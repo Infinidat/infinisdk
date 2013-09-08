@@ -46,6 +46,12 @@ Types in the system are classes deriving from :class:`the SystemObject class<.Sy
 The **FIELDS** class member must be a list of :class:`.Field` objects.
 
 .. autoclass:: infinipy2.core.field.Field
+   :members:
+
+Type information for each field can be specified to further expand on the constraints or limitations it poses, via the :class:`.TypeInfo` class.
+
+.. autoclass:: infinipy2.core.type_info.TypeInfo
+   :members:
         
 Field Definitions
 -----------------
@@ -67,7 +73,7 @@ Fields have types. The exact type and the domain/behavior of its values is deter
 
 The extra information for the type is used for querying the abstraction layer for capabilities - not for enforcing the limits. The API layer will send illegal values if given by the user. 
 
-.. note:: If an illegal value (especially a value of an invalid type) is given to a field requiring :ref:`translation`, the translation will be skipped and the value will be sent as is. This allows us to perform negative testing more easily.
+.. note:: If an illegal value (especially a value of an invalid type) is given to a field requiring :ref:`translation <translation>`, the translation will be skipped and the value will be sent as is. This allows us to perform negative testing more easily.
 
 .. note:: should also take care of autogenrating defaults.
 

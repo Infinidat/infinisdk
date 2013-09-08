@@ -1,21 +1,20 @@
 class TypeInfo(object):
 
     def __init__(self, type, min_length=None, max_length=None, charset=None, max=None, min=None):
-        """
-        :param min_length: minimum length for parameter
-        :param max_length: maximum length for parameter
-        :param charset: sequence of characters the parameter must use
-        :param min: minimum value
-        :param max: maximum value
-        """
         super(TypeInfo, self).__init__()
         self.type = type
+
+        #: minimum length for parameter
         self.min_length = min_length
+        #: maximum length for parameter
         self.max_length = max_length
         if charset is not None:
             charset = set(charset)
+        #: sequence of characters the parameter must use
         self.charset = charset
+        #: minimum value
         self.min = min
+        #: maximum value
         self.max = max
 
     def is_valid_value(self, value):
