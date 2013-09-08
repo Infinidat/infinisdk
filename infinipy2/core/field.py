@@ -1,4 +1,9 @@
+import operator
+
+from .._compat import iteritems
 from .type_info import TypeInfo
+from .field_filter import FieldFilter
+from .field_sorting import FieldSorting
 from sentinels import NOTHING
 
 class Field(object):
@@ -23,7 +28,7 @@ class Field(object):
         self.name = name
         if api_name is None:
             api_name = name
-        self.api_name = name
+        self.api_name = api_name
         if not isinstance(type, TypeInfo):
             type = TypeInfo(type)
         self.type = type
@@ -33,3 +38,22 @@ class Field(object):
         self.translator = None
         self.is_unique = is_unique
         self.default = default
+
+    def __neg__(self):
+        return FieldSorting(self, "-")
+
+    def __pos__(self):
+        return FieldSorting(self)
+
+def _install_filter_factory(operator_name):
+    def meth(self, other):
+        return FieldFilter(self, operator_name, other)
+    meth.__name__ = "__{0}__".format(operator_name)
+    setattr(Field, meth.__name__, meth)
+    return meth
+
+def _install_filter_factories():
+    for operator_name in ["eq"]:
+        _install_filter_factory(operator_name)
+
+_install_filter_factories()
