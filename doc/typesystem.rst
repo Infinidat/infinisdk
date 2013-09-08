@@ -21,7 +21,7 @@ Notes on Reflecting Collection State
 For fixed collections, we assume that getting an object from the abstraction layer will always return the same instance. This is required for attaching properties/info to those objects. The other collections don't guarantee it, but can check equality/hashing of identical objects. 
 
 Defining an Object Schema (WIP)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------------
 
 Types in the system are classes deriving from :class:`the SystemObject class<.SystemObject>`. The fields a specific object exhibits are defined in the **FIELDS** class variable:
 
@@ -43,39 +43,42 @@ Types in the system are classes deriving from :class:`the SystemObject class<.Sy
   ...          ),
   ...     ]
 
+
+Field Definitions
+~~~~~~~~~~~~~~~~~
+
 The **FIELDS** class member must be a list of :class:`.Field` objects.
 
 .. autoclass:: infinipy2.core.field.Field
    :members:
 
-Type information for each field can be specified to further expand on the constraints or limitations it poses, via the :class:`.TypeInfo` class.
-
-.. autoclass:: infinipy2.core.type_info.TypeInfo
-   :members:
-        
-Field Definitions
------------------
-
-Unspecified Fields
-~~~~~~~~~~~~~~~~~~
-
-Objects have fields. Most of these fields are dominantly useful for programs using the abstraction layer, but some may be of no interest to the application, and thus are ignored. We can get the value of these fields through our getters, and update them using the update methods, but other parts like creation logic or filtering will not perform any special treatment for those fields. We will not attempt to translate their name or special conversion of their values.
-
-Values Taken from Config
-~~~~~~~~~~~~~~~~~~~~~~~~
-
-In many places in the field definition block we can refer to config paths, enabling us to store defaults and similar elements in a single place. This is done with the :func:`.FROM_CONFIG` macro.
+.. note:: Some of the real object fields exposed by the system may be of no interest to the application, and thus don't have to be specified in the **FIELDS** section. We can get the value of these fields through our getters, and update them using the update methods, but other parts like creation logic or filtering will not perform any special treatment for those fields. We will not attempt to translate their name or special conversion of their values.
 
 Field Type
 ~~~~~~~~~~
 
-Fields have types. The exact type and the domain/behavior of its values is determined by the **type** keyword. This controls optional min/max limitations, etc. 
+Fields have types. The exact type and the domain/behavior of its values is determined by the **type** keyword. It can be either a simple type (like any built-in Python type), or an instance of the :class:`.TypeInfo` class.
+
+The latter provides some more customization about the type constraints or attributes, like min/max constraints and more.
+
+.. autoclass:: infinipy2.core.type_info.TypeInfo
+   :members:
+
 
 The extra information for the type is used for querying the abstraction layer for capabilities - not for enforcing the limits. The API layer will send illegal values if given by the user. 
 
 .. note:: If an illegal value (especially a value of an invalid type) is given to a field requiring :ref:`translation <translation>`, the translation will be skipped and the value will be sent as is. This allows us to perform negative testing more easily.
 
 .. note:: should also take care of autogenrating defaults.
+
+
+Values Taken from Config
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+In many places in the field definition block we can refer to config paths, enabling us to store defaults and similar elements in a single place. This is done with the :func:`.FROM_CONFIG` proxy.
+
+.. autofunction:: infinipy2.core.proxies.FROM_CONFIG
+
 
 Defaults, Mandatory Fields and System Defaults
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
