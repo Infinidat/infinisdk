@@ -20,6 +20,7 @@ if PY2:
     import __builtin__ as _builtins
 
     from cStringIO import StringIO
+    import httplib
 
     def iteritems(d):
         return d.iteritems() # not dict.iteritems!!! we support ordered dicts as well
@@ -34,6 +35,7 @@ else:
     import builtins as _builtins
 
     from io import StringIO
+    import http.client as httplib
 
     zip = _builtins.zip
     xrange = range
