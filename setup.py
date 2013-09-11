@@ -10,7 +10,7 @@ _INSTALL_REQUIERS = [
     "logbook",
     "requests>=1.2.0",
     "sentinels",
-    "urlobject",
+    "URLObject",
 ]
 
 setup(name="infinipy2",
