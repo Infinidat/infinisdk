@@ -1,6 +1,6 @@
 from infinipy2.core.api import APITarget, API
 from ..utils import TestCase
-from ..utils.http_scenarios.generic import generic_scenario
+from ..utils.api_scenarios.generic import generic_scenario
 
 class APITest(TestCase):
 
