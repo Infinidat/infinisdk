@@ -35,7 +35,7 @@ class Application(object):
                 for chunk in self._iter_chunks(infile):
                     outfile.write(chunk)
         except:
-            if os.isfile(output_filename):
+            if os.path.isfile(output_filename):
                 os.unlink(output_filename)
             raise
         os.rename(output_filename, filename)
@@ -55,9 +55,11 @@ class Application(object):
         return returned
 
     def _format_response(self, response):
+        if response.status_code != 200:
+            logging.debug("Bad status for request: %s (%s)", response.status_code, response.content)
         response.raise_for_status()
         assert response.headers["Content-type"] == "application/json"
-        return "OK(JSON({}))".format(response.content)
+        return "OK(JSON({}))".format(response.content.replace("true", "True").replace("false", "False"))
 
 ################################## Boilerplate ################################
 def _configure_logging(args):

@@ -3,6 +3,7 @@ from infinipy2._compat import httplib
 import httpretty
 import requests
 import json
+from sentinels import NOTHING
 
 from urlobject import URLObject as URL
 
@@ -45,15 +46,25 @@ class Rule(object):
             body=self.response.data, **self.response.headers)
 
 class Request(object):
-    def __init__(self, method, path):
+    def __init__(self, method, path, data=NOTHING):
         super(Request, self).__init__()
         self.method = method
         self.path = path
+        self.data = data
 
     def send(self, url, **kwargs):
         url = url.add_path(self.path)
+        headers = {}
+        data = self.data
+        if data is not NOTHING:
+            import pdb
+            pdb.set_trace()
+            headers["Content-type"] = "application/json"
+            data = json.dumps(data)
+        else:
+            data = None
         return getattr(requests, self.method.lower())(
-            url, **kwargs)
+            url, headers=headers, data=data, **kwargs)
 
     def __rshift__(self, response):
         return Rule(self, response)
