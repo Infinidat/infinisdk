@@ -5,9 +5,10 @@ import logging
 import sys
 import requests
 import os
+import yaml
 from urlobject import URLObject
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-from tests.utils.api_scenarios.utils import *
+from tests.utils.api_scenarios.utils import iter_scenario
 
 parser = argparse.ArgumentParser(usage="%(prog)s [options] args...")
 parser.add_argument("-v", action="append_const", const=1, dest="verbosity", default=[],
@@ -30,36 +31,20 @@ class Application(object):
 
     def update_scenarios(self, filename):
         output_filename = filename + ".output"
-        try:
-            with open(filename, "r") as infile, open(output_filename, "w") as outfile:
-                for chunk in self._iter_chunks(infile):
-                    outfile.write(chunk)
-        except:
-            if os.path.isfile(output_filename):
-                os.unlink(output_filename)
-            raise
+        mementos = []
+        for rule in iter_scenario(filename):
+            result = rule.request.send(self.url, auth=self.auth)
+            memento = rule.original_yaml
+            memento["response"] = {"status_code": result.status_code, "data": result.json()}
+            mementos.append(memento)
+        with open(output_filename, "w") as outfile:
+            outfile.write(
+                yaml.safe_dump_all(
+                    mementos,
+                    encoding="utf-8",
+                ))
         os.rename(output_filename, filename)
 
-    def _iter_chunks(self, infile):
-        for line in infile:
-            if "WHAT?" in line or "AUTOUPDATE" in line:
-                line = self._translate_what(line)
-            yield line
-
-    def _translate_what(self, line):
-        request_str = line.split(">>")[0].strip()
-        request = eval(request_str)
-        response = request.send(self.url, auth=self.auth)
-        returned = "{} >> {} # AUTOUPDATE\n".format(request_str, self._format_response(response))
-        logging.debug("%r --> %r", line, returned)
-        return returned
-
-    def _format_response(self, response):
-        if response.status_code != 200:
-            logging.debug("Bad status for request: %s (%s)", response.status_code, response.content)
-        response.raise_for_status()
-        assert response.headers["Content-type"] == "application/json"
-        return "OK(JSON({}))".format(response.content.replace("true", "True").replace("false", "False"))
 
 ################################## Boilerplate ################################
 def _configure_logging(args):

@@ -1,6 +1,6 @@
 from infinipy2.core.api import APITarget, API
 from ..utils import TestCase
-from ..utils.api_scenarios.generic import generic_scenario
+from ..utils import api_scenario
 
 class APITest(TestCase):
 
@@ -10,7 +10,7 @@ class APITest(TestCase):
         self.api = API(self.target)
 
     def test_api(self):
-        with generic_scenario(self.target):
+        with api_scenario('izbox_handshake', self.target):
             self.api.get("system")
 
 class FakeTarget(APITarget):
