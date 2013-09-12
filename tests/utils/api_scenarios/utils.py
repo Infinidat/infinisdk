@@ -1,6 +1,7 @@
 import functools
 from infinipy2._compat import httplib
 import httpretty
+import requests
 import json
 
 from urlobject import URLObject as URL
@@ -48,6 +49,11 @@ class Request(object):
         super(Request, self).__init__()
         self.method = method
         self.path = path
+
+    def send(self, url, **kwargs):
+        url = url.add_path(self.path)
+        return getattr(requests, self.method.lower())(
+            url, **kwargs)
 
     def __rshift__(self, response):
         return Rule(self, response)
