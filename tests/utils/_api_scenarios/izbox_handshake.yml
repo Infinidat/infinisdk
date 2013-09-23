@@ -3,33 +3,489 @@ response:
   json:
     error: null
     metadata: {ready: true}
-    result: {name: izbox-25001, serial: 25001, version: 0.2.post88.g4237415}
+    result: {name: izbox-25001, serial: 25001, version: 0.3.post27.gebc8036}
   status_code: 200
 ---
 request: get /api/rest/filesystems
 response:
   json:
     error: null
-    metadata: {number_of_objects: 1, page: 1, page_size: 50, pages_total: 1, ready: true}
+    metadata: {number_of_objects: 20, page: 1, page_size: 50, pages_total: 1, ready: true}
     result:
     - available_on_drive_in_bytes: 0
       cifs_access_list:
       - {read_only: false, username: Everyone}
       compression_type: 'off'
-      created_at: 1378973722000
+      created_at: 1379510533000
       disabled: false
       group_id: 0
-      id: 53
-      modified_at: 1378973722000
-      mount_path: /var/tmp/izbox_mock_data/public/export/bla
+      id: 2
+      modified_at: 1379510533000
+      mount_path: /var/tmp/izbox_mock_data/public/export/FS-BB-0000001
       mounted: true
-      name: bla
+      name: FS-BB-0000001
       nfs_access_list:
       - {allow_root_access: false, host: '*', read_only: false, secure: true}
       owned_by: CUSTOMER
       parent_id: -1
       permissions: 511
-      quota_in_bytes: 1000000000
+      quota_in_bytes: 0
+      raw_data_in_bytes: 0
+      shared_by_cifs: true
+      shared_by_nfs: true
+      type: master
+      used_on_drive_in_bytes: 0
+      user_id: 0
+    - available_on_drive_in_bytes: 0
+      cifs_access_list:
+      - {read_only: false, username: Everyone}
+      compression_type: 'off'
+      created_at: 1379510534000
+      disabled: false
+      group_id: 0
+      id: 3
+      modified_at: 1379510534000
+      mount_path: /var/tmp/izbox_mock_data/public/export/FS-AA-0000001
+      mounted: true
+      name: FS-AA-0000001
+      nfs_access_list:
+      - {allow_root_access: false, host: '*', read_only: false, secure: true}
+      owned_by: CUSTOMER
+      parent_id: -1
+      permissions: 511
+      quota_in_bytes: 0
+      raw_data_in_bytes: 0
+      shared_by_cifs: true
+      shared_by_nfs: true
+      type: master
+      used_on_drive_in_bytes: 0
+      user_id: 0
+    - available_on_drive_in_bytes: 0
+      cifs_access_list:
+      - {read_only: false, username: Everyone}
+      compression_type: 'off'
+      created_at: 1379510537000
+      disabled: false
+      group_id: 0
+      id: 4
+      modified_at: 1379510537000
+      mount_path: /var/tmp/izbox_mock_data/public/export/FS-CC-0000001
+      mounted: true
+      name: FS-CC-0000001
+      nfs_access_list:
+      - {allow_root_access: false, host: '*', read_only: false, secure: true}
+      owned_by: CUSTOMER
+      parent_id: -1
+      permissions: 511
+      quota_in_bytes: 0
+      raw_data_in_bytes: 0
+      shared_by_cifs: true
+      shared_by_nfs: true
+      type: master
+      used_on_drive_in_bytes: 0
+      user_id: 0
+    - available_on_drive_in_bytes: 0
+      cifs_access_list:
+      - {read_only: false, username: Everyone}
+      compression_type: 'off'
+      created_at: 1379510540000
+      disabled: false
+      group_id: 0
+      id: 5
+      modified_at: 1379510540000
+      mount_path: /var/tmp/izbox_mock_data/public/export/FS-BB-0000002
+      mounted: true
+      name: FS-BB-0000002
+      nfs_access_list:
+      - {allow_root_access: false, host: '*', read_only: false, secure: true}
+      owned_by: CUSTOMER
+      parent_id: -1
+      permissions: 511
+      quota_in_bytes: 0
+      raw_data_in_bytes: 0
+      shared_by_cifs: true
+      shared_by_nfs: true
+      type: master
+      used_on_drive_in_bytes: 0
+      user_id: 0
+    - available_on_drive_in_bytes: 0
+      cifs_access_list:
+      - {read_only: false, username: Everyone}
+      compression_type: 'off'
+      created_at: 1379510548000
+      disabled: false
+      group_id: 0
+      id: 6
+      modified_at: 1379510548000
+      mount_path: /var/tmp/izbox_mock_data/public/export/FS-AA-0000002
+      mounted: true
+      name: FS-AA-0000002
+      nfs_access_list:
+      - {allow_root_access: false, host: '*', read_only: false, secure: true}
+      owned_by: CUSTOMER
+      parent_id: -1
+      permissions: 511
+      quota_in_bytes: 0
+      raw_data_in_bytes: 0
+      shared_by_cifs: true
+      shared_by_nfs: true
+      type: master
+      used_on_drive_in_bytes: 0
+      user_id: 0
+    - available_on_drive_in_bytes: 0
+      cifs_access_list:
+      - {read_only: false, username: Everyone}
+      compression_type: 'off'
+      created_at: 1379510550000
+      disabled: false
+      group_id: 0
+      id: 7
+      modified_at: 1379510550000
+      mount_path: /var/tmp/izbox_mock_data/public/export/FS-BB-0000004
+      mounted: true
+      name: FS-BB-0000004
+      nfs_access_list:
+      - {allow_root_access: false, host: '*', read_only: false, secure: true}
+      owned_by: CUSTOMER
+      parent_id: -1
+      permissions: 511
+      quota_in_bytes: 0
+      raw_data_in_bytes: 0
+      shared_by_cifs: true
+      shared_by_nfs: true
+      type: master
+      used_on_drive_in_bytes: 0
+      user_id: 0
+    - available_on_drive_in_bytes: 0
+      cifs_access_list:
+      - {read_only: false, username: Everyone}
+      compression_type: 'off'
+      created_at: 1379510557000
+      disabled: false
+      group_id: 0
+      id: 8
+      modified_at: 1379510557000
+      mount_path: /var/tmp/izbox_mock_data/public/export/FS-BB-0000008
+      mounted: true
+      name: FS-BB-0000008
+      nfs_access_list:
+      - {allow_root_access: false, host: '*', read_only: false, secure: true}
+      owned_by: CUSTOMER
+      parent_id: -1
+      permissions: 511
+      quota_in_bytes: 0
+      raw_data_in_bytes: 0
+      shared_by_cifs: true
+      shared_by_nfs: true
+      type: master
+      used_on_drive_in_bytes: 0
+      user_id: 0
+    - available_on_drive_in_bytes: 0
+      cifs_access_list:
+      - {read_only: false, username: Everyone}
+      compression_type: 'off'
+      created_at: 1379510559000
+      disabled: false
+      group_id: 0
+      id: 9
+      modified_at: 1379510559000
+      mount_path: /var/tmp/izbox_mock_data/public/export/FS-CC-0000002
+      mounted: true
+      name: FS-CC-0000002
+      nfs_access_list:
+      - {allow_root_access: false, host: '*', read_only: false, secure: true}
+      owned_by: CUSTOMER
+      parent_id: -1
+      permissions: 511
+      quota_in_bytes: 0
+      raw_data_in_bytes: 0
+      shared_by_cifs: true
+      shared_by_nfs: true
+      type: master
+      used_on_drive_in_bytes: 0
+      user_id: 0
+    - available_on_drive_in_bytes: 0
+      cifs_access_list:
+      - {read_only: false, username: Everyone}
+      compression_type: 'off'
+      created_at: 1379510561000
+      disabled: false
+      group_id: 0
+      id: 10
+      modified_at: 1379510561000
+      mount_path: /var/tmp/izbox_mock_data/public/export/FS-AA-0000004
+      mounted: true
+      name: FS-AA-0000004
+      nfs_access_list:
+      - {allow_root_access: false, host: '*', read_only: false, secure: true}
+      owned_by: CUSTOMER
+      parent_id: -1
+      permissions: 511
+      quota_in_bytes: 0
+      raw_data_in_bytes: 0
+      shared_by_cifs: true
+      shared_by_nfs: true
+      type: master
+      used_on_drive_in_bytes: 0
+      user_id: 0
+    - available_on_drive_in_bytes: 0
+      cifs_access_list:
+      - {read_only: false, username: Everyone}
+      compression_type: 'off'
+      created_at: 1379510572000
+      disabled: false
+      group_id: 0
+      id: 12
+      modified_at: 1379510572000
+      mount_path: /var/tmp/izbox_mock_data/public/export/FS-BB-0000032
+      mounted: true
+      name: FS-BB-0000032
+      nfs_access_list:
+      - {allow_root_access: false, host: '*', read_only: false, secure: true}
+      owned_by: CUSTOMER
+      parent_id: -1
+      permissions: 511
+      quota_in_bytes: 0
+      raw_data_in_bytes: 0
+      shared_by_cifs: true
+      shared_by_nfs: true
+      type: master
+      used_on_drive_in_bytes: 0
+      user_id: 0
+    - available_on_drive_in_bytes: 0
+      cifs_access_list:
+      - {read_only: false, username: Everyone}
+      compression_type: 'off'
+      created_at: 1379510574000
+      disabled: false
+      group_id: 0
+      id: 13
+      modified_at: 1379510574000
+      mount_path: /var/tmp/izbox_mock_data/public/export/FS-AA-0000008
+      mounted: true
+      name: FS-AA-0000008
+      nfs_access_list:
+      - {allow_root_access: false, host: '*', read_only: false, secure: true}
+      owned_by: CUSTOMER
+      parent_id: -1
+      permissions: 511
+      quota_in_bytes: 0
+      raw_data_in_bytes: 0
+      shared_by_cifs: true
+      shared_by_nfs: true
+      type: master
+      used_on_drive_in_bytes: 0
+      user_id: 0
+    - available_on_drive_in_bytes: 0
+      cifs_access_list:
+      - {read_only: false, username: Everyone}
+      compression_type: 'off'
+      created_at: 1379510580000
+      disabled: false
+      group_id: 0
+      id: 14
+      modified_at: 1379510580000
+      mount_path: /var/tmp/izbox_mock_data/public/export/FS-BB-0000064
+      mounted: true
+      name: FS-BB-0000064
+      nfs_access_list:
+      - {allow_root_access: false, host: '*', read_only: false, secure: true}
+      owned_by: CUSTOMER
+      parent_id: -1
+      permissions: 511
+      quota_in_bytes: 0
+      raw_data_in_bytes: 0
+      shared_by_cifs: true
+      shared_by_nfs: true
+      type: master
+      used_on_drive_in_bytes: 0
+      user_id: 0
+    - available_on_drive_in_bytes: 0
+      cifs_access_list:
+      - {read_only: false, username: Everyone}
+      compression_type: 'off'
+      created_at: 1379510582000
+      disabled: false
+      group_id: 0
+      id: 15
+      modified_at: 1379510582000
+      mount_path: /var/tmp/izbox_mock_data/public/export/FS-CC-0000004
+      mounted: true
+      name: FS-CC-0000004
+      nfs_access_list:
+      - {allow_root_access: false, host: '*', read_only: false, secure: true}
+      owned_by: CUSTOMER
+      parent_id: -1
+      permissions: 511
+      quota_in_bytes: 0
+      raw_data_in_bytes: 0
+      shared_by_cifs: true
+      shared_by_nfs: true
+      type: master
+      used_on_drive_in_bytes: 0
+      user_id: 0
+    - available_on_drive_in_bytes: 0
+      cifs_access_list:
+      - {read_only: false, username: Everyone}
+      compression_type: 'off'
+      created_at: 1379510587000
+      disabled: false
+      group_id: 0
+      id: 16
+      modified_at: 1379510587000
+      mount_path: /var/tmp/izbox_mock_data/public/export/FS-AA-0000016
+      mounted: true
+      name: FS-AA-0000016
+      nfs_access_list:
+      - {allow_root_access: false, host: '*', read_only: false, secure: true}
+      owned_by: CUSTOMER
+      parent_id: -1
+      permissions: 511
+      quota_in_bytes: 0
+      raw_data_in_bytes: 0
+      shared_by_cifs: true
+      shared_by_nfs: true
+      type: master
+      used_on_drive_in_bytes: 0
+      user_id: 0
+    - available_on_drive_in_bytes: 0
+      cifs_access_list:
+      - {read_only: false, username: Everyone}
+      compression_type: 'off'
+      created_at: 1379510591000
+      disabled: false
+      group_id: 0
+      id: 18
+      modified_at: 1379510591000
+      mount_path: /var/tmp/izbox_mock_data/public/export/FS-BB-0000128
+      mounted: true
+      name: FS-BB-0000128
+      nfs_access_list:
+      - {allow_root_access: false, host: '*', read_only: false, secure: true}
+      owned_by: CUSTOMER
+      parent_id: -1
+      permissions: 511
+      quota_in_bytes: 0
+      raw_data_in_bytes: 0
+      shared_by_cifs: true
+      shared_by_nfs: true
+      type: master
+      used_on_drive_in_bytes: 0
+      user_id: 0
+    - available_on_drive_in_bytes: 0
+      cifs_access_list:
+      - {read_only: false, username: Everyone}
+      compression_type: 'off'
+      created_at: 1379511807000
+      disabled: false
+      group_id: 0
+      id: 20
+      modified_at: 1379511807000
+      mount_path: /var/tmp/izbox_mock_data/public/export/FS-a-nslp-try0-0000001
+      mounted: true
+      name: FS-a-nslp-try0-0000001
+      nfs_access_list:
+      - {allow_root_access: false, host: '*', read_only: false, secure: true}
+      owned_by: CUSTOMER
+      parent_id: -1
+      permissions: 511
+      quota_in_bytes: 0
+      raw_data_in_bytes: 0
+      shared_by_cifs: true
+      shared_by_nfs: true
+      type: master
+      used_on_drive_in_bytes: 0
+      user_id: 0
+    - available_on_drive_in_bytes: 0
+      cifs_access_list:
+      - {read_only: false, username: Everyone}
+      compression_type: 'off'
+      created_at: 1379511809000
+      disabled: false
+      group_id: 0
+      id: 21
+      modified_at: 1379511809000
+      mount_path: /var/tmp/izbox_mock_data/public/export/FS-a-nslp-try0-0000002
+      mounted: true
+      name: FS-a-nslp-try0-0000002
+      nfs_access_list:
+      - {allow_root_access: false, host: '*', read_only: false, secure: true}
+      owned_by: CUSTOMER
+      parent_id: -1
+      permissions: 511
+      quota_in_bytes: 0
+      raw_data_in_bytes: 0
+      shared_by_cifs: true
+      shared_by_nfs: true
+      type: master
+      used_on_drive_in_bytes: 0
+      user_id: 0
+    - available_on_drive_in_bytes: 0
+      cifs_access_list:
+      - {read_only: false, username: Everyone}
+      compression_type: 'off'
+      created_at: 1379511812000
+      disabled: false
+      group_id: 0
+      id: 22
+      modified_at: 1379511812000
+      mount_path: /var/tmp/izbox_mock_data/public/export/FS-a-nslp-try0-0000004
+      mounted: true
+      name: FS-a-nslp-try0-0000004
+      nfs_access_list:
+      - {allow_root_access: false, host: '*', read_only: false, secure: true}
+      owned_by: CUSTOMER
+      parent_id: -1
+      permissions: 511
+      quota_in_bytes: 0
+      raw_data_in_bytes: 0
+      shared_by_cifs: true
+      shared_by_nfs: true
+      type: master
+      used_on_drive_in_bytes: 0
+      user_id: 0
+    - available_on_drive_in_bytes: 0
+      cifs_access_list:
+      - {read_only: false, username: Everyone}
+      compression_type: 'off'
+      created_at: 1379510383000
+      disabled: false
+      group_id: 0
+      id: 1
+      modified_at: 1379510383000
+      mount_path: /var/tmp/izbox_mock_data/public/export/fs1
+      mounted: true
+      name: fs1
+      nfs_access_list:
+      - {allow_root_access: false, host: '*', read_only: false, secure: true}
+      owned_by: CUSTOMER
+      parent_id: -1
+      permissions: 511
+      quota_in_bytes: 0
+      raw_data_in_bytes: 0
+      shared_by_cifs: true
+      shared_by_nfs: true
+      type: master
+      used_on_drive_in_bytes: 0
+      user_id: 0
+    - available_on_drive_in_bytes: 0
+      cifs_access_list:
+      - {read_only: false, username: Everyone}
+      compression_type: 'off'
+      created_at: 1379510565000
+      disabled: false
+      group_id: 0
+      id: 11
+      modified_at: 1379510565000
+      mount_path: /var/tmp/izbox_mock_data/public/export/FS-BB-0000016
+      mounted: true
+      name: FS-BB-0000016
+      nfs_access_list:
+      - {allow_root_access: false, host: '*', read_only: false, secure: true}
+      owned_by: CUSTOMER
+      parent_id: -1
+      permissions: 511
+      quota_in_bytes: 0
       raw_data_in_bytes: 0
       shared_by_cifs: true
       shared_by_nfs: true
