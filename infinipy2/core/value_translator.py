@@ -34,3 +34,9 @@ class FunctionTranslator(ValueTranslator):
         super(FunctionTranslator, self).__init__()
         self._to_api = to_api
         self._from_api = from_api
+
+class IdentityTranslator(ValueTranslator):
+    def identity(self, value):
+        return value
+
+    to_api = from_api = identity

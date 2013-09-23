@@ -61,7 +61,6 @@ class API(object):
     patch = _get_request_delegate("patch")
     delete = _get_request_delegate("delete")
 
-
     def request(self, http_method, path, assert_success=True, **kwargs):
         """
         Sends a request to the IZBox API interface
@@ -90,7 +89,7 @@ class API(object):
 
 class Response(object):
     """
-        IZBox API request response 
+    IZBox API request response
     """
     def __init__(self, resp):
         super(Response, self).__init__()
@@ -100,16 +99,19 @@ class Response(object):
     def _get_result(self):
         return self.get_json()['result']
     def get_result(self):
-        result = self._get_result()
-        return update_response_data(result)
+        return self._get_result()
     def get_error(self):
         return self.get_json()['error']
+
     def get_metadata(self):
         return self.get_json()['metadata']
+
+    def get_total_num_objects(self):
+        return self.get_metadata()["number_of_objects"]
+
     def assert_success(self):
         try:
             self.response.raise_for_status()
         except requests.exceptions.HTTPError as e:
             raise APICommandFailed(self.response, e)
 # TODO : implement async request
- 

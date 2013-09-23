@@ -4,6 +4,7 @@ from .._compat import iteritems
 from .type_info import TypeInfo
 from .field_filter import FieldFilter
 from .field_sorting import FieldSorting
+from .value_translator import IdentityTranslator
 from sentinels import NOTHING
 
 class Field(object):
@@ -11,7 +12,7 @@ class Field(object):
     This class represents a single field exposed by a schema
     """
 
-    def __init__(self, name, api_name=None, type=str, mutable=True, forbidden=False, mandatory=False, translator=None, is_unique=False, default=NOTHING):
+    def __init__(self, name, api_name=None, type=str, mutable=True, forbidden=False, mandatory=False, translator=IdentityTranslator(), is_unique=False, default=NOTHING):
         super(Field, self).__init__()
 
         #:the name of this field, as will be seen by the Python code interacting with the object(s)
@@ -53,7 +54,7 @@ def _install_filter_factory(operator_name):
     return meth
 
 def _install_filter_factories():
-    for operator_name in ["eq"]:
+    for operator_name in ["eq", "gt", "lt", "ge", "le"]:
         _install_filter_factory(operator_name)
 
 _install_filter_factories()

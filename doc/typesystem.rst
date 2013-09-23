@@ -37,8 +37,8 @@ Types in the system are classes deriving from :class:`the SystemObject class<.Sy
   ...        Field(name="id", mutable=False, forbidden=True, is_unique=True),
   ...        Field("name", type=TypeInfo(str, min_length=FROM_CONFIG("defaults.max...."), max_length=1000, charset=string.printable), mandatory=True),
   ...        Field(
-  ...            "size", type=TypeInfo(Capacity, min=0, max=TiB), api_name="size_in_bytes",
-  ...            translator=FunctionTranslator(to_api=lambda x: int(x) // bytes, from_api=lambda x: int(x) * bytes),
+  ...            "quota", type=TypeInfo(Capacity, min=0, max=TiB), api_name="quota_in_bytes",
+  ...            translator=FunctionTranslator(to_api=lambda x: int(x // byte), from_api=lambda x: int(x) * bytes),
   ...            mandatory=True,
   ...          ),
   ...     ]
@@ -53,6 +53,12 @@ The **FIELDS** class member must be a list of :class:`.Field` objects.
    :members:
 
 .. note:: Some of the real object fields exposed by the system may be of no interest to the application, and thus don't have to be specified in the **FIELDS** section. We can get the value of these fields through our getters, and update them using the update methods, but other parts like creation logic or filtering will not perform any special treatment for those fields. We will not attempt to translate their name or special conversion of their values.
+
+The "id" Field
+~~~~~~~~~~~~~~
+
+All objects must be uniquely identifiable in their system. Infinipy uses the ``id`` field to do this, and it assumes that every object declares this field. Its exact type or its real name in the system is left to the implementation.
+
 
 Field Type
 ~~~~~~~~~~
@@ -129,13 +135,15 @@ Finding objects (one or many at a time) is done by the :func:`.find`:
 .. code-block:: python
 
     # get all filesystems with composite predicate
-    filesystems = Filesystem.find(system, Filesystem.fields.quota>=2*GB)
+    >>> filesystems = Filesystem.find(system, Filesystem.fields.quota>=2*GB)
+    >>> len(filesystems)
+    1
     
     # get a filesystem with id
-    [filesystem] = Filesystem.find(system, id=230)
+    >>> [filesystem] = Filesystem.find(system, id=2)
 
     # get a filesystem with id
-    objs = Filesystem.find(system, ...).only_fields(["size"]).sort(-Filesystem.fields.quota)
+    #>>> objs = Filesystem.find(system).only_fields(["size"]).sort(-Filesystem.fields.quota)
 
 Queries are lazy, they are only sent to the system in the beginning of the iteration, and possibly span multiple pages during iteration.
 

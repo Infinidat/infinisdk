@@ -1,0 +1,26 @@
+from contextlib import contextmanager
+from infinipy2.core.api import APITarget
+from infinipy2.core.api import API
+from tests.utils import api_scenario
+
+class FakeTarget(APITarget):
+    _ADDRESS = ("fakeaddress", 80)
+    _AUTH = ("fakeuser", "fakepassword")
+
+    def get_api_timeout(self):
+        return 1
+
+    def get_api_address(self):
+        return self._ADDRESS
+
+    def get_api_auth(self):
+        return self._AUTH
+
+@contextmanager
+def doctest_context():
+    fake_system = FakeTarget()
+    fake_system.api = API(fake_system)
+    with api_scenario("izbox_handshake", fake_system):
+        yield {
+            "system": fake_system,
+        }
