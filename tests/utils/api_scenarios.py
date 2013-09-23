@@ -10,11 +10,15 @@ import yaml
 
 from urlobject import URLObject as URL
 
-def iter_api_scenario(filename):
+def get_real_scenario_filename(filename):
     if not os.path.isfile(filename):
         if not filename.endswith(".yml"):
             filename = filename + ".yml"
         filename = os.path.join(os.path.dirname(__file__), "_api_scenarios", filename)
+    return filename
+
+def iter_api_scenario(filename):
+    filename = get_real_scenario_filename(filename)
     with open(filename) as infile:
         for rule in yaml.load_all(infile):
             yield Rule.from_yaml(rule)

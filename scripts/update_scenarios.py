@@ -7,10 +7,10 @@ import requests
 import os
 import yaml
 from urlobject import URLObject
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-from tests.utils.api_scenarios.utils import iter_scenario
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+from tests.utils.api_scenarios import iter_api_scenario, get_real_scenario_filename
 
-parser = argparse.ArgumentParser(usage="%(prog)s [options] args...")
+parser = argparse.ArgumentParser(usage="%(prog)s [options] system [scenario1 [scenario2 ...]]")
 parser.add_argument("-v", action="append_const", const=1, dest="verbosity", default=[],
                     help="Be more verbose. Can be specified multiple times to increase verbosity further")
 parser.add_argument("-u", "--username", default="Infinidat")
@@ -30,12 +30,13 @@ class Application(object):
         return 0
 
     def update_scenarios(self, filename):
+        filename = get_real_scenario_filename(filename)
         output_filename = filename + ".output"
         mementos = []
-        for rule in iter_scenario(filename):
+        for rule in iter_api_scenario(filename):
             result = rule.request.send(self.url, auth=self.auth)
             memento = rule.original_yaml
-            memento["response"] = {"status_code": result.status_code, "data": result.json()}
+            memento["response"] = {"status_code": result.status_code, "json": result.json()}
             mementos.append(memento)
         with open(output_filename, "w") as outfile:
             outfile.write(
@@ -44,7 +45,6 @@ class Application(object):
                     encoding="utf-8",
                 ))
         os.rename(output_filename, filename)
-
 
 ################################## Boilerplate ################################
 def _configure_logging(args):
