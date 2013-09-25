@@ -143,7 +143,7 @@ Finding objects (one or many at a time) is done by the :func:`.find`:
     >>> [filesystem] = Filesystem.find(system, id=2)
 
     # get a filesystem with id
-    #>>> objs = Filesystem.find(system).only_fields(["size"]).sort(-Filesystem.fields.quota)
+    >>> objs = Filesystem.find(system).only_fields(["quota"]).sort(-Filesystem.fields.quota)
 
 Queries are lazy, they are only sent to the system in the beginning of the iteration, and possibly span multiple pages during iteration.
 
