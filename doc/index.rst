@@ -14,7 +14,7 @@ Contents:
    overview
    api_layer
    typesystem
-   objects_collections
+   object_collections
    development
 
 

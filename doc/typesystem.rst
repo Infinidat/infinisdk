@@ -1,3 +1,6 @@
+.. _typesystem:
+
+
 Typesystem
 ==========
 

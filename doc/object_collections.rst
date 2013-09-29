@@ -4,7 +4,7 @@ Objects Collections
 Overview
 --------
 
-This document describes the interface interacting with a collection of objects (as deinfed in ?) of a specific system.      
+This document describes the interface interacting with a collection of objects (as deinfed in :ref:`typesystem`) of a specific system.      
 
 Attaching objects types to system
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -15,18 +15,43 @@ Binders are grouped in :class:`.CollectionBinderContainer`. There are 2 main col
  1. system.objects
  2. system.components  
 
-Adding binder is done using :func:`.install`  and is being done once at system initialization. 
+Adding binder is done using :func:`.CollectionBinderContainer.install`  and is being done once at system initialization. 
 
 It also exposes methods for getting the installed types:
 
+
 .. code-block:: python
 
-    system.objects.get_types() # get a list of installed object classes
-    system.objects.get_type('Filesystem') # get the object class from class name  
-    system.objects.get_types_name() # get the list of class names which are installed 
+    >>> objects = CollectionBinderContainer(system)
+    >>> class Filesystem(SystemObject):
+    ...     pass
+    >>> objects.install(Filesystem)
 
-Events binder is attached directly to system object
+Querying object binders:
 
+.. code-block:: python
+
+   >>> objects.get_types()
+   [<class Filesystem>]
+   >>> objects.get_type("Filesystem")
+   <class Filesystem>
+   >>> objects.get_type_names()
+   ["Filsystem"]
+   >>> objects.Filesystem
+   <Filesystem binder for ...>
+   >>> objects["Filesystem"]
+   <Filesystem binder for ...>
+   >>> objects.get_binders()
+   [<Filesystem binder for ...>]
+
+
+
+.. autoclass:: infinipy2.core.binder_container.CollectionBinderContainer
+   :members:
+   
+   .. automethod:: __getitem__(classname)
+
+Events binder is attached directly to the :class:`.System` object.
 
 Objects Collection Type Binder
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
