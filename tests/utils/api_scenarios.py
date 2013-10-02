@@ -85,7 +85,7 @@ class Rule(object):
 UNSPECIFIED = object()
 
 class Request(object):
-    def __init__(self, method, path, data=NOTHING, headers=UNSPECIFIED):
+    def __init__(self, method, path, data=None, headers=UNSPECIFIED):
         super(Request, self).__init__()
         self.method = method.lower()
         self.path = path
@@ -97,28 +97,31 @@ class Request(object):
         if isinstance(yaml, str):
             method, path = yaml.split()
             yaml = {"method": method, "path": path}
+        else:
+            yaml = yaml.copy()
+        if "json" in yaml:
+            assert "headers" not in yaml
+            yaml["headers"] = {"Content-type": "application/json"}
+            yaml["data"] = json.dumps(yaml.pop("json"))
         return cls(**yaml)
 
     def get_as_dict(self, root_url, **overrides):
         assert self.path.startswith("/") and not root_url.endswith("/")
         url = root_url + self.path
-        headers = overrides.pop("headers", {}).copy()
-        data = self.data
-        if data is not NOTHING:
-            headers["Content-type"] = "application/json"
-            data = json.dumps(data)
-        else:
-            data = None
-        returned = {"url": url, "headers": headers, "data": data, "method": self.method}
+        headers = self.headers
+        if headers is UNSPECIFIED:
+            headers = {}
+        headers.update(overrides.pop("headers", {}))
+        returned = {"url": url, "headers": headers, "data": self.data, "method": self.method}
         returned.update(overrides)
         return returned
 
     def send(self, url, **kwargs):
         as_dict = self.get_as_dict(url, **kwargs)
+        import ipdb
+        ipdb.set_trace()
         return requests.request(**as_dict)
 
-    def __rshift__(self, response):
-        return Rule(self, response)
 
 class Response(object):
     def __init__(self, status_code=httplib.OK, content="", headers=None):
