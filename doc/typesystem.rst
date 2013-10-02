@@ -20,24 +20,18 @@ Using system.objects
 
 The quickest way of accessing objects defined on a system is through ``system.objects``:
 
-``system.objects`` is actually an instance of :class:`.CollectionBinderContainer` and supports several convenience APIs for querying the supported types:
+``system.objects`` is actually an instance of :class:`.TypeBinderContainer` and supports several convenience APIs for querying the supported types:
 
 .. code-block:: python
 
-   >>> system.objects.get_types()
-   [<class Filesystem>]
-   >>> system.objects.get_type("Filesystem")
-   <class Filesystem>
-   >>> system.objects.get_type_names()
-   ["Filsystem"]
    >>> system.objects["filesystems"]
-   <Filesystem binder for ...>
+   <izbox001.filesystems>
    >>> system.objects[Filesystem] # by class
-   <Filesystem binder for ...>
+   <izbox001.filesystems>
 
 .. note:: ``system.objects`` is only one collection of type binders existing in the system. There's also ``system.components``, which bundles the physical components of a system.
 
-.. autoclass:: infinipy2.core.binder_container.CollectionBinderContainer
+.. autoclass:: infinipy2.core.type_binder_container.TypeBinderContainer
    :members:
    
    .. automethod:: __getitem__(classname)
@@ -53,8 +47,7 @@ In many cases they behave as simple Python objects or collections, but they are 
 .. code-block:: python
 
    >>> len(system.objects.filesystems)
-   2
-
+   5
 
 .. autoclass:: infinipy2.core.type_binder.TypeBinder
    :members:
@@ -72,14 +65,14 @@ Finding objects (one or many at a time) is done by the :func:`.TypeBinder.find`:
 
     # get all filesystems with composite predicate
     >>> matching = system.objects.filesystems.find(system.objects.filesystems.fields.quota>=2*GB)
-    >>> len(filesystems)
+    >>> len(matching)
     1
     
     # get a filesystem with id
     >>> [filesystem] = system.objects.filesystems.find(id=2)
 
     # get a filesystem with id
-    >>> objs = Filesystem.find(system).only_fields(["quota"]).sort(-Filesystem.fields.quota)
+    >>> objs = Filesystem.find(system).only_fields(["quota"]).sort(-system.objects.filesystems.fields.quota)
 
 Queries are lazy, they are only sent to the system in the beginning of the iteration, and possibly span multiple pages during iteration.
 
@@ -95,16 +88,16 @@ You can also get specific objects using the type binders:
 .. code-block:: python
 
    >>> system.objects.filesystems.get(system.objects.filesystems.fields.name == "fs1")
-   <Filesystem fs1>
-   >>> system.objects.filesystems.get(system.objects.filesystems.fields.name == "nonexisting")
+   <Filesystem id=1>
+   >>> system.objects.filesystems.get(system.objects.filesystems.fields.name == "nonexisting") # doctest: +ELLIPSIS
    Traceback (most recent call last):
       ...
-   ObjectNotFound: ...
+   ObjectNotFound
    >>> system.objects.filesystems.safe_get(system.objects.filesystems.fields.name == "nonexisting") is None
    True
-   >>> system.objects.filesystems.choose(system.objects.filesystems.quota > 2*TiB)
-   <Filesystem fs2>
-   >>> system.objects.filesystems.count(system.objects.filesystems.quota > 2*TiB)
+   >>> system.objects.filesystems.choose(system.objects.filesystems.fields.quota > 2*TiB)
+   <Filesystem id=1000>
+   >>> system.objects.filesystems.count(system.objects.filesystems.fields.quota > 2*TiB)
    1
 
 **TODO**: add ``create``

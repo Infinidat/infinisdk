@@ -17,6 +17,8 @@ else:
 
 if PY2:
 
+    string_types = (basestring,)
+
     import __builtin__ as _builtins
 
     from cStringIO import StringIO
@@ -31,6 +33,8 @@ if PY2:
     from itertools import izip as zip
     xrange = _builtins.xrange
 else:
+
+    string_types = (str,)
 
     import builtins as _builtins
 

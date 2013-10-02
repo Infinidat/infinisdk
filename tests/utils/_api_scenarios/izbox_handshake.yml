@@ -66,3 +66,28 @@ response:
         quota_in_bytes: 2000000000
       - id: 5
         quota_in_bytes: 2000000000
+---
+request: get /api/rest/filesystems?name=eq%3Afs1
+response:
+  json:
+    error: null
+    metadata: {number_of_objects: 1, page: 1, page_size: 50, pages_total: 1, ready: true}
+    result:
+      - id: 1
+        name: fs1
+---
+request: get /api/rest/filesystems?name=eq%3Anonexisting
+response:
+  json:
+    error: null
+    metadata: {number_of_objects: 0, page: 1, page_size: 50, pages_total: 1, ready: true}
+    result: []
+---
+request: get /api/rest/filesystems?quota_in_bytes=gt%3A2199023255552
+response:
+  json:
+    error: null
+    metadata: {number_of_objects: 1, page: 1, page_size: 50, pages_total: 1, ready=true}
+    result:
+      - id: 1000
+        name: fs1000

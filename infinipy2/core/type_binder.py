@@ -1,0 +1,64 @@
+import random
+from .exceptions import ObjectNotFound, TooManyObjectsFound
+
+class TypeBinder(object):
+    """
+    Binds a specific type to a system.
+    """
+
+    def __init__(self, object_type, system):
+        super(TypeBinder, self).__init__()
+        self.object_type = object_type
+        self.system = system
+
+    @property
+    def fields(self):
+        return self.object_type.fields
+
+    def find(self, *predicates, **kw):
+        """
+        Returns all objects with desired predicates.
+
+        Proxy for :func:`.SystemObject.find`.
+        """
+        return self.object_type.find(self.system, *predicates, **kw)
+
+    def get(self, *predicates, **kw):
+        """
+        Finds exactly one object matching criteria. Raises :class:`ObjectNotFound` if not found, :class:`TooManyObjectsFound` if more than one is found
+        """
+        returned = self.find(*predicates, **kw)
+        if not returned:
+            raise ObjectNotFound()
+        if len(returned) > 1:
+            raise TooManyObjectsFound()
+        [obj] = returned
+        return obj
+
+    def safe_get(self, *predicates, **kw):
+        """
+        Like :func:`.get`, only returns ``None`` if no objects were found
+        """
+        try:
+            return self.get(*predicates, **kw)
+        except ObjectNotFound:
+            return None
+
+    def choose(self, *predicates, **kw):
+        """
+        Chooses a random element out of those returned. Raises ObjectNotFound if none were returned
+        """
+        returned = self.find(*predicates, **kw)
+        if not returned:
+            raise ObjectNotFound()
+
+        return returned[random.randrange(len(returned))]
+
+    def count(self, *predicates, **kw):
+        return len(self.find(*predicates, **kw))
+
+    def __repr__(self):
+        return "<{0}.{1}>".format(self.system, self.object_type.get_plural_name())
+
+    def __len__(self):
+        return len(self.find())

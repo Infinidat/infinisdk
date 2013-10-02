@@ -8,3 +8,11 @@ class APICommandFailed(APICommandException):
     def __init__(self, response, *args, **kwargs):
         self.response = response
         super(APICommandFailed, self).__init__(*args, **kwargs)
+
+
+class ObjectNotFound(InfinipyException):
+    pass
+
+class TooManyObjectsFound(InfinipyException):
+    pass
+
