@@ -7,6 +7,8 @@ from urlobject import URLObject as URL
 class SystemObject(with_metaclass(FieldsMeta)):
     FIELDS = []
     URL_PATH = None
+    #: specifies which :class:`.TypeBinder` subclass is to be used for this type
+    BINDER_CLASS = None
 
     def __init__(self, system, initial_data):
         super(SystemObject, self).__init__()

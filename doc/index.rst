@@ -14,7 +14,8 @@ Contents:
    overview
    api_layer
    typesystem
-   object_collections
+   events
+   components
    development
 
 

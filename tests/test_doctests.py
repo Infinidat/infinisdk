@@ -5,7 +5,6 @@ import os
 
 class DocTest(TestCase):
 
-
     def test_sphinx_doctests(self):
         for path, _, filenames in os.walk(os.path.join(os.path.dirname(__file__), "..", "doc")):
             for filename in filenames:
