@@ -87,12 +87,13 @@ You can also get specific objects using the type binders:
 
 .. code-block:: python
 
+   >>> from infinipy2.core.exceptions import ObjectNotFound
    >>> system.objects.filesystems.get(system.objects.filesystems.fields.name == "fs1")
    <Filesystem id=1>
-   >>> system.objects.filesystems.get(system.objects.filesystems.fields.name == "nonexisting") # doctest: +ELLIPSIS
-   Traceback (most recent call last):
-      ...
-   ObjectNotFound
+   >>> try:
+   ...     system.objects.filesystems.get(system.objects.filesystems.fields.name == "nonexisting")
+   ... except ObjectNotFound:
+   ...     pass
    >>> system.objects.filesystems.safe_get(system.objects.filesystems.fields.name == "nonexisting") is None
    True
    >>> system.objects.filesystems.choose(system.objects.filesystems.fields.quota > 2*TiB)
