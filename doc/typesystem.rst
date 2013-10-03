@@ -88,6 +88,7 @@ You can also get specific objects using the type binders:
    <Filesystem id=1>
    >>> try:
    ...     system.objects.filesystems.get(system.objects.filesystems.fields.name == "nonexisting")
+   ...     assert False
    ... except ObjectNotFound:
    ...     pass
    >>> system.objects.filesystems.safe_get(system.objects.filesystems.fields.name == "nonexisting") is None
