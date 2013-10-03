@@ -66,5 +66,8 @@ class TypeBinder(object):
     def __repr__(self):
         return "<{0}.{1}>".format(self.system, self.object_type.get_plural_name())
 
+    def __iter__(self):
+        return iter(self.find())
+
     def __len__(self):
         return len(self.find())

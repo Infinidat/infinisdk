@@ -80,6 +80,10 @@ You can also get specific objects using the type binders:
 .. code-block:: python
 
    >>> from infinipy2.core.exceptions import ObjectNotFound
+   
+   >>> for fs in system.objects.filesystems:
+   ...     unused = fs.id # do something with fs here
+
    >>> system.objects.filesystems.get(system.objects.filesystems.fields.name == "fs1")
    <Filesystem id=1>
    >>> try:
