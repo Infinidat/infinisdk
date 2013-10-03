@@ -11,7 +11,7 @@ class SampleDerivedObject(SampleBaseObject):
         Field(name="number", type=int),
     ]
 
-class SystemObjectTest(TestCase):
+class SystemObjectFieldsTest(TestCase):
 
     def test_num_fields(self):
         self.assertEquals(len(SampleBaseObject.fields), 1)

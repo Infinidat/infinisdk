@@ -67,6 +67,47 @@ response:
       - id: 5
         quota_in_bytes: 2000000000
 ---
+request: get /api/rest/filesystems?fields=name%2Cquota_in_bytes
+response:
+  json:
+    error: null
+    metadata: {number_of_objects: 5, page: 1, page_size: 50, pages_total: 1, ready: true}
+    result:
+      - id: 1
+        name: fs1
+        quota_in_bytes: 2000000000
+      - id: 2
+        name: fs2
+        quota_in_bytes: 2000000000
+      - id: 3
+        name: fs3
+        quota_in_bytes: 2000000000
+      - id: 4
+        name: fs4
+        quota_in_bytes: 2000000000
+      - id: 5
+        name: fs5
+        quota_in_bytes: 2000000000
+---
+request: get /api/rest/filesystems?id=eq%3A1&fields=name
+response:
+  json:
+    error: null
+    metadata: {number_of_objects: 5, page: 1, page_size: 50, pages_total: 1, ready: true}
+    result:
+      - id: 1
+        name: fs1
+---
+request: get /api/rest/filesystems?id=eq%3A1&fields=name%2Cquota_in_bytes
+response:
+  json:
+    error: null
+    metadata: {number_of_objects: 5, page: 1, page_size: 50, pages_total: 1, ready: true}
+    result:
+      - id: 1
+        name: fs1
+        quota_in_bytes: 2000000000
+---
 request: get /api/rest/filesystems?name=eq%3Afs1
 response:
   json:

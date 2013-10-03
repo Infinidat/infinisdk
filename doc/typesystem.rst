@@ -15,7 +15,7 @@ Objects provide easy setters/getters for object attributes, as well as convenien
 
 To "attach" objects to a specific system, another concept exists, which is the **object binder**. This is a relatively simple element responsible of "gluing" the objects to a specific system. Examples of such binders can be seen below as ``system.objects``, ``system.components``, etc.
 
-Using system.objects
+Using System Objects
 --------------------
 
 The quickest way of accessing objects defined on a system is through ``system.objects``:
@@ -29,25 +29,13 @@ The quickest way of accessing objects defined on a system is through ``system.ob
    >>> system.objects[Filesystem] # by class
    <izbox001.filesystems>
 
-.. note:: ``system.objects`` is only one collection of type binders existing in the system. There's also ``system.components``, which bundles the physical components of a system.
+.. note:: ``system.objects`` is only one collection of type binders existing in the system. There's also ``system.components``, which bundles the physical components of a system. Each type binder is an instance of :class:`.TypeBinder`, and is a proxy that behaves like a collection, and enables several additional operations on the collection as a whole as we'll see later on.
 
 .. autoclass:: infinipy2.core.type_binder_container.TypeBinderContainer
    :members:
    
    .. automethod:: __getitem__(classname)
 
-
-The Type Binders
-----------------
-
-Each member of ``system.objects`` and similar containers is called a **type binder**, and is derived from :class:`.TypeBinder`. Their goal is to "attach" supported object classes to a specific system.
-
-In many cases they behave as simple Python objects or collections, but they are in fact complex proxies:
-
-.. code-block:: python
-
-   >>> len(system.objects.filesystems)
-   5
 
 .. autoclass:: infinipy2.core.type_binder.TypeBinder
    :members:
@@ -62,6 +50,10 @@ One useful thing that we can do with type binders is finding objects (one or man
 Finding objects (one or many at a time) is done by the :func:`.TypeBinder.find`:
 
 .. code-block:: python
+
+    # get the number of objects stored in the system
+    >>> len(system.objects.filesystems)
+    5
 
     # get all filesystems with composite predicate
     >>> matching = system.objects.filesystems.find(system.objects.filesystems.fields.quota>=2*GB)
@@ -80,8 +72,8 @@ Queries are lazy, they are only sent to the system in the beginning of the itera
 
 You can always turn the lazy behavior into an eager iteration by constructing a list from the lazy query.
 
-Getting Objects
-~~~~~~~~~~~~~~~
+Getting Specific Objects
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 You can also get specific objects using the type binders:
 
@@ -103,15 +95,7 @@ You can also get specific objects using the type binders:
 
 **TODO**: add ``create``
 
-
-
-Notes on Reflecting Collection State
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-For fixed collections, we assume that getting an object from the abstraction layer will always return the same instance. This is required for attaching properties/info to those objects. The other collections don't guarantee it, but can check equality/hashing of identical objects. 
-
-Using Objects
--------------
+.. note:: For fixed collections, we assume that getting an object from the abstraction layer will always return the same instance. This is required for attaching properties/info to those objects. The other collections don't guarantee it, but can check equality/hashing of identical objects. 
 
 Getting Object Attributes (Field Values)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -120,16 +104,19 @@ Objects expose the :func:`.get_fields` and :func:`.get_field`:
 
 .. code-block:: python
 
-    filesystem.get_fields("name", "quota") # ==> {"name": "bla", "quota": 2*GB}
-    filesystem.get_field("name") # ==> "bla"
+    >>> filesystem = system.objects.filesystems.get(name="fs1")
+    >>> str(filesystem.get_fields(["name", "quota"])["name"])
+    'fs1'
+    >>> str(filesystem.get_field("name"))
+    'fs1'
 
 These APIs always fetch the values live from the system's API. This may take a long time, especially in tight loops.
 
-As an optimization (left to the user to decide), get_field and get_fields support the optional *cached* flag, fetching the last seen value (if available):
+As an optimization (left to the user to decide), get_field and get_fields support the optional *from_cache* flag, fetching the last seen value (if available):
 
 .. code-block:: python
 
-    sum_of_all_fs = sum(fs.get_field("quota", cached=True) for fs in Filesystem.find(system).only_fields("quota"))
+    >>> sum_of_all_fs = sum(fs.get_field("quota", from_cache=True) for fs in system.objects.filesystems.find().only_fields(["quota"]))
 
 
 Defining an Object Schema
