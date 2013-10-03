@@ -57,6 +57,8 @@ Finding objects (one or many at a time) is done by the :func:`.TypeBinder.find`:
 
     # get all filesystems with composite predicate
     >>> matching = system.objects.filesystems.find(system.objects.filesystems.fields.quota>=2*GB)
+    >>> matching
+    <Query /api/rest/filesystems?quota_in_bytes=ge%3A2000000000>
     >>> len(matching)
     1
     
