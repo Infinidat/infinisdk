@@ -118,6 +118,17 @@ As an optimization (left to the user to decide), get_field and get_fields suppor
 
     >>> sum_of_all_fs = sum(fs.get_field("quota", from_cache=True) for fs in system.objects.filesystems.find().only_fields(["quota"]))
 
+Creating Objects
+~~~~~~~~~~~~~~~~
+
+Creating an object is done by the **create** method:
+
+.. code-block:: python
+
+    >>> fs = system.objects.filesystems.create(name="test", quota=1*GB)
+
+.. note:: the **create** method above is a shortcut for the create method of the :class:`.Filesystem` class itself.
+
 
 Defining an Object Schema
 -------------------------

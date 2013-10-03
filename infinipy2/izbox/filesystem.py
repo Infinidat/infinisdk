@@ -8,3 +8,4 @@ class Filesystem(SystemObject):
               translator=FunctionTranslator(to_api=lambda x: int(x // byte), from_api=lambda x: int(x) * byte)),
         Field("name"),
     ]
+

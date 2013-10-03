@@ -19,7 +19,23 @@ class SystemObject(with_metaclass(FieldsMeta)):
         #: the system to which this object belongs
         self.system = system
         self._cache = initial_data
-        self.id = self._get_id_from_cache()
+        self.id = self._cache[self.fields.id.api_name]
+
+    @classmethod
+    def create(cls, system, **fields):
+        return cls(system, system.api.post(cls.get_url_path(system), data=cls._get_data_for_post(fields)).get_result())
+
+    @classmethod
+    def _get_data_for_post(cls, fields):
+        returned = {}
+        for field in cls.fields:
+            if not field.mandatory and field.name not in fields:
+                continue
+            field_value = fields.get(field.name, NOTHING)
+            if field_value is NOTHING:
+                field_value = field.get_default(system)
+            returned[field.api_name] = field.translator.to_api(field_value)
+        return returned
 
     @classmethod
     def bind(cls, system):
@@ -28,9 +44,6 @@ class SystemObject(with_metaclass(FieldsMeta)):
     @classmethod
     def get_plural_name(cls):
         return cls.__name__.lower() + "s"
-
-    def _get_id_from_cache(self):
-        return self._cache["id"] # TODO: this needs to rely on FIELDS
 
     @classmethod
     def get_url_path(cls, system):

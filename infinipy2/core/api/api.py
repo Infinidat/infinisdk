@@ -74,8 +74,7 @@ class API(object):
         hostname = full_url.hostname
         _logger.debug("{} <-- {} {}", hostname, http_method.upper(), full_url)
         if 'data' in kwargs:
-            raw_data = update_request_data(kwargs.pop('data'))
-            kwargs['data'] = json.dumps(raw_data)
+            kwargs['data'] = json.dumps(kwargs.pop('data'))
             _logger.debug("{} <-- DATA: {}" , hostname, kwargs['data'])
         kwargs.setdefault('timeout', self._default_request_timeout)
         response = self._session.request(http_method, full_url, **kwargs)

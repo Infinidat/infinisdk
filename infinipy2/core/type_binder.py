@@ -11,6 +11,12 @@ class TypeBinder(object):
         self.object_type = object_type
         self.system = system
 
+    def create(self, *args, **kwargs):
+        """
+        Creats an object on the system
+        """
+        return self.object_type.create(self.system, *args, **kwargs)
+
     @property
     def fields(self):
         return self.object_type.fields
