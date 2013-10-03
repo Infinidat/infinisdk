@@ -26,14 +26,26 @@ def iter_api_scenario(filename):
         for rule in yaml.load_all(infile):
             yield Rule.from_yaml(rule)
 
-@contextmanager
-def api_scenario(name, target):
-    old_request = requests.sessions.Session.request
-    requests.sessions.Session.request = RequestHandler(target, list(iter_api_scenario(name)))
-    try:
-        yield
-    finally:
-        requests.sessions.Session.request = old_request
+
+class api_scenario(object):
+    def __init__(self, target, *scenarios):
+        self.target = target
+        self.scenarios = scenarios
+
+    def __enter__(self):
+        self.start()
+        return self
+
+    def __exit__(self, *args):
+        self.end()
+
+    def start(self):
+        self.old_request = requests.sessions.Session.request
+        requests.sessions.Session.request = RequestHandler(self.target, list(item for scenario in self.scenarios for item in iter_api_scenario(scenario)))
+
+    def end(self):
+        requests.sessions.Session.request = self.old_request
+        self.old_request = None
 
 class RequestHandler(object):
     def __init__(self, target, rules):

@@ -1,15 +1,17 @@
 import operator
 from infinipy2.core import *
+from infinipy2.izbox import IZBox
 from ..utils import TestCase
-from ..utils import api_scenario, FakeSystem
+from ..utils import api_scenario
 from urlobject import URLObject
 
 class QueryExecutionTest(TestCase):
     def setUp(self):
         super(QueryExecutionTest, self).setUp()
-        self.system = FakeSystem()
-        self.system.start_api_scenario("izbox_handshake")
-        self.addCleanup(self.system.end_api_scenario)
+        self.system = IZBox(("address", 80))
+        self.scenario = api_scenario(self.system, "izbox_handshake")
+        self.scenario.start()
+        self.addCleanup(self.scenario.end)
 
     def test_querying_length(self):
         all_filesystems = FileSystem.find(self.system)
@@ -19,7 +21,7 @@ class QueryExecutionTest(TestCase):
 class QueryTest(TestCase):
     def setUp(self):
         super(QueryTest, self).setUp()
-        self.system = FakeSystem()
+        self.system = IZBox(("address", 80))
         self.field = FileSystem.fields.quota
 
     def test_querying_equal(self):
