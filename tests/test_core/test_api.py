@@ -1,4 +1,3 @@
-from infinipy2.core.api import APITarget, API
 from infinipy2.izbox import IZBox
 from ..utils import TestCase
 from ..utils import api_scenario

@@ -1,13 +1,11 @@
-from contextlib import contextmanager
 from infinipy2._compat import httplib
-from sentinels import NOTHING
 from urlobject import URLObject as URL
-import functools
-import json
+from json import dumps as encode_json, loads as decode_json
 import os
 import requests
 import yaml
 import logbook
+import datadiff
 
 _logger = logbook.Logger(__name__)
 
@@ -25,7 +23,6 @@ def iter_api_scenario(filename):
     with open(filename) as infile:
         for rule in yaml.load_all(infile):
             yield Rule.from_yaml(rule)
-
 
 class api_scenario(object):
     def __init__(self, target, *scenarios):
@@ -53,8 +50,11 @@ class RequestHandler(object):
         self._rules = rules
         self._address = target.get_api_address()
 
-    def __call__(self, method, url, *args, **kwargs):
-        _logger.debug("Handling request: {} {} {} {}", method, url, args, kwargs)
+    def __call__(self, method, url, **kwargs):
+        _logger.debug("Handling request: {} {} {}", method, url, kwargs)
+        data = json = kwargs.pop("data", None)
+        if data is not None:
+            json = decode_json(data)
         url = URL(url)
         if (url.hostname, url.port) != self._address:
             raise InvalidRequas("Request {} {} does not match hostname/port of target".format(method, url))
@@ -66,6 +66,9 @@ class RequestHandler(object):
             rule_url = URL("http://{}:{}".format(*self._address) + rule.request.path)
             if rule_url != url:
                 _logger.debug("{} does not match (wrong url {})", rule, rule_url)
+                continue
+            if rule.request.json != json:
+                _logger.debug("{} does not match (wrong data):\n{}", rule, datadiff.diff(rule.request.json, json))
                 continue
             return rule.response.make_response()
         raise InvalidRequest("Could not find matching rule for {} {}".format(method, url))
@@ -92,16 +95,22 @@ class Rule(object):
         return URL("http://{}:{}".format(*target.get_api_address())).add_path(self.request.path)
 
     def __repr__(self):
-        return "<Rule {} --> {}>".format(URL("http://SERVER") + self.request.path, self.response.status_code)
-
-UNSPECIFIED = object()
+        return "<Rule {} {} --> {}>".format(self.request.method, URL("http://SERVER") + self.request.path, self.response.status_code)
 
 class Request(object):
-    def __init__(self, method, path, data=None, headers=UNSPECIFIED):
+    def __init__(self, method, path, data=None, headers=None, json=None):
         super(Request, self).__init__()
         self.method = method.lower()
-        self.path = path
+        if headers is None:
+            headers = {}
+        self.headers = headers
+        self.json = json
+        if json is not None:
+            assert data is None
+            data = encode_json(json)
+            self.headers["Content-type"] = "application/json"
         self.data = data
+        self.path = path
         self.headers = headers
 
     @classmethod
@@ -111,10 +120,6 @@ class Request(object):
             yaml = {"method": method, "path": path}
         else:
             yaml = yaml.copy()
-        if "json" in yaml:
-            assert "headers" not in yaml
-            yaml["headers"] = {"Content-type": "application/json"}
-            yaml["data"] = json.dumps(yaml.pop("json"))
         return cls(**yaml)
 
     def get_as_dict(self, root_url, **overrides):
@@ -134,7 +139,6 @@ class Request(object):
         ipdb.set_trace()
         return requests.request(**as_dict)
 
-
 class Response(object):
     def __init__(self, status_code=httplib.OK, content="", headers=None):
         super(Response, self).__init__()
@@ -144,7 +148,7 @@ class Response(object):
         if isinstance(content, (dict, list)):
             if "Content-type" not in self.headers:
                 self.headers["Content-type"] = "application/json"
-            self.content = json.dumps(self.content)
+            self.content = encode_json(self.content)
 
     def get_as_dict(self):
         return {"status_code": self.status_code, "content": self.content, "headers": self.headers}

@@ -23,18 +23,22 @@ class SystemObject(with_metaclass(FieldsMeta)):
 
     @classmethod
     def create(cls, system, **fields):
-        return cls(system, system.api.post(cls.get_url_path(system), data=cls._get_data_for_post(fields)).get_result())
+        data = cls._get_data_for_post(fields)
+        return cls(system, system.api.post(cls.get_url_path(system), data=data).get_result())
 
     @classmethod
     def _get_data_for_post(cls, fields):
         returned = {}
+        missing_fields = set()
         for field in cls.fields:
             if not field.mandatory and field.name not in fields:
                 continue
-            field_value = fields.get(field.name, NOTHING)
+            field_value = fields.get(field.name, field.default)
             if field_value is NOTHING:
-                field_value = field.get_default(system)
+                missing_fields.add(field.name)
             returned[field.api_name] = field.translator.to_api(field_value)
+        if missing_fields:
+            raise MissingFields("Following fields were not specified: {}".format(", ".join(sorted(missing_fields))))
         return returned
 
     @classmethod

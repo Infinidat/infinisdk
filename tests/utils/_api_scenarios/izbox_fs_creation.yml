@@ -9,7 +9,7 @@ request:
     - {allow_root_access: false, host: '*', read_only: false, secure: true}
     owned_by: CUSTOMER
     permissions: 511
-    quota_in_bytes: 1000000
+    quota_in_bytes: 1000000000
     shared_by_cifs: true
     shared_by_nfs: true
     user_id: 0
@@ -37,7 +37,7 @@ response:
       owned_by: CUSTOMER
       parent_id: -1
       permissions: 511
-      quota_in_bytes: 1000000
+      quota_in_bytes: 1000000000
       raw_data_in_bytes: 0
       shared_by_cifs: true
       shared_by_nfs: true
