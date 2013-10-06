@@ -5,7 +5,6 @@ import os
 import requests
 import yaml
 import logbook
-import datadiff
 
 _logger = logbook.Logger(__name__)
 
@@ -68,7 +67,7 @@ class RequestHandler(object):
                 _logger.debug("{} does not match (wrong url {})", rule, rule_url)
                 continue
             if rule.request.json != json:
-                _logger.debug("{} does not match (wrong data):\n{}", rule, datadiff.diff(rule.request.json, json))
+                _logger.debug("{} does not match (wrong data):\n{}", rule, LazyDiff(rule.request.json, json))
                 continue
             return rule.response.make_response()
         raise InvalidRequest("Could not find matching rule for {} {}".format(method, url))
@@ -170,3 +169,19 @@ class Response(object):
             yaml["content"] = yaml.pop("json")
             headers["Content-type"] = "application/json"
         return cls(**yaml)
+
+class LazyDiff(object):
+    __slots__ = ["a", "b"]
+    def __init__(self, a, b):
+        self.a = a
+        self.b = b
+    def __repr__(self):
+        diff = []
+        for key in set(self.a) | set(self.b):
+            a_value = self.a.get(key, "<<NOTHING>>")
+            b_value = self.b.get(key, "<<NOTHING>>")
+            if a_value != b_value:
+                diff.append((key, a_value, b_value))
+
+        return "\n".join("{!r}: {} != {}".format(*x) for x in diff)
+        return "\n".join(":".join(*l) for l in dictdiffer.diff(self.a, self.b))
