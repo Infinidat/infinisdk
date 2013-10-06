@@ -13,7 +13,7 @@ class Filesystem(SystemObject):
 
         Field("compression_type", mandatory=True, default="off"),
         Field("owned_by",         mandatory=True, default="CUSTOMER"),
-        Field("permissions",      mandatory=True, type=int, default=0777),
+        Field("permissions",      mandatory=True, type=int, default=0o777),
         Field("shared_by_cifs",   mandatory=True, type=bool, default=True),
         Field("shared_by_nfs",    mandatory=True, type=bool, default=True),
         Field("user_id",          mandatory=True, type=int, default=0),
