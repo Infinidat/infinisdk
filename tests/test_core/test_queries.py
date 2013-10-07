@@ -77,7 +77,7 @@ class QueryTest(TestCase):
     def test_only_fields(self):
         # NOTE: uses api name!
         self.assert_query_equals(
-            Filesystem.find(self.system).only_fields(["quota"]), "fields=quota_in_bytes")
+            Filesystem.find(self.system).only_fields(["quota"]), "fields=id%2Cquota_in_bytes")
 
     def assert_query_equals(self, q, expected):
         self.assertEquals(

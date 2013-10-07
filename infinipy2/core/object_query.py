@@ -55,4 +55,9 @@ class ObjectQuery(object):
             for field_name in field_names
         ]
         self.query = add_comma_separated_query_param(self.query, "fields", translated_fields)
+        fields = self.query.query_dict["fields"].split(",")
+        # make sure we pluck the 'id' field
+        if self.object_type.fields.id.api_name not in fields:
+            fields.insert(0, self.object_type.fields.id.api_name)
+            self.query = self.query.set_query_param("fields", ",".join(fields))
         return self

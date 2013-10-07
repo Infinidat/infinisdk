@@ -50,7 +50,7 @@ response:
       - id: 4
   status_code: 200
 ---
-request: get /api/rest/filesystems?fields=quota_in_bytes
+request: get /api/rest/filesystems?fields=id%2Cquota_in_bytes
 response:
   json:
     error: null
@@ -67,7 +67,7 @@ response:
       - id: 5
         quota_in_bytes: 2000000000
 ---
-request: get /api/rest/filesystems?fields=name%2Cquota_in_bytes
+request: get /api/rest/filesystems?fields=id%2Cname%2Cquota_in_bytes
 response:
   json:
     error: null
@@ -89,7 +89,7 @@ response:
         name: fs5
         quota_in_bytes: 2000000000
 ---
-request: get /api/rest/filesystems?id=eq%3A1&fields=name
+request: get /api/rest/filesystems?id=eq%3A1&fields=id%2Cname
 response:
   json:
     error: null
@@ -98,7 +98,7 @@ response:
       - id: 1
         name: fs1
 ---
-request: get /api/rest/filesystems?id=eq%3A1&fields=name%2Cquota_in_bytes
+request: get /api/rest/filesystems?id=eq%3A1&fields=id%2Cname%2Cquota_in_bytes
 response:
   json:
     error: null
