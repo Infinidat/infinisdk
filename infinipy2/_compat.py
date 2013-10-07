@@ -17,6 +17,8 @@ else:
 
 if PY2:
 
+    import httplib
+
     string_types = (basestring,)
 
     import __builtin__ as _builtins
@@ -33,6 +35,8 @@ if PY2:
     from itertools import izip as zip
     xrange = _builtins.xrange
 else:
+
+    import http.client as httplib
 
     string_types = (str,)
 

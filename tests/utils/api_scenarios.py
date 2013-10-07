@@ -47,22 +47,37 @@ class RequestHandler(object):
     def __init__(self, target, rules):
         super(RequestHandler, self).__init__()
         self._rules = rules
-        self._address = target.get_api_address()
+        self._addresses = target.get_api_addresses()
 
     def __call__(self, method, url, **kwargs):
         _logger.debug("Handling request: {} {} {}", method, url, kwargs)
         data = json = kwargs.pop("data", None)
         if data is not None:
             json = decode_json(data)
+
         url = URL(url)
-        if (url.hostname, url.port) != self._address:
-            raise InvalidRequas("Request {} {} does not match hostname/port of target".format(method, url))
+        for index, address in enumerate(self._addresses):
+            returned = self._handle_request(address, method, url, json, kwargs)
+            if returned is not None:
+                return returned
+        raise InvalidRequest("Could not find matching rule for {} {}".format(method, url))
+
+    def _handle_request(self, address, method, url, json, kwargs):
+        if url.hostname != address[0]:
+            raise InvalidRequest("Request {} {} does not match hostname".format(method, url))
+
         for rule in self._rules:
             if rule.request.method != method:
                 _logger.debug("{} does not match (wrong method)", rule)
                 continue
+            request_port = rule.request.port
+            if request_port is None:
+                request_port = address[1]
+            if request_port != address[1]:
+                _logger.debug("{} does not match (wrong port {} != {})", rule, request_port, address[1])
+                continue
             assert rule.request.path.startswith("/")
-            rule_url = URL("http://{}:{}".format(*self._address) + rule.request.path)
+            rule_url = URL("http://{}:{}".format(*address) + rule.request.path)
             if rule_url != url:
                 _logger.debug("{} does not match (wrong url {})", rule, rule_url)
                 continue
@@ -70,7 +85,7 @@ class RequestHandler(object):
                 _logger.debug("{} does not match (wrong data):\n{}", rule, LazyDiff(rule.request.json, json))
                 continue
             return rule.response.make_response()
-        raise InvalidRequest("Could not find matching rule for {} {}".format(method, url))
+        return None
 
 class InvalidRequest(Exception):
     pass
@@ -90,14 +105,11 @@ class Rule(object):
         returned.original_yaml = yaml
         return returned
 
-    def get_url(self, target):
-        return URL("http://{}:{}".format(*target.get_api_address())).add_path(self.request.path)
-
     def __repr__(self):
         return "<Rule {} {} --> {}>".format(self.request.method, URL("http://SERVER") + self.request.path, self.response.status_code)
 
 class Request(object):
-    def __init__(self, method, path, data=None, headers=None, json=None):
+    def __init__(self, method, path, data=None, headers=None, json=None, port=None):
         super(Request, self).__init__()
         self.method = method.lower()
         if headers is None:
@@ -110,6 +122,7 @@ class Request(object):
             self.headers["Content-type"] = "application/json"
         self.data = data
         self.path = path
+        self.port = port
         self.headers = headers
 
     @classmethod
@@ -184,4 +197,6 @@ class LazyDiff(object):
                 diff.append((key, a_value, b_value))
 
         return "\n".join("{!r}: {} != {}".format(*x) for x in diff)
-        return "\n".join(":".join(*l) for l in dictdiffer.diff(self.a, self.b))
+
+class InvalidRequest(Exception):
+    pass

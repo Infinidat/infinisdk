@@ -6,9 +6,9 @@ class APITarget(with_metaclass(abc.ABCMeta)):
     Abstract base class for anything that would like to become an API target
     """
 
-    def get_api_address(self):
+    def get_api_addresses(self):
         """
-        :rtype: tuple of (ip address, port) for api interaction
+        :rtype: list of tuples of (ip address, port) for api interaction
         """
         raise NotImplementedError() # pragma: no cover
 

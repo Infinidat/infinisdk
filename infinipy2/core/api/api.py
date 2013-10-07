@@ -1,9 +1,12 @@
-import requests, json
-from urlobject import URLObject as URL
-from logbook import Logger
+import json
 from contextlib import contextmanager
-import types
+
+import requests
+from logbook import Logger
+
+from ..._compat import httplib
 from ..exceptions import APICommandFailed
+from urlobject import URLObject as URL
 
 _logger = Logger(__name__)
 
@@ -30,7 +33,7 @@ class API(object):
         self.system = target
         self._default_request_timeout = self.system.get_api_timeout()
         self._approved = False
-        self._reset_session()
+        self._session = None
 
     @contextmanager
     def get_approval_context(self, value):
@@ -48,13 +51,6 @@ class API(object):
     def get_unapproved_context(self):
         return self.get_approval_context(False)
 
-    def _reset_session(self):
-        self._session = requests.Session()
-        self._session.auth = self.system.get_api_auth()
-        self._session.headers['content-type'] = 'application/json'
-        url = URL("http://{}:{}".format(*self.system.get_api_address()))
-        self._url = url.add_path("api/rest")
-
     get = _get_request_delegate("get")
     put = _get_request_delegate("put")
     post = _get_request_delegate("post")
@@ -67,40 +63,74 @@ class API(object):
 
         :rtype: :class:`.Response`
         """
-        _url = URL(path)
-        full_url = _join_path(self._url, _url)
-        if http_method in ['put', 'delete'] and self._approved:
-            full_url = full_url.add_query_param('approved', 'true')
-        hostname = full_url.hostname
-        _logger.debug("{} <-- {} {}", hostname, http_method.upper(), full_url)
-        if 'data' in kwargs:
-            kwargs['data'] = json.dumps(kwargs.pop('data'))
-            _logger.debug("{} <-- DATA: {}" , hostname, kwargs['data'])
-        kwargs.setdefault('timeout', self._default_request_timeout)
-        response = self._session.request(http_method, full_url, **kwargs)
-        elapsed = response.elapsed.total_seconds()
-        _logger.debug("{} --> {} {} (took {:.04f}s)", hostname, response.status_code, response.reason, elapsed)
-        returned = Response(response)
-        _logger.debug("{} --> {}", hostname, returned.get_json())
+        returned = None
+        for url, attempted_session in self._iter_possible_http_sessions():
+            full_url = _join_path(url, URL(path))
+            if http_method in ['put', 'delete'] and self._approved:
+                full_url = full_url.add_query_param('approved', 'true')
+            hostname = full_url.hostname
+            _logger.debug("{} <-- {} {}", hostname, http_method.upper(), full_url)
+            if 'data' in kwargs:
+                kwargs['data'] = json.dumps(kwargs.pop('data'))
+                _logger.debug("{} <-- DATA: {}" , hostname, kwargs['data'])
+            kwargs.setdefault('timeout', self._default_request_timeout)
+            response = attempted_session.request(http_method, full_url, **kwargs)
+            elapsed = response.elapsed.total_seconds()
+            _logger.debug("{} --> {} {} (took {:.04f}s)", hostname, response.status_code, response.reason, elapsed)
+            returned = Response(url, response)
+            _logger.debug("{} --> {}", hostname, returned.get_json())
+            if response.status_code != httplib.SERVICE_UNAVAILABLE:
+                self._url = url
+                self._session = attempted_session
+                break
+
         if assert_success is not False:
             returned.assert_success()
         return returned
+
+    _api_address_index = 0
+    def _iter_possible_http_sessions(self):
+        if self._session is not None:
+            yield self._url, self._session
+
+        addresses = list(self.system.get_api_addresses())
+        for i in range(self._api_address_index, len(addresses)+self._api_address_index):
+            i = i % len(addresses)
+            self._api_address_index = i
+            attempted = addresses[i]
+            session = requests.Session()
+            session.auth = self.system.get_api_auth()
+            session.headers['content-type'] = 'application/json'
+            url = URL("http://{}:{}".format(*attempted))
+            url = url.add_path("api/rest")
+            yield url, session
+
 
 class Response(object):
     """
     IZBox API request response
     """
-    def __init__(self, resp):
+    def __init__(self, url, resp):
         super(Response, self).__init__()
+        #: response object as returned from ``requests``
         self.response = resp
+        #: URLObject of the final location the response was obtained from
+        self.url = url
+
     def get_json(self):
         return self.response.json()
+
     def _get_result(self):
         return self.get_json()['result']
+
     def get_result(self):
         return self._get_result()
+
     def get_error(self):
         return self.get_json()['error']
+
+    def __repr__(self):
+        return repr(self.response)
 
     def get_metadata(self):
         return self.get_json()['metadata']

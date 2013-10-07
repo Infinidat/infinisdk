@@ -5,8 +5,13 @@ from .filesystem import Filesystem
 class IZBox(APITarget):
 
     def __init__(self, address, auth=None):
+        """
+        :param address: Either a tuple of (host, port), or a list of such tuples for multiple addresses
+        """
         super(IZBox, self).__init__()
-        self._address = address
+        if not isinstance(address[0], (list, tuple)):
+            address = [address]
+        self._addresses = address
         self.objects = TypeBinderContainer(self)
         if auth is None:
             # TODO: take from configuration
@@ -17,8 +22,8 @@ class IZBox(APITarget):
         for object_type in [Filesystem]:
             self.objects.install(object_type)
 
-    def get_api_address(self):
-        return self._address
+    def get_api_addresses(self):
+        return self._addresses
 
     def get_api_timeout(self):
         # TODO: take this from config
@@ -28,4 +33,4 @@ class IZBox(APITarget):
         return self._auth
 
     def __repr__(self):
-        return self._address[0]
+        return self._addresses[0][0]
