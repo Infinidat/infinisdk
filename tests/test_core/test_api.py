@@ -9,5 +9,5 @@ class APITest(TestCase):
         self.system = IZBox(("address", 80))
 
     def test_api(self):
-        with api_scenario(self.system, 'izbox_handshake'):
+        with api_scenario(self.system, 'izbox_queries'):
             self.system.api.get("system")

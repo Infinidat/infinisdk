@@ -10,7 +10,7 @@ class TypeBinderContainerTest(TestCase):
     def setUp(self):
         super(TypeBinderContainerTest, self).setUp()
         self.system = IZBox(("address", 80))
-        self.scenario = api_scenario(self.system, "izbox_handshake")
+        self.scenario = api_scenario(self.system, "izbox_queries")
         self.scenario.start()
         self.addCleanup(self.scenario.end)
 
