@@ -1,12 +1,20 @@
 import itertools
 
 from sentinels import NOTHING
+import slash
+from urlobject import URLObject as URL
 
 from .._compat import with_metaclass, iteritems, itervalues
 from .fields import FieldsMeta
 from .object_query import ObjectQuery
 from .type_binder import TypeBinder
-from urlobject import URLObject as URL
+
+def _install_slash_hooks():
+    for (hook, operation) in itertools.product(["pre", "post"], ['creation', 'deletion', 'update']):
+        slash.hooks.ensure_custom_hook("{}_object_{}".format(hook, operation))
+    slash.hooks.ensure_custom_hook("object_operation_failure")
+
+_install_slash_hooks()
 
 class SystemObject(with_metaclass(FieldsMeta)):
     FIELDS = []
