@@ -1,6 +1,6 @@
 from ..core.api import APITarget, API
 from ..core.type_binder_container import TypeBinderContainer
-from .filesystem import Filesystem
+from .filesystem import Filesystem, Snapshot
 
 class IZBox(APITarget):
 
@@ -18,8 +18,7 @@ class IZBox(APITarget):
             auth = ("infinidat", "123456")
         self._auth = auth
         self.api = API(self)
-
-        for object_type in [Filesystem]:
+        for object_type in [Filesystem, Snapshot]:
             self.objects.install(object_type)
 
     def get_api_addresses(self):

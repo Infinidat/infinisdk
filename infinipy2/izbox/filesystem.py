@@ -19,3 +19,6 @@ class Filesystem(SystemObject):
         Field("user_id",          mandatory=True, type=int, default=0),
         Field("group_id",         mandatory=True, type=int, default=0),
     ]
+
+class Snapshot(Filesystem):
+    pass
