@@ -28,4 +28,3 @@ class SystemObjectFieldsTest(TestCase):
 
         self.assertEquals(len(EmptyObject.fields), 0)
 
-

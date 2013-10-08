@@ -1,4 +1,5 @@
 import itertools
+from contextlib import contextmanager
 
 from sentinels import NOTHING
 import slash
@@ -32,7 +33,8 @@ class SystemObject(with_metaclass(FieldsMeta)):
     @classmethod
     def create(cls, system, **fields):
         data = cls._get_data_for_post(fields)
-        return cls(system, system.api.post(cls.get_url_path(system), data=data).get_result())
+        with _possible_api_failure_context():
+            return cls(system, system.api.post(cls.get_url_path(system), data=data).get_result())
 
     @classmethod
     def _get_data_for_post(cls, fields):
@@ -110,3 +112,11 @@ class SystemObject(with_metaclass(FieldsMeta)):
 
     def __repr__(self):
         return "<{} id={}>".format(type(self).__name__, self.id)
+
+@contextmanager
+def _possible_api_failure_context():
+    try:
+        yield
+    except APICommandFailed as e:
+        slash.hooks.object_operation_failure()
+        raise

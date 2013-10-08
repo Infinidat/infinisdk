@@ -4,17 +4,11 @@ from infinipy2.core.exceptions import ObjectNotFound, TooManyObjectsFound
 from infinipy2.izbox import IZBox
 from infinipy2.izbox.filesystem import Filesystem
 from ..utils import TestCase
-from ..utils import api_scenario
 from urlobject import URLObject
 
 class QueryTestBase(TestCase):
 
-    def setUp(self):
-        super(QueryTestBase, self).setUp()
-        self.system = IZBox(("address", 80))
-        self.scenario = api_scenario(self.system, "izbox_queries")
-        self.scenario.start()
-        self.addCleanup(self.scenario.end)
+    API_SCENARIOS = ["izbox_queries"]
 
 class QueryExecutionTest(QueryTestBase):
 
