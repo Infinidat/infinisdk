@@ -66,7 +66,10 @@ Finding objects (one or many at a time) is done by the :func:`.TypeBinder.find`:
     >>> [filesystem] = system.objects.filesystems.find(id=2)
 
     # get a filesystem with id
-    >>> objs = Filesystem.find(system).only_fields(["quota"]).sort(-system.objects.filesystems.fields.quota)
+    >>> objs = system.objects.filesystems.find().only_fields(["quota"]).sort(-system.objects.filesystems.fields.quota)
+
+    # get all filesystems with page_size and/or page index
+    >>> objs = system.objects.filesystems.find().page(1).page_size(100)
 
 Queries are lazy, they are only sent to the system in the beginning of the iteration, and possibly span multiple pages during iteration.
 

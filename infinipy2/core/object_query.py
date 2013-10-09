@@ -50,6 +50,9 @@ class ObjectQuery(object):
         return self
 
     def only_fields(self, field_names):
+        """
+        Plucks the specified field names from the query. Can be specified multiple times
+        """
         translated_fields = [
             self.object_type.fields[field_name].api_name
             for field_name in field_names
@@ -60,4 +63,18 @@ class ObjectQuery(object):
         if self.object_type.fields.id.api_name not in fields:
             fields.insert(0, self.object_type.fields.id.api_name)
             self.query = self.query.set_query_param("fields", ",".join(fields))
+        return self
+
+    def page(self, page_index):
+        """
+        Requests a specific pagination page
+        """
+        self.query = self.query.set_query_param("page", str(page_index))
+        return self
+
+    def page_size(self, page_size):
+        """
+        Sets the page size of the query
+        """
+        self.query = self.query.set_query_param("page_size", str(page_size))
         return self

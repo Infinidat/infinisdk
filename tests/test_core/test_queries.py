@@ -73,6 +73,11 @@ class QueryTest(TestCase):
         self.assert_query_equals(
             Filesystem.find(self.system).only_fields(["quota"]), "fields=id%2Cquota_in_bytes")
 
+    def test_pagination(self):
+        self.assert_query_equals(
+            Filesystem.find(self.system).page(5).page_size(100), "page=5&page_size=100")
+
     def assert_query_equals(self, q, expected):
         self.assertEquals(
             q.query, "/api/rest/filesystems?" + expected)
+
