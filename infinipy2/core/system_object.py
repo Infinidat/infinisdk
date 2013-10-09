@@ -5,6 +5,7 @@ from sentinels import NOTHING
 import slash
 from urlobject import URLObject as URL
 
+from .exceptions import APICommandFailed
 from .._compat import with_metaclass, iteritems, itervalues
 from .fields import FieldsMeta
 from .object_query import ObjectQuery
@@ -33,8 +34,11 @@ class SystemObject(with_metaclass(FieldsMeta)):
     @classmethod
     def create(cls, system, **fields):
         data = cls._get_data_for_post(fields)
+        slash.hooks.pre_object_creation(data=data, system=system, cls=cls)
         with _possible_api_failure_context():
-            return cls(system, system.api.post(cls.get_url_path(system), data=data).get_result())
+            returned = cls(system, system.api.post(cls.get_url_path(system), data=data).get_result())
+        slash.hooks.post_object_creation(obj=returned, data=data)
+        return returned
 
     @classmethod
     def _get_data_for_post(cls, fields):
