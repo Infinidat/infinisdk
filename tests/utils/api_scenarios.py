@@ -137,9 +137,7 @@ class Request(object):
     def get_as_dict(self, root_url, **overrides):
         assert self.path.startswith("/") and not root_url.endswith("/")
         url = root_url + self.path
-        headers = self.headers
-        if headers is UNSPECIFIED:
-            headers = {}
+        headers = self.headers.copy()
         headers.update(overrides.pop("headers", {}))
         returned = {"url": url, "headers": headers, "data": self.data, "method": self.method}
         returned.update(overrides)
@@ -147,8 +145,6 @@ class Request(object):
 
     def send(self, url, **kwargs):
         as_dict = self.get_as_dict(url, **kwargs)
-        import ipdb
-        ipdb.set_trace()
         return requests.request(**as_dict)
 
 class Response(object):
