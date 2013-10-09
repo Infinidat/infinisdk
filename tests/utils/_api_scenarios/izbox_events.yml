@@ -1,0 +1,11 @@
+request: get /api/rest/events?sort=-id&page_size=2&page=1
+response:
+  json:
+    error: null
+    metadata: {number_of_objects: 600, page: 1, page_size: 2, pages_total: 300, ready: true}
+    result:
+    - code: FILESYSTEM_DELETED
+      id: 50
+    - code: FILESYSTEM_CREATED
+      id: 49
+  status_code: 200

@@ -1,6 +1,7 @@
 from ..core.api import APITarget, API
 from ..core.type_binder_container import TypeBinderContainer
 from .filesystem import Filesystem, Snapshot
+from .events import Events
 
 class IZBox(APITarget):
 
@@ -20,6 +21,8 @@ class IZBox(APITarget):
         self.api = API(self)
         for object_type in [Filesystem, Snapshot]:
             self.objects.install(object_type)
+
+        self.events = Events(self)
 
     def get_api_addresses(self):
         return self._addresses
