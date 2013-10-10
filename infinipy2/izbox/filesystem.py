@@ -1,5 +1,6 @@
 from capacity import byte
 from ..core import SystemObject, Field, FunctionTranslator
+from ..core.system_object_utils import make_getter
 
 class Filesystem(SystemObject):
     FIELDS = [
@@ -19,6 +20,8 @@ class Filesystem(SystemObject):
         Field("user_id",          mandatory=True, type=int, default=0),
         Field("group_id",         mandatory=True, type=int, default=0),
     ]
+
+    get_quota = make_getter("quota")
 
 class Snapshot(Filesystem):
     pass
