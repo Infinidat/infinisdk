@@ -7,6 +7,7 @@ from urlobject import URLObject as URL
 
 from .exceptions import APICommandFailed
 from .._compat import with_metaclass, iteritems, itervalues
+from .exceptions import MissingFields
 from .fields import FieldsMeta
 from .object_query import ObjectQuery
 from .type_binder import TypeBinder

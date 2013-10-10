@@ -1,5 +1,6 @@
 from ..utils import TestCase
 from infinipy2.core import *
+from infinipy2.core.exceptions import MissingFields
 
 class SampleBaseObject(SystemObject):
     FIELDS = [
@@ -8,7 +9,7 @@ class SampleBaseObject(SystemObject):
 
 class SampleDerivedObject(SampleBaseObject):
     FIELDS = [
-        Field(name="number", type=int),
+        Field(name="number", type=int, mandatory=True),
     ]
 
 class SystemObjectFieldsTest(TestCase):
@@ -28,3 +29,9 @@ class SystemObjectFieldsTest(TestCase):
 
         self.assertEquals(len(EmptyObject.fields), 0)
 
+class SystemObjectCreationTest(TestCase):
+
+    def test_object_creation_missing_fields(self):
+        dummy_system = object()
+        with self.assertRaises(MissingFields):
+            SampleDerivedObject.create(dummy_system)
