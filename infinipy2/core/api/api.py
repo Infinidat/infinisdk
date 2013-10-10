@@ -26,7 +26,6 @@ def _join_path(url, path):
         _url = _url.with_query(path.query)
     return _url
 
-
 class API(object):
     def __init__(self, target):
         super(API, self).__init__()
@@ -64,17 +63,19 @@ class API(object):
         :rtype: :class:`.Response`
         """
         returned = None
+        kwargs.setdefault('timeout', self._default_request_timeout)
+        data = kwargs.get("data")
+        if data is not None:
+            data = json.dumps(kwargs.pop('data'))
         for url, attempted_session in self._iter_possible_http_sessions():
             full_url = _join_path(url, URL(path))
             if http_method in ['put', 'delete'] and self._approved:
                 full_url = full_url.add_query_param('approved', 'true')
             hostname = full_url.hostname
             _logger.debug("{} <-- {} {}", hostname, http_method.upper(), full_url)
-            if 'data' in kwargs:
-                kwargs['data'] = json.dumps(kwargs.pop('data'))
-                _logger.debug("{} <-- DATA: {}" , hostname, kwargs['data'])
-            kwargs.setdefault('timeout', self._default_request_timeout)
-            response = attempted_session.request(http_method, full_url, **kwargs)
+            if data is not None:
+                _logger.debug("{} <-- DATA: {}" , hostname, data)
+            response = attempted_session.request(http_method, full_url, data=data, **kwargs)
             elapsed = response.elapsed.total_seconds()
             _logger.debug("{} --> {} {} (took {:.04f}s)", hostname, response.status_code, response.reason, elapsed)
             returned = Response(url, response)
