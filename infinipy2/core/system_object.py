@@ -5,8 +5,8 @@ from sentinels import NOTHING
 import slash
 from urlobject import URLObject as URL
 
-from .exceptions import APICommandFailed
-from .._compat import with_metaclass, iteritems, itervalues
+from .exceptions import APICommandFailed, ObjectNotFound
+from .._compat import with_metaclass, iteritems, itervalues, httplib
 from .exceptions import MissingFields
 from .fields import FieldsMeta
 from .object_query import ObjectQuery
@@ -31,6 +31,19 @@ class SystemObject(with_metaclass(FieldsMeta)):
         self.system = system
         self._cache = initial_data
         self.id = self._cache[self.fields.id.api_name]
+
+    def is_in_system(self):
+        """
+        Returns whether or not the object actually exists
+        """
+        try:
+            self.get_field("name")
+        except APICommandFailed as e:
+            if e.status_code != httplib.NOT_FOUND:
+                raise
+            return False
+        else:
+            return True
 
     @classmethod
     def create(cls, system, **fields):
@@ -104,9 +117,21 @@ class SystemObject(with_metaclass(FieldsMeta)):
                 return returned
 
         # TODO: remove unnecessary construction, move to direct getting
-        [result] = self.find(self.system, id=self.id).only_fields(field_names)
+        query = URL(self.get_url_path(self.system)).add_path(str(self.id))
 
-        self._cache.update(result._cache)
+        only_fields = []
+        for field_name in field_names:
+            try:
+                only_fields.append(self.fields[field_name].api_name)
+            except LookupError:
+                only_fields.append(field_name)
+
+        query = query.add_query_param("fields", ",".join(only_fields))
+
+        response = self.system.api.get(query)
+
+        result = response.get_result()
+        self._cache.update(result)
 
         returned = {}
         for field_name in field_names:

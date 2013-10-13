@@ -1,13 +1,12 @@
 request:
   method: get
-  path: /api/rest/filesystems?id=eq%3A151&fields=id%2Cquota_in_bytes
+  path: /api/rest/filesystems/151?fields=quota_in_bytes
 response:
   json:
     error: null
     metadata: {ready: true, number_of_objects: 1}
     result:
-      - id: 151
-        quota_in_bytes: 2000000000
+      quota_in_bytes: 2000000000
   status_code: 200
 ---
 request:

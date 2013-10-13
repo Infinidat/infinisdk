@@ -10,7 +10,7 @@ _logger = logbook.Logger(__name__)
 
 from urlobject import URLObject as URL
 
-_scenario_cache = {}
+_rule_cache = {}
 
 def get_real_scenario_filename(filename):
     if not os.path.isfile(filename):
@@ -20,15 +20,16 @@ def get_real_scenario_filename(filename):
     return filename
 
 def iter_api_scenario(filename):
-    return (Rule.from_yaml(rule) for rule in _get_rules(get_real_scenario_filename(filename)))
+    return _get_rules(get_real_scenario_filename(filename))
 
 def _get_rules(filename):
-    rules = _scenario_cache.get(filename)
+    rules = _rule_cache.get(filename)
     if rules is None:
         with open(filename) as infile:
-            rules = _scenario_cache[filename] = list(yaml.load_all(infile))
+            rules = _rule_cache[filename] = [Rule.from_yaml(filename, index, rule) for index, rule in enumerate(yaml.load_all(infile))]
+
     for rule in rules:
-        yield rule.copy()
+        yield rule
 
 class api_scenario(object):
     def __init__(self, target, *scenarios):
@@ -91,6 +92,7 @@ class RequestHandler(object):
             if rule.request.json != json:
                 _logger.debug("{} does not match (wrong data):\n{}", rule, LazyDiff(rule.request.json, json))
                 continue
+            rule.use_count += 1
             return rule.response.make_response()
         return None
 
@@ -98,14 +100,18 @@ class InvalidRequest(Exception):
     pass
 
 class Rule(object):
-    def __init__(self, request, response):
+    def __init__(self, filename, item_index, request, response):
         super(Rule, self).__init__()
+        self.filename = filename
+        self.item_index = item_index
         self.request = request
         self.response = response
+        self.use_count = 0
 
     @classmethod
-    def from_yaml(cls, yaml):
+    def from_yaml(cls, filename, item_index, yaml):
         returned = cls(
+            filename, item_index,
             Request.from_yaml(yaml["request"]),
             Response.from_yaml(yaml.get("response", None))
         )

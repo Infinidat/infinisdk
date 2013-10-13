@@ -28,19 +28,6 @@ response:
       - id: 2
   status_code: 200
 ---
-request: get /api/rest/filesystems?sort=-id
-response:
-  json:
-    error: null
-    metadata: {number_of_objects: 5, page: 1, page_size: 50, pages_total: 1, ready: true}
-    result:
-      - id: 5
-      - id: 4
-      - id: 3
-      - id: 2
-      - id: 1
-  status_code: 200
----
 request: get /api/rest/filesystems?quota_in_bytes=ge%3A2000000000
 response:
   json:
@@ -67,55 +54,31 @@ response:
       - id: 5
         quota_in_bytes: 2000000000
 ---
-request: get /api/rest/filesystems?fields=id%2Cname%2Cquota_in_bytes
+request: get /api/rest/filesystems/1?fields=name
 response:
   json:
     error: null
-    metadata: {number_of_objects: 5, page: 1, page_size: 50, pages_total: 1, ready: true}
     result:
-      - id: 1
-        name: fs1
-        quota_in_bytes: 2000000000
-      - id: 2
-        name: fs2
-        quota_in_bytes: 2000000000
-      - id: 3
-        name: fs3
-        quota_in_bytes: 2000000000
-      - id: 4
-        name: fs4
-        quota_in_bytes: 2000000000
-      - id: 5
-        name: fs5
-        quota_in_bytes: 2000000000
+      name: fs1
 ---
-request: get /api/rest/filesystems?id=eq%3A1&fields=id%2Cname
+request: get /api/rest/filesystems/1?fields=name%2Cquota_in_bytes
 response:
   json:
     error: null
-    metadata: {number_of_objects: 5, page: 1, page_size: 50, pages_total: 1, ready: true}
     result:
-      - id: 1
-        name: fs1
+      name: fs1
+      quota_in_bytes: 2000000000
 ---
-request: get /api/rest/filesystems?id=eq%3A1&fields=id%2Cname%2Cquota_in_bytes
+# not found example
+request: get /api/rest/filesystems/1023?fields=name
 response:
   json:
-    error: null
-    metadata: {number_of_objects: 1, page: 1, page_size: 50, pages_total: 1, ready: true}
-    result:
-      - id: 1
-        name: fs1
-        quota_in_bytes: 2000000000
----
-request: get /api/rest/filesystems?id=eq%3A1&fields=id%2Cquota_in_bytes
-response:
-  json:
-    error: null
-    metadata: {number_of_objects: 1, page: 1, page_size: 50, pages_total: 1, ready: true}
-    result:
-      - id: 1
-        quota_in_bytes: 2000000000
+    error: 
+      code: OBJECT_NOT_FOUND
+      message: Filesystem id not found
+    metadata: {ready: true}
+    result: null
+  status_code: 404
 ---
 request: get /api/rest/filesystems?name=eq%3Afs1
 response:

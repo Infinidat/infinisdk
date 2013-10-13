@@ -128,6 +128,20 @@ As an optimization (left to the user to decide), get_field and get_fields suppor
 
     >>> sum_of_all_fs = sum(fs.get_field("quota", from_cache=True) for fs in system.objects.filesystems.find().only_fields(["quota"]))
 
+Checking if an Object Exists
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Objects support the :func:`.is_in_system` method for checking if they still exist in the system:
+
+.. code-block:: python
+
+   >>> fs = system.objects.filesystems.get_by_id_lazy(1023)
+   >>> fs.is_in_system()
+   False
+   >>> fs = system.objects.filesystems.get_by_id_lazy(1)
+   >>> fs.is_in_system()
+   True
+
 Creating Objects
 ~~~~~~~~~~~~~~~~
 

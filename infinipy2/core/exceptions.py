@@ -8,6 +8,14 @@ class APICommandFailed(APICommandException):
     def __init__(self, response, *args, **kwargs):
         self.response = response
         super(APICommandFailed, self).__init__(*args, **kwargs)
+        self.status_code = self.response.status_code
+        if self.response.json() is not None:
+            self.message = (self.response.json().get("error") or {}).get("message", "???")
+
+    def __repr__(self):
+        return "API Command Failed (status {} - {})".format(self.status_code, self.message)
+
+    __str__ = __repr__
 
 class CommandNotApproved(APICommandException):
     def __init__(self, response):
