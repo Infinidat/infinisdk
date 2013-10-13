@@ -5,7 +5,7 @@ import requests
 from logbook import Logger
 
 from ..._compat import httplib
-from ..exceptions import APICommandFailed
+from ..exceptions import APICommandFailed, CommandNotApproved
 from urlobject import URLObject as URL
 
 _logger = Logger(__name__)
@@ -31,7 +31,7 @@ class API(object):
         super(API, self).__init__()
         self.system = target
         self._default_request_timeout = self.system.get_api_timeout()
-        self._approved = False
+        self._approved = True
         self._session = None
 
     @contextmanager
@@ -46,7 +46,6 @@ class API(object):
     def get_approved_context(self):
         return self.get_approval_context(True)
 
-    @contextmanager
     def get_unapproved_context(self):
         return self.get_approval_context(False)
 
@@ -69,7 +68,7 @@ class API(object):
             data = json.dumps(kwargs.pop('data'))
         for url, attempted_session in self._iter_possible_http_sessions():
             full_url = _join_path(url, URL(path))
-            if http_method in ['put', 'delete'] and self._approved:
+            if http_method != 'get' and self._approved:
                 full_url = full_url.add_query_param('approved', 'true')
             hostname = full_url.hostname
             _logger.debug("{} <-- {} {}", hostname, http_method.upper(), full_url)
@@ -143,5 +142,8 @@ class Response(object):
         try:
             self.response.raise_for_status()
         except requests.exceptions.HTTPError as e:
-            raise APICommandFailed(self.response, e)
+            if self.response.status_code == httplib.FORBIDDEN:
+                raise CommandNotApproved(self.response)
+            raise APICommandFailed(self.response)
+
 # TODO : implement async request

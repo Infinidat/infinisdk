@@ -1,7 +1,3 @@
-request: 
-  method: post
-  path: /api/rest/filesystems
-  json:
 request:
   json:
     cifs_access_list:
@@ -17,7 +13,7 @@ request:
     shared_by_nfs: true
     user_id: 0
   method: post
-  path: /api/rest/filesystems
+  path: /api/rest/filesystems?approved=true
 response:
   json:
     error: 

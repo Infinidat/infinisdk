@@ -14,7 +14,7 @@ request:
   json:
     quota_in_bytes: 3000000000
   method: put
-  path: /api/rest/filesystems/151
+  path: /api/rest/filesystems/151?approved=true
 response:
   json:
     error: null
@@ -24,10 +24,26 @@ response:
 ---
 request:
   json:
+    quota_in_bytes: 3000000000
+  method: put
+  path: /api/rest/filesystems/151
+response:
+  json:
+    error:
+      code: "DANGEROUS_OPERATION"
+      message: "This dangerous operation requires approval"
+      reasons: 
+       - "This operation will cause I/O disruption!"
+    metadata: {ready: true}
+    result: null
+  status_code: 403
+---
+request:
+  json:
     quota_in_bytes: 4000000000
     name: new_name
   method: put
-  path: /api/rest/filesystems/151
+  path: /api/rest/filesystems/151?approved=true
 response:
   json:
     error: null
