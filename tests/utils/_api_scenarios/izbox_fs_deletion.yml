@@ -1,0 +1,10 @@
+request:
+  method: delete
+  path: /api/rest/filesystems/1?approved=true
+response:
+  json:
+    error: null
+    metadata: {ready: true}
+    result: null
+  status_code: 200
+

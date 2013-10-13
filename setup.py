@@ -7,6 +7,7 @@ with open(os.path.join(os.path.dirname(__file__), "infinipy2", "__version__.py")
 
 _INSTALL_REQUIERS = [
     "capacity",
+    "infi.pyutils",
     "logbook",
     "requests>=1.2.0",
     "sentinels",

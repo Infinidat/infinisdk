@@ -298,6 +298,14 @@ Object Deletion
 
 Deletion is done with :func:`.delete`, and forced deletion is done with :func:`.purge`.
 
+.. code-block:: python
+
+ >>> fs = system.objects.filesystems.get_by_id_lazy(1)
+ >>> fs.delete()
+
+.. code-block:: python
+
+ >>> fs.purge()
 
 Object Updates
 ~~~~~~~~~~~~~~

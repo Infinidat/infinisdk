@@ -3,6 +3,7 @@ from contextlib import contextmanager
 
 from sentinels import NOTHING
 import slash
+from infi.pyutils.lazy import cached_method
 from urlobject import URLObject as URL
 
 from .exceptions import APICommandFailed, ObjectNotFound
@@ -117,7 +118,7 @@ class SystemObject(with_metaclass(FieldsMeta)):
                 return returned
 
         # TODO: remove unnecessary construction, move to direct getting
-        query = URL(self.get_url_path(self.system)).add_path(str(self.id))
+        query = self.get_this_url_path()
 
         only_fields = []
         for field_name in field_names:
@@ -162,7 +163,25 @@ class SystemObject(with_metaclass(FieldsMeta)):
             if field.api_name != field_name:
                 update_dict.pop(field_name)
 
-        self.system.api.put(URL(self.get_url_path(self.system)).add_path(str(self.id)), data=update_dict)
+        self.system.api.put(self.get_this_url_path(), data=update_dict)
+
+    def delete(self):
+        """
+        Deletes this object.
+
+        .. note:: does nothing except sending the deletion request. See :func:`.purge` for forcibly deleting objects.
+        """
+        self.system.api.delete(self.get_this_url_path())
+
+    def purge(self):
+        """
+        Deletes this object, doing all necessary operations to ensure deletion is successful.
+        """
+        self.delete()
+
+    @cached_method
+    def get_this_url_path(self):
+        return URL(self.get_url_path(self.system)).add_path(str(self.id))
 
     def __repr__(self):
         return "<{} id={}>".format(type(self).__name__, self.id)
