@@ -29,6 +29,15 @@ class TypeBinder(object):
         """
         return self.object_type.find(self.system, *predicates, **kw)
 
+    def get_by_id_lazy(self, id):
+        """
+        Obtains an object with a specified id *without* checking if it exists or querying it on the way.
+
+        This is useful assuming the next operation is a further query/update on this object.
+        """
+        # TODO: test this on components
+        return self.object_type(self.system, {"id":id})
+
     def get(self, *predicates, **kw):
         """
         Finds exactly one object matching criteria. Raises :class:`ObjectNotFound` if not found, :class:`TooManyObjectsFound` if more than one is found

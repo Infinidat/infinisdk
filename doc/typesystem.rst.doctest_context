@@ -7,7 +7,7 @@ from infinipy2.izbox import IZBox
 @contextmanager
 def doctest_context():
     fake_system = IZBox(("izbox001", 80))
-    with api_scenario(fake_system, "izbox_queries", "izbox_fs_creation"):
+    with api_scenario(fake_system, "izbox_queries", "izbox_fs_creation", "izbox_fs_update"):
         yield {
             "TiB": capacity.TiB,
             "GB": capacity.GB,

@@ -103,7 +103,7 @@ class SystemObject(with_metaclass(FieldsMeta)):
             if not any(x is NOTHING for x in itervalues(returned)):
                 return returned
 
-        # TODO: remove unnecessary construction
+        # TODO: remove unnecessary construction, move to direct getting
         [result] = self.find(self.system, id=self.id).only_fields(field_names)
 
         self._cache.update(result._cache)
@@ -114,6 +114,30 @@ class SystemObject(with_metaclass(FieldsMeta)):
             returned[field_name] = field.translator.from_api(self._cache[field.api_name])
 
         return returned
+
+    def update_field(self, field_name, field_value):
+        """
+        Updates the value of a single field
+        """
+        self._update_fields({field_name: field_value})
+
+    def update_fields(self, **update_dict):
+        """
+        Atomically update a group of fields and respective values (given as a dictionary)
+        """
+        self._update_fields(update_dict)
+
+    def _update_fields(self, update_dict):
+        for field_name, field_value in list(iteritems(update_dict)):
+            try:
+                field = self.fields[field_name]
+            except LookupError:
+                continue
+            update_dict[field.api_name] = field.translator.to_api(field_value)
+            if field.api_name != field_name:
+                update_dict.pop(field_name)
+
+        self.system.api.put(URL(self.get_url_path(self.system)).add_path(str(self.id)), data=update_dict)
 
     def __repr__(self):
         return "<{} id={}>".format(type(self).__name__, self.id)

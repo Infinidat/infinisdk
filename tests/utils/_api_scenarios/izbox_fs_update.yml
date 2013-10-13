@@ -1,0 +1,37 @@
+request:
+  method: get
+  path: /api/rest/filesystems?id=eq%3A151&fields=id%2Cquota_in_bytes
+response:
+  json:
+    error: null
+    metadata: {ready: true, number_of_objects: 1}
+    result:
+      - id: 151
+        quota_in_bytes: 2000000000
+  status_code: 200
+---
+request:
+  json:
+    quota_in_bytes: 3000000000
+  method: put
+  path: /api/rest/filesystems/151
+response:
+  json:
+    error: null
+    metadata: {ready: true}
+    result:
+  status_code: 200
+---
+request:
+  json:
+    quota_in_bytes: 4000000000
+    name: new_name
+  method: put
+  path: /api/rest/filesystems/151
+response:
+  json:
+    error: null
+    metadata: {ready: true}
+    result:
+  status_code: 200
+

@@ -292,7 +292,7 @@ Objects that support updates expose the :func:`.update_fields` and :func:`update
 
 .. code-block:: python
 
-    filesystem = ...
-    filesystem.update_fields(quota=4*GB, name="new_name")
-    filesystem.update_field("quota", 16*GB)
+    >>> filesystem = system.objects.filesystems.get_by_id_lazy(151)
+    >>> filesystem.update_fields(quota=4*GB, name="new_name")
+    >>> filesystem.update_field("quota", 3*GB)
 
