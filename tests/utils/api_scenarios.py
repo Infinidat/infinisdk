@@ -10,6 +10,8 @@ _logger = logbook.Logger(__name__)
 
 from urlobject import URLObject as URL
 
+_scenario_cache = {}
+
 def get_real_scenario_filename(filename):
     if not os.path.isfile(filename):
         if not filename.endswith(".yml"):
@@ -18,10 +20,15 @@ def get_real_scenario_filename(filename):
     return filename
 
 def iter_api_scenario(filename):
-    filename = get_real_scenario_filename(filename)
-    with open(filename) as infile:
-        for rule in yaml.load_all(infile):
-            yield Rule.from_yaml(rule)
+    return (Rule.from_yaml(rule) for rule in _get_rules(get_real_scenario_filename(filename)))
+
+def _get_rules(filename):
+    rules = _scenario_cache.get(filename)
+    if rules is None:
+        with open(filename) as infile:
+            rules = _scenario_cache[filename] = list(yaml.load_all(infile))
+    for rule in rules:
+        yield rule.copy()
 
 class api_scenario(object):
     def __init__(self, target, *scenarios):
