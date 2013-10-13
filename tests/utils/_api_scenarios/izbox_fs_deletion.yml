@@ -3,8 +3,8 @@ request:
   path: /api/rest/filesystems/1?approved=true
 response:
   json:
-    error: null
     metadata: {ready: true}
+    error: null
     result: null
   status_code: 200
 
