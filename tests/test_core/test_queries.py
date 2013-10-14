@@ -44,6 +44,9 @@ class QueryTest(TestCase):
         ]:
             self.assert_query_equals(query, "id=eq%3A2")
 
+    def test_querying_ne(self):
+        self.assert_query_equals(Filesystem.find(self.system, self.field != "X"), "id=ne%3AX")
+
     def test_querying_ge(self):
         self.assert_query_equals(Filesystem.find(self.system, self.field >= "X"), "id=ge%3AX")
 
@@ -80,4 +83,3 @@ class QueryTest(TestCase):
     def assert_query_equals(self, q, expected):
         self.assertEquals(
             q.query, "/api/rest/filesystems?" + expected)
-

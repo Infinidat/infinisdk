@@ -36,7 +36,7 @@ class TypeBinder(object):
         This is useful assuming the next operation is a further query/update on this object.
         """
         # TODO: test this on components
-        return self.object_type(self.system, {"id":id})
+        return self.object_type.construct(self.system, {self.fields.id.api_name:id})
 
     def get(self, *predicates, **kw):
         """

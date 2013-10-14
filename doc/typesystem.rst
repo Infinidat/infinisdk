@@ -1,6 +1,5 @@
 .. _typesystem:
 
-
 Typesystem
 ==========
 
@@ -153,9 +152,34 @@ Creating an object is done by the **create** method:
 
 .. note:: the **create** method above is a shortcut for the create method of the :class:`.Filesystem` class itself.
 
+Object Deletion
+~~~~~~~~~~~~~~~
 
-Defining an Object Schema
--------------------------
+Deletion is done with :func:`.delete`, and forced deletion is done with :func:`.purge`.
+
+.. code-block:: python
+
+ >>> fs = system.objects.filesystems.get_by_id_lazy(1)
+ >>> fs.delete()
+
+.. code-block:: python
+
+ >>> fs.purge()
+
+Object Updates
+~~~~~~~~~~~~~~
+
+Objects that support updates expose the :func:`.update_fields` and :func:`update_field`:
+
+.. code-block:: python
+
+    >>> filesystem = system.objects.filesystems.get_by_id_lazy(151)
+    >>> filesystem.update_fields(quota=4*GB, name="new_name")
+    >>> filesystem.update_field("quota", 3*GB)
+
+
+Object Schemas
+--------------
 
 Types in the system are classes deriving from :class:`the SystemObject class<.SystemObject>`. The fields a specific object exhibits are defined in the **FIELDS** class variable:
 
@@ -177,10 +201,6 @@ Types in the system are classes deriving from :class:`the SystemObject class<.Sy
   ...          ),
   ...     ]
 
-Binding Object Types to Systems
--------------------------------
-**TODO**
-
 Field Definitions
 ~~~~~~~~~~~~~~~~~
 
@@ -190,6 +210,31 @@ The **FIELDS** class member must be a list of :class:`.Field` objects.
    :members:
 
 .. note:: Some of the real object fields exposed by the system may be of no interest to the application, and thus don't have to be specified in the **FIELDS** section. We can get the value of these fields through our getters, and update them using the update methods, but other parts like creation logic or filtering will not perform any special treatment for those fields. We will not attempt to translate their name or special conversion of their values.
+
+Domains and Translation
+~~~~~~~~~~~~~~~~~~~~~~~
+.. _translation:
+
+Field names and values exist in two domains - the API domain, which is the syntax recognized by the system's API service itself, and the translated domain, represented as Pythonic values by the abstraction layer. We'll be using those terms in the following discussion.
+
+For instance, we would like the following code:
+
+.. code-block:: python
+
+    Filesystem.create(system, quota=2*GB, ...)
+
+to be translated to the following JSON structure being posted:
+
+.. code-block:: javascript
+
+   {
+     //...
+     "quota_in_bytes": 2000000000,
+     //...
+   }
+
+Here the API domain talks in ``quota_in_bytes`` which is an integer, while the translated domain talks in ``quota``, which is a `capacity unit <http://github.com/vmalloc/capacity>`_.
+
 
 The "id" Field
 ~~~~~~~~~~~~~~
@@ -239,82 +284,4 @@ Sometimes we may want to omit a certain required field(s), while still autogener
 .. code-block:: python
 
    Filesystem.create(system, name=OMIT) #  will autogenerate quota and other required fields, but skip generating the name
-
-Domains and Translation
-~~~~~~~~~~~~~~~~~~~~~~~
-.. _translation:
-
-Field names and values exist in two domains - the API domain, which is the syntax recognized by the system's API service itself, and the translated domain, represented as Pythonic values by the abstraction layer. We'll be using those terms in the following discussion.
-
-For instance, we would like the following code:
-
-.. code-block:: python
-
-    Filesystem.create(system, quota=2*GB, ...)
-
-to be translated to the following JSON structure being posted:
-
-.. code-block:: javascript
-
-   {
-     //...
-     "quota_in_bytes": 2000000000,
-     //...
-   }
-
-Here the API domain talks in ``quota_in_bytes`` which is an integer, while the translated domain talks in ``quota``, which is a `capacity unit <http://github.com/vmalloc/capacity>`_.
-
-    
-
-
-Object Lifetime
----------------
-
-Objects can be queried for attribute values, and can optionally be created and/or deleted.
-
-Object Creation (where applicable)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Creation is always done by the classmethod :func:`.create`. Its first argument (not including the class itself) is always a system instance. The following keyword arguments are names of fields and their values.
-
-Below is an example of how to implement such a method:
-
-.. code-block:: python
-
- >>> from infinipy2.core import SystemObject
- 
- >>> class Filesystem(SystemObject):
- ...     FIELDS = [
- ...       #...
- ...     ]
- ...     @classmethod
- ...     def create(cls, system, **fields):
- ...         returned = system.api.post(fields)
- ...         return cls(system, returned["result"]["id"])
-
-
-Object Deletion
-~~~~~~~~~~~~~~~
-
-Deletion is done with :func:`.delete`, and forced deletion is done with :func:`.purge`.
-
-.. code-block:: python
-
- >>> fs = system.objects.filesystems.get_by_id_lazy(1)
- >>> fs.delete()
-
-.. code-block:: python
-
- >>> fs.purge()
-
-Object Updates
-~~~~~~~~~~~~~~
-
-Objects that support updates expose the :func:`.update_fields` and :func:`update_field`:
-
-.. code-block:: python
-
-    >>> filesystem = system.objects.filesystems.get_by_id_lazy(151)
-    >>> filesystem.update_fields(quota=4*GB, name="new_name")
-    >>> filesystem.update_field("quota", 3*GB)
 

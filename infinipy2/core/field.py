@@ -54,7 +54,7 @@ def _install_filter_factory(operator_name):
     return meth
 
 def _install_filter_factories():
-    for operator_name in ["eq", "gt", "lt", "ge", "le"]:
+    for operator_name in ["eq", "gt", "lt", "ge", "le", "ne"]:
         _install_filter_factory(operator_name)
 
 _install_filter_factories()

@@ -1,0 +1,104 @@
+request: get /api/rest/components?type=eq%3Aenclosure
+response:
+  json:
+    error: null
+    metadata: {number_of_objects: 8, page: 1, page_size: 50, pages_total: 1, ready: true}
+    result:
+    - alerts: []
+      data: {model: NDS-4600-JD, serial_number: MXE340002AHRB0A2, vendor: NEWISYS}
+      id: 102000
+      index: 2
+      parent_id: 100000
+      parent_index: 1
+      path: system.racks[1].enclosures[2]
+      status: OK
+      type: enclosure
+    - alerts: []
+      data: {model: NDS-4600-JD, serial_number: MXE340002AHRB0A2, vendor: NEWISYS}
+      id: 106000
+      index: 6
+      parent_id: 100000
+      parent_index: 1
+      path: system.racks[1].enclosures[6]
+      status: OK
+      type: enclosure
+    - alerts: []
+      data: {model: NDS-4600-JD, serial_number: MXE340002AHRB0A2, vendor: NEWISYS}
+      id: 108000
+      index: 8
+      parent_id: 100000
+      parent_index: 1
+      path: system.racks[1].enclosures[8]
+      status: OK
+      type: enclosure
+    - alerts: []
+      data: {model: NDS-4600-JD, serial_number: MXE340002AHRB0A2, vendor: NEWISYS}
+      id: 104000
+      index: 4
+      parent_id: 100000
+      parent_index: 1
+      path: system.racks[1].enclosures[4]
+      status: OK
+      type: enclosure
+    - alerts: []
+      data: {model: NDS-4600-JD, serial_number: MXE340002AHRB0A2, vendor: NEWISYS}
+      id: 101000
+      index: 1
+      parent_id: 100000
+      parent_index: 1
+      path: system.racks[1].enclosures[1]
+      status: OK
+      type: enclosure
+    - alerts: []
+      data: {model: NDS-4600-JD, serial_number: MXE340002AHRB0A2, vendor: NEWISYS}
+      id: 103000
+      index: 3
+      parent_id: 100000
+      parent_index: 1
+      path: system.racks[1].enclosures[3]
+      status: OK
+      type: enclosure
+    - alerts: []
+      data: {model: NDS-4600-JD, serial_number: MXE340002AHRB0A2, vendor: NEWISYS}
+      id: 105000
+      index: 5
+      parent_id: 100000
+      parent_index: 1
+      path: system.racks[1].enclosures[5]
+      status: OK
+      type: enclosure
+    - alerts: []
+      data: {model: NDS-4600-JD, serial_number: MXE340002AHRB0A2, vendor: NEWISYS}
+      id: 107000
+      index: 7
+      parent_id: 100000
+      parent_index: 1
+      path: system.racks[1].enclosures[7]
+      status: OK
+      type: enclosure
+  status_code: 200
+---
+request: get /api/rest/components?type=eq%3Aenclosure&status=ne%3AOK
+response:
+  json:
+    error: null
+    metadata: {number_of_objects: 0, page: 1, page_size: 50, pages_total: 1, ready: true}
+    result: []
+  status_code: 200
+---
+request: get /api/rest/components?type=eq%3Aenclosure&id=eq%3A102000
+response:
+  json:
+    error: null
+    metadata: {number_of_objects: 1, page: 1, page_size: 50, pages_total: 1, ready: true}
+    result:
+    - alerts: []
+      data: {model: NDS-4600-JD, serial_number: MXE340002AHRB0A2, vendor: NEWISYS}
+      id: 102000
+      index: 2
+      parent_id: 100000
+      parent_index: 1
+      path: system.racks[1].enclosures[2]
+      status: OK
+      type: enclosure
+  status_code: 200

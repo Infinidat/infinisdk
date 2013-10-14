@@ -23,7 +23,7 @@ class ObjectQuery(object):
     def __getitem__(self, index):
         self._fetch()
         if isinstance(self._fetched[index], dict):
-            self._fetched[index] = self.object_type(self.system, self._fetched[index])
+            self._fetched[index] = self.object_type.construct(self.system, self._fetched[index])
         return self._fetched[index]
 
     def _fetch(self):

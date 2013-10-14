@@ -1,14 +1,28 @@
 Components
 ==========
 
-.. note:: wip
+Infinipy provides reflection for physical system components (referred to here as *components*). Components are similar to logical objects :ref:`discussed earlier<typesystem>`, but they are slightly different:
 
-All system components are represented by a fixed collections objects, grouped by component type. 
-These objects are created and cached during system initialization the :class:`ComponentTypeBinder>`. 
-Query methods like :func:`.find` will always return the same instance for a a specific component.
-Components cannot be created, deleted or updated. Some components may support state modifying operations    
+1. They are cached by default -- getting the same component twice will return the very same Python object twice
+2. They reside in ``system.components``, instead of ``system.objects``.
 
 .. note:: The component *object* itself is cached. Actual data of this object is usually not cached.
+
+Querying Components
+-------------------
+
+This is very similar to querying objects:
+
+.. code-block:: python
+
+    >>> encs = system.components.enclosures.find()
+    >>> len(encs)
+    8
+
+    >>> len(system.components.enclosures.find(system.components.enclosures.fields.status != "OK"))
+    0
+
+
 
 Retrieving Component Objects
 ----------------------------

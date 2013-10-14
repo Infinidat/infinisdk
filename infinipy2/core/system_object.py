@@ -33,6 +33,15 @@ class SystemObject(with_metaclass(FieldsMeta)):
         self._cache = initial_data
         self.id = self._cache[self.fields.id.api_name]
 
+    @classmethod
+    def construct(cls, system, data):
+        """
+        Template method to enable customizing the object instantiation process.
+
+        This enables system components to be cached rather than re-fetched every time
+        """
+        return cls(system, data)
+
     def is_in_system(self):
         """
         Returns whether or not the object actually exists
