@@ -22,3 +22,7 @@ class ComponentsTest(TestCase):
             len({id(x) for x in candidates}), 1,
             "Objects are unexpectedly recreated for each fetch"
         )
+
+    def test_cannot_get_system_component_by_id_lazily(self):
+        with self.assertRaises(NotImplementedError):
+            self.system.components.get_by_id_lazy(1)

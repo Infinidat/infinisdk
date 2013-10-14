@@ -22,8 +22,7 @@ class SystemComponentsBinder(TypeBinder):
         """
         self._components_by_id[component.id] = component
 
-    @classmethod
-    def get_by_id_lazy(cls, id):
+    def get_by_id_lazy(self, id):
         returned = self.try_get_component_by_id(id)
         if returned is None:
             raise NotImplementedError("Initializing generic components lazily is not yet supported") # pragma: no cover
