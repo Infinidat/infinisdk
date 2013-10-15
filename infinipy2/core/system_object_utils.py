@@ -13,3 +13,6 @@ def make_updater(attribute_name):
     updater.__name__ = "update_{}".format(attribute_name)
     updater.__doc__ = "updates the value of {!r}".format(attribute_name)
     return updater
+
+def make_getter_updater(attribute_name):
+    return make_getter(attribute_name), make_updater(attribute_name)

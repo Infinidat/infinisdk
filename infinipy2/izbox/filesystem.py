@@ -1,6 +1,6 @@
 from capacity import byte
 from ..core import SystemObject, Field, FunctionTranslator
-from ..core.system_object_utils import make_getter, make_updater
+from ..core.system_object_utils import make_getter_updater
 
 class Filesystem(SystemObject):
     FIELDS = [
@@ -21,8 +21,9 @@ class Filesystem(SystemObject):
         Field("group_id",         mandatory=True, type=int, default=0),
     ]
 
-    get_quota = make_getter("quota")
-    update_quota = make_updater("quota")
+    get_quota, update_quota = make_getter_updater("quota")
+
+    get_name, update_name = make_getter_updater("name")
 
 class Snapshot(Filesystem):
     pass

@@ -49,4 +49,27 @@ response:
     metadata: {ready: true}
     result:
   status_code: 200
+---
+request:
+  method: get
+  path: /api/rest/filesystems/151?fields=name
+response:
+  json:
+    error: null
+    metadata: {ready: true, number_of_objects: 1}
+    result:
+      name: fs151
+  status_code: 200
+---
+request:
+  method: put
+  path: /api/rest/filesystems/151?approved=true
+  json:
+    name: new_name
+response:
+  json:
+    error: null
+    metadata: {ready: true}
+    result: null
+  status_code: 200
 
