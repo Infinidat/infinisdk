@@ -143,8 +143,12 @@ class SystemObject(with_metaclass(FieldsMeta)):
 
         returned = {}
         for field_name in field_names:
-            field = self.fields[field_name]
-            returned[field_name] = field.translator.from_api(self._cache[field.api_name])
+            field = self.fields.get(field_name, None)
+            if field is not None:
+                value = field.translator.from_api(self._cache[field.api_name])
+            else:
+                value = self._cache[field_name]
+            returned[field_name] = value
 
         return returned
 

@@ -28,6 +28,9 @@ class Fields(object):
     def add_field(self, field):
         self._fields[field.name] = field
 
+    def get(self, field_name, default=None):
+        return self._fields.get(field_name, default)
+
     def __getattr__(self, attr):
         try:
             return self[attr]

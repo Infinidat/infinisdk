@@ -1,6 +1,9 @@
 from ..core.field import Field
 from ..core.system_component import SystemComponentsBinder
 from ..core.system_object import SystemObject
+
+from infi.pyutils.lazy import cached_method
+
 from urlobject import URLObject as URL
 
 class IZBoxSystemComponents(SystemComponentsBinder):
@@ -14,7 +17,13 @@ class IZBoxSystemComponent(SystemObject):
     FIELDS = [
         Field("id", type=int),
         Field("status"),
+        Field("index", type=int),
+        Field("parent_index", type=int),
     ]
+
+    @cached_method
+    def get_this_url_path(self):
+        return super(IZBoxSystemComponent, self).get_this_url_path().del_query_param("type")
 
     @classmethod
     def get_url_path(cls, system):
@@ -45,4 +54,9 @@ class Node(IZBoxSystemComponent):
 
 @IZBoxSystemComponents.install_component_type
 class System(IZBoxSystemComponent):
-    pass
+
+    def get_primary_node(self):
+        return self.system.components.nodes.get(index=self.get_primary_node_index())
+
+    def get_primary_node_index(self, use_cache=False):
+        return self.get_field("data", use_cache)["primary_node_id"]
