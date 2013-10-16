@@ -30,6 +30,7 @@ class ComponentsTest(TestCase):
 
     def test_system_component(self):
         system_component = self.system.components.systems.get()
+        self.assertIs(system_component, self.system.components.get_system_component())
 
     def test_cannot_get_system_component_by_id_lazily(self):
         with self.assertRaises(NotImplementedError):

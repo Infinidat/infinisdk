@@ -37,6 +37,12 @@ class SystemComponentsBinder(TypeBinder):
             raise NotImplementedError("Initializing generic components lazily is not yet supported") # pragma: no cover
         return returned
 
+    def get_system_component(self):
+        """
+        Retrieves the component representing the system itself
+        """
+        return self.systems.get()
+
 _COMPONENTS_BY_TYPE_NAME = {}
 
 def _make_component_type(object_type):
