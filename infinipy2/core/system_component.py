@@ -100,5 +100,9 @@ class Enclosure(SystemComponent):
     pass
 
 @_make_component_type
+class Node(SystemComponent):
+    pass
+
+@_make_component_type
 class System(SystemComponent):
     pass
