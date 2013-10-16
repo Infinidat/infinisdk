@@ -8,7 +8,7 @@ from urlobject import URLObject as URL
 
 from .exceptions import APICommandFailed, ObjectNotFound
 from .._compat import with_metaclass, iteritems, itervalues, httplib
-from .exceptions import MissingFields
+from .exceptions import MissingFields, CacheMiss
 from .fields import FieldsMeta
 from .object_query import ObjectQuery
 from .type_binder import TypeBinder
@@ -122,9 +122,7 @@ class SystemObject(with_metaclass(FieldsMeta)):
         :rtype: a dictionary of field names to their values
         """
         if from_cache:
-            returned = {field_name: self._cache.get(self.fields[field_name].api_name, NOTHING) for field_name in field_names}
-            if not any(x is NOTHING for x in itervalues(returned)):
-                return returned
+            return self._get_fields_from_cache(field_names)
 
         # TODO: remove unnecessary construction, move to direct getting
         query = self.get_this_url_path()
@@ -147,6 +145,22 @@ class SystemObject(with_metaclass(FieldsMeta)):
         for field_name in field_names:
             field = self.fields[field_name]
             returned[field_name] = field.translator.from_api(self._cache[field.api_name])
+
+        return returned
+
+    def _get_fields_from_cache(self, field_names):
+        returned = {}
+        missed = []
+        for field_name in field_names:
+            value = self._cache.get(self.fields[field_name].api_name, NOTHING)
+            if value is NOTHING:
+                missed.append(field_name)
+            else:
+                returned[field_name] = value
+        if missed:
+            raise CacheMiss(
+                "The following fields could not be obtained from cache: {}".format(
+                    ", ".join(repr(field) for field in missed)))
 
         return returned
 
