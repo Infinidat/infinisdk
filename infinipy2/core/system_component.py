@@ -1,23 +1,21 @@
 from .._compat import itervalues
 from .field import Field
-from .system_object import SystemObject
 from .type_binder import TypeBinder
-from urlobject import URLObject as URL
 
 class SystemComponentsBinder(TypeBinder):
 
-    class types:
-        pass
+    _COMPONENTS_BY_TYPE_NAME = None
+    types = None
 
-    def __init__(self, system):
-        super(SystemComponentsBinder, self).__init__(SystemComponent, system)
+    def __init__(self, base_component_type, system):
+        super(SystemComponentsBinder, self).__init__(base_component_type, system)
         self._components_by_id = {}
 
     def get_component_types(self):
         """
         Returns all classes installed for specific component types
         """
-        return list(itervalues(_COMPONENTS_BY_TYPE_NAME))
+        return list(itervalues(self._COMPONENTS_BY_TYPE_NAME))
 
     def try_get_component_by_id(self, component_id):
         """
@@ -43,13 +41,17 @@ class SystemComponentsBinder(TypeBinder):
         """
         return self.systems.get()
 
-_COMPONENTS_BY_TYPE_NAME = {}
+    @classmethod
+    def install_component_type(cls, component_type):
+        setattr(cls, component_type.get_plural_name(), SpecificComponentBinderGetter(component_type))
 
-def _make_component_type(object_type):
-    setattr(SystemComponentsBinder, object_type.get_plural_name(), SpecificComponentBinderGetter(object_type))
-    _COMPONENTS_BY_TYPE_NAME[object_type.get_type_name()] = object_type
-    setattr(SystemComponentsBinder.types, object_type.__name__, object_type)
-    return object_type
+        if cls._COMPONENTS_BY_TYPE_NAME is None:
+            cls._COMPONENTS_BY_TYPE_NAME = {}
+        cls._COMPONENTS_BY_TYPE_NAME[component_type.get_type_name()] = component_type
+        if cls.types is None:
+            cls.types = TypeContainer()
+        setattr(cls.types, component_type.__name__, component_type)
+        return component_type
 
 class SpecificComponentBinderGetter(object):
 
@@ -74,41 +76,5 @@ class SpecificComponentBinder(TypeBinder):
             self.system.components.cache_component(returned)
         return returned
 
-class SystemComponent(SystemObject):
-    BINDER_CLASS = SystemComponentsBinder
-
-    FIELDS = [
-        Field("id", type=int),
-        Field("status"),
-    ]
-
-    @classmethod
-    def get_url_path(cls, system):
-        return URL("/api/rest/components").add_query_param("type", "eq:{}".format(cls.get_type_name()))
-
-    @classmethod
-    def get_type_name(cls):
-        return cls.__name__.lower()
-
-    @classmethod
-    def construct(cls, system, data):
-        component_id = data["id"]
-        component_type = data["type"]
-        returned = system.components.try_get_component_by_id(component_id)
-        if returned is None:
-            object_type = _COMPONENTS_BY_TYPE_NAME.get(component_type, SystemComponent)
-            returned = object_type(system, data)
-            system.components.cache_component(returned)
-        return returned
-
-@_make_component_type
-class Enclosure(SystemComponent):
-    pass
-
-@_make_component_type
-class Node(SystemComponent):
-    pass
-
-@_make_component_type
-class System(SystemComponent):
+class TypeContainer(object):
     pass

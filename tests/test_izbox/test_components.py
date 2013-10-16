@@ -24,7 +24,7 @@ class ComponentsTest(TestCase):
         )
 
     def test_component_types(self):
-        from infinipy2.core.system_component import System, Enclosure
+        from infinipy2.izbox.components import System, Enclosure
         self.assertIs(self.system.components.types.System, System)
         self.assertIs(self.system.components.types.Enclosure, Enclosure)
 

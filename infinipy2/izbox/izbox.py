@@ -1,6 +1,6 @@
 from ..core.api import APITarget, API
 from ..core.type_binder_container import TypeBinderContainer
-from ..core.system_component import SystemComponentsBinder
+from .components import IZBoxSystemComponents
 from .filesystem import Filesystem, Snapshot
 from .events import Events
 
@@ -23,7 +23,7 @@ class IZBox(APITarget):
         for object_type in [Filesystem, Snapshot]:
             self.objects.install(object_type)
 
-        self.components = SystemComponentsBinder(self)
+        self.components = IZBoxSystemComponents(self)
 
         self.events = Events(self)
 

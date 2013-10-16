@@ -31,7 +31,7 @@ There are several ways to obtain component types from the system:
 
   >>> types = system.components.get_component_types()
   >>> system.components.types.Enclosure
-  <class 'infinipy2.core.system_component.Enclosure'>
+  <class 'infinipy2.izbox.components.Enclosure'>
 
 
 Retrieving Component Objects
