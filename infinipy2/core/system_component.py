@@ -1,14 +1,21 @@
+from .._compat import itervalues
 from .field import Field
 from .system_object import SystemObject
 from .type_binder import TypeBinder
-
 from urlobject import URLObject as URL
+
 
 class SystemComponentsBinder(TypeBinder):
 
     def __init__(self, system):
         super(SystemComponentsBinder, self).__init__(SystemComponent, system)
         self._components_by_id = {}
+
+    def get_component_types(self):
+        """
+        Returns all classes installed for specific component types
+        """
+        return list(itervalues(_COMPONENTS_BY_TYPE_NAME))
 
     def try_get_component_by_id(self, component_id):
         """
