@@ -102,3 +102,21 @@ response:
       status: OK
       type: enclosure
   status_code: 200
+---
+request: get /api/rest/components?type=eq%3Asystem
+response:
+  json:
+    error: null
+    metadata: {number_of_objects: 1, page: 1, page_size: 50, pages_total: 1, ready: true}
+    result:
+    - alerts: []
+      data: {name: izbox-mock, primary_node_id: 1, system_serial: 25001, system_state: online,
+        up_since: 2261951843, version: 0.3.post284.gf82c8eb}
+      id: 0
+      index: -1
+      parent_id: -1
+      parent_index: -1
+      path: system
+      status: OK
+      type: system
+  status_code: 200
