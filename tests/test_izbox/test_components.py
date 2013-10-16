@@ -23,6 +23,11 @@ class ComponentsTest(TestCase):
             "Objects are unexpectedly recreated for each fetch"
         )
 
+    def test_component_types(self):
+        from infinipy2.core.system_component import System, Enclosure
+        self.assertIs(self.system.components.types.System, System)
+        self.assertIs(self.system.components.types.Enclosure, Enclosure)
+
     def test_cannot_get_system_component_by_id_lazily(self):
         with self.assertRaises(NotImplementedError):
             self.system.components.get_by_id_lazy(1)

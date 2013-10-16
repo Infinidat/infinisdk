@@ -4,8 +4,10 @@ from .system_object import SystemObject
 from .type_binder import TypeBinder
 from urlobject import URLObject as URL
 
-
 class SystemComponentsBinder(TypeBinder):
+
+    class types:
+        pass
 
     def __init__(self, system):
         super(SystemComponentsBinder, self).__init__(SystemComponent, system)
@@ -40,6 +42,7 @@ _COMPONENTS_BY_TYPE_NAME = {}
 def _make_component_type(object_type):
     setattr(SystemComponentsBinder, object_type.get_plural_name(), SpecificComponentBinderGetter(object_type))
     _COMPONENTS_BY_TYPE_NAME[object_type.get_type_name()] = object_type
+    setattr(SystemComponentsBinder.types, object_type.__name__, object_type)
     return object_type
 
 class SpecificComponentBinderGetter(object):
@@ -94,4 +97,8 @@ class SystemComponent(SystemObject):
 
 @_make_component_type
 class Enclosure(SystemComponent):
+    pass
+
+@_make_component_type
+class System(SystemComponent):
     pass

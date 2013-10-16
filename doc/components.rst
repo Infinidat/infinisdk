@@ -22,6 +22,16 @@ This is very similar to querying objects:
     >>> len(system.components.enclosures.find(system.components.enclosures.fields.status != "OK"))
     0
 
+Listing Component Types
+-----------------------
+
+There are several ways to obtain component types from the system:
+
+.. code-block:: python
+
+  >>> types = system.components.get_component_types()
+  >>> system.components.types.Enclosure
+  <class 'infinipy2.core.system_component.Enclosure'>
 
 
 Retrieving Component Objects
