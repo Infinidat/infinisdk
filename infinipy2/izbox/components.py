@@ -17,6 +17,9 @@ class IZBoxSystemComponents(SystemComponentsBinder):
     def get_alert_types(self):
         return self.system.api.get("components/alerts").get_result()
 
+    @cached_method
+    def get_type_infos_from_system(self):
+        return self.system.api.get("components/types").get_result()
 
 class IZBoxSystemComponent(SystemObject):
     BINDER_CLASS = SystemComponentsBinder
