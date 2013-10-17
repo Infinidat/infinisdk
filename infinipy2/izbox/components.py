@@ -13,6 +13,11 @@ class IZBoxSystemComponents(SystemComponentsBinder):
         self.system_component = System(self.system, {"type": "system", "id": 0})
         self.cache_component(self.system_component)
 
+    @cached_method
+    def get_alert_types(self):
+        return self.system.api.get("components/alerts").get_result()
+
+
 class IZBoxSystemComponent(SystemObject):
     BINDER_CLASS = SystemComponentsBinder
 
@@ -73,4 +78,3 @@ class System(IZBoxSystemComponent):
 
     def get_secondary_node_index(self, use_cache=False):
         return 1 if self.get_primary_node_index() == 2 else 2
-
