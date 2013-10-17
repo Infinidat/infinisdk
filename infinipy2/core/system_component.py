@@ -1,4 +1,4 @@
-from .._compat import itervalues
+from .._compat import itervalues, iterkeys
 from .field import Field
 from .type_binder import TypeBinder
 
@@ -16,6 +16,9 @@ class SystemComponentsBinder(TypeBinder):
         Returns all classes installed for specific component types
         """
         return list(itervalues(self._COMPONENTS_BY_TYPE_NAME))
+
+    def get_component_types_names(self):
+        return list(iterkeys(self._COMPONENTS_BY_TYPE_NAME))
 
     def try_get_component_by_id(self, component_id):
         """
