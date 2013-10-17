@@ -32,6 +32,9 @@ if PY2:
     def itervalues(d):
         return d.itervalues()
 
+    def iterkeys(d):
+        return d.iterkeys()
+
     from itertools import izip as zip
     xrange = _builtins.xrange
 else:
@@ -53,3 +56,6 @@ else:
 
     def itervalues(d):
         return iter(d.values())
+
+    def iterkeys(d):
+        return iter(d.key())

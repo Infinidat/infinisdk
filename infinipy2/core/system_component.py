@@ -17,7 +17,7 @@ class SystemComponentsBinder(TypeBinder):
         """
         return list(itervalues(self._COMPONENTS_BY_TYPE_NAME))
 
-    def get_component_types_names(self):
+    def get_component_type_names(self):
         return list(iterkeys(self._COMPONENTS_BY_TYPE_NAME))
 
     def try_get_component_by_id(self, component_id):
