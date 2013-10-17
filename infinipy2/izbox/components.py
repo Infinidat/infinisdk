@@ -50,7 +50,9 @@ class Enclosure(IZBoxSystemComponent):
 
 @IZBoxSystemComponents.install_component_type
 class Node(IZBoxSystemComponent):
-    pass
+
+    def is_primary(self):
+        return self is self.system.components.get_system_component().get_primary_node()
 
 @IZBoxSystemComponents.install_component_type
 class System(IZBoxSystemComponent):
