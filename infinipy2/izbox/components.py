@@ -56,6 +56,9 @@ class Node(IZBoxSystemComponent):
     def is_primary(self):
         return self is self.system.components.system_component.get_primary_node()
 
+    def is_secondary(self):
+        return not self.is_primary()
+
 @IZBoxSystemComponents.install_component_type
 class System(IZBoxSystemComponent):
 

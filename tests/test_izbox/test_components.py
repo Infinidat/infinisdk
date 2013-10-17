@@ -41,8 +41,12 @@ class ComponentsTest(TestCase):
         self.assertIs(self.system.components.system_component.get_primary_node(), self.system.components.nodes.get(index=1))
         self.assertIs(self.system.components.system_component.get_secondary_node(), self.system.components.nodes.get(index=2))
 
-        self.assertTrue(self.system.components.system_component.get_primary_node().is_primary())
-        self.assertFalse(self.system.components.system_component.get_secondary_node().is_primary())
+        for is_primary, node in [
+                (True, self.system.components.system_component.get_primary_node()),
+                (False, self.system.components.system_component.get_secondary_node())
+        ]:
+            self.assertEquals(is_primary, node.is_primary())
+            self.assertEquals(not is_primary, node.is_secondary())
 
     def test_cannot_get_system_component_by_id_lazily(self):
         with self.assertRaises(NotImplementedError):
