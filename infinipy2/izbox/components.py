@@ -10,6 +10,8 @@ class IZBoxSystemComponents(SystemComponentsBinder):
 
     def __init__(self, system):
         super(IZBoxSystemComponents, self).__init__(IZBoxSystemComponent, system)
+        self.system_component = System(self.system, {"type": "system", "id": 0})
+        self.cache_component(self.system_component)
 
 class IZBoxSystemComponent(SystemObject):
     BINDER_CLASS = SystemComponentsBinder
@@ -52,7 +54,7 @@ class Enclosure(IZBoxSystemComponent):
 class Node(IZBoxSystemComponent):
 
     def is_primary(self):
-        return self is self.system.components.get_system_component().get_primary_node()
+        return self is self.system.components.system_component.get_primary_node()
 
 @IZBoxSystemComponents.install_component_type
 class System(IZBoxSystemComponent):
