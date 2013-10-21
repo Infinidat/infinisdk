@@ -172,35 +172,15 @@ response:
   status_code: 200
   json:
     error: null
-    metadata: {number_of_objects: 3, page: 1, page_size: 50, pages_total: 10, ready: true}
+    metadata: {number_of_objects: 480, page: 1, page_size: 50, pages_total: 10, ready: true}
     result:
-    - alerts: []
-      data: {model: ST3000NC002-1DY166, raid_group_name: raid-group-12, serial_number: Z1F2FY1W,
-        state: DATA__ONLINE, vendor: ATA}
-      id: 107003
-      index: 3
-      parent_id: 107000
-      parent_index: 7
-      path: system.racks[1].enclosures[7].drives[3]
-      status: OK
-      type: enclosure_drive
-    - alerts: []
-      data: {model: ST3000NC002-1DY166, raid_group_name: raid-group-24, serial_number: Z1F2FY1W,
-        state: DATA__ONLINE, vendor: ATA}
-      id: 107004
-      index: 4
-      parent_id: 107000
-      parent_index: 7
-      path: system.racks[1].enclosures[7].drives[4]
-      status: OK
-      type: enclosure_drive
-    - alerts: []
-      data: {model: ST3000NC002-1DY166, raid_group_name: raid-group-36, serial_number: Z1F2FY1W,
-        state: DATA__ONLINE, vendor: ATA}
-      id: 107005
-      index: 5
-      parent_id: 107000
-      parent_index: 7
-      path: system.racks[1].enclosures[7].drives[5]
-      status: OK
-      type: enclosure_drive
+      # omitted for brevity
+---
+request: get /api/rest/components
+response:
+  status_code: 200
+  json:
+    error: null
+    metadata: {number_of_objects: 523, page: 1, page_size: 50, pages_total: 10, ready: true}
+    result:
+      # omitted for brevity

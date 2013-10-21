@@ -37,7 +37,10 @@ class IZBoxSystemComponent(SystemObject):
 
     @classmethod
     def get_url_path(cls, system):
-        return URL("/api/rest/components").add_query_param("type", "eq:{}".format(cls.get_type_name()))
+        returned = URL("/api/rest/components")
+        if cls is not system.components.object_type:
+            returned = returned.add_query_param("type", "eq:{}".format(cls.get_type_name()))
+        return returned
 
     @classmethod
     def get_type_name(cls):
@@ -55,6 +58,10 @@ class IZBoxSystemComponent(SystemObject):
         return returned
 
 @IZBoxSystemComponents.install_component_type
+class Rack(IZBoxSystemComponent):
+    pass
+
+@IZBoxSystemComponents.install_component_type
 class Enclosure(IZBoxSystemComponent):
     pass
 
@@ -66,6 +73,18 @@ class Node(IZBoxSystemComponent):
 
     def is_secondary(self):
         return not self.is_primary()
+
+@IZBoxSystemComponents.install_component_type
+class NodeEthPort(IZBoxSystemComponent):
+
+    @classmethod
+    def get_type_name(self):
+        return "node_eth_port"
+
+    @classmethod
+    def get_plural_name(self):
+        return "{}s".format(self.get_type_name())
+
 
 @IZBoxSystemComponents.install_component_type
 class EnclosureDrive(IZBoxSystemComponent):
@@ -81,7 +100,6 @@ class EnclosureDrive(IZBoxSystemComponent):
 @IZBoxSystemComponents.install_component_type
 class Service(IZBoxSystemComponent):
     pass
-
 
 @IZBoxSystemComponents.install_component_type
 class System(IZBoxSystemComponent):
