@@ -24,9 +24,13 @@ class ComponentsTest(TestCase):
         )
 
     def test_component_types(self):
-        from infinipy2.izbox.components import System, Enclosure
+        from infinipy2.izbox.components import System, Enclosure, EnclosureDrive
         self.assertIs(self.system.components.types.System, System)
         self.assertIs(self.system.components.types.Enclosure, Enclosure)
+        self.assertIs(self.system.components.types.EnclosureDrive, EnclosureDrive)
+
+    def test_enclosure_drives(self):
+        self.assertEquals(len(self.system.components.enclosure_drives.find()), 3) #capped for scenario maintainability
 
     def test_system_component(self):
         system_component = self.system.components.systems.get()

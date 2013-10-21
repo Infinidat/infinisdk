@@ -68,6 +68,22 @@ class Node(IZBoxSystemComponent):
         return not self.is_primary()
 
 @IZBoxSystemComponents.install_component_type
+class EnclosureDrive(IZBoxSystemComponent):
+
+    @classmethod
+    def get_type_name(self):
+        return "enclosure_drive"
+
+    @classmethod
+    def get_plural_name(self):
+        return "{}s".format(self.get_type_name())
+
+@IZBoxSystemComponents.install_component_type
+class Service(IZBoxSystemComponent):
+    pass
+
+
+@IZBoxSystemComponents.install_component_type
 class System(IZBoxSystemComponent):
 
     def get_primary_node(self):
