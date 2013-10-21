@@ -48,3 +48,4 @@ class SystemObjectCreationTest(TestCase):
         dummy_system = object()
         with self.assertRaises(MissingFields):
             SampleDerivedObject.create(dummy_system)
+
