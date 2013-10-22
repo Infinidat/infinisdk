@@ -10,7 +10,7 @@ class Events(TypeBinder):
         super(Events, self).__init__(Event, system)
 
     def get_events(self, min_event_id=0):
-        return self.find(Event.fields.id>=min_event_id).sort(Event.fields.id)
+        return list(self.find(Event.fields.id>=min_event_id).sort(Event.fields.id))
 
     def get_last_events(self, num, reversed=False):
         return list(self.find().sort(-Event.fields.id).page_size(num).page(1))
@@ -28,7 +28,7 @@ class Events(TypeBinder):
         returned = []
         page_counter = count(1)
         while len(returned) < max_events:
-            events = [self._build_event(e) for e in self._system.api.get(query.format(page=page_counter.next())).get_result()]
+            events = [self._build_event(e) for e in self.system.api.get(query.format(page=page_counter.next())).get_result()]
             if events:
                 returned.extend(events)
             else:
@@ -39,7 +39,7 @@ class Events(TypeBinder):
         return self._get_events_query(query, **kwargs)
 
     def _get_events_types(self):
-        return self._system.api.get("events/types").get_result()
+        return self.system.api.get("events/types").get_result()
     def get_codes(self):
         return self._get_events_types()['codes']
     def get_codes_list(self):
@@ -59,7 +59,7 @@ class Events(TypeBinder):
     def create_custom_event(self, level='INFO', description='custom event description', data=None):
         if data is None:
             data = dict()
-        return self._system.api.post("events/custom", data=dict(data=data, level=level, description=description)).get_result()
+        return self.system.api.post("events/custom", data={"data": data, "level": level, "description": description}).get_result()
 
     def get_event_by_uuid(self, uuid):
         result = self.get_custom_events_query("uuid=eq:{}".format(uuid))
@@ -76,3 +76,6 @@ class Event(SystemObject):
 
     def __getitem__(self, item):
         return self._cache[item]
+
+    def __contains__(self, field_name):
+        return field_name in self._cache

@@ -42,6 +42,26 @@ class SystemObjectFieldsTest(TestCase):
         self.assertEquals(2, obj.get_field("number", from_cache=True))
 
 
+class SystemObjectEqualityTest(TestCase):
+
+    def test__equality(self):
+        system1 = object()
+        system2 = object()
+        Obj = SampleDerivedObject
+        equal1, equal2 = [
+            Obj(system1, {"id": 100})
+            for i in range(2)
+        ]
+        self.assertTrue(equal1 == equal2)
+        self.assertFalse(equal1 != equal2)
+
+        for unequal1, unequal2 in [
+                (Obj(system1, {"id": 100}), Obj(system2, {"id": 100})),
+                (Obj(system1, {"id": 100}), Obj(system1, {"id": 101})),
+                ]:
+            self.assertTrue(unequal1 != unequal2)
+            self.assertFalse(unequal1 == unequal2)
+
 class SystemObjectCreationTest(TestCase):
 
     def test_object_creation_missing_fields(self):

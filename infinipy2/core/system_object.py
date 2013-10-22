@@ -33,6 +33,15 @@ class SystemObject(with_metaclass(FieldsMeta)):
         self._cache = initial_data
         self.id = self._cache[self.fields.id.api_name]
 
+    def __eq__(self, other):
+        if not isinstance(other, SystemObject):
+            return NotImplemented
+
+        return self.system == other.system and self.id == other.id
+
+    def __ne__(self, other):
+        return not (self == other)
+
     @classmethod
     def construct(cls, system, data):
         """
