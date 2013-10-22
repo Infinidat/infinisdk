@@ -27,6 +27,9 @@ class IZBox(APITarget):
 
         self.events = Events(self)
 
+    def get_state(self):
+        return self.components.system_component.get_state()
+
     def get_api_addresses(self):
         return self._addresses
 

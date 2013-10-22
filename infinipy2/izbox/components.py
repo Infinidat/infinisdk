@@ -38,6 +38,8 @@ class IZBoxSystemComponent(SystemObject):
     get_parent_index = make_getter("parent_index")
     get_parent_id = make_getter("parent_id")
     get_state = make_getter("state")
+    get_alerts = make_getter("alerts")
+    get_data = make_getter("data")
 
     @cached_method
     def get_this_url_path(self):
