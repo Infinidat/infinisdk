@@ -13,7 +13,7 @@ class ObjectQuery(object):
         self.object_type = object_type
         self._requested_page = None
         self._requested_page_size = None
-        self._fetched = None
+        self._fetched = {}
         self._total_num_objects = None
 
     def __iter__(self):
@@ -43,27 +43,27 @@ class ObjectQuery(object):
 
     def __getitem__(self, index):
         self._fetch(index)
-        if isinstance(self._fetched[index], dict):
+        if isinstance(self._fetched.get(index), dict):
             self._fetched[index] = self.object_type.construct(self.system, self._fetched[index])
-        return self._fetched[index]
+        try:
+            return self._fetched[index]
+        except LookupError:
+            raise IndexError()
 
     def _fetch(self, element_index=None):
         element_index = self._get_requested_element_index(element_index)
         assert element_index is not None
         if self._total_num_objects is not None and element_index >= self._total_num_objects:
             raise IndexError()
-        if self._fetched is None or element_index >= len(self._fetched) or self._fetched[element_index] is None:
+        if self._fetched.get(element_index) is None:
             query = self._get_query_for_index(element_index)
             response = self.system.api.get(query)
 
             if self._total_num_objects is None:
                 self._total_num_objects = response.get_total_num_objects()
 
-            if self._fetched is None:
-                self._fetched = [None for i in xrange(self._total_num_objects)]
-
             for index, obj in enumerate(response.get_result(), start=response.get_page_start_index()):
-                if self._fetched[index] is None:
+                if self._fetched.get(index) is None:
                     self._fetched[index] = obj
 
     def _get_query_for_index(self, element_index):
@@ -71,7 +71,7 @@ class ObjectQuery(object):
         if self._requested_page_size is None and element_index < _DEFAULT_SYSTEM_PAGE_SIZE:
             return returned
         page_size = self._requested_page_size if self._requested_page_size is not None else _DEFAULT_PAGE_SIZE
-        page_number = int(element_index // self._requested_page_size) + 1
+        page_number = int(element_index // page_size) + 1
         returned = returned.set_query_param("page", str(page_number))\
                            .set_query_param("page_size", str(page_size))
         return returned
