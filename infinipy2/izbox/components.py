@@ -28,6 +28,7 @@ class IZBoxSystemComponent(SystemObject):
     FIELDS = [
         Field("id", type=int),
         Field("status"),
+        Field("state"),
         Field("index", type=int),
         Field("parent_index", type=int),
         Field("parent_id", type=int),
@@ -36,6 +37,7 @@ class IZBoxSystemComponent(SystemObject):
     get_index = make_getter("index")
     get_parent_index = make_getter("parent_index")
     get_parent_id = make_getter("parent_id")
+    get_state = make_getter("state")
 
     @cached_method
     def get_this_url_path(self):
@@ -121,3 +123,6 @@ class System(IZBoxSystemComponent):
 
     def get_secondary_node_index(self, use_cache=False):
         return 1 if self.get_primary_node_index() == 2 else 2
+
+    def get_state(self):
+        return self.get_field("data")["system_state"]
