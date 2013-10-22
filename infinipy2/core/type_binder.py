@@ -29,6 +29,9 @@ class TypeBinder(object):
         """
         return self.object_type.find(self.system, *predicates, **kw)
 
+    def get_all(self):
+        return self.find()
+
     def get_by_id_lazy(self, id):
         """
         Obtains an object with a specified id *without* checking if it exists or querying it on the way.

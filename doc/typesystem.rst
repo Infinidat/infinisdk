@@ -54,6 +54,12 @@ Finding objects (one or many at a time) is done by the :func:`.TypeBinder.find`:
     >>> len(system.objects.filesystems)
     5
 
+    # get all filesystems
+    >>> unused = system.objects.filesystems.find()
+
+    # ... or this:
+    >>> unused = system.objects.filesystems.get_all()
+
     # get all filesystems with composite predicate
     >>> matching = system.objects.filesystems.find(system.objects.filesystems.fields.quota>=2*GB)
     >>> matching
