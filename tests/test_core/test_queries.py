@@ -87,3 +87,15 @@ class QueryTest(TestCase):
             expected = ""
         self.assertEquals(
             q.query, "/api/rest/filesystems" + expected)
+
+
+class PagedQueryTest(TestCase):
+    API_SCENARIOS = ["izbox_paged_queries"]
+
+    def test_paged_query_traversal(self):
+        """
+        Makes sure that traversing a paged query only returns the requested page
+        """
+        page_size = 10
+        result = self.system.components.find().page(5).page_size(page_size)
+        self.assertEquals(len(result), page_size)

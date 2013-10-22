@@ -29,7 +29,14 @@ class ObjectQuery(object):
 
     def __len__(self):
         self._fetch()
-        return self._total_num_objects
+        if self._requested_page is None:
+            return self._total_num_objects
+        return self._get_requested_page_size()
+
+    def _get_requested_page_size(self):
+        if self._total_num_objects >= self._requested_page * self._requested_page_size:
+            return self._requested_page_size
+        return self._total_num_objects % self._requested_page_size
 
     def __getitem__(self, index):
         self._fetch(index)

@@ -1,0 +1,107 @@
+request: get /api/rest/components?page=5&page_size=10
+response:
+  json:
+    error: null
+    metadata: {number_of_objects: 523, page: 5, page_size: 10, pages_total: 53, ready: true}
+    result:
+    - alerts: []
+      data: {model: ST3000NC002-1DY166, raid_group_name: raid-group-35, serial_number: Z1F2FY1W,
+        state: DATA__ONLINE, vendor: ATA}
+      id: 107033
+      index: 33
+      parent_id: 107000
+      parent_index: 7
+      path: system.racks[1].enclosures[7].drives[33]
+      status: OK
+      type: enclosure_drive
+    - alerts: []
+      data: {model: ST3000NC002-1DY166, raid_group_name: raid-group-43, serial_number: Z1F2FY1W,
+        state: DATA__ONLINE, vendor: ATA}
+      id: 107034
+      index: 34
+      parent_id: 107000
+      parent_index: 7
+      path: system.racks[1].enclosures[7].drives[34]
+      status: OK
+      type: enclosure_drive
+    - alerts: []
+      data: {model: ST3000NC002-1DY166, raid_group_name: raid-group-3, serial_number: Z1F2FY1W,
+        state: DATA__ONLINE, vendor: ATA}
+      id: 107035
+      index: 35
+      parent_id: 107000
+      parent_index: 7
+      path: system.racks[1].enclosures[7].drives[35]
+      status: OK
+      type: enclosure_drive
+    - alerts: []
+      data: {model: ST3000NC002-1DY166, raid_group_name: raid-group-36, serial_number: Z1F2FY1W,
+        state: DATA__ONLINE, vendor: ATA}
+      id: 107037
+      index: 37
+      parent_id: 107000
+      parent_index: 7
+      path: system.racks[1].enclosures[7].drives[37]
+      status: OK
+      type: enclosure_drive
+    - alerts: []
+      data: {model: ST3000NC002-1DY166, raid_group_name: null, serial_number: Z1F2FY1W,
+        state: SPARE__ONLINE, vendor: ATA}
+      id: 107038
+      index: 38
+      parent_id: 107000
+      parent_index: 7
+      path: system.racks[1].enclosures[7].drives[38]
+      status: OK
+      type: enclosure_drive
+    - alerts: []
+      data: {model: ST3000NC002-1DY166, raid_group_name: raid-group-4, serial_number: Z1F2FY1W,
+        state: DATA__ONLINE, vendor: ATA}
+      id: 107039
+      index: 39
+      parent_id: 107000
+      parent_index: 7
+      path: system.racks[1].enclosures[7].drives[39]
+      status: OK
+      type: enclosure_drive
+    - alerts: []
+      data: {model: ST3000NC002-1DY166, raid_group_name: raid-group-16, serial_number: Z1F2FY1W,
+        state: DATA__ONLINE, vendor: ATA}
+      id: 107040
+      index: 40
+      parent_id: 107000
+      parent_index: 7
+      path: system.racks[1].enclosures[7].drives[40]
+      status: OK
+      type: enclosure_drive
+    - alerts: []
+      data: {model: ST3000NC002-1DY166, raid_group_name: raid-group-28, serial_number: Z1F2FY1W,
+        state: DATA__ONLINE, vendor: ATA}
+      id: 107041
+      index: 41
+      parent_id: 107000
+      parent_index: 7
+      path: system.racks[1].enclosures[7].drives[41]
+      status: OK
+      type: enclosure_drive
+    - alerts: []
+      data: {model: ST3000NC002-1DY166, raid_group_name: raid-group-40, serial_number: Z1F2FY1W,
+        state: DATA__ONLINE, vendor: ATA}
+      id: 107042
+      index: 42
+      parent_id: 107000
+      parent_index: 7
+      path: system.racks[1].enclosures[7].drives[42]
+      status: OK
+      type: enclosure_drive
+    - alerts: []
+      data: {model: ST3000NC002-1DY166, raid_group_name: raid-group-8, serial_number: Z1F2FY1W,
+        state: DATA__ONLINE, vendor: ATA}
+      id: 107043
+      index: 43
+      parent_id: 107000
+      parent_index: 7
+      path: system.racks[1].enclosures[7].drives[43]
+      status: OK
+      type: enclosure_drive
+  status_code: 200
