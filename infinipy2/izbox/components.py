@@ -27,6 +27,7 @@ class IZBoxSystemComponent(SystemObject):
 
     FIELDS = [
         Field("id", type=int, is_identity=True),
+        Field("type", is_identity=True),
         Field("status"),
         Field("state"),
         Field("index", type=int),
@@ -66,6 +67,8 @@ class IZBoxSystemComponent(SystemObject):
             object_type = system.components._COMPONENTS_BY_TYPE_NAME.get(component_type, IZBoxSystemComponent)
             returned = object_type(system, data)
             system.components.cache_component(returned)
+        else:
+            returned.update_field_cache(data)
         return returned
 
 @IZBoxSystemComponents.install_component_type

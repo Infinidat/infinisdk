@@ -140,7 +140,7 @@ class SystemObject(with_metaclass(FieldsMeta)):
         response = self.system.api.get(query)
 
         result = response.get_result()
-        self._cache.update(result)
+        self.update_field_cache(result)
 
         if not field_names:
             field_names = self.fields.get_all_field_names(result)
@@ -171,6 +171,9 @@ class SystemObject(with_metaclass(FieldsMeta)):
                     ", ".join(repr(field) for field in missed)))
 
         return returned
+
+    def update_field_cache(self, api_obj):
+        self._cache.update(api_obj)
 
     def update_field(self, field_name, field_value):
         """
