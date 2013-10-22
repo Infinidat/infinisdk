@@ -106,6 +106,7 @@ class ObjectQuery(object):
         """
         Plucks the specified field names from the query. Can be specified multiple times
         """
+        assert isinstance(field_names, (list, tuple)), "field_names must be either a list or a tuple"
         translated_fields = [
             self.object_type.fields[field_name].api_name
             for field_name in field_names
