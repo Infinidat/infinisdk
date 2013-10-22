@@ -43,6 +43,9 @@ class ObjectQuery(object):
         return self._total_num_objects % self._requested_page_size
 
     def __getitem__(self, index):
+        if index < 0:
+            raise NotImplementedError("Negative indices not supported yet")
+
         self._fetch(index)
 
         if isinstance(self._fetched.get(index), dict):
