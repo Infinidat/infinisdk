@@ -30,6 +30,7 @@ class IZBoxSystemComponent(SystemObject):
         Field("status"),
         Field("index", type=int),
         Field("parent_index", type=int),
+        Field("parent_id", type=int),
     ]
 
     get_index = make_getter("index")

@@ -32,6 +32,18 @@ class TypeBinder(object):
     def get_all(self):
         return self.find()
 
+    def get_by_id(self, id):
+        """
+        Obtains an object with a specific id
+        """
+        return self.get(id=id)
+
+    def safe_get_by_id(self, id):
+        """
+        Like get_by_id, only returning None if the object could not be found
+        """
+        return self.safe_get(id=id)
+
     def get_by_id_lazy(self, id):
         """
         Obtains an object with a specified id *without* checking if it exists or querying it on the way.
