@@ -40,6 +40,7 @@ class IZBoxSystemComponent(SystemObject):
     get_state = make_getter("state")
     get_alerts = make_getter("alerts")
     get_data = make_getter("data")
+    get_status = make_getter("status")
 
     @cached_method
     def get_this_url_path(self):
