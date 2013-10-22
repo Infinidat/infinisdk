@@ -184,3 +184,31 @@ response:
     metadata: {number_of_objects: 523, page: 1, page_size: 1, pages_total: 523, ready: true}
     result:
       - id: 1
+---
+request: get /api/rest/components?type=eq%3Anode
+response:
+  json:
+    error: null
+    metadata: {number_of_objects: 2, page: 1, page_size: 50, pages_total: 1, ready: true}
+    result:
+    - alerts: []
+      data: {bios_version: 1.6.0, model: R720, ram_in_bytes: 274877906944, serial_number: Unknown,
+        up_since: 1376562755000, vendor: Dell}
+      id: 120000
+      index: 2
+      parent_id: 100000
+      parent_index: 1
+      path: system.racks[1].nodes[2]
+      status: OK
+      type: node
+    - alerts: []
+      data: {bios_version: 1.6.0, model: R720, ram_in_bytes: 274877906944, serial_number: Unknown,
+        up_since: 1376562755000, vendor: Dell}
+      id: 110000
+      index: 1
+      parent_id: 100000
+      parent_index: 1
+      path: system.racks[1].nodes[1]
+      status: OK
+      type: node
+  status_code: 200
