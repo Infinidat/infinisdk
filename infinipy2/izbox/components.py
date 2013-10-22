@@ -1,6 +1,7 @@
 from ..core.field import Field
 from ..core.system_component import SystemComponentsBinder
 from ..core.system_object import SystemObject
+from ..core.system_object_utils import make_getter
 
 from infi.pyutils.lazy import cached_method
 
@@ -30,6 +31,10 @@ class IZBoxSystemComponent(SystemObject):
         Field("index", type=int),
         Field("parent_index", type=int),
     ]
+
+    get_index = make_getter("index")
+    get_parent_index = make_getter("parent_index")
+    get_parent_id = make_getter("parent_id")
 
     @cached_method
     def get_this_url_path(self):
