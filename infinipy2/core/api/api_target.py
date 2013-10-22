@@ -23,3 +23,4 @@ class APITarget(with_metaclass(abc.ABCMeta)):
         :rtype: tuple of (username, password) to be used by default
         """
         raise NotImplementedError() # pragma: no cover
+

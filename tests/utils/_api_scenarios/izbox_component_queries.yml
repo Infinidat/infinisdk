@@ -172,15 +172,15 @@ response:
   status_code: 200
   json:
     error: null
-    metadata: {number_of_objects: 480, page: 1, page_size: 50, pages_total: 10, ready: true}
+    metadata: {number_of_objects: 480, page: 1, page_size: 1, pages_total: 480, ready: true}
     result:
-      # omitted for brevity
+      - id: 1
 ---
 request: get /api/rest/components
 response:
   status_code: 200
   json:
     error: null
-    metadata: {number_of_objects: 523, page: 1, page_size: 50, pages_total: 10, ready: true}
+    metadata: {number_of_objects: 523, page: 1, page_size: 1, pages_total: 523, ready: true}
     result:
-      # omitted for brevity
+      - id: 1

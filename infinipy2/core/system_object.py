@@ -114,7 +114,7 @@ class SystemObject(with_metaclass(FieldsMeta)):
         """
         return self.get_fields([field_name], from_cache=from_cache)[field_name]
 
-    def get_fields(self, field_names, from_cache=False):
+    def get_fields(self, field_names=(), from_cache=False):
         """
         Gets a set of fields from the system
 
@@ -134,12 +134,16 @@ class SystemObject(with_metaclass(FieldsMeta)):
             except LookupError:
                 only_fields.append(field_name)
 
-        query = query.add_query_param("fields", ",".join(only_fields))
+        if only_fields:
+            query = query.add_query_param("fields", ",".join(only_fields))
 
         response = self.system.api.get(query)
 
         result = response.get_result()
         self._cache.update(result)
+
+        if not field_names:
+            field_names = self.fields.get_all_field_names(result)
 
         returned = {}
         for field_name in field_names:

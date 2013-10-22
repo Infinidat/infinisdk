@@ -78,8 +78,12 @@ class QueryTest(TestCase):
 
     def test_pagination(self):
         self.assert_query_equals(
-            Filesystem.find(self.system).page(5).page_size(100), "page=5&page_size=100")
+            Filesystem.find(self.system).page(5).page_size(100), None) # pages are only added at query
 
     def assert_query_equals(self, q, expected):
+        if expected is not None:
+            expected = "?{}".format(expected)
+        else:
+            expected = ""
         self.assertEquals(
-            q.query, "/api/rest/filesystems?" + expected)
+            q.query, "/api/rest/filesystems" + expected)

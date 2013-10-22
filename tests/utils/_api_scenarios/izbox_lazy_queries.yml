@@ -1,4 +1,4 @@
-request: get /api/rest/components?page_size=10&page=1
+request: get /api/rest/components?page=1&page_size=10
 response:
   json:
     error: null
@@ -96,7 +96,7 @@ response:
       type: enclosure
   status_code: 200
 ---
-request: get /api/rest/components?page_size=10&page=2
+request: get /api/rest/components?page=2&page_size=10
 response:
   json:
     error: null
@@ -203,7 +203,7 @@ response:
       type: enclosure_drive
   status_code: 200
 ---
-request: get /api/rest/components?page_size=10&page=53
+request: get /api/rest/components?page=53&page_size=10
 response:
   json:
     error: null

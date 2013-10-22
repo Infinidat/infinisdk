@@ -1,4 +1,4 @@
-request: get /api/rest/events?sort=-id&page_size=2&page=1
+request: get /api/rest/events?sort=-id&page=1&page_size=2
 response:
   json:
     error: null

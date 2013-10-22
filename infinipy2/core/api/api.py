@@ -135,6 +135,10 @@ class Response(object):
     def get_metadata(self):
         return self.get_json()['metadata']
 
+    def get_page_start_index(self):
+        metadata = self.get_metadata()
+        return (metadata["page"] - 1) * metadata["page_size"]
+
     def get_total_num_objects(self):
         return self.get_metadata()["number_of_objects"]
 

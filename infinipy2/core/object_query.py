@@ -8,13 +8,24 @@ class ObjectQuery(object):
         self.system = system
         self.query = url
         self.object_type = object_type
+        self._requested_page = None
+        self._requested_page_size = None
         self._fetched = None
         self._total_num_objects = None
 
     def __iter__(self):
         self._fetch()
-        for i in xrange(len(self)):
-            yield self[i]
+        if self._requested_page is not None:
+            start = (self._requested_page - 1) * self._requested_page_size
+            end = start + self._requested_page_size
+        else:
+            start = 0
+            end = len(self)
+        for i in xrange(start, end):
+            try:
+                yield self[i]
+            except IndexError:
+                pass
 
     def __len__(self):
         self._fetch()
@@ -26,21 +37,13 @@ class ObjectQuery(object):
             self._fetched[index] = self.object_type.construct(self.system, self._fetched[index])
         return self._fetched[index]
 
-    def _fetch(self, element_index=0):
+    def _fetch(self, element_index=None):
+        element_index = self._get_requested_element_index(element_index)
+        assert element_index is not None
         if self._total_num_objects is not None and element_index >= self._total_num_objects:
             raise IndexError()
         if self._fetched is None or element_index >= len(self._fetched) or self._fetched[element_index] is None:
-            query = self.query
-            page_size = query.query_dict.get("page_size")
-            page_index = query.query_dict.get("page")
-            if page_size is not None and page_index is not None:
-                page_size = int(page_size)
-                page_index = int(element_index // int(page_size)) + 1
-                query = query.set_query_param("page", str(page_index))
-                starting_offset = page_size * (page_index - 1)
-            else:
-                starting_offset = 0
-
+            query = self._get_query_for_index(element_index)
             response = self.system.api.get(query)
 
             if self._total_num_objects is None:
@@ -49,10 +52,26 @@ class ObjectQuery(object):
             if self._fetched is None:
                 self._fetched = [None for i in xrange(self._total_num_objects)]
 
-            for index, obj in enumerate(response.get_result(), start=starting_offset):
+            for index, obj in enumerate(response.get_result(), start=response.get_page_start_index()):
                 if self._fetched[index] is None:
                     self._fetched[index] = obj
 
+    def _get_query_for_index(self, element_index):
+        returned = self.query
+        if self._requested_page_size is None:
+            return returned
+        page_number = int(element_index // self._requested_page_size) + 1
+        returned = returned.set_query_param("page", str(page_number))\
+                           .set_query_param("page_size", str(self._requested_page_size))
+        return returned
+
+    def _get_requested_element_index(self, element_index):
+        if element_index is None:
+            if self._requested_page is not None:
+                element_index = (self._requested_page - 1) * self._requested_page_size
+            else:
+                element_index = 0
+        return element_index
 
 
     def __repr__(self):
@@ -92,14 +111,13 @@ class ObjectQuery(object):
         """
         Requests a specific pagination page
         """
-        self.query = self.query.set_query_param("page", str(page_index))
+        assert page_index != 0, "Page cannot be zero based"
+        self._requested_page = page_index
         return self
 
     def page_size(self, page_size):
         """
         Sets the page size of the query
         """
-        self.query = self.query.set_query_param("page_size", str(page_size))
-        if "page" not in self.query.query_dict:
-            self.page(1)
+        self._requested_page_size = page_size
         return self

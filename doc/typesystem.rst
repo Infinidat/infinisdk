@@ -119,6 +119,18 @@ Objects expose the :func:`.get_fields` and :func:`.get_field`:
     >>> str(filesystem.get_field("name"))
     'fs1'
 
+Getting all fields can be done without passing any arguments to :func:`.get_fields`:
+
+.. code-block::
+
+   >>> "name" in filesystem.get_fields()
+   True
+   >>> "quota" in filesystem.get_fields()
+   True
+   >>> "quota_in_bytes" in filesystem.get_fields()
+   False
+
+
 These APIs always fetch the values live from the system's API. This may take a long time, especially in tight loops.
 
 As an optimization (left to the user to decide), get_field and get_fields support the optional *from_cache* flag, fetching the last seen value (if available):

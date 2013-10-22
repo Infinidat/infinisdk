@@ -100,7 +100,39 @@ request: get /api/rest/filesystems?quota_in_bytes=gt%3A2199023255552
 response:
   json:
     error: null
-    metadata: {number_of_objects: 1, page: 1, page_size: 50, pages_total: 1, ready=true}
-    result:
+    metadata: {number_of_objects: 1, page: 1, page_size: 50, pages_total: 1, ready: true}
+    result: 
       - id: 1000
-        name: fs1000
+  status_code: 200
+---
+request: get /api/rest/filesystems/1
+response:
+  json:
+    error: null
+    metadata: {ready: true}
+    result:
+      available_on_drive_in_bytes: 0
+      cifs_access_list:
+      - {read_only: false, username: Everyone}
+      compression_type: 'off'
+      created_at: 1379510383000
+      disabled: false
+      group_id: 0
+      id: 1
+      modified_at: 1379510383000
+      mount_path: /var/tmp/izbox_mock_data/public/export/fs1
+      mounted: true
+      name: fs1
+      nfs_access_list:
+      - {allow_root_access: false, host: '*', read_only: false, secure: true}
+      owned_by: CUSTOMER
+      parent_id: -1
+      permissions: 511
+      quota_in_bytes: 0
+      raw_data_in_bytes: 0
+      shared_by_cifs: true
+      shared_by_nfs: true
+      type: master
+      used_on_drive_in_bytes: 0
+      user_id: 0
+  status_code: 200
