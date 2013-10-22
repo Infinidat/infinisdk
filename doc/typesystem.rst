@@ -70,6 +70,14 @@ Finding objects (one or many at a time) is done by the :func:`.TypeBinder.find`:
     # get all filesystems with page_size and/or page index
     >>> objs = system.objects.filesystems.find().page(1).page_size(100)
 
+Note that once you request a specific page, the query is narrowed only to that page specifically:
+
+.. code-block:: python
+
+    >>> objs = system.components.find().page(5).page_size(10)
+    >>> len(objs)
+    10
+
 Queries are lazy, they are only sent to the system in the beginning of the iteration, and possibly span multiple pages during iteration.
 
 .. note:: The default sort is by ascending id. In any sort order that is not by id, there might be inconsistencies formed in the iteration when crossing page boundaries. This is because objects can get created/deleted between calls. Sorting by id solves it because ids are monotonously increasing, enabling us to resume iteration properly. 
