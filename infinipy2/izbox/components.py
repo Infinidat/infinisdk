@@ -43,6 +43,12 @@ class IZBoxSystemComponent(SystemObject):
     get_data = make_getter("data")
     get_status = make_getter("status")
 
+    def get_parent(self):
+        return self.system.components.get_by_id_lazy(self.get_parent_id())
+
+    def get_sub_components(self):
+        return self.system.components.find(parent_id=self.id)
+
     @cached_method
     def get_this_url_path(self):
         return super(IZBoxSystemComponent, self).get_this_url_path().del_query_param("type")

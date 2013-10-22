@@ -28,7 +28,8 @@ class ObjectQuery(object):
             try:
                 yield self[i]
             except IndexError:
-                pass
+                if i != self._total_num_objects:
+                    raise
 
     def __len__(self):
         self._fetch()
@@ -43,6 +44,7 @@ class ObjectQuery(object):
 
     def __getitem__(self, index):
         self._fetch(index)
+
         if isinstance(self._fetched.get(index), dict):
             self._fetched[index] = self.object_type.construct(self.system, self._fetched[index])
         try:
@@ -53,8 +55,6 @@ class ObjectQuery(object):
     def _fetch(self, element_index=None):
         element_index = self._get_requested_element_index(element_index)
         assert element_index is not None
-        if self._total_num_objects is not None and element_index >= self._total_num_objects:
-            raise IndexError()
         if self._fetched.get(element_index) is None:
             query = self._get_query_for_index(element_index)
             response = self.system.api.get(query)
