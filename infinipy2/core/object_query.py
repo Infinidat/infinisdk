@@ -2,6 +2,9 @@ from .._compat import xrange
 from .utils import add_comma_separated_query_param
 from .field import Field
 
+_DEFAULT_SYSTEM_PAGE_SIZE = 50
+_DEFAULT_PAGE_SIZE = 1000
+
 class ObjectQuery(object):
     def __init__(self, system, url, object_type):
         super(ObjectQuery, self).__init__()
@@ -65,11 +68,12 @@ class ObjectQuery(object):
 
     def _get_query_for_index(self, element_index):
         returned = self.query
-        if self._requested_page_size is None:
+        if self._requested_page_size is None and element_index < _DEFAULT_SYSTEM_PAGE_SIZE:
             return returned
+        page_size = self._requested_page_size if self._requested_page_size is not None else _DEFAULT_PAGE_SIZE
         page_number = int(element_index // self._requested_page_size) + 1
         returned = returned.set_query_param("page", str(page_number))\
-                           .set_query_param("page_size", str(self._requested_page_size))
+                           .set_query_param("page_size", str(page_size))
         return returned
 
     def _get_requested_element_index(self, element_index):
