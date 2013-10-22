@@ -107,17 +107,22 @@ class ObjectQuery(object):
         Plucks the specified field names from the query. Can be specified multiple times
         """
         assert isinstance(field_names, (list, tuple)), "field_names must be either a list or a tuple"
-        translated_fields = [
+        requested_fields = [
+        ]
+        requested_fields = self.query.query_dict.get("fields", None)
+        if requested_fields is not None:
+            requested_fields = requested_fields.split(",")
+        else:
+            requested_fields = []
+        requested_fields.extend(
             self.object_type.fields[field_name].api_name
             for field_name in field_names
-        ]
-        self.query = add_comma_separated_query_param(self.query, "fields", translated_fields)
-        fields = self.query.query_dict["fields"].split(",")
-        # make sure we pluck the 'id' field
+            )
+
         for field in self.object_type.fields.get_identity_fields():
-            if field.api_name not in fields:
-                fields.insert(0, field.api_name)
-        self.query = self.query.set_query_param("fields", ",".join(fields))
+            if field.api_name not in requested_fields:
+                requested_fields.insert(0, field.api_name)
+        self.query = self.query.set_query_param("fields", ",".join(requested_fields))
         return self
 
     def page(self, page_index):
