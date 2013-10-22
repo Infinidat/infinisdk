@@ -60,9 +60,9 @@ class IZBoxSystemComponent(SystemObject):
     @classmethod
     def construct(cls, system, data):
         component_id = data["id"]
-        component_type = data["type"]
         returned = system.components.try_get_component_by_id(component_id)
         if returned is None:
+            component_type = data["type"]
             object_type = system.components._COMPONENTS_BY_TYPE_NAME.get(component_type, IZBoxSystemComponent)
             returned = object_type(system, data)
             system.components.cache_component(returned)
