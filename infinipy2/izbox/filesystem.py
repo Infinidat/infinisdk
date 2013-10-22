@@ -4,7 +4,7 @@ from ..core.system_object_utils import make_getter_updater
 
 class Filesystem(SystemObject):
     FIELDS = [
-        Field("id"),
+        Field("id", is_identity=True),
         Field("quota", api_name="quota_in_bytes",
               translator=FunctionTranslator(to_api=lambda x: int(x // byte), from_api=lambda x: int(x) * byte)),
         Field("name", mandatory=True),

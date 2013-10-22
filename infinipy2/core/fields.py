@@ -21,14 +21,20 @@ class Fields(object):
         super(Fields, self).__init__()
         self._fields = {}
         self._fields_by_api_name = {}
+        self._identity_fields = []
 
     def update(self, other_fields):
         for field in other_fields:
-            self._fields[field.name] = field
+            self.add_field(field)
 
     def add_field(self, field):
         self._fields[field.name] = field
         self._fields_by_api_name[field.api_name] = field
+        if field.is_identity:
+            self._identity_fields.append(field)
+
+    def get_identity_fields(self):
+        return self._identity_fields
 
     def get_all_field_names(self, api_object_json):
         """

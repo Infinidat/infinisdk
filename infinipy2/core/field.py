@@ -12,7 +12,7 @@ class Field(object):
     This class represents a single field exposed by a schema
     """
 
-    def __init__(self, name, api_name=None, type=str, mutable=True, forbidden=False, mandatory=False, translator=IdentityTranslator(), is_unique=False, default=NOTHING):
+    def __init__(self, name, api_name=None, type=str, mutable=True, forbidden=False, mandatory=False, translator=IdentityTranslator(), is_unique=False, default=NOTHING, is_identity=False):
         super(Field, self).__init__()
 
         #:the name of this field, as will be seen by the Python code interacting with the object(s)
@@ -36,6 +36,8 @@ class Field(object):
         self.translator = translator
         #:If True, means that this field value must be unique across the system
         self.is_unique = is_unique
+        #:If True, this field is a part of an set of fields used to identify this object in the system
+        self.is_identity = is_identity
         #:If specified, will be used to generate defaults for this field if required and not specified by the user.
         #:Can be either a value or a callable generating a default
         self.default = default

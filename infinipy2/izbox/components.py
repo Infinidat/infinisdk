@@ -26,7 +26,7 @@ class IZBoxSystemComponent(SystemObject):
     BINDER_CLASS = SystemComponentsBinder
 
     FIELDS = [
-        Field("id", type=int),
+        Field("id", type=int, is_identity=True),
         Field("status"),
         Field("state"),
         Field("index", type=int),

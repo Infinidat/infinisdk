@@ -69,7 +69,7 @@ class Events(TypeBinder):
 class Event(SystemObject):
 
     FIELDS = [
-        Field("id", type=int),
+        Field("id", type=int, is_identity=True),
     ]
 
     BINDER_CLASS = Events
