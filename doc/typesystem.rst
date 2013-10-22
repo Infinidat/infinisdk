@@ -107,6 +107,8 @@ You can also get specific objects using the type binders:
    True
    >>> system.objects.filesystems.choose(system.objects.filesystems.fields.quota > 2*TiB)
    <Filesystem id=1000>
+   >>> system.objects.filesystems.safe_choose(system.objects.filesystems.fields.name == "nonexisting") is None
+   True
    >>> system.objects.filesystems.count(system.objects.filesystems.fields.quota > 2*TiB)
    1
 

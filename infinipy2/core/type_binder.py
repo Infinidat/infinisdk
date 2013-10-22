@@ -69,6 +69,15 @@ class TypeBinder(object):
 
         return returned[random.randrange(len(returned))]
 
+    def safe_choose(self, *predicates, **kw):
+        """
+        Like choose, but returns None when not found
+        """
+        try:
+            return self.choose(*predicates, **kw)
+        except ObjectNotFound:
+            return None
+
     def count(self, *predicates, **kw):
         return len(self.find(*predicates, **kw))
 
