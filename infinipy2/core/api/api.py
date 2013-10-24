@@ -84,7 +84,7 @@ class API(object):
                 self._session = attempted_session
                 break
 
-        if assert_success is not False:
+        if assert_success:
             returned.assert_success()
         return returned
 
@@ -118,7 +118,10 @@ class Response(object):
         self.url = url
 
     def get_json(self):
-        return self.response.json()
+        try:
+            return self.response.json()
+        except ValueError:
+            return None
 
     def _get_result(self):
         return self.get_json()['result']
@@ -127,7 +130,9 @@ class Response(object):
         return self._get_result()
 
     def get_error(self):
-        return self.get_json()['error']
+        json = self.get_json()
+        if json is not None:
+            return json['error']
 
     def __repr__(self):
         return repr(self.response)

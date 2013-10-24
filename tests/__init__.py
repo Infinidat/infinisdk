@@ -14,8 +14,3 @@ def setUp():
 
 def tearDown():
     handler.pop_application()
-    from .utils.api_scenarios import _rule_cache
-    for filename, rules in _rule_cache.items():
-        for rule in rules:
-            if not rule.use_count:
-                logbook.warning("Rule {}:{} not used", rule.filename, rule.item_index)

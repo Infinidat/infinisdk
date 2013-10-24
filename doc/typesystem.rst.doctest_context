@@ -3,11 +3,12 @@ import capacity
 from contextlib import contextmanager
 from tests.utils import api_scenario
 from infinipy2.izbox import IZBox
+from izsim import Simulator
 
 @contextmanager
 def doctest_context():
-    fake_system = IZBox(("izbox001", 80))
-    with api_scenario(fake_system, "izbox_queries", "izbox_fs_creation", "izbox_fs_update", "izbox_fs_deletion", "izbox_paged_queries"):
+    with Simulator().context() as s:
+        system = IZBox((s.base_url.netloc.host, s.base_url.netloc.port))
         yield {
             "TiB": capacity.TiB,
             "GB": capacity.GB,
