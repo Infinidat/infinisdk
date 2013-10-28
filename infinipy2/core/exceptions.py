@@ -11,17 +11,19 @@ class APICommandFailed(APICommandException):
     def __init__(self, response, *args, **kwargs):
         self.response = response
         super(APICommandFailed, self).__init__(*args, **kwargs)
-        self.status_code = self.response.status_code
-        try:
-            json = response.json()
-        except ValueError:
-            message = "[{0}]".format(response.content)
+        self.status_code = self.response.response.status_code
+        json = response.get_json()
+        if json is None:
+            message = "[{0}]".format(response.response.content)
         else:
             message = (json.get("error") or {}).get("message", "?")
         self.message = message
 
     def __repr__(self):
-        return "API Command Failed (status {} - {})".format(self.status_code, self.message)
+        return ("API Command Failed\n  "
+                "Request: {self.response.method} {self.response.url}\n  "
+                "Status: {self.status_code}\n  "
+                "Message: {self.message}".format(self=self))
 
     __str__ = __repr__
 

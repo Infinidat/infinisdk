@@ -1,4 +1,4 @@
-from ..utils import TestCase, api_scenario
+from ..utils import TestCase
 import forge
 import slash
 from capacity import GB
@@ -11,9 +11,9 @@ class SystemObjectHooksTest(TestCase):
     def setUp(self):
         super(SystemObjectHooksTest, self).setUp()
         self.forge = forge.Forge()
-        self.pre_object_creation_hook = self.forge.create_wildcard_function_stub()
-        self.post_object_creation_hook = self.forge.create_wildcard_function_stub()
-        self.object_operation_failure_hook = self.forge.create_wildcard_function_stub()
+        self.pre_object_creation_hook = self.forge.create_wildcard_function_stub(name="pre")
+        self.post_object_creation_hook = self.forge.create_wildcard_function_stub(name="post")
+        self.object_operation_failure_hook = self.forge.create_wildcard_function_stub(name="fail")
         self.identifier = object()
         self.addCleanup(self._unregister)
         slash.hooks.pre_object_creation.register(self.pre_object_creation_hook, self.identifier)

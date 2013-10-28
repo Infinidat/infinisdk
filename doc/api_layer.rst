@@ -37,7 +37,7 @@ You can easily override this behavior by entering the *unapproved* context:
 .. code-block:: python
 
     >>> with system.api.get_unapproved_context(): #doctest: +IGNORE_EXCEPTION_DETAIL, +ELLIPSIS
-    ...     system.objects.filesystems.get_by_id_lazy(151).update_field("quota", 3*GB) #doctest: +IGNORE_EXCEPTION_DETAIL, +ELLIPSIS
+    ...     system.objects.filesystems.get_by_id_lazy(1).update_field("quota", 3*GB) #doctest: +IGNORE_EXCEPTION_DETAIL, +ELLIPSIS
     Traceback (most recent call last):
        ...
     CommandNotApproved: ...

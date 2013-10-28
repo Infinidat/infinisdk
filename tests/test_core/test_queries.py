@@ -13,12 +13,15 @@ class QueryTestBase(TestCase):
 class QueryExecutionTest(QueryTestBase):
 
     def test_querying_length(self):
-        all_filesystems = Filesystem.find(self.system)
-        self.assertEquals(len(all_filesystems), 5)
+        self.assertEquals(len(Filesystem.find(self.system)), 0)
+        self.simulator.create_filesystem("fs1")
+        self.assertEquals(len(Filesystem.find(self.system)), 1)
 
 class TypeBinderQueryTest(QueryTestBase):
 
     def test_get_too_many_items(self):
+        for i in range(2):
+            self.simulator.create_filesystem("fs{}".format(i))
         with self.assertRaises(TooManyObjectsFound):
             self.system.objects.filesystems.get()
 

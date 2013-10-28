@@ -52,7 +52,7 @@ Finding objects (one or many at a time) is done by the :func:`.TypeBinder.find`:
 
     # get the number of objects stored in the system
     >>> len(system.objects.filesystems)
-    5
+    1
 
     # get all filesystems
     >>> unused = system.objects.filesystems.find()
@@ -61,6 +61,7 @@ Finding objects (one or many at a time) is done by the :func:`.TypeBinder.find`:
     >>> unused = system.objects.filesystems.get_all()
 
     # get all filesystems with composite predicate
+    >>> fs = system.objects.filesystems.create(name="some_name", quota=2.5*GB)
     >>> matching = system.objects.filesystems.find(system.objects.filesystems.fields.quota>=2*GB)
     >>> matching
     <Query /api/rest/filesystems?quota_in_bytes=ge%3A2000000000>
@@ -111,8 +112,9 @@ You can also get specific objects using the type binders:
    ...     pass
    >>> system.objects.filesystems.safe_get(system.objects.filesystems.fields.name == "nonexisting") is None
    True
-   >>> system.objects.filesystems.choose(system.objects.filesystems.fields.quota > 2*TiB)
-   <Filesystem id=1000>
+   >>> fs = system.objects.filesystems.create(name="fs2", quota=2.5*TiB)
+   >>> system.objects.filesystems.choose(system.objects.filesystems.fields.quota > 2*TiB) == fs
+   True
    >>> system.objects.filesystems.safe_choose(system.objects.filesystems.fields.name == "nonexisting") is None
    True
    >>> system.objects.filesystems.count(system.objects.filesystems.fields.quota > 2*TiB)
@@ -187,11 +189,12 @@ Deletion is done with :func:`.delete`, and forced deletion is done with :func:`.
 
 .. code-block:: python
 
- >>> fs = system.objects.filesystems.get_by_id_lazy(1)
+ >>> fs = system.objects.filesystems.create(name="deleted_fs", quota=GB)
  >>> fs.delete()
 
 .. code-block:: python
 
+ >>> fs = system.objects.filesystems.create(name="deleted_fs", quota=GB)
  >>> fs.purge()
 
 Object Updates
@@ -201,7 +204,7 @@ Objects that support updates expose the :func:`.update_fields` and :func:`update
 
 .. code-block:: python
 
-    >>> filesystem = system.objects.filesystems.get_by_id_lazy(151)
+    >>> filesystem = system.objects.filesystems.get_by_id_lazy(1)
     >>> filesystem.update_fields(quota=4*GB, name="new_name")
     >>> filesystem.update_field("quota", 3*GB)
 

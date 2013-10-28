@@ -11,6 +11,8 @@ class IZBox(APITarget):
         :param address: Either a tuple of (host, port), or a list of such tuples for multiple addresses
         """
         super(IZBox, self).__init__()
+        if type(address).__name__ == "Simulator":
+            address = (address.base_url.netloc.hostname, address.base_url.netloc.port or 80)
         if not isinstance(address[0], (list, tuple)):
             address = [address]
         self._addresses = address

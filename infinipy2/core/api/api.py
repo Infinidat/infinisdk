@@ -77,7 +77,7 @@ class API(object):
             response = attempted_session.request(http_method, full_url, data=data, **kwargs)
             elapsed = response.elapsed.total_seconds()
             _logger.debug("{} --> {} {} (took {:.04f}s)", hostname, response.status_code, response.reason, elapsed)
-            returned = Response(url, response)
+            returned = Response(http_method, full_url, response)
             _logger.debug("{} --> {}", hostname, returned.get_json())
             if response.status_code != httplib.SERVICE_UNAVAILABLE:
                 self._url = url
@@ -110,8 +110,9 @@ class Response(object):
     """
     IZBox API request response
     """
-    def __init__(self, url, resp):
+    def __init__(self, method, url, resp):
         super(Response, self).__init__()
+        self.method = method
         #: response object as returned from ``requests``
         self.response = resp
         #: URLObject of the final location the response was obtained from
@@ -153,6 +154,6 @@ class Response(object):
         except requests.exceptions.HTTPError as e:
             if self.response.status_code == httplib.FORBIDDEN:
                 raise CommandNotApproved(self.response)
-            raise APICommandFailed(self.response)
+            raise APICommandFailed(self)
 
 # TODO : implement async request
