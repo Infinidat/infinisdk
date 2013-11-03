@@ -3,8 +3,6 @@ from capacity import GB
 
 class FilesystemTest(TestCase):
 
-    API_SCENARIOS = ["izbox_queries", "izbox_fs_update"]
-
     def setUp(self):
         super(FilesystemTest, self).setUp()
         self.fs_name = "fs1"

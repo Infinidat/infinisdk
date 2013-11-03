@@ -6,7 +6,6 @@ from infinipy2.core.exceptions import APICommandFailed
 
 class SystemObjectHooksTest(TestCase):
 
-    API_SCENARIOS = ["izbox_api_failures", "izbox_fs_creation"]
 
     def setUp(self):
         super(SystemObjectHooksTest, self).setUp()

@@ -6,18 +6,15 @@ from infinipy2.izbox.filesystem import Filesystem
 from ..utils import TestCase
 from urlobject import URLObject
 
-class QueryTestBase(TestCase):
 
-    API_SCENARIOS = ["izbox_queries"]
-
-class QueryExecutionTest(QueryTestBase):
+class QueryExecutionTest(TestCase):
 
     def test_querying_length(self):
         self.assertEquals(len(Filesystem.find(self.system)), 0)
         self.simulator.create_filesystem("fs1")
         self.assertEquals(len(Filesystem.find(self.system)), 1)
 
-class TypeBinderQueryTest(QueryTestBase):
+class TypeBinderQueryTest(TestCase):
 
     def test_get_too_many_items(self):
         for i in range(2):
@@ -93,7 +90,6 @@ class QueryTest(TestCase):
 
 
 class PagedQueryTest(TestCase):
-    API_SCENARIOS = ["izbox_paged_queries"]
 
     def test_paged_query_traversal(self):
         """

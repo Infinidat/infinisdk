@@ -1,7 +1,6 @@
 from ..utils import TestCase
 
 class LazyQueryTest(TestCase):
-    API_SCENARIOS = ["izbox_lazy_queries"]
     PAGE_SIZE = 10
 
     def setUp(self):

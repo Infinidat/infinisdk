@@ -2,7 +2,6 @@ from ..utils import TestCase
 
 class ComponentsTest(TestCase):
 
-    API_SCENARIOS = ["izbox_component_queries"]
 
     def test_components_find(self):
         self.assertEquals(len(self.system.components.enclosures.find()), 8)
