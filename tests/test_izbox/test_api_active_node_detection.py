@@ -1,4 +1,5 @@
 from ..utils import TestCase
+
 from infinipy2.izbox import IZBox
 from infinipy2.core.exceptions import APICommandFailed
 
