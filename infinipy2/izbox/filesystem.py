@@ -25,5 +25,9 @@ class Filesystem(SystemObject):
 
     get_name, update_name = make_getter_updater("name")
 
+    def create_snapshot(self, snapshot_name):
+        resp = self.system.api.post("snapshots", data={"filesystem_id": self.id, "snapshot_name": snapshot_name})
+        return Snapshot(self.system, resp.get_result())
+
 class Snapshot(Filesystem):
     pass

@@ -20,3 +20,8 @@ class FilesystemTest(TestCase):
         self.assertEquals(self.fs.get_name(), self.fs_name)
         self.fs.update_name("new_name")
 
+    def test_create_snapshot(self):
+        snapshot = self.fs.create_snapshot("snap1")
+        self.assertIn(snapshot, self.system.objects.snapshots.find())
+        self.assertNotEquals(snapshot.id, self.fs.id)
+
