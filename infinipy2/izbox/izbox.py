@@ -15,7 +15,7 @@ class IZBox(APITarget):
             address = (address.base_url.netloc.hostname, address.base_url.netloc.port or 80)
         if not isinstance(address[0], (list, tuple)):
             address = [address]
-        self._addresses = address
+        self._addresses = self._normalize_addresses(address)
         self.objects = TypeBinderContainer(self)
         if auth is None:
             # TODO: take from configuration
@@ -28,6 +28,16 @@ class IZBox(APITarget):
         self.components = IZBoxSystemComponents(self)
 
         self.events = Events(self)
+
+    def _normalize_addresses(self, addresses):
+        returned = []
+        for address in addresses:
+            if not isinstance(address, tuple):
+                address = (address, 80)
+            if len(address) != 2:
+                raise ValueError("Invalid address specified: {!r}".format(address))
+            returned.append(address)
+        return returned
 
     def get_state(self):
         return self.components.system_component.get_state()
