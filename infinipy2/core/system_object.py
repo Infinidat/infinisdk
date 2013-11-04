@@ -77,15 +77,19 @@ class SystemObject(with_metaclass(FieldsMeta)):
     def _get_data_for_post(cls, fields):
         returned = {}
         missing_fields = set()
+        extra_fields = fields.copy()
         for field in cls.fields:
             if not field.mandatory and field.name not in fields:
                 continue
             field_value = fields.get(field.name, field.default)
+            extra_fields.pop(field.name, None)
+            extra_fields.pop(field.api_name, None)
             if field_value is NOTHING:
                 missing_fields.add(field.name)
             returned[field.api_name] = field.translator.to_api(field_value)
         if missing_fields:
             raise MissingFields("Following fields were not specified: {}".format(", ".join(sorted(missing_fields))))
+        returned.update(extra_fields)
         return returned
 
     @classmethod
