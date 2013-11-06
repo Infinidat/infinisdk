@@ -119,15 +119,15 @@ class SystemObject(with_metaclass(FieldsMeta)):
 
         return ObjectQuery(system, url, cls)
 
-    def get_field(self, field_name, from_cache=False):
+    def get_field(self, field_name, from_cache=False, fetch_if_not_cached=False):
         """
         Gets the value of a single field from the system
 
         :param cache: Attempt to use the last cached version of the field value
         """
-        return self.get_fields([field_name], from_cache=from_cache)[field_name]
+        return self.get_fields([field_name], from_cache=from_cache, fetch_if_not_cached=fetch_if_not_cached)[field_name]
 
-    def get_fields(self, field_names=(), from_cache=False):
+    def get_fields(self, field_names=(), from_cache=False, fetch_if_not_cached=False):
         """
         Gets a set of fields from the system
 
@@ -135,7 +135,11 @@ class SystemObject(with_metaclass(FieldsMeta)):
         :rtype: a dictionary of field names to their values
         """
         if from_cache:
-            return self._get_fields_from_cache(field_names)
+            try:
+                return self._get_fields_from_cache(field_names)
+            except CacheMiss:
+                if not fetch_if_not_cached:
+                    raise
 
         # TODO: remove unnecessary construction, move to direct getting
         query = self.get_this_url_path()
@@ -143,7 +147,7 @@ class SystemObject(with_metaclass(FieldsMeta)):
         only_fields = []
         for field_name in field_names:
             try:
-                only_fields.append(self.fields[field_name].api_name)
+                only_fields.append(self._get_field_api_name_if_defined(field_name))
             except LookupError:
                 only_fields.append(field_name)
 
@@ -169,11 +173,17 @@ class SystemObject(with_metaclass(FieldsMeta)):
 
         return returned
 
+    def _get_field_api_name_if_defined(self, field_name):
+        field = self.fields.get(field_name, None)
+        if field is None:
+            return field_name
+        return field.api_name
+
     def _get_fields_from_cache(self, field_names):
         returned = {}
         missed = []
         for field_name in field_names:
-            value = self._cache.get(self.fields[field_name].api_name, NOTHING)
+            value = self._cache.get(self._get_field_api_name_if_defined(field_name), NOTHING)
             if value is NOTHING:
                 missed.append(field_name)
             else:
