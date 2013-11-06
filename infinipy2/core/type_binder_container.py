@@ -15,6 +15,8 @@ class TypeBinderContainer(object):
         binder = object_type.bind(self.system)
         self._binders_by_class[object_type] = binder
         self._binders_by_name[object_type.get_plural_name()] = binder
+        assert not hasattr(self.system, object_type.get_plural_name())
+        setattr(self.system, object_type.get_plural_name(), binder)
 
     def __getattr__(self, attr):
         try:
