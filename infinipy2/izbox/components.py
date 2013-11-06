@@ -128,7 +128,7 @@ class System(IZBoxSystemComponent):
         return self.system.components.nodes.get(index=self.get_primary_node_index())
 
     def get_primary_node_index(self, use_cache=False):
-        return self.get_field("data", use_cache)["primary_node_id"]
+        return self.get_field("data", from_cache=True, fetch_if_not_cached=True)["primary_node_id"]
 
     def get_secondary_node(self):
         return self.system.components.nodes.get(index=self.get_secondary_node_index())
