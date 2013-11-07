@@ -1,4 +1,5 @@
 from .._compat import itervalues, iterkeys
+from .field import Field
 
 class FieldsMeta(type):
 
@@ -51,6 +52,12 @@ class Fields(object):
 
     def get(self, field_name, default=None):
         return self._fields.get(field_name, default)
+
+    def get_or_fabricate(self, field_name):
+        returned = self.get(field_name, None)
+        if returned is None:
+            return Field(field_name)
+        return returned
 
     def __getattr__(self, attr):
         try:

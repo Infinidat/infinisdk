@@ -44,6 +44,9 @@ class QueryTest(TestCase):
         ]:
             self.assert_query_equals(query, "id=eq%3A2")
 
+    def test_unknown_fields(self):
+        self.assert_query_equals(Filesystem.find(self.system, unknown_field=2), "unknown_field=eq%3A2")
+
     def test_querying_ne(self):
         self.assert_query_equals(Filesystem.find(self.system, self.field != "X"), "id=ne%3AX")
 

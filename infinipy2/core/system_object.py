@@ -115,7 +115,7 @@ class SystemObject(with_metaclass(FieldsMeta)):
         if kw:
             predicates = itertools.chain(
                 predicates,
-                (getattr(cls.fields, key) == value for key, value in iteritems(kw)))
+                (cls.fields.get_or_fabricate(key) == value for key, value in iteritems(kw)))
         for pred in predicates:
             url = pred.add_to_url(url)
 
