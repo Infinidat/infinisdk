@@ -27,7 +27,7 @@ class Filesystem(SystemObject):
 
     get_name, update_name = make_getter_updater("name")
 
-    def create_snapshot(self, name=Autogenerate("snap_{ordinal}")):
+    def create_snapshot(self, name=Autogenerate("snapshot_{ordinal}")):
         resp = self.system.api.post("snapshots", data={"filesystem_id": self.id, "snapshot_name": name})
         return Snapshot(self.system, resp.get_result())
 
