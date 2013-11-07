@@ -30,3 +30,7 @@ class FilesystemTest(TestCase):
         self.assertNotEquals(snapshot.id, self.fs.id)
         self.assertEquals(snapshot.get_parent(), self.fs)
 
+    def test_rollback(self):
+        snapshot = self.fs.create_snapshot()
+        self.fs.rollback(snapshot)
+
