@@ -43,6 +43,9 @@ class IZBoxSystemComponent(SystemObject):
     get_data = make_getter("data")
     get_status = make_getter("status")
 
+    def get_additional_data(self):
+        return self.get_field("data", from_cache=True)
+
     def get_parent(self):
         return self.system.components.get_by_id_lazy(self.get_parent_id())
 
@@ -122,7 +125,10 @@ class EnclosureDrive(IZBoxSystemComponent):
 
 @IZBoxSystemComponents.install_component_type
 class Service(IZBoxSystemComponent):
-    pass
+
+    def get_name(self):
+        return self.get_additional_data()["name"]
+
 
 @IZBoxSystemComponents.install_component_type
 class System(IZBoxSystemComponent):
