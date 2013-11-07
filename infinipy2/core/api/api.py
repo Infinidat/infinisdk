@@ -33,6 +33,11 @@ class API(object):
         self._default_request_timeout = self.system.get_api_timeout()
         self._approved = True
         self._session = None
+        self._session = requests.Session()
+        self._session.auth = self.system.get_api_auth()
+        self._session.headers["content-type"] = "application/json"
+        self._urls = [self._url_from_address(address) for address in target.get_api_addresses()]
+        self._active_url = None
 
     @contextmanager
     def get_approval_context(self, value):
@@ -62,48 +67,46 @@ class API(object):
         :rtype: :class:`.Response`
         """
         returned = None
-        kwargs.setdefault('timeout', self._default_request_timeout)
+        kwargs.setdefault("timeout", self._default_request_timeout)
         data = kwargs.get("data")
         if data is not None:
-            data = json.dumps(kwargs.pop('data'))
-        for url, attempted_session in self._iter_possible_http_sessions():
+            data = json.dumps(kwargs.pop("data"))
+
+        urls = self._get_possible_urls(kwargs.pop("address", None))
+
+        for url in urls:
             full_url = _join_path(url, URL(path))
-            if http_method != 'get' and self._approved:
-                full_url = full_url.add_query_param('approved', 'true')
+            if http_method != "get" and self._approved:
+                full_url = full_url.add_query_param("approved", "true")
             hostname = full_url.hostname
             _logger.debug("{} <-- {} {}", hostname, http_method.upper(), full_url)
             if data is not None:
                 _logger.debug("{} <-- DATA: {}" , hostname, data)
-            response = attempted_session.request(http_method, full_url, data=data, **kwargs)
+            response = self._session.request(http_method, full_url, data=data, **kwargs)
             elapsed = response.elapsed.total_seconds()
             _logger.debug("{} --> {} {} (took {:.04f}s)", hostname, response.status_code, response.reason, elapsed)
             returned = Response(http_method, full_url, response)
             _logger.debug("{} --> {}", hostname, returned.get_json())
             if response.status_code != httplib.SERVICE_UNAVAILABLE:
-                self._url = url
-                self._session = attempted_session
+                self._active_url = url
                 break
 
         if assert_success:
             returned.assert_success()
         return returned
 
-    _api_address_index = 0
-    def _iter_possible_http_sessions(self):
-        if self._session is not None:
-            yield self._url, self._session
+    def _get_possible_urls(self, address=None):
 
-        addresses = list(self.system.get_api_addresses())
-        for i in range(self._api_address_index, len(addresses)+self._api_address_index):
-            i = i % len(addresses)
-            self._api_address_index = i
-            attempted = addresses[i]
-            session = requests.Session()
-            session.auth = self.system.get_api_auth()
-            session.headers['content-type'] = 'application/json'
-            url = URL("http://{}:{}".format(*attempted))
-            url = url.add_path("api/rest")
-            yield url, session
+        if address is not None:
+            return [self._url_from_address(address)]
+
+        if self._active_url is not None:
+            return [self._active_url]
+
+        return self._urls
+
+    def _url_from_address(self, address):
+        return URL("http://{}:{}".format(*address)).add_path("/api/rest")
 
 
 class Response(object):
@@ -125,7 +128,7 @@ class Response(object):
             return None
 
     def _get_result(self):
-        return self.get_json()['result']
+        return self.get_json()["result"]
 
     def get_result(self):
         return self._get_result()
@@ -133,13 +136,13 @@ class Response(object):
     def get_error(self):
         json = self.get_json()
         if json is not None:
-            return json['error']
+            return json["error"]
 
     def __repr__(self):
         return repr(self.response)
 
     def get_metadata(self):
-        return self.get_json()['metadata']
+        return self.get_json()["metadata"]
 
     def get_page_start_index(self):
         metadata = self.get_metadata()
