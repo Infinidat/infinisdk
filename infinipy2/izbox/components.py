@@ -88,6 +88,9 @@ class Enclosure(IZBoxSystemComponent):
 @IZBoxSystemComponents.install_component_type
 class Node(IZBoxSystemComponent):
 
+    def get_address(self):
+        return ("{}-{}".format(self.system.get_name(), self.get_index()))
+
     def is_primary(self):
         return self is self.system.components.system_component.get_primary_node()
 
