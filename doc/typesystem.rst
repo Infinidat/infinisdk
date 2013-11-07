@@ -157,6 +157,8 @@ As an optimization (left to the user to decide), get_field and get_fields suppor
 
     >>> sum_of_all_fs = sum(fs.get_field("quota", from_cache=True) for fs in system.objects.filesystems.find().only_fields(["quota"]))
 
+.. note:: by default, if the field is not in the cache, it will be fetched again. You can force only from cache by passing ``fetch_if_not_cached=False``
+
 Checking if an Object Exists
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

@@ -119,19 +119,21 @@ class SystemObject(with_metaclass(FieldsMeta)):
 
         return ObjectQuery(system, url, cls)
 
-    def get_field(self, field_name, from_cache=False, fetch_if_not_cached=False):
+    def get_field(self, field_name, from_cache=False, fetch_if_not_cached=True):
         """
         Gets the value of a single field from the system
 
         :param cache: Attempt to use the last cached version of the field value
+        :param fetch_if_not_cached: pass as False to force only from cache
         """
         return self.get_fields([field_name], from_cache=from_cache, fetch_if_not_cached=fetch_if_not_cached)[field_name]
 
-    def get_fields(self, field_names=(), from_cache=False, fetch_if_not_cached=False):
+    def get_fields(self, field_names=(), from_cache=False, fetch_if_not_cached=True):
         """
         Gets a set of fields from the system
 
         :param from_cache: Attempt to fetch the fields from the cache
+        :param fetch_if_not_cached: pass as False to force only from cache
         :rtype: a dictionary of field names to their values
         """
         if from_cache:

@@ -34,7 +34,7 @@ class SystemObjectFieldsTest(TestCase):
         obj = SampleDerivedObject(object(), {"id": 1})
         self.assertEquals(obj.id, 1)
         with self.assertRaises(CacheMiss):
-            obj.get_field("number", from_cache=True)
+            obj.get_field("number", from_cache=True, fetch_if_not_cached=False)
 
     def test_get_from_cache_hit(self):
         obj = SampleDerivedObject(object(), {"id": 1, "number": 2})
