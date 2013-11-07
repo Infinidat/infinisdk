@@ -79,3 +79,11 @@ class Event(SystemObject):
 
     def __contains__(self, field_name):
         return field_name in self._cache
+
+class PushRule(SystemObject):
+
+    URL_PATH = "/api/rest/events/push_rules"
+
+    FIELDS = [
+        Field("id", type=int, is_identity=True),
+    ]

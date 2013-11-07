@@ -3,7 +3,7 @@ from ..core.type_binder_container import TypeBinderContainer
 from .components import IZBoxSystemComponents
 from .filesystem import Filesystem, Snapshot
 from .user import User
-from .events import Events
+from .events import Events, PushRule
 
 class IZBox(APITarget):
 
@@ -23,7 +23,7 @@ class IZBox(APITarget):
             auth = ("infinidat", "123456")
         self._auth = auth
         self.api = API(self)
-        for object_type in [Filesystem, Snapshot, User]:
+        for object_type in [Filesystem, Snapshot, User, PushRule]:
             self.objects.install(object_type)
 
         self.components = IZBoxSystemComponents(self)
