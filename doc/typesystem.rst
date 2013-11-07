@@ -316,5 +316,7 @@ Sometimes we may want to omit a certain required field(s), while still autogener
 
 .. code-block:: python
 
+   from infinipy2.core.api import OMIT
+
    Filesystem.create(system, name=OMIT) #  will autogenerate quota and other required fields, but skip generating the name
 

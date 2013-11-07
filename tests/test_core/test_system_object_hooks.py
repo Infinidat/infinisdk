@@ -1,11 +1,12 @@
-from ..utils import TestCase
 import forge
 import slash
 from capacity import GB
+from infinipy2.core.api import OMIT
 from infinipy2.core.exceptions import APICommandFailed
 
-class SystemObjectHooksTest(TestCase):
+from ..utils import TestCase
 
+class SystemObjectHooksTest(TestCase):
 
     def setUp(self):
         super(SystemObjectHooksTest, self).setUp()
@@ -50,5 +51,4 @@ class SystemObjectHooksTest(TestCase):
         self.object_operation_failure_hook()
         self.forge.replay()
         with self.assertRaises(APICommandFailed):
-            self.system.objects.filesystems.create(name="test_fs")
-
+            self.system.objects.filesystems.create(name="test_fs", quota=OMIT)

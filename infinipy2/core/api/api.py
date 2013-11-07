@@ -4,6 +4,7 @@ from contextlib import contextmanager
 import requests
 from logbook import Logger
 
+from .special_values import translate_special_values
 from ..._compat import httplib
 from ..exceptions import APICommandFailed, CommandNotApproved
 from urlobject import URLObject as URL
@@ -70,7 +71,7 @@ class API(object):
         kwargs.setdefault("timeout", self._default_request_timeout)
         data = kwargs.get("data")
         if data is not None:
-            data = json.dumps(kwargs.pop("data"))
+            data = json.dumps(translate_special_values(kwargs.pop("data")))
 
         urls = self._get_possible_urls(kwargs.pop("address", None))
 

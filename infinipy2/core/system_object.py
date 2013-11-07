@@ -81,7 +81,9 @@ class SystemObject(with_metaclass(FieldsMeta)):
         for field in cls.fields:
             if not field.mandatory and field.name not in fields:
                 continue
-            field_value = fields.get(field.name, field.default)
+            field_value = fields.get(field.name, NOTHING)
+            if field_value is NOTHING:
+                field_value = field.generate_default()
             extra_fields.pop(field.name, None)
             extra_fields.pop(field.api_name, None)
             if field_value is NOTHING:

@@ -40,7 +40,12 @@ class Field(object):
         self.is_identity = is_identity
         #:If specified, will be used to generate defaults for this field if required and not specified by the user.
         #:Can be either a value or a callable generating a default
-        self.default = default
+        self._default = default
+
+    def generate_default(self):
+        if hasattr(self._default, "__call__"):
+            return self._default()
+        return self._default
 
     def __neg__(self):
         return FieldSorting(self, "-")

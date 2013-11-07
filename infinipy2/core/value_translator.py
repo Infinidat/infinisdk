@@ -1,3 +1,5 @@
+from .api.special_values import SpecialValue
+
 class ValueTranslator(object):
     """
     This is an abstract base for translator objects.
@@ -11,6 +13,8 @@ class ValueTranslator(object):
 
         :rtype: must be JSON encodable
         """
+        if isinstance(value, SpecialValue):
+            return value
         return self._to_api(value)
 
     def from_api(self, value):

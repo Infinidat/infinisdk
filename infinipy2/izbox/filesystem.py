@@ -1,13 +1,15 @@
-from capacity import byte
+from capacity import byte, GB
 from ..core import SystemObject, Field, FunctionTranslator
 from ..core.system_object_utils import make_getter_updater
+from ..core.utils import get_name_generator
 
 class Filesystem(SystemObject):
     FIELDS = [
         Field("id", is_identity=True),
         Field("quota", api_name="quota_in_bytes",
+              default=GB, mandatory=True,
               translator=FunctionTranslator(to_api=lambda x: int(x // byte), from_api=lambda x: int(x) * byte)),
-        Field("name", mandatory=True),
+        Field("name", mandatory=True, default=get_name_generator("fs_{ordinal}")),
 
         Field("cifs_access_list", mandatory=True, type=list, default=[{"read_only": False, "username": "Everyone"}]),
         Field("nfs_access_list",  mandatory=True, type=list, default=[{"allow_root_access": False, "host": "*", "read_only": False, "secure": True}]),
