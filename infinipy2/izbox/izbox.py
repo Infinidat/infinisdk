@@ -47,8 +47,14 @@ class IZBox(APITarget):
         return self._addresses
 
     def is_mock(self):
+        return "mock" in self.get_name()
+
+    def get_name(self):
+        return self.get_system_info()["name"]
+
+    def get_system_info(self):
         data = self.components.system_component.get_field("data", from_cache=True, fetch_if_not_cached=True)
-        return "mock" in data["name"]
+        return data
 
     def get_api_timeout(self):
         # TODO: take this from config
