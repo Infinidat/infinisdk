@@ -54,6 +54,7 @@ class SystemObjectEqualityTest(TestCase):
         ]
         self.assertTrue(equal1 == equal2)
         self.assertFalse(equal1 != equal2)
+        self.assertEquals(hash(equal1), hash(equal2))
 
         for unequal1, unequal2 in [
                 (Obj(system1, {"id": 100}), Obj(system2, {"id": 100})),
@@ -61,6 +62,7 @@ class SystemObjectEqualityTest(TestCase):
                 ]:
             self.assertTrue(unequal1 != unequal2)
             self.assertFalse(unequal1 == unequal2)
+            self.assertNotEquals(hash(unequal1), hash(unequal2))
 
 class SystemObjectCreationTest(TestCase):
 

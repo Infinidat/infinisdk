@@ -34,13 +34,16 @@ class SystemObject(with_metaclass(FieldsMeta)):
         self.id = self._cache[self.fields.id.api_name]
 
     def __eq__(self, other):
-        if not isinstance(other, SystemObject):
+        if type(self) is not type(other):
             return NotImplemented
 
         return self.system == other.system and self.id == other.id
 
     def __ne__(self, other):
         return not (self == other)
+
+    def __hash__(self):
+        return hash((self.system, type(self), self.id))
 
     @classmethod
     def construct(cls, system, data):
