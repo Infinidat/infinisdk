@@ -32,4 +32,6 @@ class Filesystem(SystemObject):
         return Snapshot(self.system, resp.get_result())
 
 class Snapshot(Filesystem):
-    pass
+
+    def get_parent(self):
+        return self.system.filesystems.get_by_id(self.get_field("parent_id", from_cache=True))

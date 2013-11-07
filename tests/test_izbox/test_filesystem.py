@@ -28,4 +28,5 @@ class FilesystemTest(TestCase):
         snapshot = self.fs.create_snapshot("snap1")
         self.assertIn(snapshot, self.system.objects.snapshots.find())
         self.assertNotEquals(snapshot.id, self.fs.id)
+        self.assertEquals(snapshot.get_parent(), self.fs)
 
