@@ -76,7 +76,8 @@ class API(object):
 
         for url in urls:
             full_url = _join_path(url, URL(path))
-            if http_method != "get" and self._approved:
+            # TODO: make approved deduction smarter
+            if http_method != "get" and self._approved and not path.startswith("/api/internal/"):
                 full_url = full_url.add_query_param("approved", "true")
             hostname = full_url.hostname
             _logger.debug("{} <-- {} {}", hostname, http_method.upper(), full_url)
