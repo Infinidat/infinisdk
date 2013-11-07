@@ -31,6 +31,9 @@ class Filesystem(SystemObject):
         resp = self.system.api.post("snapshots", data={"filesystem_id": self.id, "snapshot_name": name})
         return Snapshot(self.system, resp.get_result())
 
+    def get_snapshots(self):
+        return self.system.snapshots.find(parent_id=self.id)
+
 class Snapshot(Filesystem):
 
     def get_parent(self):
