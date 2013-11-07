@@ -1,7 +1,7 @@
 from capacity import byte, GB
 from ..core import SystemObject, Field, FunctionTranslator
 from ..core.system_object_utils import make_getter_updater
-from ..core.utils import get_name_generator
+from ..core.api.special_values import Autogenerate
 
 class Filesystem(SystemObject):
     FIELDS = [
@@ -9,7 +9,7 @@ class Filesystem(SystemObject):
         Field("quota", api_name="quota_in_bytes",
               default=GB, mandatory=True,
               translator=FunctionTranslator(to_api=lambda x: int(x // byte), from_api=lambda x: int(x) * byte)),
-        Field("name", mandatory=True, default=get_name_generator("fs_{ordinal}")),
+        Field("name", mandatory=True, default=Autogenerate("fs_{ordinal}")),
 
         Field("cifs_access_list", mandatory=True, type=list, default=[{"read_only": False, "username": "Everyone"}]),
         Field("nfs_access_list",  mandatory=True, type=list, default=[{"allow_root_access": False, "host": "*", "read_only": False, "secure": True}]),
@@ -27,7 +27,7 @@ class Filesystem(SystemObject):
 
     get_name, update_name = make_getter_updater("name")
 
-    def create_snapshot(self, snapshot_name):
+    def create_snapshot(self, snapshot_name=Autogenerate("snap_{ordinal}")):
         resp = self.system.api.post("snapshots", data={"filesystem_id": self.id, "snapshot_name": snapshot_name})
         return Snapshot(self.system, resp.get_result())
 
