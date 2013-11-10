@@ -1,5 +1,7 @@
 from itertools import count
 from ..core import SystemObject, Field, TypeBinder
+from ..core.api.special_values import Autogenerate
+from ..core.system_object_utils import make_getter_updater
 
 default_event_page_size = 1000
 default_max_events = 10 ** 6
@@ -35,6 +37,7 @@ class Events(TypeBinder):
                 break
         del returned[max_events:]
         return returned
+
     def get_custom_events_query(self, query="", **kwargs):
         return self._get_events_query(query, **kwargs)
 
@@ -86,4 +89,10 @@ class PushRule(SystemObject):
 
     FIELDS = [
         Field("id", type=int, is_identity=True),
+        Field("visibility", mandatory=True, default="CUSTOMER"),
+        Field("filters", mandatory=True, default=list),
+        Field("recipients", mandatory=True, default=list),
+        Field("name", mandatory=True, default=Autogenerate("rule_{timestamp}")),
     ]
+
+    get_name, update_name = make_getter_updater("name")
