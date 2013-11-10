@@ -59,7 +59,7 @@ class SystemObject(with_metaclass(FieldsMeta)):
         Returns whether or not the object actually exists
         """
         try:
-            self.get_field("name")
+            self.get_field("id")
         except APICommandFailed as e:
             if e.status_code != httplib.NOT_FOUND:
                 raise
