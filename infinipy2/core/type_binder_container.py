@@ -28,3 +28,6 @@ class TypeBinderContainer(object):
         if isinstance(name, string_types):
             return self._binders_by_name[name]
         return self._binders_by_class[name]
+
+    def get_types(self):
+        return list(self._binders_by_class)
