@@ -20,13 +20,13 @@ class APITest(TestCase):
         self.assertEquals(resp.get_result(), {"a": "b", "c": {"d": {}}})
 
     def test_autogenerate_fields(self):
-        responses = [self.system.api.post("/api/izsim/echo_post", data={"a": {"b": {"name": Autogenerate("obj-{ordinal}-{time}")}}}) for i in range(2)]
+        responses = [self.system.api.post("/api/izsim/echo_post", data={"a": {"b": {"name": Autogenerate("obj-{ordinal}-{time}-{timestamp}")}}}) for i in range(2)]
         jsons = [r.get_result() for r in responses]
         for index, json in enumerate(jsons):
             name = json["a"]["b"]["name"]
-            obj, ordinal, time = name.split("-")
+            obj, ordinal, time, timestamp = name.split("-")
             self.assertEquals(int(ordinal) - 1, index)
-
+            self.assertEquals(int(timestamp) // 1000, int(float(time)))
 
     def test_specific_address(self):
         with self.assertRaises(APICommandFailed) as caught:

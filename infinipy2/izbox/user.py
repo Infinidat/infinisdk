@@ -7,7 +7,7 @@ class User(SystemObject):
     FIELDS = [
         Field("id", is_identity=True),
         Field("role", mandatory=True, default="INFINIDAT"),
-        Field("email", mandatory=True, default=Autogenerate("user{time}@infinidat.com")),
-        Field("username", mandatory=True, default=Autogenerate("user_{ordinal}")),
+        Field("email", mandatory=True, default=Autogenerate("user_{timestamp}@infinidat.com")),
+        Field("username", mandatory=True, default=Autogenerate("user_{timestamp}")),
         Field("password", mandatory=True, default="12345678"),
     ]
