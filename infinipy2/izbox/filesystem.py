@@ -39,5 +39,9 @@ class Filesystem(SystemObject):
 
 class Snapshot(Filesystem):
 
+    @classmethod
+    def create(self, system, filesystem_id, **kwargs):
+        return system.filesystems.get_by_id_lazy(filesystem_id).create_snapshot(**kwargs)
+
     def get_parent(self):
         return self.system.filesystems.get_by_id(self.get_field("parent_id", from_cache=True))

@@ -26,6 +26,13 @@ class FilesystemTest(TestCase):
 
     def test_create_snapshot(self):
         snapshot = self.fs.create_snapshot("snap1")
+        self._check_snapshot(snapshot)
+
+    def test_create_snapshot_directly(self):
+        snapshot = self.system.snapshots.create(filesystem_id=self.fs.id)
+        self._check_snapshot(snapshot)
+
+    def _check_snapshot(self, snapshot):
         self.assertIn(snapshot, self.system.objects.snapshots.find())
         self.assertNotEquals(snapshot.id, self.fs.id)
         self.assertEquals(snapshot.get_parent(), self.fs)
@@ -33,4 +40,3 @@ class FilesystemTest(TestCase):
     def test_rollback(self):
         snapshot = self.fs.create_snapshot()
         self.fs.rollback(snapshot)
-
