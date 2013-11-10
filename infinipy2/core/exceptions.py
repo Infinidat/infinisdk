@@ -39,6 +39,9 @@ class CommandNotApproved(APICommandException):
         return self.msg
 
 
+class CapacityUnavailable(APICommandException):
+    pass
+
 class ObjectNotFound(InfinipyException):
     pass
 
