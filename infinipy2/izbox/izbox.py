@@ -52,6 +52,12 @@ class IZBox(APITarget):
     def get_name(self):
         return self.get_system_info()["name"]
 
+    def get_version(self):
+        return self.get_system_info()["version"]
+
+    def get_model(self):
+        return "G3200"
+
     def get_system_info(self):
         data = self.components.system_component.get_field("data", from_cache=True, fetch_if_not_cached=True)
         return data

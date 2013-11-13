@@ -12,7 +12,7 @@ class Field(object):
     This class represents a single field exposed by a schema
     """
 
-    def __init__(self, name, api_name=None, type=str, mutable=True, forbidden=False, mandatory=False, translator=IdentityTranslator(), is_unique=False, default=NOTHING, is_identity=False):
+    def __init__(self, name, api_name=None, type=str, mutable=True, forbidden=False, mandatory=False, translator=IdentityTranslator(), is_unique=False, default=NOTHING, is_identity=False, cached=False):
         super(Field, self).__init__()
 
         #:the name of this field, as will be seen by the Python code interacting with the object(s)
@@ -41,6 +41,8 @@ class Field(object):
         #:If specified, will be used to generate defaults for this field if required and not specified by the user.
         #:Can be either a value or a callable generating a default
         self._default = default
+        #:Specifies if this field is cached by default
+        self.cached = cached
 
     def generate_default(self):
         if hasattr(self._default, "__call__"):

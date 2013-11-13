@@ -11,13 +11,18 @@ class SampleBaseObject(SystemObject):
 class SampleDerivedObject(SampleBaseObject):
     FIELDS = [
         Field(name="number", type=int, mandatory=True),
+        Field(name="cached_by_default", cached=True),
     ]
 
 class SystemObjectFieldsTest(TestCase):
 
+    def setUp(self):
+        super(SystemObjectFieldsTest, self).setUp()
+        self.system = object()
+
     def test_num_fields(self):
         self.assertEquals(len(SampleBaseObject.fields), 2)
-        self.assertEquals(len(SampleDerivedObject.fields), 3)
+        self.assertEquals(len(SampleDerivedObject.fields), 4)
 
     def test_querying_fields_by_name(self):
         self.assertIs(SampleBaseObject.fields.name.type.type, str)
@@ -31,15 +36,20 @@ class SystemObjectFieldsTest(TestCase):
         self.assertEquals(len(EmptyObject.fields), 0)
 
     def test_get_from_cache_miss(self):
-        obj = SampleDerivedObject(object(), {"id": 1})
+        obj = SampleDerivedObject(self.system, {"id": 1})
         self.assertEquals(obj.id, 1)
         with self.assertRaises(CacheMiss):
             obj.get_field("number", from_cache=True, fetch_if_not_cached=False)
 
     def test_get_from_cache_hit(self):
-        obj = SampleDerivedObject(object(), {"id": 1, "number": 2})
+        obj = SampleDerivedObject(self.system, {"id": 1, "number": 2})
         self.assertEquals(obj.id, 1)
         self.assertEquals(2, obj.get_field("number", from_cache=True))
+
+    def test_get_from_cache_by_default(self):
+        value = "some_value_here"
+        obj = SampleDerivedObject(self.system, {"id": 1, "cached_by_default": value})
+        self.assertEquals(obj.get_field("cached_by_default"), value)
 
 
 class SystemObjectEqualityTest(TestCase):

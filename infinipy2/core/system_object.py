@@ -1,7 +1,7 @@
 import itertools
 from contextlib import contextmanager
 
-from sentinels import NOTHING
+from sentinels import NOTHING, Sentinel
 import slash
 from infi.pyutils.lazy import cached_method
 from urlobject import URLObject as URL
@@ -12,6 +12,8 @@ from .exceptions import MissingFields, CacheMiss
 from .fields import FieldsMeta
 from .object_query import ObjectQuery
 from .type_binder import TypeBinder
+
+DONT_CARE = Sentinel("DONT_CARE")
 
 def _install_slash_hooks():
     for (hook, operation) in itertools.product(["pre", "post"], ['creation', 'deletion', 'update']):
@@ -59,7 +61,7 @@ class SystemObject(with_metaclass(FieldsMeta)):
         Returns whether or not the object actually exists
         """
         try:
-            self.get_field("id")
+            self.get_field("id", from_cache=False)
         except APICommandFailed as e:
             if e.status_code != httplib.NOT_FOUND:
                 raise
@@ -124,7 +126,7 @@ class SystemObject(with_metaclass(FieldsMeta)):
 
         return ObjectQuery(system, url, cls)
 
-    def get_field(self, field_name, from_cache=False, fetch_if_not_cached=True):
+    def get_field(self, field_name, from_cache=DONT_CARE, fetch_if_not_cached=True):
         """
         Gets the value of a single field from the system
 
@@ -133,7 +135,7 @@ class SystemObject(with_metaclass(FieldsMeta)):
         """
         return self.get_fields([field_name], from_cache=from_cache, fetch_if_not_cached=fetch_if_not_cached)[field_name]
 
-    def get_fields(self, field_names=(), from_cache=False, fetch_if_not_cached=True):
+    def get_fields(self, field_names=(), from_cache=DONT_CARE, fetch_if_not_cached=True):
         """
         Gets a set of fields from the system
 
@@ -141,6 +143,9 @@ class SystemObject(with_metaclass(FieldsMeta)):
         :param fetch_if_not_cached: pass as False to force only from cache
         :rtype: a dictionary of field names to their values
         """
+
+        from_cache = self._deduce_from_cache(field_names, from_cache)
+
         if from_cache:
             try:
                 return self._get_fields_from_cache(field_names)
@@ -179,6 +184,20 @@ class SystemObject(with_metaclass(FieldsMeta)):
             returned[field_name] = value
 
         return returned
+
+    def _deduce_from_cache(self, field_names, from_cache):
+        if from_cache is not DONT_CARE:
+            return from_cache
+
+
+        if not field_names:
+            return False
+
+        for field_name in field_names:
+            field = self.fields.get_or_fabricate(field_name)
+            if not field.cached and not field.is_identity:
+                return False
+        return True
 
     def _get_field_api_name_if_defined(self, field_name):
         field = self.fields.get(field_name, None)
