@@ -1,7 +1,10 @@
+import collections
 from itertools import count
-from ..core import SystemObject, Field, TypeBinder
+
+from ..core import Field, SystemObject, TypeBinder
 from ..core.api.special_values import Autogenerate
 from ..core.system_object_utils import make_getter_updater
+
 
 default_event_page_size = 1000
 default_max_events = 10 ** 6
@@ -82,6 +85,17 @@ class Event(SystemObject):
 
     def __contains__(self, field_name):
         return field_name in self._cache
+
+    def __iter__(self):
+        return iter(self._cache)
+
+    def __len__(self):
+        return len(self._cache)
+
+    def keys(self):
+        return self._cache.keys()
+
+collections.Mapping.register(Event)
 
 class PushRule(SystemObject):
 
