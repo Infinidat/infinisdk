@@ -43,6 +43,9 @@ class IZBoxSystemComponent(SystemObject):
     get_data = make_getter("data")
     get_status = make_getter("status")
 
+    def is_ok(self):
+        return self.get_status().lower() == "ok"
+
     def get_additional_data(self):
         return self.get_field("data", from_cache=True)
 
