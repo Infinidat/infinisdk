@@ -28,6 +28,10 @@ class ComponentsTest(TestCase):
         self.assertIs(self.system.components.types.Enclosure, Enclosure)
         self.assertIs(self.system.components.types.EnclosureDrive, EnclosureDrive)
 
+    def test_components_getitem(self):
+        self.assertIs(self.system.components["nodes"], self.system.components.nodes)
+        self.assertIs(self.system.components[self.system.components.types.Node], self.system.components["nodes"])
+
     def test_components_choose(self):
         self.system.components.enclosures.choose()
         self.system.components.nodes.choose()

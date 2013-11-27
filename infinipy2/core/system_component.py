@@ -50,6 +50,14 @@ class SystemComponentsBinder(TypeBinder):
         setattr(cls.types, component_type.__name__, component_type)
         return component_type
 
+    def __getitem__(self, attr):
+        if isinstance(attr, type):
+            return self[attr.get_plural_name()]
+        try:
+            return getattr(self, attr)
+        except AttributeError:
+            raise KeyError(attr)
+
 class SpecificComponentBinderGetter(object):
 
     def __init__(self, object_type):
