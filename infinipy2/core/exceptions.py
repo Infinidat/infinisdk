@@ -20,9 +20,10 @@ class APICommandFailed(APICommandException):
         self.message = message
 
     def __repr__(self):
-        return ("API Command Failed\n  "
-                "Request: {self.response.method} {self.response.url}\n  "
-                "Status: {self.status_code}\n  "
+        return ("API Command Failed\n\t"
+                "Request: {self.response.method} {self.response.url}\n\t"
+                "Data: {self.response.sent_data}\n\t"
+                "Status: {self.status_code}\n\t"
                 "Message: {self.message}".format(self=self))
 
     __str__ = __repr__

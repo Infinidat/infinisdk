@@ -87,7 +87,7 @@ class API(object):
             response = self._session.request(http_method, full_url, data=data, **kwargs)
             elapsed = response.elapsed.total_seconds()
             _logger.debug("{} --> {} {} (took {:.04f}s)", hostname, response.status_code, response.reason, elapsed)
-            returned = Response(http_method, full_url, response)
+            returned = Response(http_method, full_url, data, response)
             _logger.debug("{} --> {}", hostname, returned.get_json())
             if response.status_code != httplib.SERVICE_UNAVAILABLE:
                 self._active_url = url
@@ -115,13 +115,15 @@ class Response(object):
     """
     IZBox API request response
     """
-    def __init__(self, method, url, resp):
+    def __init__(self, method, url, data, resp):
         super(Response, self).__init__()
         self.method = method
         #: response object as returned from ``requests``
         self.response = resp
         #: URLObject of the final location the response was obtained from
         self.url = url
+        #: Data sent to on 
+        self.sent_data = data
 
     def get_json(self):
         try:
