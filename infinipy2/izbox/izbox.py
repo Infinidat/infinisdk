@@ -49,8 +49,14 @@ class IZBox(APITarget):
     def is_mock(self):
         return "mock" in self.get_name()
 
+    def is_virtual(self):
+        return all([self.get_serial() > 35000, not self.is_mock()])
+
     def get_name(self):
         return self.get_system_info()["name"]
+
+    def get_serial(self):
+        return self.get_system_info()["system_serial"]
 
     def get_version(self):
         return self.get_system_info()["version"]
