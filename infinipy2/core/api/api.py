@@ -73,7 +73,8 @@ class API(object):
         if data is not None:
             data = json.dumps(translate_special_values(kwargs.pop("data")))
 
-        urls = self._get_possible_urls(kwargs.pop("address", None))
+        specified_address = kwargs.pop("address", None)
+        urls = self._get_possible_urls(specified_address)
 
         for url in urls:
             full_url = _join_path(url, URL(path))
@@ -90,7 +91,8 @@ class API(object):
             returned = Response(http_method, full_url, data, response)
             _logger.debug("{} --> {}", hostname, returned.get_json())
             if response.status_code != httplib.SERVICE_UNAVAILABLE:
-                self._active_url = url
+                if specified_address is None: # need to remember our next API target
+                    self._active_url = url
                 break
 
         if assert_success:
