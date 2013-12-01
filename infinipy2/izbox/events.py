@@ -15,7 +15,7 @@ class Events(TypeBinder):
         super(Events, self).__init__(Event, system)
 
     def get_events(self, min_event_id=0):
-        return list(self.find(Event.fields.id>=min_event_id).sort(Event.fields.id))
+        return list(self.find(Event.fields.id >= min_event_id).sort(Event.fields.id))
 
     def get_last_events(self, num, reversed=False):
         return list(self.find().sort(-Event.fields.id).page_size(num).page(1))
@@ -62,10 +62,10 @@ class Events(TypeBinder):
     def _build_event(self, event_dict):
         return event_dict
 
-    def create_custom_event(self, level='INFO', description='custom event description', data=None):
+    def create_custom_event(self, level='INFO', description='custom event description', visibility='CUSTOMER', data=None):
         if data is None:
             data = dict()
-        return self.system.api.post("events/custom", data={"data": data, "level": level, "description": description}).get_result()
+        return self.system.api.post("events/custom", data={"data": data, "level": level, "description": description, "visibility":visibility}).get_result()
 
     def get_event_by_uuid(self, uuid):
         result = self.get_custom_events_query("uuid=eq:{}".format(uuid))
