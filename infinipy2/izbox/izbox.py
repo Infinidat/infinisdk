@@ -46,6 +46,9 @@ class IZBox(APITarget):
     def get_api_addresses(self):
         return self._addresses
 
+    def is_simulator(self):
+        return "izsim" in self.get_name()
+
     def is_mock(self):
         return "mock" in self.get_name()
 
