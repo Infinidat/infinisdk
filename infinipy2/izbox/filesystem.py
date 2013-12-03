@@ -9,7 +9,7 @@ class Filesystem(SystemObject):
         Field("quota", api_name="quota_in_bytes",
               default=GB, mandatory=True,
               translator=FunctionTranslator(to_api=lambda x: int(x // byte), from_api=lambda x: int(x) * byte)),
-        Field("name", mandatory=True, default=Autogenerate("fs_{ordinal}")),
+        Field("name", mandatory=True, default=Autogenerate("fs_{uuid}")),
 
         Field("cifs_access_list", mandatory=True, type=list, default=[{"read_only": False, "username": "Everyone"}]),
         Field("nfs_access_list",  mandatory=True, type=list, default=[{"allow_root_access": False, "host": "*", "read_only": False, "secure": True}]),
@@ -29,7 +29,7 @@ class Filesystem(SystemObject):
 
     get_mount_path = make_getter("mount_path")
 
-    def create_snapshot(self, name=Autogenerate("snapshot_{ordinal}")):
+    def create_snapshot(self, name=Autogenerate("snapshot_{uuid}")):
         resp = self.system.api.post("snapshots", data={"filesystem_id": self.id, "snapshot_name": name})
         return Snapshot(self.system, resp.get_result())
 

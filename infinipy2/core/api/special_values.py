@@ -1,5 +1,6 @@
-import time
 import itertools
+import time
+from uuid import uuid1
 
 from ..._compat import iteritems
 
@@ -17,6 +18,7 @@ class Autogenerate(SpecialValue):
     - ordinal: the number of times this template has been used already in this session
     - time: the current time, as a floating point number
     - timestamp: an integral value designating the current time (milliseconds)
+    - uuid: a unique identifier generated from uuid1
     """
 
     _ORDINALS = {}
@@ -30,8 +32,13 @@ class Autogenerate(SpecialValue):
         if counter is None:
             counter = self._ORDINALS[self.template] = itertools.count(1)
         current_time = time.time()
-        return self.template.format(time=current_time, timestamp=int(current_time * 1000), ordinal=next(counter))
+        return self.template.format(time=current_time, timestamp=int(current_time * 1000), ordinal=next(counter), uuid=_LAZY_UUID_FACTORY)
 
+class _LazyUUIDFactory(object):
+    def __str__(self):
+        return str(uuid1()).lower().replace("-", "")
+
+_LAZY_UUID_FACTORY = _LazyUUIDFactory()
 
 def translate_special_values(d):
     for key, value in list(iteritems(d)):
