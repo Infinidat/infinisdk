@@ -126,6 +126,9 @@ class EnclosureDrive(IZBoxSystemComponent):
     def get_plural_name(self):
         return "{}s".format(self.get_type_name())
 
+    def get_designated_role(self):
+        return self.get_data()['designated_role']
+
 @IZBoxSystemComponents.install_component_type
 class Service(IZBoxSystemComponent):
 
