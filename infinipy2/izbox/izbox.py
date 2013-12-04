@@ -73,7 +73,7 @@ class IZBox(APITarget):
 
     def get_api_timeout(self):
         # TODO: take this from config
-        return 60
+        return 180
 
     def get_api_auth(self):
         return self._auth
