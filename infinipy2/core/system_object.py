@@ -12,6 +12,7 @@ from .exceptions import MissingFields, CacheMiss
 from .fields import FieldsMeta
 from .object_query import ObjectQuery
 from .type_binder import TypeBinder
+from .api.special_values import translate_special_values
 
 DONT_CARE = Sentinel("DONT_CARE")
 
@@ -106,6 +107,20 @@ class SystemObject(with_metaclass(FieldsMeta)):
     @classmethod
     def get_plural_name(cls):
         return cls.__name__.lower() + "s"
+
+    @classmethod
+    def get_creation_defaults(cls):
+        """
+        Returns a dict representing the default arguments as implicitly constructed by infinipy to fulfill a ``create`` call
+
+        .. note:: this will cause generation of defaults, which will have side effects if they are special values
+
+        .. note:: this does not necessarily generate all fields that are passable into ``create``, only mandatory fields
+        """
+        return translate_special_values({
+            field.name: field.generate_default()
+            for field in cls.fields
+            if field.mandatory})
 
     @classmethod
     def get_url_path(cls, system):
