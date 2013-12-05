@@ -8,9 +8,9 @@ class APICommandException(InfinipyException):
     pass
 
 class APICommandFailed(APICommandException):
-    def __init__(self, response, *args, **kwargs):
+    def __init__(self, response):
+        super(APICommandFailed, self).__init__(response)
         self.response = response
-        super(APICommandFailed, self).__init__(*args, **kwargs)
         self.status_code = self.response.response.status_code
         json = response.get_json()
         if json is None:
@@ -26,19 +26,19 @@ class APICommandFailed(APICommandException):
                 "Status: {self.status_code}\n\t"
                 "Message: {self.message}".format(self=self))
 
-    __str__ = __repr__
+    def __str__(self):
+        return repr(self)
 
-class CommandNotApproved(APICommandException):
+class CommandNotApproved(APICommandFailed):
     def __init__(self, response):
-        reasons = []
-        json = response.json()
+        super(CommandNotApproved, self).__init__(response)
+        self.reasons = []
+        json = response.response.json()
         if json is not None:
-            reasons.extend((json.get("error") or {}).get("reasons", ()))
-        super(CommandNotApproved, self).__init__("Command forbidden without explicit approval ({})".format(", ".join(reasons), reasons))
+            self.reasons.extend((json.get("error") or {}).get("reasons", ()))
 
     def __repr__(self):
-        return self.msg
-
+        return "Command forbidden without explicit approval ({})".format(", ".join(self.reasons))
 
 class CapacityUnavailable(APICommandException):
     pass

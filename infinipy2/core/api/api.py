@@ -162,7 +162,7 @@ class Response(object):
             self.response.raise_for_status()
         except requests.exceptions.HTTPError as e:
             if self.response.status_code == httplib.FORBIDDEN:
-                raise CommandNotApproved(self.response)
+                raise CommandNotApproved(self)
             raise APICommandFailed(self)
 
 # TODO : implement async request
