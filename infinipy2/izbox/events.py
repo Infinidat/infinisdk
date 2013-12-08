@@ -46,16 +46,22 @@ class Events(TypeBinder):
 
     def _get_events_types(self):
         return self.system.api.get("events/types").get_result()
+
     def get_codes(self):
         return self._get_events_types()['codes']
+
     def get_codes_list(self):
         return [e['code'] for e in self.get_codes()]
+
     def get_codes_description_list(self):
         return [e['description'] for e in self.get_codes()]
+
     def get_levels(self):
         return self._get_events_types()['levels']
+
     def get_visibilities(self):
         return self._get_events_types()['visibilities']
+
     def get_reporters(self):
         return self._get_events_types()['reporters']
 
