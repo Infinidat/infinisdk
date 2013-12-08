@@ -18,7 +18,10 @@ class Events(TypeBinder):
         return list(self.find(Event.fields.id >= min_event_id).sort(Event.fields.id))
 
     def get_last_events(self, num, reversed=False):
-        return list(self.find().sort(-Event.fields.id).page_size(num).page(1))
+        returned = list(self.find().sort(-Event.fields.id).page_size(num).page(1))
+        if not reversed:
+            returned.reverse()
+        return returned
 
     def get_last_event(self):
         return self.get_last_events(1)[0]
