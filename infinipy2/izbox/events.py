@@ -26,27 +26,6 @@ class Events(TypeBinder):
     def get_last_event(self):
         return self.get_last_events(1)[0]
 
-    def _get_events_query(self, query="", page_size=None, max_events=default_max_events):
-        assert max_events > 0, "max_events must be a positive integer"
-        if page_size is None:
-            page_size = min(max_events_page_size, max_events)
-        if query:
-            query = query + '&'
-        query = "events?{query}page_size={page_size}&".format(query=query, page_size=page_size) + "page={page}"
-        returned = []
-        page_counter = count(1)
-        while len(returned) < max_events:
-            events = [self._build_event(e) for e in self.system.api.get(query.format(page=page_counter.next())).get_result()]
-            if events:
-                returned.extend(events)
-            else:
-                break
-        del returned[max_events:]
-        return returned
-
-    def get_custom_events_query(self, query="", **kwargs):
-        return self._get_events_query(query, **kwargs)
-
     def _get_events_types(self):
         return self.system.api.get("events/types").get_result()
 
@@ -77,7 +56,7 @@ class Events(TypeBinder):
         return self.system.api.post("events/custom", data={"data": data, "level": level, "description": description, "visibility":visibility}).get_result()
 
     def get_event_by_uuid(self, uuid):
-        result = self.get_custom_events_query("uuid=eq:{}".format(uuid))
+        result = list(self.find(uuid=uuid))
         if result:
             return result[0]
 

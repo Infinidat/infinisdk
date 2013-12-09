@@ -27,3 +27,9 @@ class EventsTest(TestCase):
         event_from_list = self.system.events.get_last_events(1)[0].get_fields()
         self.assertEquals(event_from_list['description'], description)
         self.assertEquals(event_from_list['code'], "CUSTOM_EVENT_INFO")
+
+    def test_get_event_by_uuid(self):
+        custom_event = self.system.events.create_custom_event(description='test event')
+
+        event = self.system.events.get_event_by_uuid(custom_event['uuid'])
+        self.assertEquals(event['uuid'], custom_event['uuid'])
