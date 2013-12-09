@@ -128,6 +128,10 @@ class EnclosureDrive(IZBoxSystemComponent):
 
     def get_designated_role(self):
         return self.get_data()['designated_role']
+    def phasein(self):
+        self.system.api.post("{}/phasein".format(self.get_resource_path()))
+    def phaseout(self):
+        self.system.api.post("{}/phaseout".format(self.get_resource_path()))
 
 @IZBoxSystemComponents.install_component_type
 class Service(IZBoxSystemComponent):
