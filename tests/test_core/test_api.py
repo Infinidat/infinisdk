@@ -1,6 +1,7 @@
 from infinipy2.core.api import OMIT
-from infinipy2.core.exceptions import APICommandFailed
+from infinipy2.core.exceptions import APICommandFailed, APITransportFailure
 from infinipy2.core.api import Autogenerate
+import requests
 
 from ..utils import TestCase
 
@@ -46,3 +47,11 @@ class APITest(TestCase):
         new_url = self.system.api._active_url = "http://blap.com/a/b/c"
         self.system.api.get("/api/rest/system", address=self.simulator.get_active_node_address())
         self.assertEquals(self.system.api._active_url, new_url)
+
+    def test_api_transport_error(self):
+        def fake_request(api_obj, *args, **kwargs):
+            raise requests.exceptions.ConnectionError('FakeConnectionError')
+        self.system.api._request = fake_request
+
+        with self.assertRaises(APITransportFailure):
+            self.system.api.post("/api/izsim/echo_post")

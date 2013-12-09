@@ -6,7 +6,7 @@ from logbook import Logger
 
 from .special_values import translate_special_values
 from ..._compat import httplib
-from ..exceptions import APICommandFailed, CommandNotApproved
+from ..exceptions import APICommandFailed, CommandNotApproved, APITransportFailure
 from urlobject import URLObject as URL
 
 _logger = Logger(__name__)
@@ -61,7 +61,7 @@ class API(object):
     patch = _get_request_delegate("patch")
     delete = _get_request_delegate("delete")
 
-    def request(self, http_method, path, assert_success=True, **kwargs):
+    def _request(self, http_method, path, assert_success=True, **kwargs):
         """
         Sends a request to the IZBox API interface
 
@@ -94,6 +94,13 @@ class API(object):
                 if specified_address is None: # need to remember our next API target
                     self._active_url = url
                 break
+        return returned
+
+    def request(self, http_method, path, assert_success=True, **kwargs):
+        try:
+            returned = self._request(http_method, path, **kwargs)
+        except requests.exceptions.RequestException as e:
+            raise APITransportFailure(e)
 
         if assert_success:
             returned.assert_success()

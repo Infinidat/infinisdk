@@ -7,6 +7,9 @@ class CacheMiss(InfinipyException):
 class APICommandException(InfinipyException):
     pass
 
+class APITransportFailure(APICommandException):
+    pass
+
 class APICommandFailed(APICommandException):
     def __init__(self, response):
         super(APICommandFailed, self).__init__(response)
