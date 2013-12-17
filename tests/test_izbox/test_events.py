@@ -1,4 +1,5 @@
 from ..utils import TestCase
+import forge
 
 class EventsTest(TestCase):
 
@@ -74,3 +75,27 @@ class EventsTest(TestCase):
 
     def test_get_reporters(self):
         self.assertTrue('CORE' in self.system.events.get_reporters())
+
+
+class EventsTestsWithForge(TestCase):
+    def setUp(self):
+        super(EventsTestsWithForge, self).setUp()
+        self.forge = forge.Forge()
+
+    def tearDown(self):
+        self.forge.verify()
+        self.forge.restore_all_replacements()
+        self.forge.reset()
+        super(EventsTestsWithForge, self).tearDown()
+
+    def test_events_types_caching(self):
+        mock = self.forge.replace(self.system.events, '_get_events_types_from_system')
+        mock().and_return({'codes': [], 'levels':[]})
+        self.forge.replay()
+
+        self.assertIs(self.system.events._types, None)
+        self.system.events.get_codes()
+
+        self.assertIsNot(self.system.events._types, None)
+        self.system.events.get_codes()
+        self.system.events.get_levels()

@@ -12,6 +12,7 @@ max_events_page_size = 1000
 class Events(TypeBinder):
     def __init__(self, system):
         super(Events, self).__init__(Event, system)
+        self._types = None
 
     def get_events(self, min_event_id=0):
         return list(self.find(Event.fields.id >= min_event_id).sort(Event.fields.id))
@@ -25,8 +26,13 @@ class Events(TypeBinder):
     def get_last_event(self):
         return self.get_last_events(1)[0]
 
-    def _get_events_types(self):
+    def _get_events_types_from_system(self):
         return self.system.api.get("events/types").get_result()
+
+    def _get_events_types(self):
+        if self._types is None:
+            self._types = self._get_events_types_from_system()
+        return self._types.copy()
 
     def get_codes(self):
         return self._get_events_types()['codes']
