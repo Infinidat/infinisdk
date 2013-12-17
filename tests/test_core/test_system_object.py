@@ -74,6 +74,10 @@ class SystemObjectEqualityTest(TestCase):
             self.assertFalse(unequal1 == unequal2)
             self.assertNotEquals(hash(unequal1), hash(unequal2))
 
+        diff_type2 = SampleBaseObject(system1, {"id": 100})
+        diff_type1 = SampleDerivedObject(system1, {"id": 100})
+        self.assertEqual(NotImplemented, diff_type1.__eq__(diff_type2))
+
 class SystemObjectCreationTest(TestCase):
 
     def test_object_creation_missing_fields(self):

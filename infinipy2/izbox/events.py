@@ -1,5 +1,4 @@
 import collections
-from itertools import count
 
 from ..core import Field, SystemObject, TypeBinder
 from ..core.api.special_values import Autogenerate
@@ -46,9 +45,6 @@ class Events(TypeBinder):
 
     def get_reporters(self):
         return self._get_events_types()['reporters']
-
-    def _build_event(self, event_dict):
-        return event_dict
 
     def create_custom_event(self, level='INFO', description='custom event description', visibility='CUSTOMER', data=None):
         if data is None:

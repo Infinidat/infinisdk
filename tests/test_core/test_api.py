@@ -51,7 +51,13 @@ class APITest(TestCase):
     def test_api_transport_error(self):
         def fake_request(api_obj, *args, **kwargs):
             raise requests.exceptions.ConnectionError('FakeConnectionError')
-        self.system.api._request = fake_request
+        def set_request(new_request):
+            curr_val = self.system.api._request
+            self.system.api._request = new_request
+            return curr_val
+
+        orig_request = set_request(fake_request)
+        self.addCleanup(lambda: set_request(orig_request))
 
         with self.assertRaises(APITransportFailure):
             self.system.api.post("/api/izsim/echo_post")

@@ -21,6 +21,14 @@ class EventsTest(TestCase):
         self.assertEquals(regular_events[0], reversed_events[1])
         self.assertEquals(regular_events[1], reversed_events[0])
 
+    def test_get_events(self):
+        custom_event = self.system.events.create_custom_event(description='')
+        events = self.system.events.get_events(min_event_id=custom_event['id']+1)
+        self.assertEqual(len(events), 0)
+
+        events = self.system.events.get_events(min_event_id=custom_event['id'])
+        self.assertEqual(len(events), 1)
+
     def test_create_custom_event(self):
         description = 'test events'
         event_from_post = self.system.events.create_custom_event(description=description)
@@ -30,6 +38,39 @@ class EventsTest(TestCase):
 
     def test_get_event_by_uuid(self):
         custom_event = self.system.events.create_custom_event(description='test event')
-
         event = self.system.events.get_event_by_uuid(custom_event['uuid'])
         self.assertEquals(event['uuid'], custom_event['uuid'])
+
+    def test_event_fields_operators(self):
+        for index in xrange(5):
+            custom_event = self.system.events.create_custom_event(description='test event')
+        event = self.system.events.get_last_event()
+
+        self.assertEquals(event['uuid'], custom_event['uuid'])  # Test: get_last_event & __getitem__
+        self.assertTrue('uuid' in event)  # Test: __contains__
+        self.assertFalse('fake_field_name' in event)  # Test: __contains__
+        keys = event.keys()
+        self.assertTrue(len(event), len(keys))  # Test: __len__
+        self.assertEqual(keys, list(k for k in event))  # test __iter__
+
+    def test_codes(self):
+        codes = self.system.events.get_codes()
+        self.assertTrue(len(codes) > 0)
+
+        codes_list = self.system.events.get_codes_list()
+        self.assertTrue(any('USER_CREATED'==code for code in codes_list))
+
+    def test_get_levels(self):
+        self.assertEqual(self.system.events.get_levels(),
+                         ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'])
+
+    def test_get_codes_description_list(self):
+        codes_description_list = self.system.events.get_codes_description_list()
+        self.assertTrue(len(codes_description_list) > 0)
+
+    def test_get_visibilities(self):
+        self.assertEqual(self.system.events.get_visibilities(),
+                         ['CUSTOMER', 'INFINIDAT'])
+
+    def test_get_reporters(self):
+        self.assertTrue('CORE' in self.system.events.get_reporters())
