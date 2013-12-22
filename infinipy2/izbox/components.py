@@ -129,9 +129,9 @@ class EnclosureDrive(IZBoxSystemComponent):
     def get_designated_role(self):
         return self.get_data()['designated_role']
     def phasein(self):
-        self.system.api.post("{}/phasein".format(self.get_resource_path()))
+        self.system.api.post("{}/phasein".format(self.get_this_url_path()))
     def phaseout(self):
-        self.system.api.post("{}/phaseout".format(self.get_resource_path()))
+        self.system.api.post("{}/phaseout".format(self.get_this_url_path()))
 
 @IZBoxSystemComponents.install_component_type
 class Service(IZBoxSystemComponent):
@@ -147,13 +147,13 @@ class System(IZBoxSystemComponent):
         return self.system.components.nodes.get(index=self.get_primary_node_index())
 
     def get_primary_node_index(self, use_cache=False):
-        return self.get_field("data", from_cache=True, fetch_if_not_cached=True)["primary_node_id"]
+        return self.get_field("data", from_cache=use_cache, fetch_if_not_cached=True)["primary_node_id"]
 
     def get_secondary_node(self):
         return self.system.components.nodes.get(index=self.get_secondary_node_index())
 
     def get_secondary_node_index(self, use_cache=False):
-        return 1 if self.get_primary_node_index() == 2 else 2
+        return 1 if self.get_primary_node_index(use_cache) == 2 else 2
 
     def get_state(self):
         return self.get_field("data")["system_state"]
