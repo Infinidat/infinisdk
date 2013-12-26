@@ -14,6 +14,7 @@ _INSTALL_REQUIERS = [
     "sentinels",
     "slash",
     "URLObject",
+    "confetti>=2.1.0",
 ]
 
 setup(name="infinipy2",

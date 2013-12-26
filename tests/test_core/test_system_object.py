@@ -35,6 +35,9 @@ class SystemObjectFieldsTest(TestCase):
 
         self.assertEquals(len(EmptyObject.fields), 0)
 
+    def test_unexist_field(self):
+        self.assertRaises(AttributeError, getattr, SampleDerivedObject.fields, 'fake_field')
+
     def test_get_from_cache_miss(self):
         obj = SampleDerivedObject(self.system, {"id": 1})
         self.assertEquals(obj.id, 1)

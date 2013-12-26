@@ -1,50 +1,27 @@
-from ..core.api import APITarget, API
-from ..core.type_binder_container import TypeBinderContainer
+from ..core.api import APITarget
+from ..core.config import config
 from .components import IZBoxSystemComponents
 from .filesystem import Filesystem, Snapshot
 from .user import User
 from .events import Events, PushRule
 
 class IZBox(APITarget):
+    OBJECT_TYPES = [Filesystem, Snapshot, User, PushRule]
+    SYSTEM_COMPONENTS_TYPE = IZBoxSystemComponents
 
     def __init__(self, address, auth=None):
-        """
-        :param address: Either a tuple of (host, port), or a list of such tuples for multiple addresses
-        """
-        super(IZBox, self).__init__()
-        if type(address).__name__ == "Simulator":
-            address = (address.base_url.netloc.hostname, address.base_url.netloc.port or 80)
-        if not isinstance(address[0], (list, tuple)):
-            address = [address]
-        self._addresses = self._normalize_addresses(address)
-        self.objects = TypeBinderContainer(self)
-        if auth is None:
-            # TODO: take from configuration
-            auth = ("infinidat", "123456")
-        self._auth = auth
-        self.api = API(self)
-        for object_type in [Filesystem, Snapshot, User, PushRule]:
-            self.objects.install(object_type)
-
-        self.components = IZBoxSystemComponents(self)
-
+        super(IZBox, self).__init__(address, auth)
         self.events = Events(self)
 
-    def _normalize_addresses(self, addresses):
-        returned = []
-        for address in addresses:
-            if not isinstance(address, tuple):
-                address = (address, 80)
-            if len(address) != 2:
-                raise ValueError("Invalid address specified: {!r}".format(address))
-            returned.append(address)
-        return returned
+    def _is_simulator(self, address):
+        return type(address).__name__ == "Simulator"
+
+    def _get_simulator_address(self, address):
+        port = address.base_url.netloc.port or 80
+        return (address.base_url.netloc.hostname, port)
 
     def get_state(self):
         return self.components.system_component.get_state()
-
-    def get_api_addresses(self):
-        return self._addresses
 
     def is_simulator(self):
         return "izsim" in self.get_name()
@@ -71,12 +48,9 @@ class IZBox(APITarget):
         data = self.components.system_component.get_field("data", from_cache=True, fetch_if_not_cached=True)
         return data
 
-    def get_api_timeout(self):
-        # TODO: take this from config
-        return 180
+    def _get_api_timeout(self):
+        return config.get_path('izbox.defaults.system_api.timeout_seconds')
 
-    def get_api_auth(self):
-        return self._auth
-
-    def __repr__(self):
-        return self._addresses[0][0]
+    def _get_api_auth(self):
+        d = config.get_path('izbox.defaults.system_api')
+        return (d['username'], d['password'])
