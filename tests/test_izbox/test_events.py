@@ -1,3 +1,4 @@
+from infinipy2._compat import xrange
 from ..utils import TestCase
 import forge
 
@@ -52,7 +53,7 @@ class EventsTest(TestCase):
         self.assertFalse('fake_field_name' in event)  # Test: __contains__
         keys = event.keys()
         self.assertTrue(len(event), len(keys))  # Test: __len__
-        self.assertEqual(keys, list(k for k in event))  # test __iter__
+        self.assertEqual(set(keys), set(k for k in event))  # test __iter__
 
     def test_codes(self):
         codes = self.system.events.get_codes()
