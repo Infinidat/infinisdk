@@ -14,4 +14,13 @@ config = confetti.Config(dict(
                 ),
             ),
         ),
+    infinibox=dict(
+        defaults=dict(
+            system_api=dict(
+                username="infinidat",
+                password="123456",
+                timeout_seconds=30,
+                ),
+            ),
+        ),
     ))

@@ -1,0 +1,1 @@
+from .infinibox import InfiniBox
