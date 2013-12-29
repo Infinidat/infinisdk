@@ -12,6 +12,10 @@ config = confetti.Config(dict(
                 password="123456",
                 timeout_seconds=180,
                 ),
+            events = dict(
+                page_size=1000,
+                max_events=10**6,
+                max_page_size=1000),
             ),
         ),
     infinibox=dict(

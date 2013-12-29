@@ -1,6 +1,7 @@
 from ..core.api import APITarget
 from ..core.config import config
 from .components import InfiniBoxSystemComponents
+from .events import Events
 from .volume import Volume
 from .pool import Pool
 
@@ -12,6 +13,7 @@ class InfiniBox(APITarget):
     # Events,
     # User
     # EmailRule,
+    SYSTEM_EVENTS_TYPE = Events
     SYSTEM_COMPONENTS_TYPE = InfiniBoxSystemComponents
 
     def _get_api_auth(self):

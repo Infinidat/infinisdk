@@ -9,6 +9,7 @@ class APITarget(with_metaclass(abc.ABCMeta)):
     Abstract base class for anything that would like to become an API target
     """
     OBJECT_TYPES = []
+    SYSTEM_EVENTS_TYPE = None
     SYSTEM_COMPONENTS_TYPE = None
 
     def __init__(self, address, auth=None):
@@ -32,6 +33,7 @@ class APITarget(with_metaclass(abc.ABCMeta)):
             self.objects.install(object_type)
 
         self.components = self.SYSTEM_COMPONENTS_TYPE(self)
+        self.events = self.SYSTEM_EVENTS_TYPE(self)
 
     def _normalize_addresses(self, addresses):
         if not isinstance(addresses[0], (list, tuple)):

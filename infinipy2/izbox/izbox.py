@@ -8,10 +8,7 @@ from .events import Events, PushRule
 class IZBox(APITarget):
     OBJECT_TYPES = [Filesystem, Snapshot, User, PushRule]
     SYSTEM_COMPONENTS_TYPE = IZBoxSystemComponents
-
-    def __init__(self, address, auth=None):
-        super(IZBox, self).__init__(address, auth)
-        self.events = Events(self)
+    SYSTEM_EVENTS_TYPE = Events
 
     def _is_simulator(self, address):
         return type(address).__name__ == "Simulator"
