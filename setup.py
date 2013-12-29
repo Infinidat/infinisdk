@@ -15,6 +15,7 @@ _INSTALL_REQUIERS = [
     "slash",
     "URLObject",
     "confetti>=2.1.0",
+    "infi.dtypes.wwn>=0.0.2",
 ]
 
 setup(name="infinipy2",

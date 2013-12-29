@@ -4,13 +4,13 @@ from .components import InfiniBoxSystemComponents
 from .events import Events
 from .volume import Volume
 from .pool import Pool
+from .host import Host
+from .cluster import Cluster
 
 
 class InfiniBox(APITarget):
-    OBJECT_TYPES = [Volume, Pool]
+    OBJECT_TYPES = [Volume, Pool, Host, Cluster]
     # FIXME: Should have also:
-    # Cluster & Host,
-    # Events,
     # User
     # EmailRule,
     SYSTEM_EVENTS_TYPE = Events
