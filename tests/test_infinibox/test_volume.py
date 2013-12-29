@@ -1,6 +1,7 @@
 from tests.utils import InfiniBoxTestCase
 from infinipy2._compat import iteritems
 from infinipy2.core import CapacityType
+from infinipy2.core.exceptions import APICommandFailed
 from capacity import GB
 
 
@@ -87,3 +88,9 @@ class VolumeTest(InfiniBoxTestCase):
 
         self.volume.restore(snapshot)
         self.assertEqual(self.volume.get_field('data'), snapshot.get_field('data'))
+
+    def test_get_not_exist_attribute(self):
+        with self.assertRaises(APICommandFailed) as caught:
+            self.system.api.get('volumes/2/bla')
+        received_error = caught.exception.response.get_error()
+        self.assertTrue(isinstance(received_error, dict))

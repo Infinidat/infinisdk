@@ -1,4 +1,5 @@
 from ..utils import TestCase
+from infinipy2._compat import string_types
 
 class ComponentsTest(TestCase):
 
@@ -33,8 +34,10 @@ class ComponentsTest(TestCase):
         self.assertIs(self.system.components[self.system.components.types.Node], self.system.components["nodes"])
 
     def test_components_choose(self):
-        self.system.components.enclosures.choose()
-        self.system.components.nodes.choose()
+        enc = self.system.components.enclosures.choose()
+        node = self.system.components.nodes.choose()
+        self.assertTrue(enc.is_ok())
+        self.assertTrue(node.is_ok())
 
     def test_enclosure_drives(self):
         self.assertEquals(len(self.system.components.enclosure_drives.find()), 480) #capped for scenario maintainability
@@ -45,6 +48,7 @@ class ComponentsTest(TestCase):
     def test_system_component(self):
         system_component = self.system.components.systems.get()
         self.assertIs(system_component, self.system.components.system_component)
+        self.assertIn('system_serial', system_component.get_additional_data())
 
     def test_system_component_does_not_perform_api_get(self):
         self.system.api = None
@@ -65,3 +69,31 @@ class ComponentsTest(TestCase):
     def test_cannot_get_system_component_by_id_lazily(self):
         with self.assertRaises(NotImplementedError):
             self.system.components.get_by_id_lazy(1)
+
+    def test_get_alert_types(self):
+        alert_types = self.system.components.get_alert_types()
+        self.assertTrue(isinstance(alert_types, list))
+        self.assertIsNot(alert_types[0].get('code'), None)
+
+    def test_get_type_info_from_system(self):
+        type_info = self.system.components.get_type_infos_from_system()
+        self.assertIn('node', type_info)
+
+    def test_get_parent_and_sub_components(self):
+        enc = self.system.components.enclosures.choose()
+        with self.assertRaises(NotImplementedError):
+            enc.get_parent()
+
+        rack_1 = self.system.components.racks.choose()
+        enc_parent = enc.get_parent()
+        self.assertEqual(rack_1, enc_parent)
+        self.assertIn(enc, rack_1.get_sub_components())
+
+    def test_get_node_address(self):
+        node = self.system.components.nodes.choose()
+        node_address = node.get_address()
+        self.assertTrue(isinstance(node_address, string_types))
+
+    def test_service(self):
+        service = self.system.components.services.choose()
+        self.assertTrue(isinstance(service.get_name(), string_types))
