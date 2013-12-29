@@ -1,17 +1,17 @@
 from ..core.api import APITarget
 from ..core.config import config
 from .components import InfiniBoxSystemComponents
+from .volume import Volume
+from .pool import Pool
 
 
 class InfiniBox(APITarget):
-    OBJECT_TYPES = []
+    OBJECT_TYPES = [Volume, Pool]
     # FIXME: Should have also:
-    # Volume & Pool,
     # Cluster & Host,
     # Events,
     # User
     # EmailRule,
-    # Snapshot
     SYSTEM_COMPONENTS_TYPE = InfiniBoxSystemComponents
 
     def _get_api_auth(self):

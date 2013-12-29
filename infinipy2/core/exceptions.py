@@ -1,6 +1,9 @@
 class InfinipyException(Exception):
     pass
 
+class InvalidOperationException(InfinipyException):
+    pass
+
 class CacheMiss(InfinipyException):
     pass
 

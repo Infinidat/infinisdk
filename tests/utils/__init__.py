@@ -45,6 +45,18 @@ TestCase=IZBoxTestCase
 class InfiniBoxTestCase(Infinipy2TestCase):
     SYSTEM_CLASS = InfiniBox
 
+    def _create_volume(self, **kwargs):
+        if not kwargs.get('pool_id') and not kwargs.get('pool'):
+            kwargs['pool_id'] = self._create_pool().id
+        vol = self.system.volumes.create(**kwargs)
+        self.addCleanup(vol.delete)
+        return vol
+
+    def _create_pool(self, **kwargs):
+        pool = self.system.pools.create(**kwargs)
+        self.addCleanup(pool.delete)
+        return pool
+
 
 class CoreTestCase(Infinipy2TestCase):
     @infi.unittest.parameters.iterate('system_class', [IZBox, InfiniBox])
