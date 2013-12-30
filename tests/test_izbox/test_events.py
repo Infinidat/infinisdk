@@ -38,6 +38,17 @@ class EventsTest(TestCase):
         self.assertEquals(event_from_list['description'], description)
         self.assertEquals(event_from_list['code'], "CUSTOM_EVENT_INFO")
 
+    def test_create_custom_event_with_data(self):
+        description = 'test events - {param}'
+        data=dict(param=10)
+        event_from_post = self.system.events.create_custom_event(description=description, data=data)
+        actual_data=event_from_post['data'][0]
+        self.assertEquals(actual_data['name'], 'param')
+        self.assertEquals(actual_data['value'], 10)
+        self.assertIn(actual_data['type'], 'int')
+
+
+
     def test_get_event_by_uuid(self):
         custom_event = self.system.events.create_custom_event(description='test event')
         event = self.system.events.get_event_by_uuid(custom_event['uuid'])
