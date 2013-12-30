@@ -26,3 +26,15 @@ class EventsTest(InfiniBoxTestCase):
         self.assertEquals(event_from_post['description'], description)
         self.assertEquals(event_from_list['description'], description)
         self.assertEquals(event_from_list['code'], "CUSTOM_INFO_EVENT")
+
+class EmailRuleTest(InfiniBoxTestCase):
+    def setUp(self):
+        super(EmailRuleTest, self).setUp()
+        self.rule = self.system.emailrules.create()
+        self.addCleanup(self.rule.delete)
+
+    def test_get_name(self):
+        self.assertTrue(self.rule.get_name().startswith('rule_'))
+
+    def test_get_all(self):
+        self.assertIn(self.rule, self.system.emailrules.get_all())

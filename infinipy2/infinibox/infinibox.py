@@ -1,7 +1,7 @@
 from ..core.api import APITarget
 from ..core.config import config
 from .components import InfiniBoxSystemComponents
-from .events import Events
+from .events import Events, EmailRule
 from .volume import Volume
 from .pool import Pool
 from .host import Host
@@ -10,9 +10,7 @@ from .user import User
 
 
 class InfiniBox(APITarget):
-    OBJECT_TYPES = [Volume, Pool, Host, Cluster, User]
-    # FIXME: Should have also:
-    # EmailRule,
+    OBJECT_TYPES = [Volume, Pool, Host, Cluster, User, EmailRule]
     SYSTEM_EVENTS_TYPE = Events
     SYSTEM_COMPONENTS_TYPE = InfiniBoxSystemComponents
 
