@@ -50,7 +50,7 @@ class InfiniBoxSystemTest(InfiniBoxTestCase):
         self.assertEqual(len(obj.get_all_metadata()), 0)
 
     def test_single_metadata_creation_on_all_infinibox_objects(self):
-        ignore_types = ['volumes']
+        ignore_types = ['volumes', 'users']
 
         type_classes = [obj_type for obj_type in self.system.OBJECT_TYPES
                         if obj_type.get_plural_name() not in ignore_types]

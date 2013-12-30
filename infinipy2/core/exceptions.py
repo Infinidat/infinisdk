@@ -41,7 +41,7 @@ class CommandNotApproved(APICommandFailed):
         self.reasons = []
         json = response.response.json()
         if json is not None:
-            self.reasons.extend((json.get("error") or {}).get("reasons", ()))
+            self.reasons.extend((json.get("error") or {}).get("reasons") or tuple())
 
     def __repr__(self):
         return "Command forbidden without explicit approval ({0})".format(", ".join(self.reasons))

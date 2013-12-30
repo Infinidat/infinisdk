@@ -6,12 +6,12 @@ from .volume import Volume
 from .pool import Pool
 from .host import Host
 from .cluster import Cluster
+from .user import User
 
 
 class InfiniBox(APITarget):
-    OBJECT_TYPES = [Volume, Pool, Host, Cluster]
+    OBJECT_TYPES = [Volume, Pool, Host, Cluster, User]
     # FIXME: Should have also:
-    # User
     # EmailRule,
     SYSTEM_EVENTS_TYPE = Events
     SYSTEM_COMPONENTS_TYPE = InfiniBoxSystemComponents
