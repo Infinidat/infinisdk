@@ -23,3 +23,26 @@ class InfiniBox(APITarget):
 
     def _is_simulator(self, address):
         return False  # TODO: Implement!! (and add _get_simulator_address method)
+
+    def get_state(self):
+        return self.components.system_component.get_state()
+
+    def is_simulator(self):
+        raise NotImplementedError()
+
+    def is_mock(self):
+        raise NotImplementedError()
+
+    def get_system_info(self, field_name):
+        return self.components.system_component.get_field(field_name,
+                                                          from_cache=True,
+                                                          fetch_if_not_cached=True)
+
+    def get_name(self):
+        return self.get_system_info('name')
+
+    def get_serial(self):
+        return self.get_system_info('serial_number')
+
+    def get_version(self):
+        return self.get_system_info('version')

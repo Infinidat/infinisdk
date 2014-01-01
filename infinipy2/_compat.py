@@ -37,8 +37,12 @@ if PY2:
 
     from itertools import izip as zip
     xrange = _builtins.xrange
+    sorted = _builtins.sorted
+    cmp = _builtins.cmp
+
 else:
 
+    import functools
     import http.client as httplib
 
     string_types = (str,)
@@ -59,6 +63,19 @@ else:
 
     def iterkeys(d):
         return iter(d.key())
+
+    def sorted(iterable, cmp=None, key=None, reverse=False):
+        if cmp is not None:
+            key=functools.cmp_to_key(cmp)
+        return _builtins.sorted(iterable, key=key, reverse=reverse)
+
+    def cmp(x, y):
+        if x > y:
+            return 1
+        elif x < y:
+            return -1
+        return 0
+
 
 if sys.version_info < (2, 7):
 

@@ -25,6 +25,9 @@ config = confetti.Config(dict(
                 password="123456",
                 timeout_seconds=30,
                 ),
+            enlosure_drives=dict(
+                total_count=dict(mock=0),
+                ),
             ),
         ),
     ))
