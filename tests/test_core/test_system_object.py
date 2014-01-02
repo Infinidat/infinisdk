@@ -1,4 +1,4 @@
-from ..utils import TestCase
+from ..utils import CoreTestCase
 from infinipy2.core import Field, SystemObject
 from infinipy2.core.exceptions import (MissingFields, CacheMiss,
                                        AttributeAlreadyExists)
@@ -15,7 +15,7 @@ class SampleDerivedObject(SampleBaseObject):
         Field(name="cached_by_default", cached=True),
     ]
 
-class SystemObjectFieldsTest(TestCase):
+class SystemObjectFieldsTest(CoreTestCase):
 
     def setUp(self):
         super(SystemObjectFieldsTest, self).setUp()
@@ -94,7 +94,7 @@ class SystemObjectFieldsTest(TestCase):
         self.assertEquals(some_derived_obj.get_id(), 1)
 
 
-class SystemObjectEqualityTest(TestCase):
+class SystemObjectEqualityTest(CoreTestCase):
 
     def test__equality(self):
         system1 = object()
@@ -120,7 +120,7 @@ class SystemObjectEqualityTest(TestCase):
         diff_type1 = SampleDerivedObject(system1, {"id": 100})
         self.assertEqual(NotImplemented, diff_type1.__eq__(diff_type2))
 
-class SystemObjectCreationTest(TestCase):
+class SystemObjectCreationTest(CoreTestCase):
 
     def test_object_creation_missing_fields(self):
         dummy_system = object()
