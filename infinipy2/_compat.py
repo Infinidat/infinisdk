@@ -59,3 +59,13 @@ else:
 
     def iterkeys(d):
         return iter(d.key())
+
+if sys.version_info < (2, 7):
+
+    def get_timedelta_total_seconds(d):
+        return d.seconds
+
+else:
+
+    def get_timedelta_total_seconds(d):
+        return d.total_seconds()

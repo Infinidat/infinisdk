@@ -18,7 +18,7 @@ class ComponentsTest(TestCase):
             enclosures.safe_get(id=102000),
             ]
         self.assertEquals(
-            len({id(x) for x in candidates}), 1,
+            len(set(id(x) for x in candidates)), 1,
             "Objects are unexpectedly recreated for each fetch"
         )
 

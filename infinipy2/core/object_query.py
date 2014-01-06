@@ -89,7 +89,7 @@ class ObjectQuery(object):
 
 
     def __repr__(self):
-        return "<Query {}>".format(self.query)
+        return "<Query {0}>".format(self.query)
 
     ### Modifiers
 

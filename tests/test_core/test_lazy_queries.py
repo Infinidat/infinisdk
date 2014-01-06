@@ -34,6 +34,6 @@ class LazyQueryTest(TestCase):
     def assert_fetched(self, pages):
         for i in range(0, len(self.result), self.PAGE_SIZE):
             if i // self.PAGE_SIZE in pages:
-                self.assertIsNotNone(self.result._fetched[i], "Object {} not fetched as expected".format(i))
+                self.assertIsNotNone(self.result._fetched[i], "Object {0} not fetched as expected".format(i))
             else:
-                self.assertIsNone(self.result._fetched.get(i), "Object {} unexpectedly fetched".format(i))
+                self.assertIsNone(self.result._fetched.get(i), "Object {0} unexpectedly fetched".format(i))

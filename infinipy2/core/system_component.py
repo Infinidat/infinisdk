@@ -63,7 +63,7 @@ class SpecificComponentBinderGetter(object):
     def __init__(self, object_type):
         super(SpecificComponentBinderGetter, self).__init__()
         self.object_type = object_type
-        self.cached_name = "_cached__{}".format(self.object_type.get_plural_name())
+        self.cached_name = "_cached__{0}".format(self.object_type.get_plural_name())
 
     def __get__(self, components_binder, _):
         returned = getattr(components_binder, self.cached_name, None)

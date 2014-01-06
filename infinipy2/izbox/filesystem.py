@@ -34,7 +34,7 @@ class Filesystem(SystemObject):
         return Snapshot(self.system, resp.get_result())
 
     def rollback(self, snapshot):
-        self.system.api.post("filesystems/{}/rollback".format(self.id), data={"snapshot_id": snapshot.id})
+        self.system.api.post("filesystems/{0}/rollback".format(self.id), data={"snapshot_id": snapshot.id})
 
     def get_snapshots(self):
         return self.system.snapshots.find(parent_id=self.id)

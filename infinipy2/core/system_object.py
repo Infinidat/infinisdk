@@ -18,7 +18,7 @@ DONT_CARE = Sentinel("DONT_CARE")
 
 def _install_slash_hooks():
     for (hook, operation) in itertools.product(["pre", "post"], ['creation', 'deletion', 'update']):
-        slash.hooks.ensure_custom_hook("{}_object_{}".format(hook, operation))
+        slash.hooks.ensure_custom_hook("{0}_object_{1}".format(hook, operation))
     slash.hooks.ensure_custom_hook("object_operation_failure")
 
 _install_slash_hooks()
@@ -96,7 +96,7 @@ class SystemObject(with_metaclass(FieldsMeta)):
                 missing_fields.add(field.name)
             returned[field.api_name] = field.translator.to_api(field_value)
         if missing_fields:
-            raise MissingFields("Following fields were not specified: {}".format(", ".join(sorted(missing_fields))))
+            raise MissingFields("Following fields were not specified: {0}".format(", ".join(sorted(missing_fields))))
         returned.update(extra_fields)
         return returned
 
@@ -117,16 +117,16 @@ class SystemObject(with_metaclass(FieldsMeta)):
 
         .. note:: this does not necessarily generate all fields that are passable into ``create``, only mandatory fields
         """
-        return translate_special_values({
-            field.name: field.generate_default()
+        return translate_special_values(dict(
+            (field.name, field.generate_default())
             for field in cls.fields
-            if field.mandatory})
+            if field.mandatory))
 
     @classmethod
     def get_url_path(cls, system):
         url_path = cls.URL_PATH
         if url_path is None:
-            url_path = "/api/rest/{}".format(cls.get_plural_name())
+            url_path = "/api/rest/{0}".format(cls.get_plural_name())
         return url_path
 
     @classmethod
@@ -231,7 +231,7 @@ class SystemObject(with_metaclass(FieldsMeta)):
                 returned[field_name] = value
         if missed:
             raise CacheMiss(
-                "The following fields could not be obtained from cache: {}".format(
+                "The following fields could not be obtained from cache: {0}".format(
                     ", ".join(repr(field) for field in missed)))
 
         return returned
@@ -282,7 +282,7 @@ class SystemObject(with_metaclass(FieldsMeta)):
         return URL(self.get_url_path(self.system)).add_path(str(self.id))
 
     def __repr__(self):
-        return "<{} id={}>".format(type(self).__name__, self.id)
+        return "<{0} id={1}>".format(type(self).__name__, self.id)
 
 @contextmanager
 def _possible_api_failure_context():

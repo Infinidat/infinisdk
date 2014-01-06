@@ -18,7 +18,7 @@ class TypeBinderQueryTest(TestCase):
 
     def test_get_too_many_items(self):
         for i in range(2):
-            self.simulator.create_filesystem("fs{}".format(i))
+            self.simulator.create_filesystem("fs{0}".format(i))
         with self.assertRaises(TooManyObjectsFound):
             self.system.objects.filesystems.get()
 
@@ -85,7 +85,7 @@ class QueryTest(TestCase):
 
     def assert_query_equals(self, q, expected):
         if expected is not None:
-            expected = "?{}".format(expected)
+            expected = "?{0}".format(expected)
         else:
             expected = ""
         self.assertEquals(

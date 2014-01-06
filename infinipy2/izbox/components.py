@@ -63,7 +63,7 @@ class IZBoxSystemComponent(SystemObject):
     def get_url_path(cls, system):
         returned = URL("/api/rest/components")
         if cls is not system.components.object_type:
-            returned = returned.add_query_param("type", "eq:{}".format(cls.get_type_name()))
+            returned = returned.add_query_param("type", "eq:{0}".format(cls.get_type_name()))
         return returned
 
     @classmethod
@@ -95,7 +95,7 @@ class Enclosure(IZBoxSystemComponent):
 class Node(IZBoxSystemComponent):
 
     def get_address(self):
-        return ("{}-{}".format(self.system.get_name(), self.get_index()))
+        return ("{0}-{1}".format(self.system.get_name(), self.get_index()))
 
     def is_primary(self):
         return self is self.system.components.system_component.get_primary_node()
@@ -112,7 +112,7 @@ class NodeEthPort(IZBoxSystemComponent):
 
     @classmethod
     def get_plural_name(self):
-        return "{}s".format(self.get_type_name())
+        return "{0}s".format(self.get_type_name())
 
 
 @IZBoxSystemComponents.install_component_type
@@ -124,14 +124,14 @@ class EnclosureDrive(IZBoxSystemComponent):
 
     @classmethod
     def get_plural_name(self):
-        return "{}s".format(self.get_type_name())
+        return "{0}s".format(self.get_type_name())
 
     def get_designated_role(self):
         return self.get_data()['designated_role']
     def phasein(self):
-        self.system.api.post("{}/phasein".format(self.get_this_url_path()))
+        self.system.api.post("{0}/phasein".format(self.get_this_url_path()))
     def phaseout(self):
-        self.system.api.post("{}/phaseout".format(self.get_this_url_path()))
+        self.system.api.post("{0}/phaseout".format(self.get_this_url_path()))
 
 @IZBoxSystemComponents.install_component_type
 class Service(IZBoxSystemComponent):

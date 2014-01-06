@@ -5,7 +5,7 @@ import requests
 from logbook import Logger
 
 from .special_values import translate_special_values
-from ..._compat import httplib
+from ..._compat import httplib, get_timedelta_total_seconds
 from ..exceptions import APICommandFailed, CommandNotApproved, APITransportFailure
 from urlobject import URLObject as URL
 
@@ -15,7 +15,7 @@ def _get_request_delegate(http_method):
     def returned(self, *args, **kwargs):
         return self.request(http_method, *args, **kwargs)
     returned.__name__ = http_method
-    returned.__doc__ = "Shortcut for :func:`.request({!r}) <API.request>`".format(http_method)
+    returned.__doc__ = "Shortcut for :func:`.request({0!r}) <API.request>`".format(http_method)
     return returned
 
 def _join_path(url, path):
@@ -82,14 +82,14 @@ class API(object):
             if http_method != "get" and self._approved and not path.startswith("/api/internal/"):
                 full_url = full_url.add_query_param("approved", "true")
             hostname = full_url.hostname
-            _logger.debug("{} <-- {} {}", hostname, http_method.upper(), full_url)
+            _logger.debug("{0} <-- {1} {2}", hostname, http_method.upper(), full_url)
             if data is not None:
-                _logger.debug("{} <-- DATA: {}" , hostname, data)
+                _logger.debug("{0} <-- DATA: {1}" , hostname, data)
             response = self._session.request(http_method, full_url, data=data, **kwargs)
-            elapsed = response.elapsed.total_seconds()
-            _logger.debug("{} --> {} {} (took {:.04f}s)", hostname, response.status_code, response.reason, elapsed)
+            elapsed = get_timedelta_total_seconds(response.elapsed)
+            _logger.debug("{0} --> {1} {2} (took {3:.04f}s)", hostname, response.status_code, response.reason, elapsed)
             returned = Response(http_method, full_url, data, response)
-            _logger.debug("{} --> {}", hostname, returned.get_json())
+            _logger.debug("{0} --> {1}", hostname, returned.get_json())
             if response.status_code != httplib.SERVICE_UNAVAILABLE:
                 if specified_address is None: # need to remember our next API target
                     self._active_url = url
@@ -117,7 +117,7 @@ class API(object):
         return self._urls
 
     def _url_from_address(self, address):
-        return URL("http://{}:{}".format(*address)).add_path("/api/rest")
+        return URL("http://{0}:{1}".format(*address)).add_path("/api/rest")
 
 
 class Response(object):
