@@ -6,7 +6,7 @@ test: env
 env: .env/.up-to-date
 
 .env/.up-to-date: setup.py Makefile
-        virtualenv .env
+	virtualenv .env
 	.env/bin/pip install -e ../izsim
 	.env/bin/pip install -e .
 	.env/bin/pip install nose coverage infi.unittest
