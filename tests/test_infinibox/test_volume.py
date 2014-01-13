@@ -79,15 +79,17 @@ class VolumeTest(InfiniBoxTestCase):
             self.assertTrue(self.volume.is_in_system())
 
     def test_restore(self):
-        self.skipTest('Not Implemented Yet')
-        snapshot_data = self.volume.create_snapshot()
-        snapshot = self.system.volumes.get_by_id_lazy(snapshot_data.get_json()['result'])
+        snapshot = self.volume.create_snapshot()
 
         self.assertTrue(self.volume.is_master_volume())
         self.assertTrue(snapshot.is_snapshot())
 
         self.volume.restore(snapshot)
-        self.assertEqual(self.volume.get_field('data'), snapshot.get_field('data'))
+        last_event = self.system.events.get_last_event()
+        self.assertEqual(last_event['code'], 'VOLUME_RESTORE')
+
+        snapshot.delete()
+        self.assertFalse(snapshot.is_in_system())
 
     def test_get_not_exist_attribute(self):
         with self.assertRaises(APICommandFailed) as caught:

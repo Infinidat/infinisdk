@@ -5,7 +5,7 @@ import requests
 from logbook import Logger
 
 from .special_values import translate_special_values
-from ..._compat import httplib, get_timedelta_total_seconds
+from ..._compat import httplib, get_timedelta_total_seconds, string_types
 from ..exceptions import APICommandFailed, CommandNotApproved, APITransportFailure
 from urlobject import URLObject as URL
 
@@ -69,9 +69,9 @@ class API(object):
         """
         returned = None
         kwargs.setdefault("timeout", self._default_request_timeout)
-        data = kwargs.get("data")
-        if data is not None:
-            data = json.dumps(translate_special_values(kwargs.pop("data")))
+        data = kwargs.pop("data", None)
+        if data is not None and not isinstance(data, string_types):
+            data = json.dumps(translate_special_values(data))
 
         specified_address = kwargs.pop("address", None)
         urls = self._get_possible_urls(specified_address)

@@ -1,12 +1,20 @@
 from capacity import GB
 from collections import namedtuple
 from ..core import Field, SystemObject, CapacityType
+from storage_interfaces.scsi.abstracts import ScsiVolume
 from ..core.exceptions import InvalidOperationException
 from ..core.api.special_values import Autogenerate
 from .system_object import InfiniBoxObject
+import slash
 
 PROVISIONING = namedtuple('Provisioning', ['Thick', 'Thin'])('THICK', 'THIN')
 VOLUME_TYPES = namedtuple('VolumeTypes', ['Master', 'Snapshot', 'Clone'])('MASTER', 'SNAP', 'CLONE')
+
+
+def _install_slash_fork_hooks():
+    for phase in ["begin", "cancel", "finish"]:
+        slash.hooks.ensure_custom_hook("{0}_fork".format(phase))
+_install_slash_fork_hooks()
 
 
 class Volume(InfiniBoxObject):
@@ -23,6 +31,10 @@ class Volume(InfiniBoxObject):
 
     def get_pool(self):
         return self.system.pools.get_by_id_lazy(self.get_pool_id())
+
+    def get_unique_key(self):
+        system_id = self.system.get_api_addresses()[0][0]
+        return (system_id, self.get_name())
 
     @classmethod
     def create(cls, system, **fields):
@@ -41,11 +53,18 @@ class Volume(InfiniBoxObject):
         return self.get_type() == VOLUME_TYPES.Clone
 
     def _create_child(self, name):
+        slash.hooks.begin_fork(vol=self)
         if not name:
             name = Autogenerate('vol_{uuid}')
         data = {'name': name, 'parent_id': self.get_id()}
-        resp = self.system.api.post(self.get_url_path(self.system), data=data)
-        return self.__class__(self.system, resp.get_result())
+        try:
+            resp = self.system.api.post(self.get_url_path(self.system), data=data)
+        except Exception:
+            slash.hooks.cancel_fork(vol=self)
+            raise
+        child = self.__class__(self.system, resp.get_result())
+        slash.hooks.finish_fork(vol=self, child=child)
+        return child
 
     def create_clone(self, name=None):
         if self.is_snapshot():
@@ -57,8 +76,9 @@ class Volume(InfiniBoxObject):
             raise InvalidOperationException('Cannot create snapshot for snapshot')
         return self._create_child(name)
 
-    def resore(self, snapshot):
-        raise NotImplementedError()
+    def restore(self, snapshot):
+        snapshot_data = int(snapshot.get_field('data'))
+        self.update_field('data', snapshot_data)
 
     def get_snapshots(self):
         return self.get_children()
@@ -74,3 +94,5 @@ class Volume(InfiniBoxObject):
         if parent_id:
             return self.system.volumes.get_by_id_lazy(parent_id)
         return None
+
+ScsiVolume.register(Volume)
