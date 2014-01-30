@@ -2,9 +2,10 @@ from capacity import GB
 from collections import namedtuple
 from ..core import Field, SystemObject, CapacityType
 from storage_interfaces.scsi.abstracts import ScsiVolume
-from ..core.exceptions import InvalidOperationException
+from ..core.exceptions import InvalidOperationException, InfinipyException
 from ..core.api.special_values import Autogenerate
 from .system_object import InfiniBoxObject
+from .lun import LogicalUnit
 import slash
 
 PROVISIONING = namedtuple('Provisioning', ['Thick', 'Thin'])('THICK', 'THIN')
@@ -85,6 +86,13 @@ class Volume(InfiniBoxObject):
 
     def get_clones(self):
         return self.get_children()
+
+    def get_lun(self):
+        res = self.system.api.get(self.get_this_url_path().add_path('luns'))
+        luns_data = res.get_result()
+        if len(luns_data) > 1:
+            raise InfinipyException('Volume could not have multiple luns')
+        return LogicalUnit(self.system, **luns_data[0])
 
     def get_children(self):
         return self.find(self.system, parent_id=self.get_id())

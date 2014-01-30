@@ -1,10 +1,10 @@
 from ..core import Field
 from ..core.api.special_values import Autogenerate
-from .system_object import InfiniBoxObject
+from .system_object import InfiniBoxLURelatedObject
 from infi.dtypes.wwn import WWN
 
 
-class Host(InfiniBoxObject):
+class Host(InfiniBoxLURelatedObject):
 
     FIELDS = [
         Field("id", type=int, is_identity=True),

@@ -112,8 +112,12 @@ class SystemObject(with_metaclass(FieldsMeta)):
         return cls.BINDER_CLASS(cls, system)
 
     @classmethod
+    def get_type_name(cls):
+        return cls.__name__.lower()
+
+    @classmethod
     def get_plural_name(cls):
-        return cls.__name__.lower() + "s"
+        return cls.get_type_name() + "s"
 
     @classmethod
     def get_creation_defaults(cls):
