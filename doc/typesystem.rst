@@ -220,6 +220,7 @@ Types in the system are classes deriving from :class:`the SystemObject class<.Sy
 
 
   >>> from infinipy2.core import *
+  >>> from api_object_schema import *
   >>> from capacity import *
   >>> import string
 

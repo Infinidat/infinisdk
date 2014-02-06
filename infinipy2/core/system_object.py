@@ -9,7 +9,8 @@ from urlobject import URLObject as URL
 from .exceptions import APICommandFailed, ObjectNotFound
 from .._compat import with_metaclass, iteritems, itervalues, httplib
 from .exceptions import MissingFields, CacheMiss
-from .fields import FieldsMeta
+from api_object_schema import FieldsMeta as FieldsMetaBase
+from .field import Field
 from .object_query import ObjectQuery
 from .type_binder import TypeBinder
 from .api.special_values import translate_special_values
@@ -22,6 +23,10 @@ def _install_slash_hooks():
     slash.hooks.ensure_custom_hook("object_operation_failure")
 
 _install_slash_hooks()
+
+class FieldsMeta(FieldsMetaBase):
+
+    FIELD_FACTORY = Field
 
 class SystemObject(with_metaclass(FieldsMeta)):
     FIELDS = []

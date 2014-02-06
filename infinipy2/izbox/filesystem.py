@@ -1,5 +1,7 @@
 from capacity import byte, GB
-from ..core import SystemObject, Field, FunctionTranslator
+from ..core import SystemObject
+from ..core.field import Field
+from api_object_schema import FunctionTranslator
 from ..core.system_object_utils import make_getter_updater, make_getter
 from ..core.api.special_values import Autogenerate
 
