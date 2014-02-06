@@ -10,7 +10,7 @@ class SampleBaseObject(SystemObject):
 
 class SampleDerivedObject(SampleBaseObject):
     FIELDS = [
-        Field(name="number", type=int, mandatory=True),
+        Field(name="number", type=int, creation_parameter=True),
         Field(name="cached_by_default", cached=True),
     ]
 

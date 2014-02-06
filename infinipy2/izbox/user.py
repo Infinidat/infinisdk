@@ -7,10 +7,10 @@ class User(SystemObject):
 
     FIELDS = [
         Field("id", is_identity=True),
-        Field("role", mandatory=True, default="INFINIDAT"),
-        Field("email", mandatory=True, default=Autogenerate("user_{timestamp}@infinidat.com")),
-        Field("name", api_name="username", mandatory=True, default=Autogenerate("user_{timestamp}")),
-        Field("password", mandatory=True, default="12345678"),
+        Field("role", creation_parameter=True, mutable=True, default="INFINIDAT"),
+        Field("email", creation_parameter=True, mutable=True, default=Autogenerate("user_{timestamp}@infinidat.com")),
+        Field("name", api_name="username", creation_parameter=True, mutable=True, default=Autogenerate("user_{timestamp}")),
+        Field("password", creation_parameter=True, mutable=True, default="12345678"),
     ]
 
     get_name, update_name = make_getter_updater("name")

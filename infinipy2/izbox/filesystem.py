@@ -9,20 +9,20 @@ class Filesystem(SystemObject):
     FIELDS = [
         Field("id", is_identity=True),
         Field("quota", api_name="quota_in_bytes",
-              default=GB, mandatory=True,
+              default=GB, creation_parameter=True, mutable=True,
               translator=FunctionTranslator(to_api=lambda x: int(x // byte), from_api=lambda x: int(x) * byte)),
-        Field("name", mandatory=True, default=Autogenerate("fs_{uuid}")),
+        Field("name", creation_parameter=True, mutable=True, default=Autogenerate("fs_{uuid}")),
 
-        Field("cifs_access_list", mandatory=True, type=list, default=[{"read_only": False, "username": "Everyone"}]),
-        Field("nfs_access_list",  mandatory=True, type=list, default=[{"allow_root_access": False, "host": "*", "read_only": False, "secure": True}]),
+        Field("cifs_access_list", creation_parameter=True, mutable=True, type=list, default=[{"read_only": False, "username": "Everyone"}]),
+        Field("nfs_access_list",  creation_parameter=True, mutable=True, type=list, default=[{"allow_root_access": False, "host": "*", "read_only": False, "secure": True}]),
 
-        Field("compression_type", mandatory=True, default="off"),
-        Field("owned_by",         mandatory=True, default="CUSTOMER"),
-        Field("permissions",      mandatory=True, type=int, default=0o777),
-        Field("shared_by_cifs",   mandatory=True, type=bool, default=True),
-        Field("shared_by_nfs",    mandatory=True, type=bool, default=True),
-        Field("user_id",          mandatory=True, type=int, default=0),
-        Field("group_id",         mandatory=True, type=int, default=0),
+        Field("compression_type", creation_parameter=True, mutable=True, default="off"),
+        Field("owned_by",         creation_parameter=True, mutable=True, default="CUSTOMER"),
+        Field("permissions",      creation_parameter=True, mutable=True, type=int, default=0o777),
+        Field("shared_by_cifs",   creation_parameter=True, mutable=True, type=bool, default=True),
+        Field("shared_by_nfs",    creation_parameter=True, mutable=True, type=bool, default=True),
+        Field("user_id",          creation_parameter=True, mutable=True, type=int, default=0),
+        Field("group_id",         creation_parameter=True, mutable=True, type=int, default=0),
     ]
 
     get_quota, update_quota = make_getter_updater("quota")

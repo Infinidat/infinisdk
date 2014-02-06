@@ -90,8 +90,10 @@ class SystemObject(with_metaclass(FieldsMeta)):
         missing_fields = set()
         extra_fields = fields.copy()
         for field in cls.fields:
-            if not field.mandatory and field.name not in fields:
-                continue
+            if field.name not in fields:
+                if not field.creation_parameter or field.optional:
+                    continue
+
             field_value = fields.get(field.name, NOTHING)
             if field_value is NOTHING:
                 field_value = field.generate_default()
@@ -125,7 +127,7 @@ class SystemObject(with_metaclass(FieldsMeta)):
         return translate_special_values(dict(
             (field.name, field.generate_default())
             for field in cls.fields
-            if field.mandatory))
+            if field.creation_parameter and not field.optional))
 
     @classmethod
     def get_url_path(cls, system):

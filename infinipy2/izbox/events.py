@@ -93,10 +93,10 @@ class PushRule(SystemObject):
 
     FIELDS = [
         Field("id", type=int, is_identity=True),
-        Field("visibility", mandatory=True, default="CUSTOMER"),
-        Field("filters", mandatory=True, default=list),
-        Field("recipients", mandatory=True, default=list),
-        Field("name", mandatory=True, default=Autogenerate("rule_{timestamp}")),
+        Field("visibility", creation_parameter=True, mutable=True, default="CUSTOMER"),
+        Field("filters", creation_parameter=True, mutable=True, default=list),
+        Field("recipients", creation_parameter=True, mutable=True, default=list),
+        Field("name", creation_parameter=True, mutable=True, default=Autogenerate("rule_{timestamp}")),
     ]
 
     get_name, update_name = make_getter_updater("name")
