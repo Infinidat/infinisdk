@@ -101,7 +101,7 @@ class SystemObject(with_metaclass(FieldsMeta)):
             extra_fields.pop(field.api_name, None)
             if field_value is NOTHING:
                 missing_fields.add(field.name)
-            returned[field.api_name] = field.translator.to_api(field_value)
+            returned[field.api_name] = field.type.translator.to_api(field_value)
         if missing_fields:
             raise MissingFields("Following fields were not specified: {0}".format(", ".join(sorted(missing_fields))))
         returned.update(extra_fields)
@@ -200,7 +200,7 @@ class SystemObject(with_metaclass(FieldsMeta)):
         for field_name in field_names:
             field = self.fields.get(field_name, None)
             if field is not None:
-                value = field.translator.from_api(self._cache[field.api_name])
+                value = field.type.translator.from_api(self._cache[field.api_name])
             else:
                 value = self._cache[field_name]
             returned[field_name] = value
@@ -264,7 +264,7 @@ class SystemObject(with_metaclass(FieldsMeta)):
                 field = self.fields[field_name]
             except LookupError:
                 continue
-            update_dict[field.api_name] = field.translator.to_api(field_value)
+            update_dict[field.api_name] = field.type.translator.to_api(field_value)
             if field.api_name != field_name:
                 update_dict.pop(field_name)
 

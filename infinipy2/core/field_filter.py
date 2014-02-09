@@ -9,5 +9,5 @@ class FieldFilter(object):
     def add_to_url(self, urlobj):
         return urlobj.add_query_param(self.field.api_name, "{0}:{1}".format(
             self.operator_name,
-            self.field.translator.to_api(self.value)))
+            self.field.type.translator.to_api(self.value)))
 

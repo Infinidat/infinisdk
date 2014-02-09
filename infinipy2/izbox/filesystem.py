@@ -1,7 +1,7 @@
-from capacity import byte, GB
+from capacity import byte, Capacity, GB
 from ..core import SystemObject
 from ..core.field import Field
-from api_object_schema import FunctionTranslator
+from api_object_schema import FunctionTranslator, TypeInfo
 from ..core.system_object_utils import make_getter_updater, make_getter
 from ..core.api.special_values import Autogenerate
 
@@ -9,8 +9,9 @@ class Filesystem(SystemObject):
     FIELDS = [
         Field("id", is_identity=True),
         Field("quota", api_name="quota_in_bytes",
-              default=GB, creation_parameter=True, mutable=True,
-              translator=FunctionTranslator(to_api=lambda x: int(x // byte), from_api=lambda x: int(x) * byte)),
+              type=TypeInfo(Capacity, api_type=int,
+                            translator=FunctionTranslator(to_api=lambda x: int(x // byte), from_api=lambda x: int(x) * byte)),
+              default=GB, creation_parameter=True, mutable=True),
         Field("name", creation_parameter=True, mutable=True, default=Autogenerate("fs_{uuid}")),
 
         Field("cifs_access_list", creation_parameter=True, mutable=True, type=list, default=[{"read_only": False, "username": "Everyone"}]),
@@ -52,4 +53,3 @@ class Snapshot(Filesystem):
     @classmethod
     def get_creation_defaults(cls):
         return {"name": Filesystem.fields.name.generate_default().generate()}
-

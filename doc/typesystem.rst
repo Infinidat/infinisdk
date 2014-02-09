@@ -229,8 +229,9 @@ Types in the system are classes deriving from :class:`the SystemObject class<.Sy
   ...        Field(name="id", is_unique=True, is_identity=True),
   ...        Field("name", mutable=True, type=TypeInfo(str, min_length=FROM_CONFIG("defaults.max...."), max_length=1000, charset=string.printable), creation_parameter=True),
   ...        Field(
-  ...            "quota", type=TypeInfo(Capacity, min=0, max=TiB), api_name="quota_in_bytes",
-  ...            translator=FunctionTranslator(to_api=lambda x: int(x // byte), from_api=lambda x: int(x) * bytes),
+  ...            "quota", api_name="quota_in_bytes",
+  ...            type=TypeInfo(Capacity, min=0, max=TiB, api_type=int, 
+  ...                          translator=FunctionTranslator(to_api=lambda x: int(x // byte), from_api=lambda x: int(x) * bytes)),
   ...            creation_parameter=True, mutable=True
   ...          ),
   ...     ]
