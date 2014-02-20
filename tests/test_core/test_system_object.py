@@ -1,6 +1,7 @@
 from ..utils import TestCase
-from infinipy2.core import *
-from infinipy2.core.exceptions import MissingFields, CacheMiss
+from infinipy2.core import Field, SystemObject
+from infinipy2.core.exceptions import (MissingFields, CacheMiss,
+                                       AttributeAlreadyExists)
 
 class SampleBaseObject(SystemObject):
     FIELDS = [
@@ -53,6 +54,44 @@ class SystemObjectFieldsTest(TestCase):
         value = "some_value_here"
         obj = SampleDerivedObject(self.system, {"id": 1, "cached_by_default": value})
         self.assertEquals(obj.get_field("cached_by_default"), value)
+
+    def test_auto_getter_attribute_already_exists_in_same_class(self):
+        with self.assertRaises(AttributeAlreadyExists):
+            class SomeObjectForGetter(SystemObject):
+                FIELDS = [Field("id")]
+                get_id = lambda self: 'my id'
+
+        with self.assertRaises(AttributeAlreadyExists):
+            class SomeObjectForUpdater(SystemObject):
+                FIELDS = [Field("id", mutable=True)]
+                _id = 'my id'
+                def update_id(self, value): self._id = value
+
+    def test_auto_getter_attribute_already_exists_in_base_class1(self):
+        class SomeObject(SystemObject):
+            FIELDS = [Field("id")]
+
+        class SomeDerivedObject(SomeObject):
+            _id = 'other id'
+            def get_id(self): return self._id
+            def update_id(self, value): self._id = value
+
+        some_derived_obj = SomeDerivedObject(self.system, {"id": 1})
+        self.assertEquals(some_derived_obj.get_id(), 'other id')
+        some_derived_obj.update_id('bla bla')
+        self.assertEquals(some_derived_obj.get_id(), 'bla bla')
+
+    def test_auto_getter_attribute_already_exists_in_base_class2(self):
+        class SomeObject(SystemObject):
+            _id = 'my id'
+            def get_id(self): return self._id
+            def update_id(self, value): self._id = value
+
+        class SomeDerivedObject(SomeObject):
+            FIELDS = [Field("id", cached=True, mutable=True)]
+
+        some_derived_obj = SomeDerivedObject(self.system, {"id": 1})
+        self.assertEquals(some_derived_obj.get_id(), 1)
 
 
 class SystemObjectEqualityTest(TestCase):

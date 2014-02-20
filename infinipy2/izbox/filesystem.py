@@ -2,7 +2,6 @@ from capacity import byte, Capacity, GB
 from ..core import SystemObject
 from ..core.field import Field
 from api_object_schema import FunctionTranslator, TypeInfo
-from ..core.system_object_utils import make_getter_updater, make_getter
 from ..core.api.special_values import Autogenerate
 
 class Filesystem(SystemObject):
@@ -25,12 +24,6 @@ class Filesystem(SystemObject):
         Field("user_id",          creation_parameter=True, mutable=True, type=int, default=0),
         Field("group_id",         creation_parameter=True, mutable=True, type=int, default=0),
     ]
-
-    get_quota, update_quota = make_getter_updater("quota")
-
-    get_name, update_name = make_getter_updater("name")
-
-    get_mount_path = make_getter("mount_path")
 
     def create_snapshot(self, name=Autogenerate("snapshot_{uuid}")):
         resp = self.system.api.post("snapshots", data={"filesystem_id": self.id, "snapshot_name": name})

@@ -2,7 +2,6 @@ import collections
 
 from ..core import Field, SystemObject, TypeBinder
 from ..core.api.special_values import Autogenerate
-from ..core.system_object_utils import make_getter_updater
 
 
 default_event_page_size = 1000
@@ -98,5 +97,3 @@ class PushRule(SystemObject):
         Field("recipients", creation_parameter=True, mutable=True, default=list),
         Field("name", creation_parameter=True, mutable=True, default=Autogenerate("rule_{timestamp}")),
     ]
-
-    get_name, update_name = make_getter_updater("name")
