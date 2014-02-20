@@ -1,14 +1,11 @@
-import random
 from infinipy2._compat import string_types
 from ..utils import InfiniBoxTestCase
 from infinipy2.infinibox.components import (System, Rack, Enclosure,
                                             Drive, FcPort, Node, Service)
 from infinipy2.core.config import config
 
-NO_OF_ENCLOSURES_DRIVES = config.get_path('infinibox.defaults.enlosure_drives.total_count.mock')
+NO_OF_ENCLOSURES_DRIVES = config.get_path('infinibox.defaults.enlosure_drives.total_count.simulator')
 
-def choose_from_list(a_list):
-    return a_list[random.randrange(len(a_list))]
 
 class ComponentsTest(InfiniBoxTestCase):
     def _basic_check_for_component(self, component_type, parent_type, check_sub_components):
@@ -21,10 +18,6 @@ class ComponentsTest(InfiniBoxTestCase):
 
         is_component_instance = lambda obj: isinstance(obj, component_type)
         self.assertTrue(all(map(is_component_instance, component_instances)))
-
-        # FIXME: HACK until there will be a simulator... (Reason: Mock doesn't have drives & fc_ports)
-        if component_type in [Drive, FcPort]:
-            return
 
         component_instance = collection.choose()
 

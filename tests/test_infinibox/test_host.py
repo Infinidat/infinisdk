@@ -34,6 +34,7 @@ class HostTest(InfiniBoxTestCase):
         self.assertEqual(self.host.get_cluster(), cluster)
 
     def test_ports_operations(self):
+        self.skipTest('Does infinibox support this?')
         fc_address = "00:01:02:03:04:05:06:07"
         iscsi_address = "07:06:05:04:03:02:01:00"
 

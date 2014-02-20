@@ -1,16 +1,26 @@
 import infi.unittest
 from infinipy2.izbox import IZBox
 from infinipy2.infinibox import InfiniBox
-from izsim import Simulator
+from izsim import Simulator as IZBoxSimulator
+from infinisim.infinibox import Infinibox as InfinisimInfinibox
 
-class FakeSimulator(object):
+class InfiniboxSimulator(object):
+    def __init__(self):
+        self._simulator = InfinisimInfinibox()
+
+        infinidat_user = self._simulator.users.get_by_name("infinidat")
+        self._simulator.auth.push_user(infinidat_user)
+
     def start_context(self):
-        pass
+        self._simulator.activate()
+
     def end_context(self):
-        pass
+        self._simulator.deactivate()
+
     def get_address(self):
-        return ("ayalas-ubuntu", 9998)
-simulators_dict = {IZBox: Simulator, InfiniBox: FakeSimulator}
+        return (self._simulator.get_floating_addresses()[0], 80)
+
+simulators_dict = {IZBox: IZBoxSimulator, InfiniBox: InfiniboxSimulator}
 
 
 class Infinipy2TestCase(infi.unittest.TestCase):

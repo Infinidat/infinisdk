@@ -26,7 +26,7 @@ config = confetti.Config(dict(
                 timeout_seconds=30,
                 ),
             enlosure_drives=dict(
-                total_count=dict(mock=0),
+                total_count=dict(mock=0, simulator=480),
                 ),
             ),
         ),

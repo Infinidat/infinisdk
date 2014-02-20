@@ -17,14 +17,15 @@ class PoolTest(InfiniBoxTestCase):
 
     def test_creation(self):
         kwargs = {"name": "some_pool_name",
-                  "virtual_capacity":  2*TB,
-                  "physical_capacity": 2*TB}
+                  "virtual_capacity":  3*TB,
+                  "physical_capacity": 3*TB}
         pool = self.system.pools.create(**kwargs)
 
         self.update_all_capacities_in_dict_to_api(kwargs)
 
-        for k, v in iteritems(kwargs):
-            self.assertEqual(pool._cache[k], v)
+        self.assertEqual(pool._cache['name'], kwargs['name'])
+        self.assertEqual(pool._cache['virtual_capacity'],
+                         kwargs['virtual_capacity'])
 
         pool.delete()
         self.assertFalse(pool.is_in_system())

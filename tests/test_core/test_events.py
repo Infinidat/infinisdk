@@ -6,7 +6,10 @@ class EventsTest(CoreTestCase):
 
     def test_get_last_events(self):
         events = self.system.events.get_last_events(1)
-        self.assertEquals(len(events), 1)
+        # In mock system there is single event for system status (OK/Active)
+        # In infinism there is no event
+        # In izsim there is "SYSTEM_IS_UP" event
+        self.assertLessEqual(len(events), 1)
 
     def test_get_last_events_with_reversed_param(self):
         # Ensuring that there are at least 2 events
