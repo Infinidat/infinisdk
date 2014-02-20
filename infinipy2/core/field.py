@@ -46,6 +46,9 @@ class Field(FieldBase):
     def __pos__(self):
         return FieldSorting(self)
 
+    def extract_from_json(self, obj_class, json):
+        return json[self.api_name]  #TODO: Use api_object_schema.binding instead
+
 def _install_filter_factory(operator_name):
     def meth(self, other):
         return FieldFilter(self, operator_name, other)

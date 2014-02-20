@@ -39,7 +39,7 @@ class SystemObject(with_metaclass(FieldsMeta)):
         #: the system to which this object belongs
         self.system = system
         self._cache = initial_data
-        self.id = self._cache[self.fields.id.api_name]
+        self.id = self.fields.id.extract_from_json(self, self._cache)
 
     def __eq__(self, other):
         if type(self) is not type(other):
@@ -200,6 +200,7 @@ class SystemObject(with_metaclass(FieldsMeta)):
         for field_name in field_names:
             field = self.fields.get(field_name, None)
             if field is not None:
+                #value = field.type.translator.from_api(field.extract_from_json(self, self._cache))
                 value = field.type.translator.from_api(self._cache[field.api_name])
             else:
                 value = self._cache[field_name]
