@@ -28,7 +28,7 @@ class LogicalUnit(object):
 
     @classmethod
     def _unmap(cls, obj, lun):
-        url = obj.get_this_url_path().add_path('luns/lu/{0}'.format(lun))
+        url = obj.get_this_url_path().add_path('luns/lun/{0}'.format(lun))
         obj.system.api.delete(url)
 
     def delete(self):
