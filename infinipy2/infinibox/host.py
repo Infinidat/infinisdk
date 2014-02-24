@@ -39,8 +39,9 @@ class Host(InfiniBoxLURelatedObject):
         return self._remove_port('iscsi', port_address)
 
     def _remove_port(self, port_type, port_address):
+        port_wwn = str(WWN(port_address))
         url = "{0}/ports/{1}/{2}".format(self.get_this_url_path(),
-                                      port_type, port_address)
+                                         port_type, port_wwn)
         self.system.api.delete(url)
 
     def get_fc_ports(self):
