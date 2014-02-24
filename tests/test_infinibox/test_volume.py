@@ -1,7 +1,7 @@
 from tests.utils import InfiniBoxTestCase
 from infinipy2._compat import iteritems
 from infinipy2.core import CapacityType
-from infinipy2.core.exceptions import APICommandFailed
+from infinipy2.core.exceptions import APICommandFailed, InvalidOperationException
 from capacity import GB
 
 
@@ -16,12 +16,13 @@ class VolumeTest(InfiniBoxTestCase):
         kwargs = {'name': 'some_volume_name',
                   'size': 2*GB,
                   'pool_id': pool.id,
-                  'provtype': 'THIN'}
+                  'provisioning': 'THIN'}
         volume = self._create_volume(**kwargs)
-        kwargs.pop('provtype')  #FIXME: Remove this line, after infinibox implement it...
-        kwargs['size'] = CapacityType.translator.to_api(kwargs['size'])
-        for k, v in iteritems(kwargs):
-            self.assertEqual(volume._cache[k], v)
+
+        self.assertEqual(volume.get_name(), kwargs['name'])
+        self.assertEqual(volume.get_size(), kwargs['size'])
+        self.assertEqual(volume.get_pool().id, kwargs['pool_id'])
+        self.assertEqual(volume.get_provisioning(), kwargs['provisioning'])
 
     def test_get_name(self):
         vol_name = 'some_volume_name'
@@ -96,3 +97,14 @@ class VolumeTest(InfiniBoxTestCase):
             self.system.api.get('volumes/2/bla')
         received_error = caught.exception.response.get_error()
         self.assertTrue(isinstance(received_error, dict))
+
+    def test_unique_key(self):
+        self.assertIsNot(self.volume.get_unique_key(), None)
+
+    def test_invalid_child_operation(self):
+        with self.assertRaises(InvalidOperationException):
+            self.volume.create_clone()
+
+        snapshot = self.volume.create_snapshot()
+        with self.assertRaises(InvalidOperationException):
+            snapshot.create_snapshot()
