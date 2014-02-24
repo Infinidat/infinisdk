@@ -1,8 +1,11 @@
+import flux
 import infi.unittest
 from infinipy2.izbox import IZBox
 from infinipy2.infinibox import InfiniBox
 from izsim import Simulator as IZBoxSimulator
 from infinisim.infinibox import Infinibox as InfinisimInfinibox
+
+flux.current_timeline.set_time_factor(0)
 
 class InfiniboxSimulator(object):
     def __init__(self):

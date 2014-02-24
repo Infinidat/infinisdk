@@ -18,6 +18,7 @@ _INSTALL_REQUIERS = [
     "infi.dtypes.wwn>=0.0.2",
     "storage_interfaces",
     "infinisim",
+    "flux",
 ]
 
 setup(name="infinipy2",
