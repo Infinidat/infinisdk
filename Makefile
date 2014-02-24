@@ -5,6 +5,9 @@ test: env
 
 env: .env/.up-to-date
 
+develop_env: env
+	.env/bin/pip install -e ../infinisim
+
 .env/.up-to-date: setup.py Makefile
 	virtualenv .env
 	.env/bin/pip install -e .
