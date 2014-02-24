@@ -1,5 +1,5 @@
 from ..utils import InfiniBoxTestCase
-from infinipy2._compat import iteritems
+from infinipy2._compat import iteritems, string_types
 from logbook import Logger
 
 _logger = Logger(__name__)
@@ -61,3 +61,9 @@ class InfiniBoxSystemTest(InfiniBoxTestCase):
         for type_class in type_classes:
             obj = type_class.create(self.system)
             self._validate_single_metadata_support(obj)
+
+    def test_infinibox_attributes(self):
+        self.assertTrue(self.system.get_name().startswith('simulator'))
+        self.assertTrue(isinstance(self.system.get_serial(), int))
+        self.assertTrue(isinstance(self.system.get_state(), string_types))
+        self.assertTrue(isinstance(self.system.get_version(), string_types))
