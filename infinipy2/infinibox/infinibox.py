@@ -22,13 +22,17 @@ class InfiniBox(APITarget):
         return config.get_path('infinibox.defaults.system_api.timeout_seconds')
 
     def _is_simulator(self, address):
-        return False  # TODO: Implement!! (and add _get_simulator_address method)
+        return type(address).__name__ == "Infinibox"
+
+    def _get_simulator_address(self, address):
+        simulator_address = address.get_floating_addresses()[0]
+        return (simulator_address, 80)
 
     def get_state(self):
         return self.components.system_component.get_state()
 
     def is_simulator(self):
-        raise NotImplementedError()
+        return "simulator" in self.get_name()
 
     def is_mock(self):
         raise NotImplementedError()

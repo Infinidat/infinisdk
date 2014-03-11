@@ -7,23 +7,7 @@ from infinisim.infinibox import Infinibox as InfinisimInfinibox
 
 flux.current_timeline.set_time_factor(0)
 
-class InfiniboxSimulator(object):
-    def __init__(self):
-        self._simulator = InfinisimInfinibox()
-
-        infinidat_user = self._simulator.users.get_by_name("infinidat")
-        self._simulator.auth.push_user(infinidat_user)
-
-    def start_context(self):
-        self._simulator.activate()
-
-    def end_context(self):
-        self._simulator.deactivate()
-
-    def get_address(self):
-        return (self._simulator.get_floating_addresses()[0], 80)
-
-simulators_dict = {IZBox: IZBoxSimulator, InfiniBox: InfiniboxSimulator}
+simulators_dict = {IZBox: IZBoxSimulator, InfiniBox: InfinisimInfinibox}
 
 
 class Infinipy2TestCase(infi.unittest.TestCase):
@@ -32,9 +16,9 @@ class Infinipy2TestCase(infi.unittest.TestCase):
     def setUp(self):
         super(Infinipy2TestCase, self).setUp()
         self.simulator = self._get_simulator()
-        self.simulator.start_context()
-        self.addCleanup(self.simulator.end_context)
-        self.system = self.SYSTEM_CLASS(self.simulator.get_address())
+        self.simulator.activate()
+        self.addCleanup(self.simulator.deactivate)
+        self.system = self.SYSTEM_CLASS(self.simulator)
 
     def interact(self):
         # For using this method, nose should be run with '-s' option
