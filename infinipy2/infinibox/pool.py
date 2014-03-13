@@ -14,3 +14,15 @@ class Pool(InfiniBoxObject):
 
     def get_volumes(self):
         return self.system.volumes.find(pool_id=self.id)
+
+    def _get_pool_owners_url(self, owner_id=None):
+        url = self.get_this_url_path().add_path('owners')
+        if owner_id:
+            url = url.add_path(str(owner_id))
+        return url
+
+    def add_owner(self, user):
+        self.system.api.post(self._get_pool_owners_url(user.id), data={})
+
+    def discard_owner(self, user):
+        self.system.api.delete(self._get_pool_owners_url(user.id), data={})

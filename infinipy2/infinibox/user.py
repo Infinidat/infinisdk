@@ -15,8 +15,9 @@ class User(SystemObject):
 
     def get_pools(self):
         pools_url = "{0}/pools".format(self.get_this_url_path())
-        return [self.system.pools.get_by_id_lazy(pool_id)
-                for pool_id in self.system.api.get(pools_url)]
+        resp = self.system.api.get(pools_url)
+        return [self.system.pools.get_by_id(pool_info['id'])
+                for pool_info in resp.get_result()]
 
     def reset_password(self):
         url = "{0}/reset_password".format(self.get_this_url_path())

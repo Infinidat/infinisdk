@@ -1,5 +1,4 @@
 from tests.utils import InfiniBoxTestCase
-from infinipy2._compat import iteritems
 
 
 class UserTest(InfiniBoxTestCase):
@@ -53,7 +52,18 @@ class UserTest(InfiniBoxTestCase):
         self.assertEqual(self.user.get_role(), new_role)
 
     def test_get_pools(self):
-        self.skipTest('Not Implemented Yet...')
+        user = self.system.users.create(role='PoolAdmin')
+        self.assertEquals(user.get_pools(), [])
+
+        pool = self.system.pools.create()
+        pool.add_owner(user)
+
+        pools = user.get_pools()
+        self.assertEquals(len(pools), 1)
+        self.assertEquals(pools[0], pool)
+
+        pool.discard_owner(user)
+        self.assertEquals(user.get_pools(), [])
 
     def test_reset_password(self):
         self.skipTest('Not Implemented Yet...')
