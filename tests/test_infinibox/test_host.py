@@ -50,23 +50,3 @@ class HostTest(InfiniBoxTestCase):
 
         self.host.remove_fc_port(address2)
         self.assertEqual([], self.host.get_fc_ports())
-
-    def test_ports_operations(self):
-        self.skipTest('Does infinibox support this?')
-        fc_address = "00:01:02:03:04:05:06:07"
-        iscsi_address = "07:06:05:04:03:02:01:00"
-
-        self.assertEqual(self.host.get_field("ports"), [])
-        self.host.add_fc_port(fc_address)
-        self.host.add_iscsi_port(iscsi_address)
-
-        self.assertEqual([fc_address], self.host.get_fc_ports())
-        self.assertEqual([iscsi_address], self.host.get_iscsi_ports())
-
-        self.host.remove_fc_port(fc_address)
-        self.assertEqual([], self.host.get_fc_ports())
-        self.assertEqual([iscsi_address], self.host.get_iscsi_ports())
-
-        self.host.remove_iscsi_port(iscsi_address)
-        self.assertEqual([], self.host.get_fc_ports())
-        self.assertEqual([], self.host.get_iscsi_ports())

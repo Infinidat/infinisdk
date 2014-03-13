@@ -29,14 +29,8 @@ class Host(InfiniBoxLURelatedObject):
     def add_fc_port(self, port_address):
         return self._add_port('fc', port_address)
 
-    def add_iscsi_port(self, port_address):
-        return self._add_port('iscsi', port_address)
-
     def remove_fc_port(self, port_address):
         return self._remove_port('fc', port_address)
-
-    def remove_iscsi_port(self, port_address):
-        return self._remove_port('iscsi', port_address)
 
     def _remove_port(self, port_type, port_address):
         port_wwn = str(WWN(port_address))
@@ -46,9 +40,6 @@ class Host(InfiniBoxLURelatedObject):
 
     def get_fc_ports(self):
         return self._get_ports('fc')
-
-    def get_iscsi_ports(self):
-        return self._get_ports('iscsi')
 
     def _get_ports(self, port_type):
         lowered_port_type = port_type.lower()
