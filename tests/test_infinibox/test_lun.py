@@ -14,12 +14,17 @@ class LogicalUnitTest(InfiniBoxTestCase):
         luns = self.host.get_luns()
         self.assertEquals(len(luns), 0)
 
+        pool = self.system.pools.create()
+        vol = self.system.volumes.create(pool=pool)
+        self.assertFalse(self.host.is_volume_mapped(vol))
+
     def test_map_volume_to_cluster(self):
         volume = self._create_volume()
         self.cluster.map_volume(volume)
 
         luns = self.cluster.get_luns()
         self.assertEquals(len(luns), 1)
+        self.assertTrue(self.cluster.is_volume_mapped(volume))
 
         lu = list(luns)[0]
         self.assertEquals(lu.get_volume(), volume)
@@ -34,7 +39,7 @@ class LogicalUnitTest(InfiniBoxTestCase):
 
     def test_map_volume_to_host(self):
         volume = self._create_volume()
-        self.host.map_volume(volume)
+        self.host.map_volume(volume, 2)
 
         luns = self.host.get_luns()
         self.assertEquals(len(luns), 1)

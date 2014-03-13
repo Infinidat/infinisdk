@@ -32,6 +32,8 @@ class ComponentsTest(TestCase):
     def test_components_getitem(self):
         self.assertIs(self.system.components["nodes"], self.system.components.nodes)
         self.assertIs(self.system.components[self.system.components.types.Node], self.system.components["nodes"])
+        with self.assertRaises(KeyError):
+            self.system.components['fake_component']
 
     def test_components_choose(self):
         enc = self.system.components.enclosures.choose()

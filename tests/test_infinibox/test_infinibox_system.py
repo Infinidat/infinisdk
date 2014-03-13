@@ -67,3 +67,9 @@ class InfiniBoxSystemTest(InfiniBoxTestCase):
         self.assertTrue(isinstance(self.system.get_serial(), int))
         self.assertTrue(isinstance(self.system.get_state(), string_types))
         self.assertTrue(isinstance(self.system.get_version(), string_types))
+
+    def test_infinibox_system_type(self):
+        self.assertTrue(self.system.is_simulator())
+
+        with self.assertRaises(NotImplementedError):
+            self.system.is_mock()
