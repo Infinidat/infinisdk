@@ -1,4 +1,6 @@
+from ecosystem.mocks.mock_mailboxer import get_simulated_mail_server
 from tests.utils import InfiniBoxTestCase
+import re
 
 
 class UserTest(InfiniBoxTestCase):
@@ -65,5 +67,18 @@ class UserTest(InfiniBoxTestCase):
         pool.discard_owner(user)
         self.assertEquals(user.get_pools(), [])
 
+    def _get_token_from_mail(self, mail_address):
+        msg = self._get_last_mailboxer_msg(mail_address)
+        return re.findall("token=(.*)\"", msg.content)[0]
+
+    def _get_last_mailboxer_msg(self, mail_address):
+        msg = get_simulated_mail_server(self.simulator).get_messages(mail_address)
+        return msg[0]
+
     def test_reset_password(self):
-        self.skipTest('Not Implemented Yet...')
+        user_email = self.user.get_email()
+        self.user.request_reset_password()
+        token = self._get_token_from_mail(user_email)
+        self.user.reset_password(token)
+        msg = self._get_last_mailboxer_msg(user_email)
+        self.assertTrue('successfully' in msg.content)

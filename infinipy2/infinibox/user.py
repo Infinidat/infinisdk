@@ -19,9 +19,14 @@ class User(SystemObject):
         return [self.system.pools.get_by_id(pool_info['id'])
                 for pool_info in resp.get_result()]
 
-    def reset_password(self):
-        url = "{0}/reset_password".format(self.get_this_url_path())
-        self.system.api.put(url)
+    def reset_password(self, token):
+        url = self.get_this_url_path().add_path('reset_password').add_path(token)
+        self.system.api.get(url)
+
+    def request_reset_password(self):
+        url = self.get_this_url_path().add_path('reset_password')
+        self.system.api.post(url)
+
 
     def is_in_system(self):
         #FIXME: Remove this function when INFINIBOX-7647 will be fixed...
