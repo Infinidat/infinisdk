@@ -15,11 +15,8 @@ develop_env: env
 	.env/bin/pip install -e git://infinigit.infinidat.com/qa/izsim#egg=izsim
 	touch .env/.up-to-date
 
-jenkins-docker-test: docker-installed
+jenkins-docker-test:
 	docker pull docker.infinidat.com/python-detox
 	docker run -v $(CURDIR):/src docker.infinidat.com/python-detox
-
-docker-installed:
-	curl http://docker.infinidat.com/scripts/install.sh | sh -
 
 .PHONY: docker-installed
