@@ -19,4 +19,3 @@ jenkins-docker-test:
 	docker pull docker.infinidat.com/python-detox
 	docker run -v $(CURDIR):/src docker.infinidat.com/python-detox
 
-.PHONY: docker-installed
