@@ -35,7 +35,7 @@ class InfiniBox(APITarget):
         return "simulator" in self.get_name()
 
     def is_mock(self):
-        raise NotImplementedError()
+        return "mock" in self.get_name()
 
     def get_system_info(self, field_name):
         return self.components.system_component.get_field(field_name,

@@ -70,6 +70,4 @@ class InfiniBoxSystemTest(InfiniBoxTestCase):
 
     def test_infinibox_system_type(self):
         self.assertTrue(self.system.is_simulator())
-
-        with self.assertRaises(NotImplementedError):
-            self.system.is_mock()
+        self.assertFalse(self.system.is_mock())
