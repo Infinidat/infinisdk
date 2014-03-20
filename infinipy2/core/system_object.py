@@ -198,7 +198,7 @@ class SystemObject(with_metaclass(FieldsMeta)):
         self.update_field_cache(result)
 
         if not field_names:
-            field_names = self.fields.get_all_field_names(result)
+            field_names = self.fields.get_all_field_names_or_fabricate(result)
 
         returned = {}
         for field_name in field_names:
