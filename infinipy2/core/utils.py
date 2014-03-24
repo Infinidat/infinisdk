@@ -9,6 +9,8 @@ def add_comma_separated_query_param(url, param_name, value):
     'http://a.com/a/b/c?sort=a'
     >>> str(add_comma_separated_query_param("http://a.com/a/b/c?sort=a", "sort", "b"))
     'http://a.com/a/b/c?sort=a%2Cb'
+    >>> str(add_comma_separated_query_param("http://a.com/a/b/c", "sort", ("a", "b")))
+    'http://a.com/a/b/c?sort=a%2Cb'
     """
     if not isinstance(url, URL):
         url = URL(url)

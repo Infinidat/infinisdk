@@ -1,7 +1,7 @@
 from infinipy2.core import *
-from ..utils import TestCase
+from ..utils import CoreTestCase
 
-class TypeBinderContainerTest(TestCase):
+class TypeBinderContainerTest(CoreTestCase):
 
 
     def test_unknown_attributes_raise_attribute_error(self):

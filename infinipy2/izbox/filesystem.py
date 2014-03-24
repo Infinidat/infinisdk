@@ -1,33 +1,29 @@
-from capacity import byte, GB
-from ..core import SystemObject, Field, FunctionTranslator
-from ..core.system_object_utils import make_getter_updater, make_getter
+from capacity import byte, Capacity, GB
+from ..core import SystemObject
+from ..core.field import Field
+from api_object_schema import FunctionTranslator, TypeInfo
 from ..core.api.special_values import Autogenerate
 
 class Filesystem(SystemObject):
     FIELDS = [
         Field("id", is_identity=True),
         Field("quota", api_name="quota_in_bytes",
-              default=GB, mandatory=True,
-              translator=FunctionTranslator(to_api=lambda x: int(x // byte), from_api=lambda x: int(x) * byte)),
-        Field("name", mandatory=True, default=Autogenerate("fs_{uuid}")),
+              type=TypeInfo(Capacity, api_type=int,
+                            translator=FunctionTranslator(to_api=lambda x: int(x // byte), from_api=lambda x: int(x) * byte)),
+              default=GB, creation_parameter=True, mutable=True),
+        Field("name", creation_parameter=True, mutable=True, default=Autogenerate("fs_{uuid}")),
 
-        Field("cifs_access_list", mandatory=True, type=list, default=[{"read_only": False, "username": "Everyone"}]),
-        Field("nfs_access_list",  mandatory=True, type=list, default=[{"allow_root_access": False, "host": "*", "read_only": False, "secure": True}]),
+        Field("cifs_access_list", creation_parameter=True, mutable=True, type=list, default=[{"read_only": False, "username": "Everyone"}]),
+        Field("nfs_access_list",  creation_parameter=True, mutable=True, type=list, default=[{"allow_root_access": False, "host": "*", "read_only": False, "secure": True}]),
 
-        Field("compression_type", mandatory=True, default="off"),
-        Field("owned_by",         mandatory=True, default="CUSTOMER"),
-        Field("permissions",      mandatory=True, type=int, default=0o777),
-        Field("shared_by_cifs",   mandatory=True, type=bool, default=True),
-        Field("shared_by_nfs",    mandatory=True, type=bool, default=True),
-        Field("user_id",          mandatory=True, type=int, default=0),
-        Field("group_id",         mandatory=True, type=int, default=0),
+        Field("compression_type", creation_parameter=True, mutable=True, default="off"),
+        Field("owned_by",         creation_parameter=True, mutable=True, default="CUSTOMER"),
+        Field("permissions",      creation_parameter=True, mutable=True, type=int, default=0o777),
+        Field("shared_by_cifs",   creation_parameter=True, mutable=True, type=bool, default=True),
+        Field("shared_by_nfs",    creation_parameter=True, mutable=True, type=bool, default=True),
+        Field("user_id",          creation_parameter=True, mutable=True, type=int, default=0),
+        Field("group_id",         creation_parameter=True, mutable=True, type=int, default=0),
     ]
-
-    get_quota, update_quota = make_getter_updater("quota")
-
-    get_name, update_name = make_getter_updater("name")
-
-    get_mount_path = make_getter("mount_path")
 
     def create_snapshot(self, name=Autogenerate("snapshot_{uuid}")):
         resp = self.system.api.post("snapshots", data={"filesystem_id": self.id, "snapshot_name": name})
@@ -50,4 +46,3 @@ class Snapshot(Filesystem):
     @classmethod
     def get_creation_defaults(cls):
         return {"name": Filesystem.fields.name.generate_default().generate()}
-

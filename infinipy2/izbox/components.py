@@ -1,7 +1,6 @@
 from ..core.field import Field
 from ..core.system_component import SystemComponentsBinder
 from ..core.system_object import SystemObject
-from ..core.system_object_utils import make_getter
 
 from infi.pyutils.lazy import cached_method
 
@@ -34,14 +33,6 @@ class IZBoxSystemComponent(SystemObject):
         Field("parent_index", type=int, cached=True),
         Field("parent_id", type=int, cached=True),
     ]
-
-    get_index = make_getter("index")
-    get_parent_index = make_getter("parent_index")
-    get_parent_id = make_getter("parent_id")
-    get_state = make_getter("state")
-    get_alerts = make_getter("alerts")
-    get_data = make_getter("data")
-    get_status = make_getter("status")
 
     def is_ok(self):
         return self.get_status().lower() == "ok"

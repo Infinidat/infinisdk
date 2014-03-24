@@ -1,6 +1,7 @@
-from ..utils import TestCase
-from infinipy2.core import *
-from infinipy2.core.exceptions import MissingFields, CacheMiss
+from ..utils import CoreTestCase
+from infinipy2.core import Field, SystemObject
+from infinipy2.core.exceptions import (MissingFields, CacheMiss,
+                                       AttributeAlreadyExists)
 
 class SampleBaseObject(SystemObject):
     FIELDS = [
@@ -10,11 +11,11 @@ class SampleBaseObject(SystemObject):
 
 class SampleDerivedObject(SampleBaseObject):
     FIELDS = [
-        Field(name="number", type=int, mandatory=True),
+        Field(name="number", type=int, creation_parameter=True),
         Field(name="cached_by_default", cached=True),
     ]
 
-class SystemObjectFieldsTest(TestCase):
+class SystemObjectFieldsTest(CoreTestCase):
 
     def setUp(self):
         super(SystemObjectFieldsTest, self).setUp()
@@ -35,6 +36,9 @@ class SystemObjectFieldsTest(TestCase):
 
         self.assertEquals(len(EmptyObject.fields), 0)
 
+    def test_unexist_field(self):
+        self.assertRaises(AttributeError, getattr, SampleDerivedObject.fields, 'fake_field')
+
     def test_get_from_cache_miss(self):
         obj = SampleDerivedObject(self.system, {"id": 1})
         self.assertEquals(obj.id, 1)
@@ -51,8 +55,46 @@ class SystemObjectFieldsTest(TestCase):
         obj = SampleDerivedObject(self.system, {"id": 1, "cached_by_default": value})
         self.assertEquals(obj.get_field("cached_by_default"), value)
 
+    def test_auto_getter_attribute_already_exists_in_same_class(self):
+        with self.assertRaises(AttributeAlreadyExists):
+            class SomeObjectForGetter(SystemObject):
+                FIELDS = [Field("id")]
+                get_id = lambda self: 'my id'
 
-class SystemObjectEqualityTest(TestCase):
+        with self.assertRaises(AttributeAlreadyExists):
+            class SomeObjectForUpdater(SystemObject):
+                FIELDS = [Field("id", mutable=True)]
+                _id = 'my id'
+                def update_id(self, value): self._id = value
+
+    def test_auto_getter_attribute_already_exists_in_base_class1(self):
+        class SomeObject(SystemObject):
+            FIELDS = [Field("id")]
+
+        class SomeDerivedObject(SomeObject):
+            _id = 'other id'
+            def get_id(self): return self._id
+            def update_id(self, value): self._id = value
+
+        some_derived_obj = SomeDerivedObject(self.system, {"id": 1})
+        self.assertEquals(some_derived_obj.get_id(), 'other id')
+        some_derived_obj.update_id('bla bla')
+        self.assertEquals(some_derived_obj.get_id(), 'bla bla')
+
+    def test_auto_getter_attribute_already_exists_in_base_class2(self):
+        class SomeObject(SystemObject):
+            _id = 'my id'
+            def get_id(self): return self._id
+            def update_id(self, value): self._id = value
+
+        class SomeDerivedObject(SomeObject):
+            FIELDS = [Field("id", cached=True, mutable=True)]
+
+        some_derived_obj = SomeDerivedObject(self.system, {"id": 1})
+        self.assertEquals(some_derived_obj.get_id(), 1)
+
+
+class SystemObjectEqualityTest(CoreTestCase):
 
     def test__equality(self):
         system1 = object()
@@ -78,7 +120,7 @@ class SystemObjectEqualityTest(TestCase):
         diff_type1 = SampleDerivedObject(system1, {"id": 100})
         self.assertEqual(NotImplemented, diff_type1.__eq__(diff_type2))
 
-class SystemObjectCreationTest(TestCase):
+class SystemObjectCreationTest(CoreTestCase):
 
     def test_object_creation_missing_fields(self):
         dummy_system = object()

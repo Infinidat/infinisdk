@@ -2,11 +2,10 @@ import itertools
 import time
 from uuid import uuid1
 
+from api_object_schema.special_value import SpecialValue
+
 from ..._compat import iteritems
 
-
-class SpecialValue(object):
-    pass
 
 OMIT = SpecialValue()
 

@@ -1,6 +1,9 @@
 class InfinipyException(Exception):
     pass
 
+class InvalidOperationException(InfinipyException):
+    pass
+
 class CacheMiss(InfinipyException):
     pass
 
@@ -38,10 +41,10 @@ class CommandNotApproved(APICommandFailed):
         self.reasons = []
         json = response.response.json()
         if json is not None:
-            self.reasons.extend((json.get("error") or {}).get("reasons", ()))
+            self.reasons.extend((json.get("error") or {}).get("reasons") or tuple())
 
     def __repr__(self):
-        return "Command forbidden without explicit approval ({})".format(", ".join(self.reasons))
+        return "Command forbidden without explicit approval ({0})".format(", ".join(self.reasons))
 
 class CapacityUnavailable(APICommandException):
     pass
@@ -54,3 +57,10 @@ class TooManyObjectsFound(InfinipyException):
 
 class MissingFields(InfinipyException):
     pass
+
+class AttributeAlreadyExists(InfinipyException):
+    def __init__(self, obj, attr):
+        self._obj = obj
+        self._attr = attr
+        msg = "{0} already exists for {1}".format(attr, obj)
+        super(AttributeAlreadyExists, self).__init__(msg)

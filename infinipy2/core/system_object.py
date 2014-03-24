@@ -9,7 +9,8 @@ from urlobject import URLObject as URL
 from .exceptions import APICommandFailed, ObjectNotFound
 from .._compat import with_metaclass, iteritems, itervalues, httplib
 from .exceptions import MissingFields, CacheMiss
-from .fields import FieldsMeta
+from api_object_schema import FieldsMeta as FieldsMetaBase
+from .field import Field
 from .object_query import ObjectQuery
 from .type_binder import TypeBinder
 from .api.special_values import translate_special_values
@@ -23,6 +24,10 @@ def _install_slash_hooks():
 
 _install_slash_hooks()
 
+class FieldsMeta(FieldsMetaBase):
+
+    FIELD_FACTORY = Field
+
 class SystemObject(with_metaclass(FieldsMeta)):
     FIELDS = []
     URL_PATH = None
@@ -34,7 +39,7 @@ class SystemObject(with_metaclass(FieldsMeta)):
         #: the system to which this object belongs
         self.system = system
         self._cache = initial_data
-        self.id = self._cache[self.fields.id.api_name]
+        self.id = self.fields.id.extract_from_json(self, self._cache)
 
     def __eq__(self, other):
         if type(self) is not type(other):
@@ -85,8 +90,10 @@ class SystemObject(with_metaclass(FieldsMeta)):
         missing_fields = set()
         extra_fields = fields.copy()
         for field in cls.fields:
-            if not field.mandatory and field.name not in fields:
-                continue
+            if field.name not in fields:
+                if not field.creation_parameter or field.optional:
+                    continue
+
             field_value = fields.get(field.name, NOTHING)
             if field_value is NOTHING:
                 field_value = field.generate_default()
@@ -94,7 +101,7 @@ class SystemObject(with_metaclass(FieldsMeta)):
             extra_fields.pop(field.api_name, None)
             if field_value is NOTHING:
                 missing_fields.add(field.name)
-            returned[field.api_name] = field.translator.to_api(field_value)
+            returned[field.api_name] = field.type.translator.to_api(field_value)
         if missing_fields:
             raise MissingFields("Following fields were not specified: {0}".format(", ".join(sorted(missing_fields))))
         returned.update(extra_fields)
@@ -105,8 +112,12 @@ class SystemObject(with_metaclass(FieldsMeta)):
         return cls.BINDER_CLASS(cls, system)
 
     @classmethod
+    def get_type_name(cls):
+        return cls.__name__.lower()
+
+    @classmethod
     def get_plural_name(cls):
-        return cls.__name__.lower() + "s"
+        return cls.get_type_name() + "s"
 
     @classmethod
     def get_creation_defaults(cls):
@@ -120,7 +131,7 @@ class SystemObject(with_metaclass(FieldsMeta)):
         return translate_special_values(dict(
             (field.name, field.generate_default())
             for field in cls.fields
-            if field.mandatory))
+            if field.creation_parameter and not field.optional))
 
     @classmethod
     def get_url_path(cls, system):
@@ -187,13 +198,14 @@ class SystemObject(with_metaclass(FieldsMeta)):
         self.update_field_cache(result)
 
         if not field_names:
-            field_names = self.fields.get_all_field_names(result)
+            field_names = self.fields.get_all_field_names_or_fabricate(result)
 
         returned = {}
         for field_name in field_names:
             field = self.fields.get(field_name, None)
             if field is not None:
-                value = field.translator.from_api(self._cache[field.api_name])
+                #value = field.type.translator.from_api(field.extract_from_json(self, self._cache))
+                value = field.type.translator.from_api(self._cache[field.api_name])
             else:
                 value = self._cache[field_name]
             returned[field_name] = value
@@ -257,7 +269,7 @@ class SystemObject(with_metaclass(FieldsMeta)):
                 field = self.fields[field_name]
             except LookupError:
                 continue
-            update_dict[field.api_name] = field.translator.to_api(field_value)
+            update_dict[field.api_name] = field.type.translator.to_api(field_value)
             if field.api_name != field_name:
                 update_dict.pop(field_name)
 

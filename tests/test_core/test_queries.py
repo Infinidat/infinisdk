@@ -91,6 +91,10 @@ class QueryTest(TestCase):
         self.assertEquals(
             q.query, "/api/rest/filesystems" + expected)
 
+    def test_negative_item_position(self):
+        with self.assertRaises(NotImplementedError):
+            self.system.events.find()[-3]
+
 
 class PagedQueryTest(TestCase):
 

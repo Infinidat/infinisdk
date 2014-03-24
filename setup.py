@@ -6,6 +6,7 @@ with open(os.path.join(os.path.dirname(__file__), "infinipy2", "__version__.py")
     exec(version_file.read()) # pylint: disable=W0122
 
 _INSTALL_REQUIERS = [
+    "api_object_schema>=1.3.0",
     "capacity",
     "infi.pyutils",
     "logbook",
@@ -13,6 +14,11 @@ _INSTALL_REQUIERS = [
     "sentinels",
     "slash",
     "URLObject",
+    "confetti>=2.1.0",
+    "infi.dtypes.wwn>=0.0.2",
+    "storage_interfaces",
+    "infinisim",
+    "flux",
 ]
 
 setup(name="infinipy2",
