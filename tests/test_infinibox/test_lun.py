@@ -20,7 +20,10 @@ class LogicalUnitTest(InfiniBoxTestCase):
 
     def test_map_volume_to_cluster(self):
         volume = self._create_volume()
+        self.assertFalse(volume.is_mapped())
+
         self.cluster.map_volume(volume)
+        self.assertTrue(volume.is_mapped())
 
         luns = self.cluster.get_luns()
         self.assertEquals(len(luns), 1)
@@ -36,10 +39,14 @@ class LogicalUnitTest(InfiniBoxTestCase):
 
         lu.unmap()
         self.assertEquals(len(self.cluster.get_luns()), 0)
+        self.assertFalse(volume.is_mapped())
 
     def test_map_volume_to_host(self):
         volume = self._create_volume()
+        self.assertFalse(volume.is_mapped())
+
         self.host.map_volume(volume, 2)
+        self.assertTrue(volume.is_mapped())
 
         luns = self.host.get_luns()
         self.assertEquals(len(luns), 1)
@@ -55,6 +62,7 @@ class LogicalUnitTest(InfiniBoxTestCase):
 
         lu.unmap()
         self.assertEquals(len(self.host.get_luns()), 0)
+        self.assertFalse(volume.is_mapped())
 
     def test_multiple_luns_mapping_objects(self):
         host_volume = self._create_volume()

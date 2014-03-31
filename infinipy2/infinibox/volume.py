@@ -90,12 +90,19 @@ class Volume(InfiniBoxObject):
     def get_clones(self):
         return self.get_children()
 
-    def get_lun(self):
+    def _get_lun(self):
         res = self.system.api.get(self.get_this_url_path().add_path('luns'))
-        luns_data = res.get_result()
+        return res.get_result()
+
+    def get_lun(self):
+        luns_data = self._get_lun()
         if len(luns_data) > 1:
             raise InfinipyException('Volume could not have multiple luns')
         return LogicalUnit(self.system, **luns_data[0])
+
+    def is_mapped(self):
+        luns_data = self._get_lun()
+        return len(luns_data) != 0
 
     def get_children(self):
         return self.find(self.system, parent_id=self.get_id())
