@@ -69,15 +69,18 @@ class VolumeTest(InfiniBoxTestCase):
     def test_clones_and_snapshots(self):
         self.assertTrue(self.volume.is_master_volume())
         self.assertIs(self.volume.get_parent(), None)
+        self.assertFalse(self.volume.has_children())
 
         snapshots = self._create_and_validate_children(self.volume, 'snapshot')
         snap = snapshots[-1]
         clones = self._create_and_validate_children(snap, 'clone')
+        self.assertTrue(self.volume.has_children())
 
         for obj in clones+snapshots:
             obj.delete()
             self.assertFalse(obj.is_in_system())
             self.assertTrue(self.volume.is_in_system())
+        self.assertFalse(self.volume.has_children())
 
     def test_restore(self):
         snapshot = self.volume.create_snapshot()

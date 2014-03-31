@@ -100,6 +100,9 @@ class Volume(InfiniBoxObject):
     def get_children(self):
         return self.find(self.system, parent_id=self.get_id())
 
+    def has_children(self):
+        return len(self.get_children()) != 0
+
     def get_parent(self):
         parent_id = self.get_parent_id()
         if parent_id:
