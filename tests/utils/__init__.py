@@ -1,3 +1,4 @@
+import random
 import flux
 import infi.unittest
 from infinipy2.izbox import IZBox
@@ -15,6 +16,7 @@ class Infinipy2TestCase(infi.unittest.TestCase):
 
     def setUp(self):
         super(Infinipy2TestCase, self).setUp()
+        random.seed("unittests")
         self.simulator = self._get_simulator()
         self.simulator.activate()
         self.addCleanup(self.simulator.deactivate)
