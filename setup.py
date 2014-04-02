@@ -17,7 +17,6 @@ _INSTALL_REQUIERS = [
     "confetti>=2.1.0",
     "infi.dtypes.wwn>=0.0.2",
     "storage_interfaces",
-    "infinisim",
     "flux",
 ]
 
