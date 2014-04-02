@@ -101,14 +101,13 @@ class Volume(InfiniBoxObject):
         return LogicalUnit(self.system, **luns_data[0])
 
     def is_mapped(self):
-        luns_data = self._get_lun()
-        return len(luns_data) != 0
+        return self.get_field("mapped")
 
     def get_children(self):
         return self.find(self.system, parent_id=self.get_id())
 
     def has_children(self):
-        return len(self.get_children()) != 0
+        return self.get_field("has_children")
 
     def get_parent(self):
         parent_id = self.get_parent_id()
