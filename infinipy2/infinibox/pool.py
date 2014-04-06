@@ -6,10 +6,10 @@ from .system_object import InfiniBoxObject
 
 class Pool(InfiniBoxObject):
     FIELDS = [
-        Field("id", is_identity=True),
-        Field("name", creation_parameter=True, mutable=True, default=Autogenerate("pool_{uuid}")),
-        Field("virtual_capacity",  creation_parameter=True, mutable=True, default=TB, type=CapacityType),
-        Field("physical_capacity", creation_parameter=True, mutable=True, default=TB, type=CapacityType),
+        Field("id", is_identity=True, is_filterable=True, is_sortable=True),
+        Field("name", creation_parameter=True, mutable=True, is_filterable=True, is_sortable=True, default=Autogenerate("pool_{uuid}")),
+        Field("virtual_capacity",  creation_parameter=True, mutable=True, default=TB, type=CapacityType, is_filterable=True, is_sortable=True),
+        Field("physical_capacity", creation_parameter=True, mutable=True, default=TB, type=CapacityType, is_filterable=True, is_sortable=True),
     ]
 
     def get_volumes(self):

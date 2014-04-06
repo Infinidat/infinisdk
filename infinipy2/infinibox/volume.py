@@ -21,13 +21,13 @@ _install_slash_fork_hooks()
 class Volume(InfiniBoxObject):
 
     FIELDS = [
-        Field("id", is_identity=True),
-        Field("name", creation_parameter=True, mutable=True, default=Autogenerate("vol_{uuid}")),
-        Field("size", creation_parameter=True, mutable=True, default=GB, type=CapacityType),
-        Field("pool_id", creation_parameter=True),
-        Field("type", cached=True),
-        Field("parent_id", cached=True),
-        Field("provisioning", api_name="provtype", mutable=True, creation_parameter=True, default="THICK"),
+        Field("id", is_identity=True, is_filterable=True, is_sortable=True),
+        Field("name", creation_parameter=True, mutable=True, is_filterable=True, is_sortable=True, default=Autogenerate("vol_{uuid}")),
+        Field("size", creation_parameter=True, mutable=True, is_filterable=True, is_sortable=True, default=GB, type=CapacityType),
+        Field("pool_id", creation_parameter=True, is_filterable=True, is_sortable=True),
+        Field("type", cached=True, is_filterable=True, is_sortable=True),
+        Field("parent_id", cached=True, is_filterable=True),
+        Field("provisioning", api_name="provtype", mutable=True, creation_parameter=True, is_filterable=True, is_sortable=True, default="THICK"),
     ]
 
     def get_pool(self):

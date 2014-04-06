@@ -6,8 +6,8 @@ from .system_object import InfiniBoxLURelatedObject
 class Cluster(InfiniBoxLURelatedObject):
 
     FIELDS = [
-        Field("id", type=int, is_identity=True),
-        Field("name", creation_parameter=True, mutable=True, default=Autogenerate("cluster_{uuid}")),
+        Field("id", type=int, is_identity=True, is_filterable=True, is_sortable=True),
+        Field("name", creation_parameter=True, mutable=True, is_filterable=True, is_sortable=True, default=Autogenerate("cluster_{uuid}")),
         Field("luns", type=list, add_getter=False, add_updater=False),
         Field("hosts", api_name="hosts", type=list, add_getter=False, add_updater=False),
     ]

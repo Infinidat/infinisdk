@@ -7,11 +7,11 @@ from infi.dtypes.wwn import WWN
 class Host(InfiniBoxLURelatedObject):
 
     FIELDS = [
-        Field("id", type=int, is_identity=True),
-        Field("name", creation_parameter=True, mutable=True, default=Autogenerate("host_{uuid}")),
+        Field("id", type=int, is_identity=True, is_filterable=True, is_sortable=True),
+        Field("name", creation_parameter=True, mutable=True, is_filterable=True, is_sortable=True, default=Autogenerate("host_{uuid}")),
         Field("luns", type=list, add_getter=False, add_updater=False),
         Field("ports", type=list, add_getter=False, add_updater=False),
-        Field("host_cluster_id", type=int),
+        Field("host_cluster_id", type=int, is_filterable=True),
     ]
 
     def get_cluster(self):
