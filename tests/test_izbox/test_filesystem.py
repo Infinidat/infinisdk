@@ -41,3 +41,7 @@ class FilesystemTest(TestCase):
     def test_rollback(self):
         snapshot = self.fs.create_snapshot()
         self.fs.rollback(snapshot)
+
+    def test_get_mount_path(self):
+        path = self.fs.get_mount_path()
+        self.assertIn(self.fs.get_name(), path)

@@ -12,6 +12,7 @@ class Filesystem(SystemObject):
                             translator=FunctionTranslator(to_api=lambda x: int(x // byte), from_api=lambda x: int(x) * byte)),
               default=GB, creation_parameter=True, mutable=True),
         Field("name", creation_parameter=True, mutable=True, default=Autogenerate("fs_{uuid}")),
+        Field("mount_path", type=str),
 
         Field("cifs_access_list", creation_parameter=True, mutable=True, type=list, default=[{"read_only": False, "username": "Everyone"}]),
         Field("nfs_access_list",  creation_parameter=True, mutable=True, type=list, default=[{"allow_root_access": False, "host": "*", "read_only": False, "secure": True}]),
