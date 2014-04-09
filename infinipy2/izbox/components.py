@@ -32,6 +32,8 @@ class IZBoxSystemComponent(SystemObject):
         Field("index", type=int, cached=True),
         Field("parent_index", type=int, cached=True),
         Field("parent_id", type=int, cached=True),
+        Field("alerts", type=list),
+        Field("data", type=dict),
     ]
 
     def is_ok(self):

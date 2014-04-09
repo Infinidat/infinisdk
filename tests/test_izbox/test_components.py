@@ -77,6 +77,16 @@ class ComponentsTest(TestCase):
         self.assertTrue(isinstance(alert_types, list))
         self.assertIsNot(alert_types[0].get('code'), None)
 
+    def test_get_component_alert(self):
+        node = self.system.components.nodes.choose()
+        alerts = node.get_alerts()
+        self.assertEquals(alerts, [])
+
+    def test_get_data(self):
+        node = self.system.components.nodes.choose()
+        data = node.get_data()
+        self.assertEquals(data, {})
+
     def test_get_type_info_from_system(self):
         type_info = self.system.components.get_type_infos_from_system()
         self.assertIn('node', type_info)
