@@ -3,6 +3,10 @@ default: test
 test: env
 	.env/bin/nosetests --with-doctest
 
+doc:
+	.env/bin/python setup.py build_sphinx
+.PHONY: doc
+
 coverage: env
 	.env/bin/nosetests --with-doctest --with-coverage --cover-package infinipy2
 
