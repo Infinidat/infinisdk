@@ -3,6 +3,8 @@ The API Layer
 
 Infinipy contains an API abstraction layer intended to ease the process of talking to the Infinidat API protocol.
 
+.. automodule:: infinipy2.core.api
+
 .. autoclass:: infinipy2.core.api.API
    :members:
 

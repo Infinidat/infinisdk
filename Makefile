@@ -1,5 +1,8 @@
 default: test
 
+docs: env
+	.env/bin/python setup.py build_sphinx -a -E
+
 test: env
 	.env/bin/nosetests --with-doctest
 
@@ -14,10 +17,10 @@ develop_env: env
 .env/.up-to-date: setup.py Makefile
 	virtualenv .env
 	.env/bin/pip install -e .
+	.env/bin/pip install Sphinx==1.1.3
 	.env/bin/pip install -r test_requirements.txt
 	touch .env/.up-to-date
 
 jenkins-docker-test:
 	docker pull docker.infinidat.com/python-detox
 	docker run -i -v $(CURDIR):/src docker.infinidat.com/python-detox
-

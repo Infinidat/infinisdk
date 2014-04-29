@@ -19,12 +19,18 @@ class TypeBinderContainer(object):
         setattr(self.system, object_type.get_plural_name(), binder)
 
     def __getattr__(self, attr):
+        """
+        Gets a type binder given its name
+        """
         try:
             return self._binders_by_name[attr]
         except LookupError:
             raise AttributeError(attr)
 
     def __getitem__(self, name):
+        """
+        Gets a type binder given its name
+        """
         if isinstance(name, string_types):
             return self._binders_by_name[name]
         return self._binders_by_class[name]

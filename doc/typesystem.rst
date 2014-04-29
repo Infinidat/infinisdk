@@ -32,14 +32,11 @@ The quickest way of accessing objects defined on a system is through ``system.ob
 
 .. autoclass:: infinipy2.core.type_binder_container.TypeBinderContainer
    :members:
-   
-   .. automethod:: __getitem__(classname)
-
+   :special-members:
 
 .. autoclass:: infinipy2.core.type_binder.TypeBinder
    :members:
-
-   .. automethod:: __len__()
+   :special-members:
 
 Querying, Filtering, Paging
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -139,7 +136,7 @@ Objects expose the :func:`.get_fields` and :func:`.get_field`:
 
 Getting all fields can be done without passing any arguments to :func:`.get_fields`:
 
-.. code-block::
+.. code-block:: python
 
    >>> "name" in filesystem.get_fields()
    True
@@ -284,9 +281,6 @@ Fields have types. The exact type and the domain/behavior of its values is deter
 
 The latter provides some more customization about the type constraints or attributes, like min/max constraints and more.
 
-.. autoclass:: infinipy2.core.type_info.TypeInfo
-   :members:
-
 
 The extra information for the type is used for querying the abstraction layer for capabilities - not for enforcing the limits. The API layer will send illegal values if given by the user. 
 
@@ -304,7 +298,7 @@ In many places in the field definition block we can refer to config paths, enabl
 
 
 Defaults, Mandatory Creation Fields and System Defaults
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Each field which is a creation parameter is mandatory by default (meaning it is not optional for :func:`.create`). This can be changed by specifying the ``optional`` keyword argument as ``True``.
 
