@@ -43,7 +43,7 @@ class PushRule(SystemObject):
     FIELDS = [
         Field("id", type=int, is_identity=True),
         Field("visibility", creation_parameter=True, mutable=True, default="CUSTOMER"),
-        Field("filters", creation_parameter=True, mutable=True, default=list),
-        Field("recipients", creation_parameter=True, mutable=True, default=list),
+        Field("filters", creation_parameter=True, mutable=True, default=list, type=list),
+        Field("recipients", creation_parameter=True, mutable=True, default=list, type=list),
         Field("name", creation_parameter=True, mutable=True, default=Autogenerate("rule_{timestamp}")),
     ]
