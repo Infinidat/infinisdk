@@ -1,15 +1,13 @@
-from capacity import byte, Capacity, GB
-from ..core import SystemObject
+from capacity import GB
+from ..core import SystemObject, CapacityType
 from ..core.field import Field
-from api_object_schema import FunctionTranslator, TypeInfo
 from ..core.api.special_values import Autogenerate
 
 class Filesystem(SystemObject):
     FIELDS = [
         Field("id", is_identity=True),
         Field("quota", api_name="quota_in_bytes",
-              type=TypeInfo(Capacity, api_type=int,
-                            translator=FunctionTranslator(to_api=lambda x: int(x // byte), from_api=lambda x: int(x) * byte)),
+              type=CapacityType,
               default=GB, creation_parameter=True, mutable=True),
         Field("name", creation_parameter=True, mutable=True, default=Autogenerate("fs_{uuid}")),
         Field("mount_path", type=str),
