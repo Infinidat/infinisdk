@@ -35,6 +35,9 @@ class APITarget(with_metaclass(abc.ABCMeta)):
         self.components = self.SYSTEM_COMPONENTS_TYPE(self)
         self.events = self.SYSTEM_EVENTS_TYPE(self)
 
+    def get_collections_names(self):
+        return [obj_type.get_plural_name() for obj_type in self.OBJECT_TYPES]
+
     def _normalize_addresses(self, addresses):
         if not isinstance(addresses[0], (list, tuple)):
             addresses = [addresses]

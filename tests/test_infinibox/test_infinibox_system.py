@@ -49,6 +49,11 @@ class InfiniBoxSystemTest(InfiniBoxTestCase):
         obj.unset_metadata(key)
         self.assertEqual(len(obj.get_all_metadata()), 0)
 
+    def test_get_collections_names(self):
+        collections_names = self.system.get_collections_names()
+        self.assertEquals(len(collections_names), len(self.system.OBJECT_TYPES))
+        self.assertIn("volumes", collections_names)
+
     def test_single_metadata_creation_on_all_infinibox_objects(self):
         ignore_types = ['volumes', 'users', 'emailrules']
 
