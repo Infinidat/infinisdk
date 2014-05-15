@@ -28,6 +28,10 @@ class InfiniBox(APITarget):
         simulator_address = address.get_floating_addresses()[0]
         return (simulator_address, 80)
 
+    def get_approval_failure_codes(self):
+        d = config.get_path('infinibox.approval_required_codes')
+        return d
+
     def get_state(self):
         return self.components.system_component.get_state()
 

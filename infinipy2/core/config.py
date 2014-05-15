@@ -17,6 +17,9 @@ config = confetti.Config(dict(
                 max_events=10**6,
                 max_page_size=1000),
             ),
+        approval_required_codes=tuple((
+            "DANGEROUS_OPERATION",
+            )),
         ),
     infinibox=dict(
         defaults=dict(
@@ -29,5 +32,9 @@ config = confetti.Config(dict(
                 total_count=dict(mock=0, simulator=480),
                 ),
             ),
+        approval_required_codes=tuple((
+            "APPROVAL_REQUIRED",
+            "APPROVAL_REQUIRED_VOLUME_HAS_CHILDREN",
+            )),
         ),
     ))

@@ -17,6 +17,10 @@ class IZBox(APITarget):
         port = address.base_url.netloc.port or 80
         return (address.base_url.netloc.hostname, port)
 
+    def get_approval_failure_codes(self):
+        d = config.get_path('izbox.approval_required_codes')
+        return d
+
     def get_state(self):
         return self.components.system_component.get_state()
 

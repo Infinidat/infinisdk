@@ -103,7 +103,13 @@ class API(object):
             raise APITransportFailure(e)
 
         if assert_success:
-            returned.assert_success()
+            try:
+                returned.assert_success()
+            except APICommandFailed as e:
+                if e.response.get_error():
+                    if e.response.get_error().get('code') in self.system.get_approval_failure_codes():
+                        raise CommandNotApproved(e.response)
+                raise
         return returned
 
     def _get_possible_urls(self, address=None):
@@ -168,8 +174,6 @@ class Response(object):
         try:
             self.response.raise_for_status()
         except requests.exceptions.HTTPError as e:
-            if self.response.status_code == httplib.FORBIDDEN:
-                raise CommandNotApproved(self)
             raise APICommandFailed(self)
 
 # TODO : implement async request

@@ -52,6 +52,9 @@ class APITarget(with_metaclass(abc.ABCMeta)):
             returned.append(address)
         return returned
 
+    def get_approval_failure_codes(self):
+        return tuple()
+
     def get_api_addresses(self):
         return self._addresses
 
