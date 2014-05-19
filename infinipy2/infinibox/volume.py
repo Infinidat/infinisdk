@@ -4,6 +4,7 @@ from ..core import Field, SystemObject, CapacityType
 from storage_interfaces.scsi.abstracts import ScsiVolume
 from ..core.exceptions import InvalidOperationException, InfinipyException
 from ..core.api.special_values import Autogenerate
+from ..core.bindings import ObjectIdBinding
 from .system_object import InfiniBoxObject
 from .lun import LogicalUnit
 import slash
@@ -24,25 +25,15 @@ class Volume(InfiniBoxObject):
         Field("id", is_identity=True, is_filterable=True, is_sortable=True),
         Field("name", creation_parameter=True, mutable=True, is_filterable=True, is_sortable=True, default=Autogenerate("vol_{uuid}")),
         Field("size", creation_parameter=True, mutable=True, is_filterable=True, is_sortable=True, default=GB, type=CapacityType),
-        Field("pool_id", creation_parameter=True, is_filterable=True, is_sortable=True),
+        Field("pool", api_name="pool_id", creation_parameter=True, is_filterable=True, is_sortable=True, binding=ObjectIdBinding()),
         Field("type", cached=True, is_filterable=True, is_sortable=True),
         Field("parent_id", cached=True, is_filterable=True),
         Field("provisioning", api_name="provtype", mutable=True, creation_parameter=True, is_filterable=True, is_sortable=True, default="THICK"),
     ]
 
-    def get_pool(self):
-        return self.system.pools.get_by_id_lazy(self.get_pool_id())
-
     def get_unique_key(self):
         system_id = self.system.get_api_addresses()[0][0]
         return (system_id, self.get_name())
-
-    @classmethod
-    def create(cls, system, **fields):
-        pool = fields.pop('pool', None)
-        if isinstance(pool, SystemObject):
-            fields['pool_id'] = pool.id
-        return super(Volume, cls).create(system, **fields)
 
     def is_master_volume(self):
         return self.get_type() == VOLUME_TYPES.Master

@@ -94,14 +94,20 @@ class SystemObject(with_metaclass(FieldsMeta)):
                 if not field.creation_parameter or field.optional:
                     continue
 
-            field_value = fields.get(field.name, NOTHING)
-            if field_value is NOTHING:
-                field_value = field.generate_default()
+            field_value = extra_fields.get(field.name, NOTHING)
             extra_fields.pop(field.name, None)
+            field_api_value = extra_fields.get(field.api_name, NOTHING)
             extra_fields.pop(field.api_name, None)
-            if field_value is NOTHING:
+            if field_value is NOTHING and field_api_value is NOTHING:
+                field_value = field.generate_default()
+            if field_value is not NOTHING and field_api_value is not NOTHING:
+                raise ValueError("Multiple colliding arguments: {0} and {1}".format(field.name, field.api_name))
+            if field_value is NOTHING and field_api_value is NOTHING:
                 missing_fields.add(field.name)
-            returned[field.api_name] = field.type.translator.to_api(field_value)
+            if field_value is not NOTHING:
+                returned[field.api_name] = field.binding.get_raw_api_value(field.type.translator.to_api(field_value))
+            else:
+                returned[field.api_name] = field_api_value
         if missing_fields:
             raise MissingFields("Following fields were not specified: {0}".format(", ".join(sorted(missing_fields))))
         returned.update(extra_fields)
