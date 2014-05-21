@@ -18,8 +18,8 @@ DONT_CARE = Sentinel("DONT_CARE")
 
 def _install_gossip_hooks():
     for (hook, operation) in itertools.product(["pre", "post"], ['creation', 'deletion', 'update']):
-        gossip.define("{0}_object_{1}".format(hook, operation))
-    gossip.define("object_operation_failure")
+        gossip.define("slash.{0}_object_{1}".format(hook, operation))
+    gossip.define("slash.object_operation_failure")
 
 _install_gossip_hooks()
 
@@ -77,10 +77,10 @@ class SystemObject(with_metaclass(FieldsMeta)):
     @classmethod
     def create(cls, system, **fields):
         data = cls._get_data_for_post(fields)
-        gossip.trigger('pre_object_creation', data=data, system=system, cls=cls)
+        gossip.trigger('slash.pre_object_creation', data=data, system=system, cls=cls)
         with _possible_api_failure_context():
             returned = cls(system, system.api.post(cls.get_url_path(system), data=data).get_result())
-        gossip.trigger('post_object_creation', obj=returned, data=data)
+        gossip.trigger('slash.post_object_creation', obj=returned, data=data)
         return returned
 
     @classmethod
@@ -306,5 +306,5 @@ def _possible_api_failure_context():
     try:
         yield
     except APICommandFailed as e:
-        gossip.trigger('object_operation_failure')
+        gossip.trigger('slash.object_operation_failure')
         raise

@@ -16,9 +16,9 @@ class SystemObjectHooksTest(TestCase):
         self.object_operation_failure_hook = self.forge.create_wildcard_function_stub(name="fail")
         self.identifier = object()
         self.addCleanup(self._unregister)
-        gossip.register(self.pre_object_creation_hook, 'pre_object_creation', self.identifier)
-        gossip.register(self.post_object_creation_hook, 'post_object_creation', self.identifier)
-        gossip.register(self.object_operation_failure_hook, 'object_operation_failure', self.identifier)
+        gossip.register(self.pre_object_creation_hook, 'slash.pre_object_creation', self.identifier)
+        gossip.register(self.post_object_creation_hook, 'slash.post_object_creation', self.identifier)
+        gossip.register(self.object_operation_failure_hook, 'slash.object_operation_failure', self.identifier)
 
     def _unregister(self):
         gossip.unregister_token(self.identifier)

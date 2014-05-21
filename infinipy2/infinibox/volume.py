@@ -45,20 +45,20 @@ class Volume(InfiniBoxObject):
         return self.get_type() == VOLUME_TYPES.Clone
 
     def _create_child(self, name):
-        gossip.trigger('begin_fork', vol=self)
+        gossip.trigger('slash.begin_fork', vol=self)
         if not name:
             name = Autogenerate('vol_{uuid}')
         data = {'name': name, 'parent_id': self.get_id()}
-        gossip.trigger('pre_object_creation', data=data, system=self.system, cls=type(self))
+        gossip.trigger('slash.pre_object_creation', data=data, system=self.system, cls=type(self))
         try:
             resp = self.system.api.post(self.get_url_path(self.system), data=data)
         except Exception:
-            gossip.trigger('object_operation_failure')
-            gossip.trigger('cancel_fork', vol=self)
+            gossip.trigger('slash.object_operation_failure')
+            gossip.trigger('slash.cancel_fork', vol=self)
             raise
         child = self.__class__(self.system, resp.get_result())
-        gossip.trigger('post_object_creation', obj=child, data=data)
-        gossip.trigger('finish_fork', vol=self, child=child)
+        gossip.trigger('slash.post_object_creation', obj=child, data=data)
+        gossip.trigger('slash.finish_fork', vol=self, child=child)
         return child
 
     def create_clone(self, name=None):
