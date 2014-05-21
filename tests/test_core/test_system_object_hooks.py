@@ -1,5 +1,5 @@
 import forge
-import slash
+import gossip
 from capacity import GB
 from infinipy2.core.api import OMIT
 from infinipy2.core.exceptions import APICommandFailed
@@ -16,13 +16,12 @@ class SystemObjectHooksTest(TestCase):
         self.object_operation_failure_hook = self.forge.create_wildcard_function_stub(name="fail")
         self.identifier = object()
         self.addCleanup(self._unregister)
-        slash.hooks.pre_object_creation.register(self.pre_object_creation_hook, self.identifier)
-        slash.hooks.post_object_creation.register(self.post_object_creation_hook, self.identifier)
-        slash.hooks.object_operation_failure.register(self.object_operation_failure_hook, self.identifier)
+        gossip.register(self.pre_object_creation_hook, 'pre_object_creation', self.identifier)
+        gossip.register(self.post_object_creation_hook, 'post_object_creation', self.identifier)
+        gossip.register(self.object_operation_failure_hook, 'object_operation_failure', self.identifier)
 
     def _unregister(self):
-        for _, hook in slash.hooks.get_all_hooks():
-            hook.unregister_by_identifier(self.identifier)
+        gossip.unregister_token(self.identifier)
 
     def tearDown(self):
         self.forge.verify()

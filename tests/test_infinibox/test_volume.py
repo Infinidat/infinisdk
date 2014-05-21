@@ -1,8 +1,8 @@
+import gossip
 from tests.utils import InfiniBoxTestCase
 from infinipy2.core.exceptions import APICommandFailed, InvalidOperationException
 from capacity import GB
 from functools import partial
-import slash
 
 
 class VolumeTest(InfiniBoxTestCase):
@@ -118,9 +118,9 @@ class VolumeTest(InfiniBoxTestCase):
         def hook_callback(hook_type, **kwargs):
             obj_name = kwargs['data']['name']
             l.append('{0}_{1}'.format(hook_type, obj_name))
-        slash.hooks.pre_object_creation.register(partial(hook_callback,'pre'), hook_ident)
-        slash.hooks.object_operation_failure.register(partial(hook_callback,'failure'), hook_ident)
-        slash.hooks.post_object_creation.register(partial(hook_callback,'post'), hook_ident)
+        gossip.register(partial(hook_callback, 'pre'), 'pre_object_creation', hook_ident)
+        gossip.register(partial(hook_callback, 'failure'), 'object_operation_failure', hook_ident)
+        gossip.register(partial(hook_callback, 'post'), 'post_object_creation', hook_ident)
 
         snapshot = self.volume.create_snapshot('a_snap')
         self.assertEquals(l, ['pre_a_snap', 'post_a_snap'])
@@ -128,6 +128,4 @@ class VolumeTest(InfiniBoxTestCase):
         snapshot.create_clone('a_clone')
         self.assertEquals(l, ['pre_a_snap', 'post_a_snap', 'pre_a_clone', 'post_a_clone'])
 
-        slash.hooks.pre_object_creation.unregister_by_identifier(hook_ident)
-        slash.hooks.object_operation_failure.unregister_by_identifier(hook_ident)
-        slash.hooks.post_object_creation.unregister_by_identifier(hook_ident)
+        gossip.unregister_token(hook_ident)

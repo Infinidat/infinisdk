@@ -1,8 +1,7 @@
 import itertools
+import gossip
 from contextlib import contextmanager
-
 from sentinels import NOTHING, Sentinel
-import slash
 from infi.pyutils.lazy import cached_method
 from urlobject import URLObject as URL
 
@@ -17,12 +16,12 @@ from .api.special_values import translate_special_values
 
 DONT_CARE = Sentinel("DONT_CARE")
 
-def _install_slash_hooks():
+def _install_gossip_hooks():
     for (hook, operation) in itertools.product(["pre", "post"], ['creation', 'deletion', 'update']):
-        slash.hooks.ensure_custom_hook("{0}_object_{1}".format(hook, operation))
-    slash.hooks.ensure_custom_hook("object_operation_failure")
+        gossip.define("{0}_object_{1}".format(hook, operation))
+    gossip.define("object_operation_failure")
 
-_install_slash_hooks()
+_install_gossip_hooks()
 
 class FieldsMeta(FieldsMetaBase):
 
@@ -78,10 +77,10 @@ class SystemObject(with_metaclass(FieldsMeta)):
     @classmethod
     def create(cls, system, **fields):
         data = cls._get_data_for_post(fields)
-        slash.hooks.pre_object_creation(data=data, system=system, cls=cls)
+        gossip.trigger('pre_object_creation', data=data, system=system, cls=cls)
         with _possible_api_failure_context():
             returned = cls(system, system.api.post(cls.get_url_path(system), data=data).get_result())
-        slash.hooks.post_object_creation(obj=returned, data=data)
+        gossip.trigger('post_object_creation', obj=returned, data=data)
         return returned
 
     @classmethod
@@ -307,5 +306,5 @@ def _possible_api_failure_context():
     try:
         yield
     except APICommandFailed as e:
-        slash.hooks.object_operation_failure()
+        gossip.trigger('object_operation_failure')
         raise

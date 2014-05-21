@@ -1,5 +1,4 @@
 import os
-import sys
 from setuptools import setup, find_packages
 
 with open(os.path.join(os.path.dirname(__file__), "infinipy2", "__version__.py")) as version_file:
@@ -12,7 +11,7 @@ _INSTALL_REQUIERS = [
     "logbook",
     "requests>=1.2.0",
     "sentinels",
-    "slash",
+    "gossip>=0.6.0",
     "URLObject",
     "confetti>=2.1.0",
     "infi.dtypes.wwn>=0.0.2",

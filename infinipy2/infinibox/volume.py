@@ -1,3 +1,4 @@
+import gossip
 from capacity import GB
 from collections import namedtuple
 from ..core import Field, SystemObject, CapacityType
@@ -7,16 +8,15 @@ from ..core.api.special_values import Autogenerate
 from ..core.bindings import ObjectIdBinding
 from .system_object import InfiniBoxObject
 from .lun import LogicalUnit
-import slash
 
 PROVISIONING = namedtuple('Provisioning', ['Thick', 'Thin'])('THICK', 'THIN')
 VOLUME_TYPES = namedtuple('VolumeTypes', ['Master', 'Snapshot', 'Clone'])('MASTER', 'SNAP', 'CLONE')
 
 
-def _install_slash_fork_hooks():
+def _install_gossip_hooks():
     for phase in ["begin", "cancel", "finish"]:
-        slash.hooks.ensure_custom_hook("{0}_fork".format(phase))
-_install_slash_fork_hooks()
+        gossip.define("{0}_fork".format(phase))
+_install_gossip_hooks()
 
 
 class Volume(InfiniBoxObject):
@@ -45,20 +45,20 @@ class Volume(InfiniBoxObject):
         return self.get_type() == VOLUME_TYPES.Clone
 
     def _create_child(self, name):
-        slash.hooks.begin_fork(vol=self)
+        gossip.trigger('begin_fork', vol=self)
         if not name:
             name = Autogenerate('vol_{uuid}')
         data = {'name': name, 'parent_id': self.get_id()}
-        slash.hooks.pre_object_creation(data=data, system=self.system, cls=type(self))
+        gossip.trigger('pre_object_creation', data=data, system=self.system, cls=type(self))
         try:
             resp = self.system.api.post(self.get_url_path(self.system), data=data)
         except Exception:
-            slash.hooks.object_operation_failure()
-            slash.hooks.cancel_fork(vol=self)
+            gossip.trigger('object_operation_failure')
+            gossip.trigger('cancel_fork', vol=self)
             raise
         child = self.__class__(self.system, resp.get_result())
-        slash.hooks.post_object_creation(obj=child, data=data)
-        slash.hooks.finish_fork(vol=self, child=child)
+        gossip.trigger('post_object_creation', obj=child, data=data)
+        gossip.trigger('finish_fork', vol=self, child=child)
         return child
 
     def create_clone(self, name=None):
