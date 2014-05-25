@@ -22,10 +22,10 @@ _install_gossip_hooks()
 class Volume(InfiniBoxObject):
 
     FIELDS = [
-        Field("id", is_identity=True, is_filterable=True, is_sortable=True),
+        Field("id", type=int, is_identity=True, is_filterable=True, is_sortable=True),
         Field("name", creation_parameter=True, mutable=True, is_filterable=True, is_sortable=True, default=Autogenerate("vol_{uuid}")),
         Field("size", creation_parameter=True, mutable=True, is_filterable=True, is_sortable=True, default=GB, type=CapacityType),
-        Field("pool", api_name="pool_id", creation_parameter=True, is_filterable=True, is_sortable=True, binding=ObjectIdBinding()),
+        Field("pool", type=int, api_name="pool_id", creation_parameter=True, is_filterable=True, is_sortable=True, binding=ObjectIdBinding()),
         Field("type", cached=True, is_filterable=True, is_sortable=True),
         Field("parent_id", cached=True, is_filterable=True),
         Field("provisioning", api_name="provtype", mutable=True, creation_parameter=True, is_filterable=True, is_sortable=True, default="THICK"),

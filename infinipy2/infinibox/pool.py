@@ -6,7 +6,7 @@ from .system_object import InfiniBoxObject
 
 class Pool(InfiniBoxObject):
     FIELDS = [
-        Field("id", is_identity=True, is_filterable=True, is_sortable=True),
+        Field("id", type=int, is_identity=True, is_filterable=True, is_sortable=True),
         Field("name", creation_parameter=True, mutable=True, is_filterable=True, is_sortable=True, default=Autogenerate("pool_{uuid}")),
         Field("virtual_capacity",  creation_parameter=True, mutable=True, default=TB, type=CapacityType, is_filterable=True, is_sortable=True),
         Field("physical_capacity", creation_parameter=True, mutable=True, default=TB, type=CapacityType, is_filterable=True, is_sortable=True),

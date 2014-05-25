@@ -23,9 +23,9 @@ class EmailRule(SystemObject):
     URL_PATH = "/api/rest/events/mail"
 
     FIELDS = [
-        Field("id", type=int, is_identity=True),
-        Field("visibility", creation_parameter=True, default="CUSTOMER"),
+        Field("id", type=int, is_identity=True, is_filterable=True, is_sortable=True),
+        Field("visibility", creation_parameter=True, default="CUSTOMER", is_filterable=True, is_sortable=True),
         Field("filters", creation_parameter=True, type=list, default=list),
         Field("recipients", creation_parameter=True, type=list, default=["a@a.com"]),
-        Field("name", creation_parameter=True, default=Autogenerate("rule_{timestamp}")),
+        Field("name", creation_parameter=True, default=Autogenerate("rule_{timestamp}"), is_filterable=True, is_sortable=True),
     ]
