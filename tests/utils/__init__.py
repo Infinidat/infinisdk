@@ -11,6 +11,9 @@ flux.current_timeline.set_time_factor(0)
 simulators_dict = {IZBox: IZBoxSimulator, InfiniBox: InfinisimInfinibox}
 
 
+def timeline_tick(seconds=1):
+    flux.current_timeline.sleep(seconds)
+
 class Infinipy2TestCase(infi.unittest.TestCase):
     SYSTEM_CLASS = None
 

@@ -1,5 +1,5 @@
 import itertools
-import time
+import flux
 from uuid import uuid1
 
 from api_object_schema.special_value import SpecialValue
@@ -30,7 +30,7 @@ class Autogenerate(SpecialValue):
         counter = self._ORDINALS.get(self.template, None)
         if counter is None:
             counter = self._ORDINALS[self.template] = itertools.count(1)
-        current_time = time.time()
+        current_time = flux.current_timeline.time()
         return self.template.format(time=current_time, timestamp=int(current_time * 1000), ordinal=next(counter), uuid=_LAZY_UUID_FACTORY)
 
 class _LazyUUIDFactory(object):

@@ -1,5 +1,5 @@
 from ecosystem.mocks.mock_mailboxer import get_simulated_mail_server
-from tests.utils import InfiniBoxTestCase
+from tests.utils import InfiniBoxTestCase, timeline_tick
 import re
 
 
@@ -54,6 +54,7 @@ class UserTest(InfiniBoxTestCase):
         self.assertEqual(self.user.get_role(), new_role)
 
     def test_get_pools(self):
+        timeline_tick()
         user = self.system.users.create(role='PoolAdmin')
         self.assertEquals(user.get_pools(), [])
 
