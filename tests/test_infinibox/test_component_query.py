@@ -1,4 +1,5 @@
 from ..utils import InfiniBoxTestCase
+import random
 from infinipy2.core.config import config
 
 NO_OF_ENCLOSURES_DRIVES = config.get_path('infinibox.defaults.enlosure_drives.total_count.mock')
@@ -63,8 +64,10 @@ class ComponentsTest(InfiniBoxTestCase):
             query[1000]
 
     def test_get_item(self):
-        enc1 = self.system.components.enclosures.choose()
-        enc2 = self.system.components.enclosures.choose()
+        enclosures = self.system.components.enclosures.get_all()[:]
+        enc1 = random.choice(enclosures)
+        enclosures.remove(enc1)
+        enc2 = random.choice(enclosures)
         Enclosure = self.system.components.enclosures.object_type
 
         self.assertTrue(isinstance(enc1, Enclosure))
