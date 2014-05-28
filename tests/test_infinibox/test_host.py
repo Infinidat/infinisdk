@@ -38,17 +38,15 @@ class HostTest(InfiniBoxTestCase):
     def test_fc_port_operations(self):
         address1 = "00:01:02:03:04:05:06:07"
         address2 = "07:06:05:04:03:02:01:00"
-        address1s = address1.replace(":","")
-        address2s = address2.replace(":","")
 
         self.assertEqual(self.host.get_fc_ports(), [])
         self.host.add_fc_port(address1)
         self.host.add_fc_port(address2)
 
-        self.assertEqual([address1s, address2s], self.host.get_fc_ports())
+        self.assertEqual([address1, address2], self.host.get_fc_ports())
 
         self.host.remove_fc_port(address1)
-        self.assertEqual([address2s], self.host.get_fc_ports())
+        self.assertEqual([address2], self.host.get_fc_ports())
 
         self.host.remove_fc_port(address2)
         self.assertEqual([], self.host.get_fc_ports())
