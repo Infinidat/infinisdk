@@ -43,7 +43,7 @@ class HostTest(InfiniBoxTestCase):
         self.host.add_fc_port(address1)
         self.host.add_fc_port(address2)
 
-        self.assertEqual([address1, address2], self.host.get_fc_ports())
+        self.assertEqual(sorted([address1, address2]), sorted(self.host.get_fc_ports()))
 
         self.host.remove_fc_port(address1)
         self.assertEqual([address2], self.host.get_fc_ports())
