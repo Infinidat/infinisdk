@@ -1,6 +1,6 @@
 coverage
 infi.unittest>=1.0.0
-infinisim>=12.0.post209.g00a65b2
+infinisim>=16.0.post10.g571f76
 izsim
 nose
 pyforge

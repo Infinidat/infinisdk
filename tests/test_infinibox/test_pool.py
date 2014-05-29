@@ -1,7 +1,7 @@
 from tests.utils import InfiniBoxTestCase
 from infinipy2._compat import xrange, iteritems
 from infinipy2.core import CapacityType
-from capacity import TB, Capacity
+from capacity import TB, KiB,Capacity
 
 
 class PoolTest(InfiniBoxTestCase):
@@ -13,7 +13,7 @@ class PoolTest(InfiniBoxTestCase):
         capacity_translator = CapacityType.translator
         for k,v in iteritems(d):
             if isinstance(v, Capacity):
-                d[k] = capacity_translator.to_api(v)
+                d[k] = capacity_translator.to_api(v.roundup(6 * 64 * KiB))
 
     def test_creation(self):
         kwargs = {"name": "some_pool_name",
