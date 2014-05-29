@@ -118,9 +118,9 @@ class VolumeTest(InfiniBoxTestCase):
         def hook_callback(hook_type, **kwargs):
             obj_name = kwargs['data']['name']
             l.append('{0}_{1}'.format(hook_type, obj_name))
-        gossip.register(partial(hook_callback, 'pre'), 'slash.pre_object_creation', hook_ident)
-        gossip.register(partial(hook_callback, 'failure'), 'slash.object_operation_failure', hook_ident)
-        gossip.register(partial(hook_callback, 'post'), 'slash.post_object_creation', hook_ident)
+        gossip.register(partial(hook_callback, 'pre'), 'infinidat.pre_object_creation', hook_ident)
+        gossip.register(partial(hook_callback, 'failure'), 'infinidat.object_operation_failure', hook_ident)
+        gossip.register(partial(hook_callback, 'post'), 'infinidat.post_object_creation', hook_ident)
 
         snapshot = self.volume.create_snapshot('a_snap')
         self.assertEquals(l, ['pre_a_snap', 'post_a_snap'])
