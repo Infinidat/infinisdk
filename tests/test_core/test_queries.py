@@ -62,6 +62,29 @@ class QueryTest(TestCase):
     def test_querying_lt(self):
         self.assert_query_equals(Filesystem.find(self.system, self.field < "X"), "id=lt%3AX")
 
+    def get_expectation_with_range(self, field_name, operator_name, iterable):
+        return field_name+ "=" + operator_name + "%3A%28" + "%2C".join(str(item) for item in iterable) + "%29"
+
+    def test_querying_between(self):
+        id_range = (1,3)
+        expected = self.get_expectation_with_range("id", "between", id_range)
+        self.assert_query_equals(Filesystem.find(self.system, self.field.__between__(id_range)), expected)
+        self.assert_query_equals(Filesystem.find(self.system, self.field.between(id_range)), expected)
+
+    def test_querying_like(self):
+        field = self.system.objects.filesystems.fields.name
+        self.assert_query_equals(Filesystem.find(self.system, field.like("abc")), "name=like%3Aabc")
+
+    def test_querying_in(self):
+        id_range = (1,3)
+        expected = self.get_expectation_with_range("id", "in", id_range)
+        self.assert_query_equals(Filesystem.find(self.system, self.field.in_(id_range)), expected)
+
+    def test_querying_not_in(self):
+        id_range = (1,3)
+        expected = self.get_expectation_with_range("id", "notin", id_range)
+        self.assert_query_equals(Filesystem.find(self.system, self.field.not_in(id_range)), expected)
+
     def test_sorting(self):
         self.assert_query_equals(
             Filesystem.find(self.system).sort(-Filesystem.fields.quota), "sort=-quota_in_bytes")
