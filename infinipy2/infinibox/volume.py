@@ -75,6 +75,20 @@ class Volume(InfiniBoxObject):
         snapshot_data = int(snapshot.get_field('data'))
         self.update_field('data', snapshot_data)
 
+    def own_replication_snapshot(self, name=None):
+        if not name:
+            name = Autogenerate('vol_{uuid}')
+        data = {'name': name}
+        gossip.trigger('infinidat.pre_object_creation', data=data, system=self.system, cls=type(self))
+        try:
+            resp = self.system.api.post(self.get_this_url_path().add_path('own_snapshot'), data=data)
+        except Exception:
+            gossip.trigger('infinidat.object_operation_failure')
+            raise
+        child = self.__class__(self.system, resp.get_result())
+        gossip.trigger('infinidat.post_object_creation', obj=child, data=data)
+        return child
+
     def get_snapshots(self):
         return self.get_children()
 
@@ -105,5 +119,12 @@ class Volume(InfiniBoxObject):
         if parent_id:
             return self.system.volumes.get_by_id_lazy(parent_id)
         return None
+
+    def purge(self):
+        if self.is_mapped():
+            self.get_lun().unmap()
+        for child in self.get_children():
+            child.purge()
+        super(Volume, self).purge()
 
 ScsiVolume.register(Volume)

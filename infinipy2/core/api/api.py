@@ -63,7 +63,7 @@ class API(object):
 
     def _request(self, http_method, path, assert_success=True, **kwargs):
         """
-        Sends a request to the IZBox API interface
+        Sends a request to the system API interface
 
         :rtype: :class:`.Response`
         """
@@ -128,7 +128,7 @@ class API(object):
 
 class Response(object):
     """
-    IZBox API request response
+    System API request response
     """
     def __init__(self, method, url, data, resp):
         super(Response, self).__init__()
