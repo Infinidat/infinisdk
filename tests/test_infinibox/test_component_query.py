@@ -1,4 +1,4 @@
-from ..utils import InfiniBoxTestCase
+import pytest
 import random
 from infinipy2.core.config import config
 
@@ -7,69 +7,68 @@ NO_OF_ENCLOSURES_DRIVES = config.get_path('infinibox.defaults.enlosure_drives.to
 get_id = lambda obj: obj.get_id()
 get_state = lambda obj: obj.get_state()
 
-class ComponentsTest(InfiniBoxTestCase):
-    def test_get_all_items_of_specific_component(self):
-        enclosures = self.system.components.enclosures
-        self.assertEquals(len(enclosures.find()), 8)
-        self.assertEquals(set(enclosures.find()), set(enclosures.get_all()))
+def test_get_all_items_of_specific_component(infinibox):
+    enclosures = infinibox.components.enclosures
+    assert len(enclosures.find()) == 8
+    assert set(enclosures.find()) == set(enclosures.get_all())
 
-    def test_get_all_items_of_all_the_components(self):
-        found_components = self.system.components.find()
-        all_components = self.system.components.get_all()
+def test_get_all_items_of_all_the_components(infinibox):
+    found_components = infinibox.components.find()
+    all_components = infinibox.components.get_all()
 
-        self.assertGreater(len(found_components), NO_OF_ENCLOSURES_DRIVES)
-        self.assertGreater(len(all_components), NO_OF_ENCLOSURES_DRIVES)
-        self.assertEqual(list(found_components), list(all_components))
+    assert len(found_components) > NO_OF_ENCLOSURES_DRIVES
+    assert len(all_components) > NO_OF_ENCLOSURES_DRIVES
+    assert list(found_components) == list(all_components)
 
-    def test_sort_results_asc(self):
-        enclosures = self.system.components.enclosures
-        sorting = enclosures.find().sort(+enclosures.object_type.fields.id)
+def test_sort_results_asc(infinibox):
+    enclosures = infinibox.components.enclosures
+    sorting = enclosures.find().sort(+enclosures.object_type.fields.id)
 
-        sorted_enclosures = sorted(enclosures.find(), key=get_id, reverse=False)
-        self.assertEqual(sorted_enclosures, list(sorting))
+    sorted_enclosures = sorted(enclosures.find(), key=get_id, reverse=False)
+    assert sorted_enclosures == list(sorting)
 
-    def test_sort_results_desc(self):
-        enclosures = self.system.components.enclosures
-        sorting = enclosures.find().sort(-enclosures.object_type.fields.id)
+def test_sort_results_desc(infinibox):
+    enclosures = infinibox.components.enclosures
+    sorting = enclosures.find().sort(-enclosures.object_type.fields.id)
 
-        sorted_enclosures = sorted(enclosures.find(), key=get_id, reverse=True)
-        self.assertEqual(sorted_enclosures, list(sorting))
+    sorted_enclosures = sorted(enclosures.find(), key=get_id, reverse=True)
+    assert sorted_enclosures == list(sorting)
 
-    def test_sort_results_where_key_is_equal(self):
-        enclosures = self.system.components.enclosures
-        sorting = enclosures.find().sort(+enclosures.object_type.fields.state)
+def test_sort_results_where_key_is_equal(infinibox):
+    enclosures = infinibox.components.enclosures
+    sorting = enclosures.find().sort(+enclosures.object_type.fields.state)
 
-        sorted_enclosures = sorted(enclosures.find(), key=get_state)
-        self.assertEqual(sorted_enclosures, list(sorting))
+    sorted_enclosures = sorted(enclosures.find(), key=get_state)
+    assert sorted_enclosures == list(sorting)
 
-    def test_filter_with_predicates(self):
-        services = self.system.components.services
-        for service in services.find(services.fields.state == "ACTIVE"):
-            self.assertEquals(service.get_state(), "ACTIVE")
+def test_filter_with_predicates(infinibox):
+    services = infinibox.components.services
+    for service in services.find(services.fields.state == "ACTIVE"):
+        assert service.get_state() == 'ACTIVE'
 
-    def test_filter_with_kw(self):
-        services = self.system.components.services
-        for service in services.find(state="ACTIVE"):
-            self.assertEquals(service.get_state(), "ACTIVE")
+def test_filter_with_kw(infinibox):
+    services = infinibox.components.services
+    for service in services.find(state="ACTIVE"):
+        assert service.get_state() == 'ACTIVE'
 
-    def test_get_length(self):
-        found_components = self.system.components.find()
-        self.assertEqual(len(found_components), len(list(found_components)))
+def test_get_length(infinibox):
+    found_components = infinibox.components.find()
+    assert len(found_components) == len(list(found_components))
 
-    def test_get_item_negative_path(self):
-        query = self.system.components.enclosures.find()
-        with self.assertRaises(NotImplementedError):
-            query[-4]
-        with self.assertRaises(IndexError):
-            query[1000]
+def test_get_item_negative_path(infinibox):
+    query = infinibox.components.enclosures.find()
+    with pytest.raises(NotImplementedError):
+        query[-4]
+    with pytest.raises(IndexError):
+        query[1000]
 
-    def test_get_item(self):
-        enclosures = self.system.components.enclosures.get_all()[:]
-        enc1 = random.choice(enclosures)
-        enclosures.remove(enc1)
-        enc2 = random.choice(enclosures)
-        Enclosure = self.system.components.enclosures.object_type
+def test_get_item(infinibox):
+    enclosures = infinibox.components.enclosures.get_all()[:]
+    enc1 = random.choice(enclosures)
+    enclosures.remove(enc1)
+    enc2 = random.choice(enclosures)
+    Enclosure = infinibox.components.enclosures.object_type
 
-        self.assertTrue(isinstance(enc1, Enclosure))
-        self.assertTrue(isinstance(enc2, Enclosure))
-        self.assertNotEqual(enc1, enc2)
+    assert isinstance(enc1, Enclosure)
+    assert isinstance(enc2, Enclosure)
+    assert enc1 != enc2

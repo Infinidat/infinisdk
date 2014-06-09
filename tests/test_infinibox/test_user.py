@@ -1,85 +1,79 @@
+import pytest
+import flux
 from ecosystem.mocks.mock_mailboxer import get_simulated_mail_server
-from tests.utils import InfiniBoxTestCase, timeline_tick
 import re
 
+def test_name(infinibox, user):
+    curr_name = user.get_name()
+    new_name = 'other_user_name'
+    user.update_name(new_name)
 
-class UserTest(InfiniBoxTestCase):
-    def setUp(self):
-        super(UserTest, self).setUp()
-        self.user = self.system.users.create()
-        self.addCleanup(self.user.delete)
+    assert curr_name.startswith('user_')
+    assert curr_name != new_name
+    assert user.get_name() == new_name
 
-    def test_name(self):
-        curr_name = self.user.get_name()
-        new_name = 'other_user_name'
-        self.user.update_name(new_name)
+def test_creation(infinibox, user):
+    kwargs = {"role": "ReadOnly",
+              "name": "some_user_name",
+              "email": "fake@email.com",
+              "password": "some_password"}
+    user = infinibox.users.create(**kwargs)
 
-        self.assertTrue(curr_name.startswith('user_'))
-        self.assertNotEqual(curr_name, new_name)
-        self.assertEqual(self.user.get_name(), new_name)
+    assert user.get_name() == kwargs['name']
+    assert user.get_role() == kwargs['role']
+    assert user.get_email() == kwargs['email']
+    assert user in infinibox.users.get_all()
+    user.delete()
+    assert (not user.is_in_system())
 
-    def test_creation(self):
-        kwargs = {"role": "ReadOnly",
-                  "name": "some_user_name",
-                  "email": "fake@email.com",
-                  "password": "some_password"}
-        user = self.system.users.create(**kwargs)
+def test_password(infinibox, user):
+    with pytest.raises(AttributeError):
+        user.get_password()
+    user.update_password('some_password')
 
-        self.assertEqual(user.get_name(), kwargs['name'])
-        self.assertEqual(user.get_role(), kwargs['role'])
-        self.assertEqual(user.get_email(), kwargs['email'])
-        self.assertIn(user, self.system.users.get_all())
-        user.delete()
-        self.assertFalse(user.is_in_system())
+def test_email(infinibox, user):
+    orig_email = user.get_email()
+    new_email = 'some@email.com'
 
-    def test_password(self):
-        with self.assertRaises(AttributeError):
-            self.user.get_password()
-        self.user.update_password('some_password')
+    user.update_email(new_email)
+    assert orig_email != new_email
+    assert user.get_email() == new_email
 
-    def test_email(self):
-        orig_email = self.user.get_email()
-        new_email = 'some@email.com'
+def test_role(infinibox, user):
+    orig_role = user.get_role()
+    new_role = 'ReadOnly'
 
-        self.user.update_email(new_email)
-        self.assertNotEqual(orig_email, new_email)
-        self.assertEqual(self.user.get_email(), new_email)
+    user.update_role(new_role)
+    assert orig_role != new_role
+    assert user.get_role() == new_role
 
-    def test_role(self):
-        orig_role = self.user.get_role()
-        new_role = 'ReadOnly'
+def test_get_pools(infinibox, user):
+    flux.current_timeline.sleep(1)
+    user = infinibox.users.create(role='PoolAdmin')
+    assert user.get_pools() == []
 
-        self.user.update_role(new_role)
-        self.assertNotEqual(orig_role, new_role)
-        self.assertEqual(self.user.get_role(), new_role)
+    pool = infinibox.pools.create()
+    pool.add_owner(user)
 
-    def test_get_pools(self):
-        timeline_tick()
-        user = self.system.users.create(role='PoolAdmin')
-        self.assertEquals(user.get_pools(), [])
+    pools = user.get_pools()
+    assert len(pools) == 1
+    assert pools[0] == pool
 
-        pool = self.system.pools.create()
-        pool.add_owner(user)
+    pool.discard_owner(user)
+    assert user.get_pools() == []
 
-        pools = user.get_pools()
-        self.assertEquals(len(pools), 1)
-        self.assertEquals(pools[0], pool)
+def _get_token_from_mail(simulator, mail_address):
+    msg = _get_last_mailboxer_msg(simulator, mail_address)
+    return re.findall("token=(.*)\"", msg.content)[0]
 
-        pool.discard_owner(user)
-        self.assertEquals(user.get_pools(), [])
+def _get_last_mailboxer_msg(simulator, mail_address):
+    msg = get_simulated_mail_server(simulator).get_messages(mail_address)
+    return msg[0]
 
-    def _get_token_from_mail(self, mail_address):
-        msg = self._get_last_mailboxer_msg(mail_address)
-        return re.findall("token=(.*)\"", msg.content)[0]
-
-    def _get_last_mailboxer_msg(self, mail_address):
-        msg = get_simulated_mail_server(self.simulator).get_messages(mail_address)
-        return msg[0]
-
-    def test_reset_password(self):
-        user_email = self.user.get_email()
-        self.user.request_reset_password()
-        token = self._get_token_from_mail(user_email)
-        self.user.reset_password(token)
-        msg = self._get_last_mailboxer_msg(user_email)
-        self.assertTrue('successfully' in msg.content)
+def test_reset_password(infinibox, infinibox_simulator, user):
+    user_email = user.get_email()
+    user.request_reset_password()
+    token = _get_token_from_mail(infinibox_simulator, user_email)
+    user.reset_password(token)
+    msg = _get_last_mailboxer_msg(infinibox_simulator, user_email)
+    assert 'successfully' in msg.content

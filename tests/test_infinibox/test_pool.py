@@ -1,60 +1,61 @@
-from tests.utils import InfiniBoxTestCase
 from infinipy2._compat import xrange, iteritems
 from infinipy2.core import CapacityType
-from capacity import TB, KiB,Capacity
+from capacity import TB, KiB, Capacity
+from ..conftest import create_volume, create_pool
 
 
-class PoolTest(InfiniBoxTestCase):
-    def setUp(self):
-        super(PoolTest, self).setUp()
-        self.pool = self._create_pool()
+def update_all_capacities_in_dict_to_api(d):
+    capacity_translator = CapacityType.translator
+    for k, v in iteritems(d):
+        if isinstance(v, Capacity):
+            d[k] = capacity_translator.to_api(v.roundup(6 * 64 * KiB))
 
-    def update_all_capacities_in_dict_to_api(self, d):
-        capacity_translator = CapacityType.translator
-        for k,v in iteritems(d):
-            if isinstance(v, Capacity):
-                d[k] = capacity_translator.to_api(v.roundup(6 * 64 * KiB))
 
-    def test_creation(self):
-        kwargs = {"name": "some_pool_name",
-                  "virtual_capacity":  3*TB,
-                  "physical_capacity": 3*TB}
-        pool = self.system.pools.create(**kwargs)
+def test_creation(infinibox, pool):
+    kwargs = {"name": "some_pool_name",
+              "virtual_capacity":  3 * TB,
+              "physical_capacity": 3 * TB}
+    pool = infinibox.pools.create(**kwargs)
 
-        self.update_all_capacities_in_dict_to_api(kwargs)
+    update_all_capacities_in_dict_to_api(kwargs)
 
-        self.assertEqual(pool._cache['name'], kwargs['name'])
-        self.assertEqual(pool._cache['physical_capacity'], kwargs['physical_capacity'])
-        self.assertEqual(pool._cache['virtual_capacity'], kwargs['virtual_capacity'])
+    assert pool._cache['name'] == kwargs['name']
+    assert pool._cache['physical_capacity'] == kwargs['physical_capacity']
+    assert pool._cache['virtual_capacity'] == kwargs['virtual_capacity']
 
-        pool.delete()
-        self.assertFalse(pool.is_in_system())
+    pool.delete()
+    assert (not pool.is_in_system())
 
-    def test_get_name(self):
-        pool_name = 'some_pool_name'
-        pool = self.system.pools.create(name=pool_name)
 
-        self.assertEqual(pool.get_name(), pool_name)
-        pool.delete()
-        self.assertFalse(pool.is_in_system())
+def test_get_name(infinibox, pool):
+    pool_name = 'some_pool_name'
+    pool = infinibox.pools.create(name=pool_name)
 
-    def test_update_name(self):
-        new_name = 'some_pool_name'
-        self.pool.update_name(new_name)
-        self.assertEqual(self.pool.get_name(), new_name)
+    assert pool.get_name() == pool_name
+    pool.delete()
+    assert (not pool.is_in_system())
 
-    def _get_all_pools(self):
-        return list(self.system.pools.get_all())
 
-    def test_get_all(self):
-        orig_pools = self._get_all_pools()
-        new_pool = self._create_pool()
-        curr_pools = self._get_all_pools()
+def test_update_name(infinibox, pool):
+    new_name = 'some_pool_name'
+    pool.update_name(new_name)
+    assert pool.get_name() == new_name
 
-        self.assertEqual(len(curr_pools), len(orig_pools)+1)
-        self.assertIn(self.pool, orig_pools)
-        self.assertEqual(curr_pools[-1], new_pool)
 
-    def test_get_volumes(self):
-        volumes = [self._create_volume(pool_id=self.pool.id) for i in xrange(5)]
-        self.assertEqual(list(self.pool.get_volumes()), volumes)
+def _get_all_pools(infinibox):
+    return list(infinibox.pools.get_all())
+
+
+def test_get_all(infinibox, pool):
+    orig_pools = _get_all_pools(infinibox)
+    new_pool = create_pool(infinibox)
+    curr_pools = _get_all_pools(infinibox)
+
+    assert len(curr_pools) == (len(orig_pools) + 1)
+    assert pool in orig_pools
+    assert curr_pools[(-1)] == new_pool
+
+
+def test_get_volumes(infinibox, pool):
+    volumes = [create_volume(infinibox, pool_id=pool.id) for i in xrange(5)]
+    assert list(pool.get_volumes()) == volumes

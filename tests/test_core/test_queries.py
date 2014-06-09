@@ -1,130 +1,144 @@
-import operator
+import pytest
 from infinipy2.core import *
 from infinipy2.core.exceptions import ObjectNotFound, TooManyObjectsFound
-from infinipy2.izbox import IZBox
 from infinipy2.izbox.filesystem import Filesystem
-from ..utils import TestCase
-from urlobject import URLObject
 
 
-class QueryExecutionTest(TestCase):
-
-    def test_querying_length(self):
-        self.assertEquals(len(Filesystem.find(self.system)), 0)
-        self.simulator.create_filesystem("fs1")
-        self.assertEquals(len(Filesystem.find(self.system)), 1)
-
-class TypeBinderQueryTest(TestCase):
-
-    def test_get_too_many_items(self):
-        for i in range(2):
-            self.simulator.create_filesystem("fs{0}".format(i))
-        with self.assertRaises(TooManyObjectsFound):
-            self.system.objects.filesystems.get()
-
-    def test_get_not_found(self):
-        with self.assertRaises(ObjectNotFound):
-            self.system.objects.filesystems.get(name="nonexisting")
-
-    def test_choose_not_found(self):
-        with self.assertRaises(ObjectNotFound):
-            self.system.objects.filesystems.choose(name="nonexisting")
+def test_querying_length(izbox, izbox_simulator):
+    assert len(Filesystem.find(izbox)) == 0
+    izbox_simulator.create_filesystem("fs1")
+    assert len(Filesystem.find(izbox)) == 1
 
 
-class QueryTest(TestCase):
-    def setUp(self):
-        super(QueryTest, self).setUp()
-        self.system = IZBox(("address", 80))
-        self.field = self.system.objects.filesystems.fields.id
-
-    def test_querying_equal(self):
-        for query in [
-                Filesystem.find(self.system, id=2),
-                Filesystem.find(self.system, Filesystem.fields.id==2),
-        ]:
-            self.assert_query_equals(query, "id=eq%3A2")
-
-    def test_unknown_fields(self):
-        self.assert_query_equals(Filesystem.find(self.system, unknown_field=2), "unknown_field=eq%3A2")
-
-    def test_querying_ne(self):
-        self.assert_query_equals(Filesystem.find(self.system, self.field != "X"), "id=ne%3AX")
-
-    def test_querying_ge(self):
-        self.assert_query_equals(Filesystem.find(self.system, self.field >= "X"), "id=ge%3AX")
-
-    def test_querying_le(self):
-        self.assert_query_equals(Filesystem.find(self.system, self.field <= "X"), "id=le%3AX")
-
-    def test_querying_gt(self):
-        self.assert_query_equals(Filesystem.find(self.system, self.field > "X"), "id=gt%3AX")
-
-    def test_querying_lt(self):
-        self.assert_query_equals(Filesystem.find(self.system, self.field < "X"), "id=lt%3AX")
-
-    def get_expectation_with_range(self, field_name, operator_name, iterable):
-        return field_name+ "=" + operator_name + "%3A%28" + "%2C".join(str(item) for item in iterable) + "%29"
-
-    def test_querying_between(self):
-        id_range = (1,3)
-        expected = self.get_expectation_with_range("id", "between", id_range)
-        self.assert_query_equals(Filesystem.find(self.system, self.field.__between__(id_range)), expected)
-        self.assert_query_equals(Filesystem.find(self.system, self.field.between(id_range)), expected)
-
-    def test_querying_like(self):
-        field = self.system.objects.filesystems.fields.name
-        self.assert_query_equals(Filesystem.find(self.system, field.like("abc")), "name=like%3Aabc")
-
-    def test_querying_in(self):
-        id_range = (1,3)
-        expected = self.get_expectation_with_range("id", "in", id_range)
-        self.assert_query_equals(Filesystem.find(self.system, self.field.in_(id_range)), expected)
-
-    def test_querying_not_in(self):
-        id_range = (1,3)
-        expected = self.get_expectation_with_range("id", "notin", id_range)
-        self.assert_query_equals(Filesystem.find(self.system, self.field.not_in(id_range)), expected)
-
-    def test_sorting(self):
-        self.assert_query_equals(
-            Filesystem.find(self.system).sort(-Filesystem.fields.quota), "sort=-quota_in_bytes")
-        self.assert_query_equals(
-            Filesystem.find(self.system).sort(+Filesystem.fields.quota), "sort=quota_in_bytes")
-        self.assert_query_equals(
-            Filesystem.find(self.system).sort(Filesystem.fields.quota), "sort=quota_in_bytes")
-
-    def test_sorting_multiple(self):
-        self.assert_query_equals(
-            Filesystem.find(self.system).sort(-Filesystem.fields.quota, +Filesystem.fields.id), "sort=-quota_in_bytes%2Cid")
-
-    def test_only_fields(self):
-        # NOTE: uses api name!
-        self.assert_query_equals(
-            Filesystem.find(self.system).only_fields(["quota"]), "fields=id%2Cquota_in_bytes")
-
-    def test_pagination(self):
-        self.assert_query_equals(
-            Filesystem.find(self.system).page(5).page_size(100), None) # pages are only added at query
-
-    def assert_query_equals(self, q, expected):
-        if expected is not None:
-            expected = "?{0}".format(expected)
-        else:
-            expected = ""
-        self.assertEquals(
-            q.query, "/api/rest/filesystems" + expected)
-
-    def test_negative_item_position(self):
-        with self.assertRaises(NotImplementedError):
-            self.system.events.find()[-3]
+def test_get_too_many_items(izbox, izbox_simulator):
+    for i in range(2):
+        izbox_simulator.create_filesystem("fs{0}".format(i))
+    with pytest.raises(TooManyObjectsFound):
+        izbox.objects.filesystems.get()
 
 
-class PagedQueryTest(TestCase):
+def test_get_not_found(izbox):
+    with pytest.raises(ObjectNotFound):
+        izbox.objects.filesystems.get(name="nonexisting")
 
-    def test_paged_query_traversal(self):
-        """
-        Makes sure that traversing a paged query only returns the requested page
-        """
-        page_size = 10
-        result = self.system.components.find().page(5).page_size(page_size)
-        self.assertEquals(len(result), page_size)
+
+def test_choose_not_found(izbox):
+    with pytest.raises(ObjectNotFound):
+        izbox.objects.filesystems.choose(name="nonexisting")
+
+
+@pytest.fixture
+def field(izbox):
+    return izbox.objects.filesystems.fields.id
+
+
+def test_querying_equal(izbox, field):
+    for query in [
+            Filesystem.find(izbox, id=2),
+            Filesystem.find(izbox, Filesystem.fields.id == 2),
+    ]:
+        assert_query_equals(query, "id=eq%3A2")
+
+
+def test_unknown_fields(izbox, field):
+    assert_query_equals(Filesystem.find(izbox, unknown_field=2),
+                        "unknown_field=eq%3A2")
+
+
+def test_querying_ne(izbox, field):
+    assert_query_equals(Filesystem.find(izbox, field != "X"), "id=ne%3AX")
+
+
+def test_querying_ge(izbox, field):
+    assert_query_equals(Filesystem.find(izbox, field >= "X"), "id=ge%3AX")
+
+
+def test_querying_le(izbox, field):
+    assert_query_equals(Filesystem.find(izbox, field <= "X"), "id=le%3AX")
+
+
+def test_querying_gt(izbox, field):
+    assert_query_equals(Filesystem.find(izbox, field > "X"), "id=gt%3AX")
+
+
+def test_querying_lt(izbox, field):
+    assert_query_equals(Filesystem.find(izbox, field < "X"), "id=lt%3AX")
+
+
+def _get_expectation_with_range(field_name, operator_name, iterable):
+    return field_name + "=" + operator_name + "%3A%28" + "%2C".join(str(item) for item in iterable) + "%29"
+
+
+def test_querying_between(izbox, field):
+    id_range = (1, 3)
+    expected = _get_expectation_with_range("id", "between", id_range)
+    assert_query_equals(
+        Filesystem.find(izbox, field.__between__(id_range)), expected)
+    assert_query_equals(
+        Filesystem.find(izbox, field.between(id_range)), expected)
+
+
+def test_querying_like(izbox, field):
+    field = izbox.objects.filesystems.fields.name
+    assert_query_equals(
+        Filesystem.find(izbox, field.like("abc")), "name=like%3Aabc")
+
+
+def test_querying_in(izbox, field):
+    id_range = (1, 3)
+    expected = _get_expectation_with_range("id", "in", id_range)
+    assert_query_equals(Filesystem.find(izbox, field.in_(id_range)), expected)
+
+
+def test_querying_not_in(izbox, field):
+    id_range = (1, 3)
+    expected = _get_expectation_with_range("id", "notin", id_range)
+    assert_query_equals(
+        Filesystem.find(izbox, field.not_in(id_range)), expected)
+
+
+def test_sorting(izbox, field):
+    assert_query_equals(
+        Filesystem.find(izbox).sort(-Filesystem.fields.quota), "sort=-quota_in_bytes")
+    assert_query_equals(
+        Filesystem.find(izbox).sort(+Filesystem.fields.quota), "sort=quota_in_bytes")
+    assert_query_equals(
+        Filesystem.find(izbox).sort(Filesystem.fields.quota), "sort=quota_in_bytes")
+
+
+def test_sorting_multiple(izbox, field):
+    assert_query_equals(
+        Filesystem.find(izbox).sort(-Filesystem.fields.quota, +Filesystem.fields.id), "sort=-quota_in_bytes%2Cid")
+
+
+def test_only_fields(izbox, field):
+    # NOTE: uses api name!
+    assert_query_equals(
+        Filesystem.find(izbox).only_fields(["quota"]), "fields=id%2Cquota_in_bytes")
+
+
+def test_pagination(izbox, field):
+    assert_query_equals(
+        Filesystem.find(izbox).page(5).page_size(100), None)  # pages are only added at query
+
+
+def assert_query_equals(q, expected):
+    if expected is not None:
+        expected = "?{0}".format(expected)
+    else:
+        expected = ""
+    assert q.query == ('/api/rest/filesystems' + expected)
+
+
+def test_negative_item_position(izbox, field):
+    with pytest.raises(NotImplementedError):
+        izbox.events.find()[-3]
+
+
+def test_paged_query_traversal(izbox):
+    """
+    Makes sure that traversing a paged query only returns the requested page
+    """
+    page_size = 10
+    result = izbox.components.find().page(5).page_size(page_size)
+    assert len(result) == page_size

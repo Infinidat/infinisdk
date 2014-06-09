@@ -1,45 +1,37 @@
-from tests.utils import InfiniBoxTestCase
 from infinipy2._compat import iteritems
 
+def test_get_name(infinibox, cluster):
+    assert cluster.get_name().startswith('cluster_')
 
-class ClusterTest(InfiniBoxTestCase):
-    def setUp(self):
-        super(ClusterTest, self).setUp()
-        self.cluster = self.system.clusters.create()
-        self.addCleanup(self.cluster.delete)
+def test_update_name(infinibox, cluster):
+    curr_name = cluster.get_name()
+    new_name = 'other_cluster_name'
+    cluster.update_name(new_name)
 
-    def test_get_name(self):
-        self.assertTrue(self.cluster.get_name().startswith('cluster_'))
+    assert curr_name != new_name
+    assert cluster.get_name() == new_name
 
-    def test_update_name(self):
-        curr_name = self.cluster.get_name()
-        new_name = 'other_cluster_name'
-        self.cluster.update_name(new_name)
+def test_creation(infinibox, cluster):
+    kwargs = {'name': 'some_cluster_name'}
+    cluster = infinibox.clusters.create(**kwargs)
 
-        self.assertNotEqual(curr_name, new_name)
-        self.assertEqual(self.cluster.get_name(), new_name)
+    for k, v in iteritems(kwargs):
+        assert cluster._cache[k] == v
+    assert cluster.get_hosts() == []
 
-    def test_creation(self):
-        kwargs = {'name': 'some_cluster_name',}
-        cluster = self.system.clusters.create(**kwargs)
+    cluster.delete()
+    assert not cluster.is_in_system()
 
-        for k, v in iteritems(kwargs):
-            self.assertEqual(cluster._cache[k], v)
-        self.assertEqual(cluster.get_hosts(), [])
+def test_hosts_operations(infinibox, cluster, request):
+    assert cluster.get_hosts() == []
+    host = infinibox.hosts.create()
+    request.addfinalizer(host.delete)
 
-        cluster.delete()
-        self.assertFalse(cluster.is_in_system())
+    cluster.add_host(host)
+    hosts = cluster.get_hosts()
+    assert len(hosts) == 1
+    assert hosts[0] == host
 
-    def test_hosts_operations(self):
-        self.assertEqual(self.cluster.get_hosts(), [])
-        host = self.system.hosts.create()
-        self.addCleanup(host.delete)
-
-        self.cluster.add_host(host)
-        hosts = self.cluster.get_hosts()
-        self.assertEqual(len(hosts), 1)
-        self.assertEqual(hosts[0], host)
-
-        self.cluster.remove_host(host)
-        hosts = self.cluster.get_hosts()
-        self.assertEqual(len(hosts), 0)
+    cluster.remove_host(host)
+    hosts = cluster.get_hosts()
+    assert len(hosts) == 0

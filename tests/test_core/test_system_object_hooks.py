@@ -1,53 +1,64 @@
-import forge
-import gossip
 from capacity import GB
+from forge import And, HasKeyValue, Is, IsA, HasAttributeValue
+
+import gossip
+import pytest
 from infinipy2.core.api import OMIT
 from infinipy2.core.exceptions import APICommandFailed
 
-from ..utils import TestCase
 
-class SystemObjectHooksTest(TestCase):
+@pytest.fixture
+def hooks(forge, request):
 
-    def setUp(self):
-        super(SystemObjectHooksTest, self).setUp()
-        self.forge = forge.Forge()
-        self.pre_object_creation_hook = self.forge.create_wildcard_function_stub(name="pre")
-        self.post_object_creation_hook = self.forge.create_wildcard_function_stub(name="post")
-        self.object_operation_failure_hook = self.forge.create_wildcard_function_stub(name="fail")
-        self.identifier = object()
-        self.addCleanup(self._unregister)
-        gossip.register(self.pre_object_creation_hook, 'infinidat.pre_object_creation', self.identifier)
-        gossip.register(self.post_object_creation_hook, 'infinidat.post_object_creation', self.identifier)
-        gossip.register(self.object_operation_failure_hook, 'infinidat.object_operation_failure', self.identifier)
+    class Hooks(object):
+        pass
 
-    def _unregister(self):
-        gossip.unregister_token(self.identifier)
+    identifier = object()
 
-    def tearDown(self):
-        self.forge.verify()
-        super(SystemObjectHooksTest, self).tearDown()
+    returned = Hooks()
+    returned.pre_object_creation_hook = forge.create_wildcard_function_stub(
+        name="pre")
+    returned.post_object_creation_hook = forge.create_wildcard_function_stub(
+        name="post")
+    returned.object_operation_failure_hook = forge.create_wildcard_function_stub(
+        name="fail")
 
-    def test_creation_hook(self):
-        self.pre_object_creation_hook(
-            system=forge.Is(self.system),
-            data=forge.HasKeyValue("name", "test_fs"),
-            cls=self.system.objects.filesystems.object_type
-            )
-        self.post_object_creation_hook(
-            obj=forge.And(forge.IsA(self.system.objects.filesystems.object_type),
-                             forge.HasAttributeValue("system", self.system)),
-            data=forge.HasKeyValue("name", "test_fs"),
-            )
-        self.forge.replay()
-        self.system.objects.filesystems.create(name="test_fs", quota=GB)
+    gossip.register(returned.pre_object_creation_hook,
+                    'infinidat.pre_object_creation', identifier)
+    gossip.register(returned.post_object_creation_hook,
+                    'infinidat.post_object_creation', identifier)
+    gossip.register(returned.object_operation_failure_hook,
+                    'infinidat.object_operation_failure', identifier)
 
-    def test_creation_hook_failure(self):
-        self.pre_object_creation_hook(
-            system=forge.Is(self.system),
-            data=forge.HasKeyValue("name", "test_fs"),
-            cls=self.system.objects.filesystems.object_type
-            )
-        self.object_operation_failure_hook()
-        self.forge.replay()
-        with self.assertRaises(APICommandFailed):
-            self.system.objects.filesystems.create(name="test_fs", quota=OMIT)
+    @request.addfinalizer
+    def cleanup():
+        gossip.unregister_token(identifier)
+
+    return returned
+
+
+def test_creation_hook(hooks, forge, izbox):
+    hooks.pre_object_creation_hook(
+        system=Is(izbox),
+        data=HasKeyValue("name", "test_fs"),
+        cls=izbox.objects.filesystems.object_type
+    )
+    hooks.post_object_creation_hook(
+        obj=And(
+            IsA(izbox.objects.filesystems.object_type),
+            HasAttributeValue("system", izbox)),
+        data=HasKeyValue("name", "test_fs"),
+    )
+    forge.replay()
+    izbox.objects.filesystems.create(name="test_fs", quota=GB)
+
+def test_creation_hook_failure(hooks, forge, izbox):
+    hooks.pre_object_creation_hook(
+        system=Is(izbox),
+        data=HasKeyValue("name", "test_fs"),
+        cls=izbox.objects.filesystems.object_type
+    )
+    hooks.object_operation_failure_hook()
+    forge.replay()
+    with pytest.raises(APICommandFailed):
+        izbox.objects.filesystems.create(name="test_fs", quota=OMIT)

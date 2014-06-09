@@ -1,97 +1,84 @@
-from tests.utils import InfiniBoxTestCase
+import pytest
 
 
-class LogicalUnitTest(InfiniBoxTestCase):
-    def setUp(self):
-        super(LogicalUnitTest, self).setUp()
-        self.host = self.system.hosts.create()
-        self.addCleanup(self.host.delete)
+def test_no_luns_mapped(infinibox, host, cluster):
+    luns = host.get_luns()
+    assert len(luns) == 0
 
-        self.cluster = self.system.clusters.create()
-        self.addCleanup(self.cluster.delete)
+    pool = infinibox.pools.create()
+    vol = infinibox.volumes.create(pool=pool)
+    assert (not host.is_volume_mapped(vol))
 
-    def test_no_luns_mapped(self):
-        luns = self.host.get_luns()
-        self.assertEquals(len(luns), 0)
+def test_map_volume_to_cluster(infinibox, host, cluster, volume):
+    assert (not volume.is_mapped())
 
-        pool = self.system.pools.create()
-        vol = self.system.volumes.create(pool=pool)
-        self.assertFalse(self.host.is_volume_mapped(vol))
+    cluster.map_volume(volume)
+    assert volume.is_mapped()
 
-    def test_map_volume_to_cluster(self):
-        volume = self._create_volume()
-        self.assertFalse(volume.is_mapped())
+    luns = cluster.get_luns()
+    assert len(luns) == 1
+    assert cluster.is_volume_mapped(volume)
 
-        self.cluster.map_volume(volume)
-        self.assertTrue(volume.is_mapped())
+    lu = list(luns)[0]
+    assert lu.get_volume() == volume
+    volume_lun = volume.get_lun()
+    assert lu == volume_lun
+    assert lu == luns[int(volume_lun)]
+    assert lu.get_host() is None
+    assert lu.get_cluster() == cluster
 
-        luns = self.cluster.get_luns()
-        self.assertEquals(len(luns), 1)
-        self.assertTrue(self.cluster.is_volume_mapped(volume))
+    lu.unmap()
+    assert len(cluster.get_luns()) == 0
+    assert (not volume.is_mapped())
 
-        lu = list(luns)[0]
-        self.assertEquals(lu.get_volume(), volume)
-        volume_lun = volume.get_lun()
-        self.assertEquals(lu, volume_lun)
-        self.assertEquals(lu, luns[int(volume_lun)])
-        self.assertIs(lu.get_host(), None)
-        self.assertEquals(lu.get_cluster(), self.cluster)
+def test_map_volume_to_host(infinibox, host, cluster, volume):
+    assert (not volume.is_mapped())
 
-        lu.unmap()
-        self.assertEquals(len(self.cluster.get_luns()), 0)
-        self.assertFalse(volume.is_mapped())
+    host.map_volume(volume, 2)
+    assert volume.is_mapped()
 
-    def test_map_volume_to_host(self):
-        volume = self._create_volume()
-        self.assertFalse(volume.is_mapped())
+    luns = host.get_luns()
+    assert len(luns) == 1
 
-        self.host.map_volume(volume, 2)
-        self.assertTrue(volume.is_mapped())
+    lu = list(luns)[0]
+    assert lu.get_lun() == int(lu)
+    volume_lun = volume.get_lun()
+    assert lu.get_volume() == volume
+    assert lu == luns[int(volume_lun)]
+    assert lu == volume.get_lun()
+    assert lu.get_cluster() is None
+    assert lu.get_host() == host
 
-        luns = self.host.get_luns()
-        self.assertEquals(len(luns), 1)
+    lu.unmap()
+    assert len(host.get_luns()) == 0
+    assert (not volume.is_mapped())
 
-        lu = list(luns)[0]
-        self.assertEquals(lu.get_lun(), int(lu))
-        volume_lun = volume.get_lun()
-        self.assertEquals(lu.get_volume(), volume)
-        self.assertEquals(lu, luns[int(volume_lun)])
-        self.assertEquals(lu, volume.get_lun())
-        self.assertIs(lu.get_cluster(), None)
-        self.assertEquals(lu.get_host(), self.host)
+def test_multiple_luns_mapping_objects(infinibox, host, cluster, volume1, volume2):
+    host.map_volume(volume1)
 
-        lu.unmap()
-        self.assertEquals(len(self.host.get_luns()), 0)
-        self.assertFalse(volume.is_mapped())
+    cluster.map_volume(volume2)
 
-    def test_multiple_luns_mapping_objects(self):
-        host_volume = self._create_volume()
-        self.host.map_volume(host_volume)
+    host_lus = host.get_luns()
+    cluster_lus = cluster.get_luns()
 
-        cluster_volume = self._create_volume()
-        self.cluster.map_volume(cluster_volume)
+    assert len(host_lus) == 1
+    assert len(cluster_lus) == 1
 
-        host_lus = self.host.get_luns()
-        cluster_lus = self.cluster.get_luns()
+    host_lu = list(host_lus)[0]
+    assert list(host_lus[volume1])[0] == host_lu
 
-        self.assertEquals(len(host_lus), 1)
-        self.assertEquals(len(cluster_lus), 1)
+    cluster_lu = list(cluster_lus)[0]
+    assert list(cluster_lus[volume2])[0] == cluster_lu
 
-        host_lu = list(host_lus)[0]
-        self.assertEquals(list(host_lus[host_volume])[0], host_lu)
+    with pytest.raises(KeyError):
+        cluster_lus[volume1]
 
-        cluster_lu = list(cluster_lus)[0]
-        self.assertEquals(list(cluster_lus[cluster_volume])[0], cluster_lu)
+    assert cluster_lus.get(host_lu.get_lun(), None) == None
+    assert host_lus.get(host_lu.get_lun(), None) == host_lu
 
-        with self.assertRaises(KeyError):
-            cluster_lus[host_volume]
+    assert (not cluster_lu in host_lus)
 
-        self.assertEquals(cluster_lus.get(host_lu.get_lun(), None), None)
-        self.assertEquals(host_lus.get(host_lu.get_lun(), None), host_lu)
+    assert host_lu != cluster_lu
 
-        self.assertFalse(cluster_lu in host_lus)
-
-        self.assertNotEqual(host_lu, cluster_lu)
-
-        host_lu.delete()
-        cluster_lu.delete()
+    host_lu.delete()
+    cluster_lu.delete()

@@ -4,6 +4,6 @@ Infinipy Development
 Testing
 -------
 
-    $ nosetests
+    $ make test
 
 

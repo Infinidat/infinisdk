@@ -4,10 +4,10 @@ docs: env
 	.env/bin/python setup.py build_sphinx -a -E
 
 test: env
-	.env/bin/nosetests --with-doctest
+	.env/bin/py.test tests
 
 coverage: env
-	.env/bin/nosetests --with-doctest --with-coverage --cover-package infinipy2
+	.env/bin/coverage run .env/bin/py.test tests
 
 env: .env/.up-to-date
 
