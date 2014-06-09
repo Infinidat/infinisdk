@@ -1,7 +1,7 @@
 coverage
 infi.unittest>=1.0.0
 infinisim>=16.0.post14.g8fa7242
-izsim
+izsim>=17.0.post2.g0bd4985
 pytest
 pyforge
 
