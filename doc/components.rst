@@ -1,7 +1,7 @@
 Components
 ==========
 
-Infinipy provides reflection for physical system components (referred to here as *components*). Components are similar to logical objects :ref:`discussed earlier<typesystem>`, but they are slightly different:
+InfiniSDK provides reflection for physical system components (referred to here as *components*). Components are similar to logical objects :ref:`discussed earlier<typesystem>`, but they are slightly different:
 
 1. They are cached by default -- getting the same component twice will return the very same Python object twice
 2. They reside in ``system.components``, instead of ``system.objects``.
@@ -31,7 +31,7 @@ There are several ways to obtain component types from the system:
 
   >>> types = system.components.get_component_types()
   >>> system.components.types.Enclosure
-  <class 'infinipy2.izbox.components.Enclosure'>
+  <class 'infinisdk.izbox.components.Enclosure'>
 
 
 Retrieving Component Objects
@@ -68,7 +68,7 @@ It may also override the *_BINDER_CLASS* and *_BOUNDED_METHODS*
 
 .. code-block:: python
 
-  #>>> from infinipy2.core import GenericSystemComponent, GenericComponentBinder
+  #>>> from infinisdk.core import GenericSystemComponent, GenericComponentBinder
 
   #>>> class Node(GenericSystemComponent):
   ...     FIELDS = []

@@ -1,7 +1,7 @@
 import unittest
 import doctest
 
-from infinipy2.core import utils
+from infinisdk.core import utils
 
 class ObjectUtilsTest(unittest.TestCase):
 

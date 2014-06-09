@@ -1,7 +1,7 @@
 # -*- mode: python -*-
 import capacity
 from contextlib import contextmanager
-from infinipy2.izbox import IZBox
+from infinisdk.izbox import IZBox
 from izsim import Simulator
 
 @contextmanager

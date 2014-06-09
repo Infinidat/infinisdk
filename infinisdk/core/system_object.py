@@ -127,7 +127,7 @@ class SystemObject(with_metaclass(FieldsMeta)):
     @classmethod
     def get_creation_defaults(cls):
         """
-        Returns a dict representing the default arguments as implicitly constructed by infinipy to fulfill a ``create`` call
+        Returns a dict representing the default arguments as implicitly constructed by infinisdk to fulfill a ``create`` call
 
         .. note:: this will cause generation of defaults, which will have side effects if they are special values
 

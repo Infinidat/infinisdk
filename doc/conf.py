@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Infinipy2 documentation build configuration file, created by
+# InfiniSDK documentation build configuration file, created by
 # sphinx-quickstart on Tue Sep  3 15:07:25 2013.
 #
 # This file is execfile()d with the current directory set to its containing dir.
@@ -40,7 +40,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'Infinipy2'
+project = u'InfiniSDK'
 copyright = u'2013, Infinidat'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -48,7 +48,7 @@ copyright = u'2013, Infinidat'
 # built documents.
 #
 # The short X.Y version.
-with open(os.path.join(os.path.dirname(__file__), "..", "infinipy2", "__version__.py")) as version_file:
+with open(os.path.join(os.path.dirname(__file__), "..", "infinisdk", "__version__.py")) as version_file:
     # can't use import here...
     version = release = version_file.read().strip().split("=")[1].strip()[1:-1]
 
@@ -177,7 +177,7 @@ html_static_path = ['_static']
 #html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'Infinipy2doc'
+htmlhelp_basename = 'InfiniSDKdoc'
 
 
 # -- Options for LaTeX output --------------------------------------------------
@@ -196,7 +196,7 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'Infinipy2.tex', u'Infinipy2 Documentation',
+  ('index', 'InfiniSDK.tex', u'InfiniSDK Documentation',
    u'Infinidat', 'manual'),
 ]
 
@@ -226,7 +226,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'infinipy2', u'Infinipy2 Documentation',
+    ('index', 'infinisdk', u'InfiniSDK Documentation',
      [u'Infinidat'], 1)
 ]
 
@@ -240,8 +240,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'Infinipy2', u'Infinipy2 Documentation',
-   u'Infinidat', 'Infinipy2', 'One line description of project.',
+  ('index', 'InfiniSDK', u'InfiniSDK Documentation',
+   u'Infinidat', 'InfiniSDK', 'One line description of project.',
    'Miscellaneous'),
 ]
 

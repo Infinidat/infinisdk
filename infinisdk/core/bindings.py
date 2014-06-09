@@ -1,6 +1,6 @@
 from api_object_schema import FieldBinding
 
-class Infinipy2Binding(FieldBinding):
+class InfiniSDKBinding(FieldBinding):
     def get_api_value_from_object(self, obj):
         """
         returns the value of the object's field
@@ -19,7 +19,7 @@ class Infinipy2Binding(FieldBinding):
         """
         return value
 
-class ObjectIdBinding(Infinipy2Binding):
+class ObjectIdBinding(InfiniSDKBinding):
     def __init__(self, ref_collection_name=None):
         super(ObjectIdBinding, self).__init__()
         self._ref_collection_name = ref_collection_name

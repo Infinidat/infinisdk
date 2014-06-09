@@ -4,7 +4,7 @@ from .field_filter import FieldFilter
 from .field_sorting import FieldSorting
 
 from api_object_schema import Field as FieldBase
-from .bindings import Infinipy2Binding
+from .bindings import InfiniSDKBinding
 
 
 class Field(FieldBase):
@@ -41,7 +41,7 @@ class Field(FieldBase):
             setattr(cls, updater_name, updater_func)
 
     def get_default_binding_object(self):
-        return Infinipy2Binding()
+        return InfiniSDKBinding()
 
     def __neg__(self):
         return FieldSorting(self, "-")

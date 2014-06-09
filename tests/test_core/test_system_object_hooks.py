@@ -3,8 +3,8 @@ from forge import And, HasKeyValue, Is, IsA, HasAttributeValue
 
 import gossip
 import pytest
-from infinipy2.core.api import OMIT
-from infinipy2.core.exceptions import APICommandFailed
+from infinisdk.core.api import OMIT
+from infinisdk.core.exceptions import APICommandFailed
 
 
 @pytest.fixture

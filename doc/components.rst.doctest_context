@@ -1,7 +1,7 @@
 # -*- mode: python -*-
 from contextlib import contextmanager
 from izsim import Simulator
-from infinipy2.izbox import IZBox
+from infinisdk.izbox import IZBox
 
 @contextmanager
 def doctest_context():

@@ -1,7 +1,7 @@
 import os
 from setuptools import setup, find_packages
 
-with open(os.path.join(os.path.dirname(__file__), "infinipy2", "__version__.py")) as version_file:
+with open(os.path.join(os.path.dirname(__file__), "infinisdk", "__version__.py")) as version_file:
     exec(version_file.read()) # pylint: disable=W0122
 
 _INSTALL_REQUIERS = [
@@ -19,7 +19,7 @@ _INSTALL_REQUIERS = [
     "flux",
 ]
 
-setup(name="infinipy2",
+setup(name="infinisdk",
       classifiers = [
           "Programming Language :: Python :: 2.6",
           "Programming Language :: Python :: 2.7",
@@ -32,7 +32,7 @@ setup(name="infinipy2",
       version=__version__, # pylint: disable=E0602
       packages=find_packages(exclude=["tests"]),
 
-      url="http://devdocs.infinidat.com/sphinx/infinipy2/",
+      url="http://devdocs.infinidat.com/sphinx/infinisdk/",
 
       install_requires=_INSTALL_REQUIERS,
       scripts=[],

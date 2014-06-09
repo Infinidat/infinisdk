@@ -1,7 +1,7 @@
 import pytest
-from infinipy2.core import *
-from infinipy2.core.exceptions import ObjectNotFound, TooManyObjectsFound
-from infinipy2.izbox.filesystem import Filesystem
+from infinisdk.core import *
+from infinisdk.core.exceptions import ObjectNotFound, TooManyObjectsFound
+from infinisdk.izbox.filesystem import Filesystem
 
 
 def test_querying_length(izbox, izbox_simulator):

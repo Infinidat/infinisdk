@@ -1,4 +1,4 @@
-Infinipy Development
+InfiniSDK Development
 ====================
 
 Testing

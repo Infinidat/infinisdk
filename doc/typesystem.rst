@@ -8,7 +8,7 @@ Overview
 
 This document describes the API provided by the object abstraction layer. Its goal is to provide a programmatic layer for interacting with system objects and collections.
 
-Infinipy deals with logical objects reflected through the system API, called **system objects**, and represented as the :class:`.SystemObject` class. Such logical object classes are implemented as Python classes, and are instantiated by typesystem layer when wrapping API calls to the system.
+InfiniSDK deals with logical objects reflected through the system API, called **system objects**, and represented as the :class:`.SystemObject` class. Such logical object classes are implemented as Python classes, and are instantiated by typesystem layer when wrapping API calls to the system.
 
 Objects provide easy setters/getters for object attributes, as well as convenient wrappers for object creation and deletion (if supported). They also handle caching of attributes and other aspects of the reflection.
 
@@ -30,11 +30,11 @@ The quickest way of accessing objects defined on a system is through ``system.ob
 
 .. note:: ``system.objects`` is only one collection of type binders existing in the system. There's also ``system.components``, which bundles the physical components of a system. Each type binder is an instance of :class:`.TypeBinder`, and is a proxy that behaves like a collection, and enables several additional operations on the collection as a whole as we'll see later on.
 
-.. autoclass:: infinipy2.core.type_binder_container.TypeBinderContainer
+.. autoclass:: infinisdk.core.type_binder_container.TypeBinderContainer
    :members:
    :special-members:
 
-.. autoclass:: infinipy2.core.type_binder.TypeBinder
+.. autoclass:: infinisdk.core.type_binder.TypeBinder
    :members:
    :special-members:
 
@@ -95,7 +95,7 @@ You can also get specific objects using the type binders:
 
 .. code-block:: python
 
-   >>> from infinipy2.core.exceptions import ObjectNotFound
+   >>> from infinisdk.core.exceptions import ObjectNotFound
    
    >>> for fs in system.objects.filesystems:
    ...     unused = fs.id # do something with fs here
@@ -216,7 +216,7 @@ Types in the system are classes deriving from :class:`the SystemObject class<.Sy
 .. code-block:: python
 
 
-  >>> from infinipy2.core import *
+  >>> from infinisdk.core import *
   >>> from api_object_schema import *
   >>> from capacity import *
   >>> import string
@@ -238,7 +238,7 @@ Field Definitions
 
 The **FIELDS** class member must be a list of :class:`.Field` objects.
 
-.. autoclass:: infinipy2.core.field.Field
+.. autoclass:: infinisdk.core.field.Field
    :members:
 
 .. note:: Some of the real object fields exposed by the system may be of no interest to the application, and thus don't have to be specified in the **FIELDS** section. We can get the value of these fields through our getters, and update them using the update methods, but other parts like creation logic or filtering will not perform any special treatment for those fields. We will not attempt to translate their name or special conversion of their values.
@@ -271,7 +271,7 @@ Here the API domain talks in ``quota_in_bytes`` which is an integer, while the t
 The "id" Field
 ~~~~~~~~~~~~~~
 
-All objects must be uniquely identifiable in their system. Infinipy uses the ``id`` field to do this, and it assumes that every object declares this field. Its exact type or its real name in the system is left to the implementation.
+All objects must be uniquely identifiable in their system. InfiniSDK uses the ``id`` field to do this, and it assumes that every object declares this field. Its exact type or its real name in the system is left to the implementation.
 
 
 Field Type
@@ -294,7 +294,7 @@ Values Taken from Config
 
 In many places in the field definition block we can refer to config paths, enabling us to store defaults and similar elements in a single place. This is done with the :func:`.FROM_CONFIG` proxy.
 
-.. autofunction:: infinipy2.core.proxies.FROM_CONFIG
+.. autofunction:: infinisdk.core.proxies.FROM_CONFIG
 
 
 Defaults, Mandatory Creation Fields and System Defaults
@@ -312,7 +312,7 @@ Sometimes we may want to omit a certain required field(s), while still autogener
 
 .. code-block:: python
 
-   from infinipy2.core.api import OMIT
+   from infinisdk.core.api import OMIT
 
    Filesystem.create(system, name=OMIT) #  will autogenerate quota and other required fields, but skip generating the name
 

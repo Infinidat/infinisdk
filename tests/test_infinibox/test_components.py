@@ -1,7 +1,7 @@
 import pytest
-from infinipy2._compat import string_types
-from infinipy2.core.config import config
-from infinipy2.infinibox.components import (Drive, Enclosure, FcPort, Node,
+from infinisdk._compat import string_types
+from infinisdk.core.config import config
+from infinisdk.infinibox.components import (Drive, Enclosure, FcPort, Node,
                                             Rack, Service, System)
 
 NO_OF_ENCLOSURES_DRIVES = config.get_path('infinibox.defaults.enlosure_drives.total_count.simulator')

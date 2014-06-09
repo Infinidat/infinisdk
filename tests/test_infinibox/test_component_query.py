@@ -1,6 +1,6 @@
 import pytest
 import random
-from infinipy2.core.config import config
+from infinisdk.core.config import config
 
 NO_OF_ENCLOSURES_DRIVES = config.get_path('infinibox.defaults.enlosure_drives.total_count.mock')
 

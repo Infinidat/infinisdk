@@ -1,8 +1,8 @@
 import requests
 
 import pytest
-from infinipy2.core.api import Autogenerate, OMIT
-from infinipy2.core.exceptions import APICommandFailed, APITransportFailure
+from infinisdk.core.api import Autogenerate, OMIT
+from infinisdk.core.exceptions import APICommandFailed, APITransportFailure
 
 
 def test_omit_fields(izbox):

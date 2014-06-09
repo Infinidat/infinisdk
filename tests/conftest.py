@@ -2,8 +2,8 @@ from forge import Forge
 
 import flux
 import pytest
-from infinipy2.infinibox import InfiniBox
-from infinipy2.izbox import IZBox
+from infinisdk.infinibox import InfiniBox
+from infinisdk.izbox import IZBox
 from infinisim.infinibox import Infinibox as InfiniboxSimulator
 from izsim import Simulator as IZBoxSimulator
 

@@ -1,4 +1,4 @@
-from infinipy2._compat import xrange
+from infinisdk._compat import xrange
 
 
 def test_create_custom_event(izbox):

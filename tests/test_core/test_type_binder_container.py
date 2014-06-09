@@ -1,5 +1,5 @@
 import pytest
-from infinipy2.core import *
+from infinisdk.core import *
 
 
 def test_unknown_attributes_raise_attribute_error(system):

@@ -1,6 +1,6 @@
 import pytest
-from infinipy2.core.exceptions import APICommandFailed
-from infinipy2.izbox import IZBox
+from infinisdk.core.exceptions import APICommandFailed
+from infinisdk.izbox import IZBox
 
 
 def test_fails_if_no_alternative_node(izbox_simulator):

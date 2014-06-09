@@ -4,7 +4,7 @@ from capacity import GB
 
 import gossip
 import pytest
-from infinipy2.core.exceptions import (APICommandFailed,
+from infinisdk.core.exceptions import (APICommandFailed,
                                        InvalidOperationException)
 
 from ..conftest import create_pool, create_volume

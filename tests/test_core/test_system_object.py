@@ -1,6 +1,6 @@
 import pytest
-from infinipy2.core import Field, SystemObject
-from infinipy2.core.exceptions import (AttributeAlreadyExists, CacheMiss,
+from infinisdk.core import Field, SystemObject
+from infinisdk.core.exceptions import (AttributeAlreadyExists, CacheMiss,
                                        MissingFields)
 
 

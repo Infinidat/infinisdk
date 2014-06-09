@@ -1,5 +1,5 @@
 
-from infinipy2._compat import string_types
+from infinisdk._compat import string_types
 
 
 def test_is_mock(izbox):

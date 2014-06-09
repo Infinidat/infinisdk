@@ -1,5 +1,5 @@
 import pytest
-from infinipy2._compat import string_types
+from infinisdk._compat import string_types
 
 
 def test_components_find(izbox):
@@ -23,7 +23,7 @@ def test_component_is_always_same_object(izbox):
 
 
 def test_component_types(izbox):
-    from infinipy2.izbox.components import System, Enclosure, EnclosureDrive
+    from infinisdk.izbox.components import System, Enclosure, EnclosureDrive
     assert izbox.components.types.System is System
     assert izbox.components.types.Enclosure is Enclosure
     assert izbox.components.types.EnclosureDrive is EnclosureDrive

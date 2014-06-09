@@ -1,4 +1,4 @@
-from infinipy2._compat import iteritems, string_types
+from infinisdk._compat import iteritems, string_types
 from logbook import Logger
 
 _logger = Logger(__name__)

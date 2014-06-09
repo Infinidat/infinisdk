@@ -1,5 +1,5 @@
 from ..core import SystemObject
-from ..core.exceptions import InfinipyException
+from ..core.exceptions import InfiniSDKException
 from .lun import LogicalUnitContainer, LogicalUnit
 
 
@@ -52,8 +52,8 @@ class InfiniBoxLURelatedObject(InfiniBoxObject):
     def unmap_volume(self, volume=None, lun=None):
         if volume:
             if lun is not None:
-                raise InfinipyException('unmap_volume does not support volume & lun together')
+                raise InfiniSDKException('unmap_volume does not support volume & lun together')
             lun = volume.get_lun()
         elif lun is None:
-            raise InfinipyException('unmap_volume does must get or volume or lun')
+            raise InfiniSDKException('unmap_volume does must get or volume or lun')
         LogicalUnit._unmap(self, int(lun))

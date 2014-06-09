@@ -3,7 +3,7 @@ from capacity import GB
 from collections import namedtuple
 from ..core import Field, SystemObject, CapacityType
 from storage_interfaces.scsi.abstracts import ScsiVolume
-from ..core.exceptions import InvalidOperationException, InfinipyException
+from ..core.exceptions import InvalidOperationException, InfiniSDKException
 from ..core.api.special_values import Autogenerate
 from ..core.bindings import ObjectIdBinding
 from .system_object import InfiniBoxObject
@@ -102,7 +102,7 @@ class Volume(InfiniBoxObject):
     def get_lun(self):
         luns_data = self._get_lun()
         if len(luns_data) > 1:
-            raise InfinipyException('Volume could not have multiple luns')
+            raise InfiniSDKException('Volume could not have multiple luns')
         return LogicalUnit(self.system, **luns_data[0])
 
     def is_mapped(self):

@@ -1,4 +1,4 @@
-from infinipy2._compat import itervalues, string_types
+from infinisdk._compat import itervalues, string_types
 
 
 class LogicalUnit(object):

@@ -1,5 +1,5 @@
-from infinipy2._compat import xrange, iteritems
-from infinipy2.core import CapacityType
+from infinisdk._compat import xrange, iteritems
+from infinisdk.core import CapacityType
 from capacity import TB, KiB, Capacity
 from ..conftest import create_volume, create_pool
 

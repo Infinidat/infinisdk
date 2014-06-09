@@ -1,5 +1,5 @@
 import pytest
-from infinipy2._compat import iteritems
+from infinisdk._compat import iteritems
 
 
 def test_get_name(infinibox, host):

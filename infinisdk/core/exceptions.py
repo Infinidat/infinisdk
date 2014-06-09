@@ -1,13 +1,13 @@
-class InfinipyException(Exception):
+class InfiniSDKException(Exception):
     pass
 
-class InvalidOperationException(InfinipyException):
+class InvalidOperationException(InfiniSDKException):
     pass
 
-class CacheMiss(InfinipyException):
+class CacheMiss(InfiniSDKException):
     pass
 
-class APICommandException(InfinipyException):
+class APICommandException(InfiniSDKException):
     pass
 
 class APITransportFailure(APICommandException):
@@ -49,16 +49,16 @@ class CommandNotApproved(APICommandFailed):
 class CapacityUnavailable(APICommandException):
     pass
 
-class ObjectNotFound(InfinipyException):
+class ObjectNotFound(InfiniSDKException):
     pass
 
-class TooManyObjectsFound(InfinipyException):
+class TooManyObjectsFound(InfiniSDKException):
     pass
 
-class MissingFields(InfinipyException):
+class MissingFields(InfiniSDKException):
     pass
 
-class AttributeAlreadyExists(InfinipyException):
+class AttributeAlreadyExists(InfiniSDKException):
     def __init__(self, obj, attr):
         self._obj = obj
         self._attr = attr
