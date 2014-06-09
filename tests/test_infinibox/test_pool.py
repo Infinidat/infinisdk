@@ -24,8 +24,8 @@ class PoolTest(InfiniBoxTestCase):
         self.update_all_capacities_in_dict_to_api(kwargs)
 
         self.assertEqual(pool._cache['name'], kwargs['name'])
-        self.assertEqual(pool._cache['virtual_capacity'],
-                         kwargs['virtual_capacity'])
+        self.assertEqual(pool._cache['physical_capacity'], kwargs['physical_capacity'])
+        self.assertEqual(pool._cache['virtual_capacity'], kwargs['virtual_capacity'])
 
         pool.delete()
         self.assertFalse(pool.is_in_system())
