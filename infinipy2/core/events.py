@@ -45,6 +45,7 @@ class Event(SystemObject):
 
     FIELDS = [
         Field("id", type=int, is_identity=True, is_sortable=True, is_filterable=True),
+        Field("level", type=str, is_filterable=True, is_sortable=True),
     ]
 
     BINDER_CLASS = Events
