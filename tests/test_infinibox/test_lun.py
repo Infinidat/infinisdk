@@ -21,9 +21,11 @@ def test_map_volume_to_cluster(infinibox, host, cluster, volume):
 
     lu = list(luns)[0]
     assert lu.get_volume() == volume
-    volume_lun = volume.get_lun()
-    assert lu == volume_lun
-    assert lu == luns[int(volume_lun)]
+    volume_lus = volume.get_logical_units()
+    assert len(volume_lus) == 1
+    volume_lu = iter(volume_lus).next()
+    assert lu == volume_lu
+    assert lu == luns[int(volume_lu)]
     assert lu.get_host() is None
     assert lu.get_cluster() == cluster
 
@@ -42,10 +44,14 @@ def test_map_volume_to_host(infinibox, host, cluster, volume):
 
     lu = list(luns)[0]
     assert lu.get_lun() == int(lu)
-    volume_lun = volume.get_lun()
+    volume_lus = volume.get_logical_units()
+    assert len(volume_lus) == 1
+    volume_lu = iter(volume_lus).next()
+    assert lu == volume_lu
+
     assert lu.get_volume() == volume
-    assert lu == luns[int(volume_lun)]
-    assert lu == volume.get_lun()
+    assert lu == luns[int(volume_lu)]
+    assert lu == volume.get_lun(host)
     assert lu.get_cluster() is None
     assert lu.get_host() == host
 
