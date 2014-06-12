@@ -1,0 +1,15 @@
+# -*- mode: python -*-
+from contextlib import contextmanager
+from infinisim.infinibox import Infinibox as Simulator
+from infinisdk import InfiniBox
+
+@contextmanager
+def doctest_context():
+    simulator = Simulator()
+    simulator.activate()
+    try:
+        yield {
+            "system": InfiniBox(simulator)
+        }
+    finally:
+        simulator.deactivate()

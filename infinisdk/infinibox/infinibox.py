@@ -47,10 +47,19 @@ class InfiniBox(APITarget):
                                                           fetch_if_not_cached=True)
 
     def get_name(self):
+        """
+        Returns the name of the system
+        """
         return self.get_system_info('name')
 
     def get_serial(self):
+        """
+        Returns the serial number of the system
+        """
         return self.get_system_info('serial_number')
 
     def get_version(self):
+        """
+        Returns the product version of the system
+        """
         return self.get_system_info('version')

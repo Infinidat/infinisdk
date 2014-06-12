@@ -47,7 +47,7 @@ Creation of objects can be done easily via the :func:`create <infinisdk.core.typ
 
 		>>> pool = system.pools.create()
 
-.. note:: the *create* shortcut used above is a very thin wrapper around :method:`the create method of the Pool class <infinisdk.infinibox.pool.Pool.create>`. All it does is automatically assign the "right" system to the first argument.
+.. note:: the *create* shortcut used above is a very thin wrapper around :meth:`the create method of the Pool class <infinisdk.infinibox.pool.Pool.create>`. All it does is automatically assign the "right" system to the first argument.
 
 Object Attributes
 -----------------
@@ -60,7 +60,7 @@ Once an object is obtained (either by creation or querying as described further 
 		>>> pool.get_name() == 'new_name'
 		True
 
-All fields can be accessed via the :method:`get_field <infinisdk.core.system_object.SystemObject.get_field>` / :method:`update_field <infinisdk.core.system_object.SystemObject.update_field>` methods:
+All fields can be accessed via the :meth:`get_field <infinisdk.core.system_object.SystemObject.get_field>` / :meth:`update_field <infinisdk.core.system_object.SystemObject.update_field>` methods:
 
 .. code-block:: python
 
