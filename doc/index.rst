@@ -6,17 +6,18 @@
 Welcome to InfiniSDK's documentation!
 =====================================
 
+Overview
+--------
+
+InfiniSDK is Infinidat's Official Python SDK for interacting with Infinidat storage products. It provides a clean interface for creating, deleting, querying and manipulating API objects.
+
 Contents:
 
 .. toctree::
    :maxdepth: 2
 
-   overview
-   api_layer
-   typesystem
-   events
-   components
-   development
+   getting_started
+   api
 
 
 Indices and tables

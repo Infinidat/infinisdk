@@ -1,25 +1,34 @@
-from contextlib import contextmanager
-from unittest import TestCase
 import doctest
 import os
+from contextlib import contextmanager
 
-class DocTest(TestCase):
+import pytest
 
-    def test_sphinx_doctests(self):
-        for path, _, filenames in os.walk(os.path.join(os.path.dirname(__file__), "..", "doc")):
-            for filename in filenames:
-                if not filename.endswith(".rst"):
-                    continue
-                filename = os.path.join(path, filename)
-                context_filename = os.path.join(path, filename) + ".doctest_context"
-                context = {}
-                if os.path.exists(context_filename):
-                    with open(context_filename) as f:
-                        exec(f.read(), context)
-                with context.get("doctest_context", _NO_CONTEXT)() as globs:
-                    result = doctest.testfile(filename, module_relative=False, globs=globs)
-                if result.failed:
-                    self.fail("{0}: {1} tests failed!".format(filename, result.failed))
+_HERE = os.path.abspath(os.path.dirname(__file__))
+_DOCS_ROOT = os.path.abspath(os.path.join(_HERE, "..", "doc"))
+
+
+def test_sphinx_doctest(doctest_path):
+    context_filename = doctest_path + ".doctest_context"
+    context = {}
+    if os.path.exists(context_filename):
+        with open(context_filename) as f:
+            exec(f.read(), context)
+    with context.get("doctest_context", _NO_CONTEXT)() as globs:
+        result = doctest.testfile(doctest_path, module_relative=False, globs=globs)
+    assert not result.failed
+
+assert os.path.exists(_DOCS_ROOT)
+_DOCTEST_PATHS = list(os.path.join(path, filename)
+                      for path, _, filenames in os.walk(_DOCS_ROOT)
+                      for filename in filenames
+                      if filename.endswith(".rst"))
+
+
+@pytest.fixture(params=_DOCTEST_PATHS)
+def doctest_path(request):
+    return request.param
+
 
 @contextmanager
 def _NO_CONTEXT():
