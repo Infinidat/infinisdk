@@ -14,6 +14,7 @@ class InfiniBox(APITarget):
     SYSTEM_EVENTS_TYPE = Events
     SYSTEM_COMPONENTS_TYPE = InfiniBoxSystemComponents
 
+
     def _get_api_auth(self):
         d = config.get_path('infinibox.defaults.system_api')
         return (d['username'], d['password'])

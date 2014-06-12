@@ -284,7 +284,7 @@ class SystemObject(with_metaclass(FieldsMeta)):
         """
         Deletes this object.
 
-        .. note:: does nothing except sending the deletion request. See :func:`.purge` for forcibly deleting objects.
+        .. note:: does nothing except sending the deletion request. See :meth:`.purge` for forcibly deleting objects.
         """
         self.system.api.delete(self.get_this_url_path())
 
