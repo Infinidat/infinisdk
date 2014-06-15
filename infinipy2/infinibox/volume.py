@@ -73,7 +73,8 @@ class Volume(InfiniBoxObject):
 
     def restore(self, snapshot):
         snapshot_data = int(snapshot.get_field('data'))
-        self.update_field('data', snapshot_data)
+        restore_url = self.get_this_url_path().add_path('restore')
+        self.system.api.post(restore_url, data=snapshot_data, raw_data=True)
 
     def own_replication_snapshot(self, name=None):
         if not name:

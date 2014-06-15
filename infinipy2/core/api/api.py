@@ -69,9 +69,12 @@ class API(object):
         """
         returned = None
         kwargs.setdefault("timeout", self._default_request_timeout)
+        raw_data = kwargs.pop("raw_data", False)
         data = kwargs.pop("data", None)
         if data is not None and not isinstance(data, string_types):
-            data = json.dumps(translate_special_values(data))
+            if not raw_data:
+                data = translate_special_values(data)
+            data = json.dumps(data)
 
         specified_address = kwargs.pop("address", None)
         urls = self._get_possible_urls(specified_address)
