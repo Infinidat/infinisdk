@@ -1,3 +1,4 @@
+from __future__ import print_function
 import doctest
 import os
 from contextlib import contextmanager
@@ -15,6 +16,7 @@ def test_sphinx_doctest(doctest_path):
         with open(context_filename) as f:
             exec(f.read(), context)
     with context.get("doctest_context", _NO_CONTEXT)() as globs:
+        globs = dict(globs, print_function=print_function)
         result = doctest.testfile(doctest_path, module_relative=False, globs=globs)
     assert not result.failed
 

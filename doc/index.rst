@@ -17,6 +17,7 @@ Contents:
    :maxdepth: 2
 
    getting_started
+   querying
    examples
    api
 

@@ -60,6 +60,7 @@ Once an object is obtained (either by creation or querying as described further 
 		>>> pool.get_name() == 'new_name'
 		True
 
+
 All fields can be accessed via the :meth:`get_field <infinisdk.core.system_object.SystemObject.get_field>` / :meth:`update_field <infinisdk.core.system_object.SystemObject.update_field>` methods:
 
 .. code-block:: python
@@ -67,6 +68,29 @@ All fields can be accessed via the :meth:`get_field <infinisdk.core.system_objec
 		>>> pool.update_field('name', 'yet_another_name')
 		>>> pool.get_field('name') == 'yet_another_name'
 		True
+
+.. _capacities: 
+
+Storage Capacity Handling
+-------------------------
+
+Infinipy reflects data sizes using the ``capacity`` module, allowing easy computations and manipulations of data sizes, including units:
+
+.. code-block:: python
+
+		>>> from capacity import GiB
+
+		>>> size = pool.get_virtual_capacity()
+		>>> print(size)
+		1*TiB
+		>>> print(size * 2)
+		2*TiB
+		>>> print(size // GiB)
+		931
+
+.. seealso:: `documentation for the capacity module <https://github.com/vmalloc/capacity/>`_
+		
+
 
 Querying Objects
 ----------------
@@ -80,4 +104,6 @@ Querying objects of various types is done relatively easily through InfiniSDK. T
 
 		>>> list(system.volumes)
 		[]
+
+.. seealso:: querying
 
