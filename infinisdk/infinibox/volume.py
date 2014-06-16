@@ -103,10 +103,10 @@ class Volume(InfiniBoxObject):
     def get_lun(self, mapping_object):
         def is_mapping_object_lu(lu_data):
             lu_mapping_id = lu_data['host_cluster_id'] if lu_data['clustered'] else lu_data['host_id']
-            return lu_mapping_id  == mapping_object.id
+            return lu_mapping_id == mapping_object.id
         lus = [LogicalUnit(system=self.system, **lu_data) for lu_data in self._get_luns_data_from_url() if is_mapping_object_lu(lu_data)]
         if len(lus) > 1:
-            raise InfinipyException("There shouldn't be multiple luns for volume-mapping object pair")
+            raise InfiniSDKException("There shouldn't be multiple luns for volume-mapping object pair")
         return lus[0] if lus else None
 
     def get_logical_units(self):

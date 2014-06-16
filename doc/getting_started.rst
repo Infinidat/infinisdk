@@ -82,9 +82,9 @@ Infinipy reflects data sizes using the ``capacity`` module, allowing easy comput
 
 		>>> size = pool.get_virtual_capacity()
 		>>> print(size)
-		1*TiB
+		1*TB
 		>>> print(size * 2)
-		2*TiB
+		2*TB
 		>>> print(size // GiB)
 		931
 
