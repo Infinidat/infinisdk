@@ -46,14 +46,14 @@ class InfiniBoxLURelatedObject(InfiniBoxObject):
         if lun is not None:
             post_data['lun'] = int(lun)
         url = self.get_this_url_path().add_path('luns')
-        self.system.api.post(url, data=post_data)
-        return volume.get_lun()
+        res = self.system.api.post(url, data=post_data)
+        return LogicalUnit(system=self.system, **res.get_result())
 
     def unmap_volume(self, volume=None, lun=None):
         if volume:
             if lun is not None:
                 raise InfiniSDKException('unmap_volume does not support volume & lun together')
-            lun = volume.get_lun()
+            lun = volume.get_lun(self)
         elif lun is None:
             raise InfiniSDKException('unmap_volume does must get or volume or lun')
         LogicalUnit._unmap(self, int(lun))

@@ -83,7 +83,7 @@ class InfiniBoxSystemComponent(SystemObject):
 @InfiniBoxSystemComponents.install_component_type
 class Rack(InfiniBoxSystemComponent):
     FIELDS = [
-        Field("index", api_name="rack", type=int, is_identity=True),
+        Field("index", api_name="rack", type=int, is_identity=True, cached=True),
     ]
 
     @classmethod
@@ -102,7 +102,7 @@ class Rack(InfiniBoxSystemComponent):
 @InfiniBoxSystemComponents.install_component_type
 class Enclosure(InfiniBoxSystemComponent):
     FIELDS = [
-        Field("index", api_name="id", type=int, is_identity=True),
+        Field("index", api_name="id", type=int, is_identity=True, cached=True),
         Field("drives", type=list),
         Field("state"),
     ]
@@ -114,7 +114,7 @@ class Enclosure(InfiniBoxSystemComponent):
 @InfiniBoxSystemComponents.install_component_type
 class Node(InfiniBoxSystemComponent):
     FIELDS = [
-        Field("index", api_name="id", type=int, is_identity=True),
+        Field("index", api_name="id", type=int, is_identity=True, cached=True),
         Field("name"),
         Field("fc_ports", type=list),
         Field("drives", type=list),
@@ -133,7 +133,7 @@ class Node(InfiniBoxSystemComponent):
 class FcPort(InfiniBoxSystemComponent):
     FIELDS = [
         Field("wwpn", is_identity=True),
-        Field("index", api_name="id", type=int),
+        Field("index", api_name="id", type=int, cached=True),
         Field("node"),
         Field("state"),
     ]
@@ -145,8 +145,8 @@ class FcPort(InfiniBoxSystemComponent):
 @InfiniBoxSystemComponents.install_component_type
 class Drive(InfiniBoxSystemComponent):
     FIELDS = [
-        Field("index", api_name="drive_index", type=int, is_identity=True),
-        Field("enclosure_index", type=int),
+        Field("index", api_name="drive_index", type=int, is_identity=True, cached=True),
+        Field("enclosure_index", type=int, cached=True),
         Field("serial_number"),
         Field("state"),
     ]
@@ -154,7 +154,7 @@ class Drive(InfiniBoxSystemComponent):
 @InfiniBoxSystemComponents.install_component_type
 class Service(InfiniBoxSystemComponent):
     FIELDS = [
-        Field("index", api_name="name", is_identity=True),
+        Field("index", api_name="name", is_identity=True, cached=True),
         Field("state"),
     ]
 

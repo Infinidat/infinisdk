@@ -7,7 +7,7 @@ from ..core.exceptions import InvalidOperationException, InfiniSDKException
 from ..core.api.special_values import Autogenerate
 from ..core.bindings import ObjectIdBinding
 from .system_object import InfiniBoxObject
-from .lun import LogicalUnit
+from .lun import LogicalUnit, LogicalUnitContainer
 
 PROVISIONING = namedtuple('Provisioning', ['Thick', 'Thin'])('THICK', 'THIN')
 VOLUME_TYPES = namedtuple('VolumeTypes', ['Master', 'Snapshot', 'Clone'])('MASTER', 'SNAP', 'CLONE')
@@ -73,7 +73,8 @@ class Volume(InfiniBoxObject):
 
     def restore(self, snapshot):
         snapshot_data = int(snapshot.get_field('data'))
-        self.update_field('data', snapshot_data)
+        restore_url = self.get_this_url_path().add_path('restore')
+        self.system.api.post(restore_url, data=snapshot_data, raw_data=True)
 
     def own_replication_snapshot(self, name=None):
         if not name:
@@ -95,15 +96,21 @@ class Volume(InfiniBoxObject):
     def get_clones(self):
         return self.get_children()
 
-    def _get_lun(self):
+    def _get_luns_data_from_url(self):
         res = self.system.api.get(self.get_this_url_path().add_path('luns'))
         return res.get_result()
 
-    def get_lun(self):
-        luns_data = self._get_lun()
-        if len(luns_data) > 1:
-            raise InfiniSDKException('Volume could not have multiple luns')
-        return LogicalUnit(self.system, **luns_data[0])
+    def get_lun(self, mapping_object):
+        def is_mapping_object_lu(lu_data):
+            lu_mapping_id = lu_data['host_cluster_id'] if lu_data['clustered'] else lu_data['host_id']
+            return lu_mapping_id  == mapping_object.id
+        lus = [LogicalUnit(system=self.system, **lu_data) for lu_data in self._get_luns_data_from_url() if is_mapping_object_lu(lu_data)]
+        if len(lus) > 1:
+            raise InfinipyException("There shouldn't be multiple luns for volume-mapping object pair")
+        return lus[0] if lus else None
+
+    def get_logical_units(self):
+        return LogicalUnitContainer.from_dict_list(self.system, self._get_luns_data_from_url())
 
     def is_mapped(self):
         return self.get_field("mapped")
