@@ -16,6 +16,7 @@ Contents:
    typesystem
    events
    components
+   extending
    development
 
 

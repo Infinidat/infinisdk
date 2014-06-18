@@ -2,6 +2,7 @@ from forge import Forge
 
 import flux
 import pytest
+from infinipy2.core import extensions
 from infinipy2.infinibox import InfiniBox
 from infinipy2.izbox import IZBox
 from infinisim.infinibox import Infinibox as InfiniboxSimulator
@@ -22,6 +23,12 @@ def freeze_timeline(request):
     def restore():
         flux.current_timeline.set_time_factor(prev)
     flux.current_timeline.set_time_factor(0)
+
+@pytest.fixture(autouse=True, scope='function')
+def cleanup_extensions(request):
+    @request.addfinalizer
+    def cleanup():
+        extensions.clear_all()
 
 
 @pytest.fixture
