@@ -25,8 +25,8 @@ class InfiniBoxSystemComponent(SystemObject):
     BINDER_CLASS = SystemComponentsBinder
     BASE_URL = URL("components")
     FIELDS = [
-        ComputedIDField("id", is_identity=True),
-        Field("parent_id", add_updater=False, is_identity=True),
+        ComputedIDField("id", is_identity=True, cached=True),
+        Field("parent_id", cached=True, add_updater=False, is_identity=True),
     ]
 
     def get_parent(self):
@@ -134,7 +134,7 @@ class FcPort(InfiniBoxSystemComponent):
     FIELDS = [
         Field("wwpn", is_identity=True),
         Field("index", api_name="id", type=int, cached=True),
-        Field("node"),
+        Field("node", cached=True),
         Field("state"),
     ]
 
