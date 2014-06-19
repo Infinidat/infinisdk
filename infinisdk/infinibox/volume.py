@@ -129,7 +129,8 @@ class Volume(InfiniBoxObject):
 
     def purge(self):
         if self.is_mapped():
-            self.get_lun().unmap()
+            for lun in self.get_logical_units().luns.values():
+                lun.unmap()
         for child in self.get_children():
             child.purge()
         super(Volume, self).purge()

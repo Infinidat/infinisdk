@@ -1,0 +1,22 @@
+# -*- mode: python -*-
+from contextlib import contextmanager
+from infinisim.infinibox import Infinibox as Simulator
+from infinisdk.infinibox import InfiniBox
+
+@contextmanager
+def doctest_context():
+    simulator1 = Simulator()
+    simulator2 = Simulator()
+    simulator1.activate()
+    try:
+        simulator2.activate()
+        try:
+            yield {
+                "InfiniBox": InfiniBox,
+                "system1_address": simulator1.get_floating_addresses()[0],
+                "system2_address": simulator2.get_floating_addresses()[0],
+            }
+        finally:
+            simulator2.deactivate()
+    finally:
+        simulator1.deactivate()

@@ -64,3 +64,10 @@ class InfiniBox(APITarget):
         Returns the product version of the system
         """
         return self.get_system_info('version')
+
+    def login(self):
+        """
+        Verifies the current user against the system
+        """
+        username, password = self.api.get_auth()
+        return self.api.post("users/login", data={"username": username, "password": password})

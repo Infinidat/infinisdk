@@ -17,6 +17,10 @@ class Events(EventsBase):
                  "visibility":visibility}
         return self.system.api.post("events/custom", data=_data).get_result()
 
+    def get_levels(self):
+        sorted_levels = sorted(self._get_events_types()['levels'], key=lambda d: d['value'])
+        return [level_info['name'] for level_info in sorted_levels]
+
 
 class EmailRule(SystemObject):
 
