@@ -3,6 +3,7 @@ from contextlib import contextmanager
 
 import requests
 from logbook import Logger
+from sentinels import NOTHING
 
 from .special_values import translate_special_values
 from ..._compat import httplib, get_timedelta_total_seconds, string_types
@@ -35,6 +36,7 @@ class API(object):
         self._approved = True
         self._session = None
         self._session = requests.Session()
+        self.set_auth(*self.system.get_api_auth())
         self._session.auth = self.system.get_api_auth()
         self._session.headers["content-type"] = "application/json"
         self._urls = [self._url_from_address(address) for address in target.get_api_addresses()]
@@ -54,6 +56,48 @@ class API(object):
 
     def get_unapproved_context(self):
         return self.get_approval_context(False)
+
+    def set_auth(self, username_or_auth, password=NOTHING):
+        """
+        Sets the username and password under which operations will be performed
+
+        Can be used both with a uple argument or with two arguments (username, password):
+
+        >>> system.set_auth(('username', 'password'))
+        >>> system.set_auth('username', 'password')
+        """
+        if isinstance(username_or_auth, tuple):
+            if password is not NOTHING:
+                raise TypeError("Auth given as tuple, but password was used")
+            username, password = username_or_auth
+        else:
+            if password is NOTHING:
+                raise TypeError("Password not specified")
+            username = username_or_auth
+
+        self._session.auth = (username, password)
+
+    def get_auth(self):
+        """
+        Returns a tuple of the current username/password used by the API
+        """
+        return self._session.auth
+
+    @contextmanager
+    def auth_context(self, username, password):
+        """
+        Changes the API auth information for the duration of the context:
+
+        >>> with system.api.auth_context('username', 'password'):
+        ...     ... # execute operations as 'username'
+        """
+        auth = (username, password)
+        prev = self.get_auth()
+        self.set_auth(*auth)
+        try:
+            yield
+        finally:
+            self.set_auth(*prev)
 
     get = _get_request_delegate("get")
     put = _get_request_delegate("put")
@@ -140,7 +184,7 @@ class Response(object):
         self.response = resp
         #: URLObject of the final location the response was obtained from
         self.url = url
-        #: Data sent to on 
+        #: Data sent to on
         self.sent_data = data
 
     def get_json(self):
