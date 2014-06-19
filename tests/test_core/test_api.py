@@ -83,10 +83,11 @@ def test_absolute_api(system):
 
 def test_normalize_addresses(system):
     get_normalized = system._normalize_addresses
-    assert get_normalized('1.2.3.4') == [('1.2.3.4', 80)]
+    assert get_normalized('1.2.3.4', use_ssl=False) == [('1.2.3.4', 80)]
+    assert get_normalized('1.2.3.4', use_ssl=True) == [('1.2.3.4', 443)]
 
     with pytest.raises(ValueError):
-        get_normalized(('1.2.3.4', 80, 20))
+        get_normalized(('1.2.3.4', 80, 20), use_ssl=True)
 
 
 def test_approval_context(system):

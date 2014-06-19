@@ -12,13 +12,13 @@ class APITarget(with_metaclass(abc.ABCMeta)):
     SYSTEM_EVENTS_TYPE = None
     SYSTEM_COMPONENTS_TYPE = None
 
-    def __init__(self, address, auth=None):
+    def __init__(self, address, auth=None, use_ssl=False, ssl_cert=None):
         """
         :param address: Either a tuple of (host, port), or a list of such tuples for multiple addresses
         """
         if self._is_simulator(address):
             address = self._get_simulator_address(address)
-        self._addresses = self._normalize_addresses(address)
+        self._addresses = self._normalize_addresses(address, use_ssl)
 
         self.objects = TypeBinderContainer(self)
 
@@ -27,7 +27,7 @@ class APITarget(with_metaclass(abc.ABCMeta)):
         self._auth = auth
 
         self._timeout = self._get_api_timeout()
-        self.api = API(self)
+        self.api = API(self, use_ssl=use_ssl, ssl_cert=ssl_cert)
 
         for object_type in self.OBJECT_TYPES:
             self.objects.install(object_type)
@@ -38,11 +38,11 @@ class APITarget(with_metaclass(abc.ABCMeta)):
     def get_collections_names(self):
         return [obj_type.get_plural_name() for obj_type in self.OBJECT_TYPES]
 
-    def _normalize_addresses(self, addresses):
+    def _normalize_addresses(self, addresses, use_ssl):
         if not isinstance(addresses[0], (list, tuple)):
             addresses = [addresses]
 
-        default_port = config.get_config('defaults.system_api_port').get_value()
+        default_port = 443 if use_ssl else 80
         returned = []
         for address in addresses:
             if not isinstance(address, tuple):

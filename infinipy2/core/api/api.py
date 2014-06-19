@@ -29,17 +29,22 @@ def _join_path(url, path):
     return _url
 
 class API(object):
-    def __init__(self, target):
+    def __init__(self, target, use_ssl, ssl_cert):
         super(API, self).__init__()
         self.system = target
+        self._use_ssl = use_ssl
+        self._ssl_cert = ssl_cert
         self._default_request_timeout = self.system.get_api_timeout()
         self._approved = True
-        self._session = None
         self._session = requests.Session()
+        assert self._session.cert is None
+        self._session.cert = ssl_cert
+        if not ssl_cert:
+            self._session.verify = False
         self.set_auth(*self.system.get_api_auth())
         self._session.auth = self.system.get_api_auth()
         self._session.headers["content-type"] = "application/json"
-        self._urls = [self._url_from_address(address) for address in target.get_api_addresses()]
+        self._urls = [self._url_from_address(address, use_ssl) for address in target.get_api_addresses()]
         self._active_url = None
 
     @contextmanager
@@ -162,15 +167,16 @@ class API(object):
     def _get_possible_urls(self, address=None):
 
         if address is not None:
-            return [self._url_from_address(address)]
+            return [self._url_from_address(address, self._use_ssl)]
 
         if self._active_url is not None:
             return [self._active_url]
 
         return self._urls
 
-    def _url_from_address(self, address):
-        return URL("http://{0}:{1}".format(*address)).add_path("/api/rest")
+    def _url_from_address(self, address, use_ssl):
+        hostname, port = address
+        return URL("{0}://{1}:{2}".format("https" if use_ssl else "http", hostname, port)).add_path("/api/rest")
 
 
 class Response(object):
@@ -222,5 +228,6 @@ class Response(object):
             self.response.raise_for_status()
         except requests.exceptions.HTTPError as e:
             raise APICommandFailed(self)
+
 
 # TODO : implement async request
