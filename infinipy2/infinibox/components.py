@@ -1,3 +1,4 @@
+from .._compat import string_types
 from ..core.field import Field
 from ..core.system_component import SystemComponentsBinder
 from ..core.system_object import SystemObject
@@ -10,15 +11,19 @@ class InfiniBoxSystemComponents(SystemComponentsBinder):
 
     def __init__(self, system):
         super(InfiniBoxSystemComponents, self).__init__(InfiniBoxSystemComponent, system)
-        self.system_component = System(self.system, {'parent_id': tuple(), 'index': 0})
+        self.system_component = System(self.system, {'parent_id': "", 'index': 0})
         self.cache_component(self.system_component)
 
 
 class ComputedIDField(Field):
     def extract_from_json(self, obj_class, json):
         curr_index = obj_class.fields.index.extract_from_json(obj_class, json)
+        index_str = curr_index if isinstance(curr_index, string_types) else "{0:02}".format(curr_index)
         parent_id = json[obj_class.fields.parent_id.api_name]
-        return parent_id + (obj_class.get_type_name(), curr_index)
+        return "{0}{1}{2}:{3}".format(parent_id,
+                                      "_" if parent_id else "",
+                                      obj_class.get_type_name(),
+                                      index_str)
 
 
 class InfiniBoxSystemComponent(SystemObject):
