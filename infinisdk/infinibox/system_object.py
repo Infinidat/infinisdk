@@ -30,10 +30,18 @@ class InfiniBoxObject(SystemObject):
 class InfiniBoxLURelatedObject(InfiniBoxObject):
 
     def get_luns(self, *args, **kwargs):
+        """
+        Returns all LUNs mapped to this object
+
+        :rtype: A collection of :class:`.LogicalUnit` objects
+        """
         luns_info = self.get_field('luns', *args, **kwargs)
         return LogicalUnitContainer.from_dict_list(self.system, luns_info)
 
     def is_volume_mapped(self, volume):
+        """
+        Returns whether or not a given volume is mapped to this object
+        """
         luns = self.get_luns()
         for lun in luns:
             if lun.get_volume() == volume:
@@ -42,6 +50,11 @@ class InfiniBoxLURelatedObject(InfiniBoxObject):
             return False
 
     def map_volume(self, volume, lun=None):
+        """
+        Maps a volume to this object, possibly specifying the logical unit number (LUN) to use
+
+        :rtype: a :class:`.LogicalUnit` object representing the added LUN
+        """
         post_data = {'volume_id': volume.get_id()}
         if lun is not None:
             post_data['lun'] = int(lun)
@@ -50,6 +63,9 @@ class InfiniBoxLURelatedObject(InfiniBoxObject):
         return LogicalUnit(system=self.system, **res.get_result())
 
     def unmap_volume(self, volume=None, lun=None):
+        """
+        Unmaps a volume either by specifying the volume or the lun it occupies
+        """
         if volume:
             if lun is not None:
                 raise InfiniSDKException('unmap_volume does not support volume & lun together')

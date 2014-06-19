@@ -15,6 +15,10 @@ class Host(InfiniBoxLURelatedObject):
     ]
 
     def purge(self):
+        """
+        Purges this host.
+        .. seealso:: :meth:`.SystemObject.purge`
+        """
         cluster = self.get_cluster()
         if cluster is not None:
             cluster.remove_host(self)
@@ -23,6 +27,9 @@ class Host(InfiniBoxLURelatedObject):
         super(Host, self).purge()
 
     def get_cluster(self):
+        """
+        :return: the :class:`.Cluster` object this host belongs to, or ``None``
+        """
         cluster_id = self.get_host_cluster_id()
         if cluster_id == 0:
             return None
@@ -35,9 +42,16 @@ class Host(InfiniBoxLURelatedObject):
         self.system.api.post(url, data=data)
 
     def add_fc_port(self, port_address):
+        """
+        Adds a FC port address (WWN) to this host
+        :param port_address: A string representing the WWN to add (e.g. ``00:11:22:33:44:55:66``)
+        """
         return self._add_port('fc', port_address)
 
     def remove_fc_port(self, port_address):
+        """
+        Removes a FC port address (WWN) to this host
+        """
         return self._remove_port('fc', port_address)
 
     def _remove_port(self, port_type, port_address):
@@ -47,6 +61,9 @@ class Host(InfiniBoxLURelatedObject):
         self.system.api.delete(url)
 
     def get_fc_ports(self):
+        """
+        Returns all FC ports defined on this host
+        """
         return self._get_ports('fc')
 
     def _get_ports(self, port_type):

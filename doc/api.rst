@@ -16,6 +16,7 @@ infinibox.volumes
 
 .. autoclass:: Volume
    :members:
+   :inherited-members:
 
 infinibox.pools
 ~~~~~~~~~~~~~~~
@@ -24,6 +25,7 @@ infinibox.pools
 
 .. autoclass:: Pool
    :members:
+   :inherited-members:
 
 infinibox.hosts
 ~~~~~~~~~~~~~~~
@@ -32,6 +34,7 @@ infinibox.hosts
 
 .. autoclass:: Host
    :members:
+   :inherited-members:
 
 infinibox.clusters
 ~~~~~~~~~~~~~~~~~~
@@ -40,6 +43,17 @@ infinibox.clusters
 
 .. autoclass:: Cluster
    :members:
+   :inherited-members:
+
+Infinibox Utilities
+~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: infinisdk.infinibox.lun
+
+.. autoclass:: LogicalUnit
+   :members:
+   :special-members: __int__
+
 
 
 Core Objects
@@ -49,3 +63,4 @@ Core Objects
 
 .. autoclass:: infinisdk.core.system_object.SystemObject
   :members:
+

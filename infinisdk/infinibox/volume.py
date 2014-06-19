@@ -128,6 +128,11 @@ class Volume(InfiniBoxObject):
         return None
 
     def purge(self):
+        """
+        Purges this volume
+
+        .. seealso:: :meth:`.SystemObject.purge`
+        """
         if self.is_mapped():
             for lun in self.get_logical_units().luns.values():
                 lun.unmap()

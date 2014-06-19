@@ -14,16 +14,22 @@ class LogicalUnit(object):
         self.additional_data = kwargs
 
     def get_host(self):
+        """ Returns the host to which this LU belongs
+        """
         if not self.host_id:
             return None
         return self.system.hosts.get_by_id_lazy(self.host_id)
 
     def get_cluster(self):
+        """ Returns the cluster to which this LU belongs
+        """
         if not self.host_cluster_id:
             return None
         return self.system.clusters.get_by_id_lazy(self.host_cluster_id)
 
     def get_volume(self):
+        """ Returns the volume mapped to this LU
+        """
         return self.system.volumes.get_by_id_lazy(self.volume_id)
 
     @classmethod
@@ -32,15 +38,21 @@ class LogicalUnit(object):
         obj.system.api.delete(url)
 
     def delete(self):
+        """ Deletes (or unmaps) this LU
+        """
         obj = self.get_host() or self.get_cluster()
         self._unmap(obj, self.lun)
 
     unmap=delete
 
     def get_lun(self):
+        """ Returns the logical unit number of this LU
+        """
         return self.lun
 
     def __int__(self):
+        """ Same as :meth:`.get_lun`
+        """
         return self.get_lun()
 
     def __repr__(self):
