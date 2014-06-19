@@ -14,6 +14,14 @@ class Host(InfiniBoxLURelatedObject):
         Field("host_cluster_id", type=int, is_filterable=True),
     ]
 
+    def purge(self):
+        cluster = self.get_cluster()
+        if cluster is not None:
+            cluster.remove_host(self)
+        for lun in self.get_luns():
+            self.unmap_volume(lun=lun)
+        super(Host, self).purge()
+
     def get_cluster(self):
         cluster_id = self.get_host_cluster_id()
         if cluster_id == 0:
