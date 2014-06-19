@@ -49,6 +49,8 @@ class API(object):
 
     @contextmanager
     def get_approval_context(self, value):
+        """A context manager that controls whether requests are automatically approved (confirmed)
+        """
         old_approved_value = self._approved
         self._approved = value
         try:
@@ -57,9 +59,11 @@ class API(object):
             self._approved = old_approved_value
 
     def get_approved_context(self):
+        """A context marking all operations as approved (confirmed)"""
         return self.get_approval_context(True)
 
     def get_unapproved_context(self):
+        """A context marking all operations as unapproved (not confirmed)"""
         return self.get_approval_context(False)
 
     def set_auth(self, username_or_auth, password=NOTHING):
