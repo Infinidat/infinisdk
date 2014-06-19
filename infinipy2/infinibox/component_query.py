@@ -2,6 +2,7 @@ from .._compat import itervalues, iteritems, sorted, cmp
 import operator
 
 
+
 class InfiniBoxComponentQuery(object):
     def __init__(self, system, object_type, *predicates, **kw):
         self.system = system
@@ -68,19 +69,27 @@ class InfiniBoxComponentQuery(object):
             self._fetch_all()
 
     def _fetch_all(self):
-        Rack = self.system.components.racks.object_type
+        components = self.system.components
+        if not components.should_fetch_all():
+            return
+        Rack = components.racks.object_type
         rack_1_url = Rack.get_specific_rack_url(1)
         rack_1_data = self.system.api.get(rack_1_url).get_json()['result']
-        system_component = self.system.components.system_component
+        system_component = components.system_component
         Rack.construct(self.system, rack_1_data, system_component.id)
+        components.mark_fetched_all()
 
     def _fetch_nodes(self):
-        rack_1 = self.system.components.racks.choose()
-        Node = self.system.components.nodes.object_type
+        components = self.system.components
+        if not components.should_fetch_nodes():
+            return
+        rack_1 = components.racks.choose()
+        Node = components.nodes.object_type
         nodes_url = Node.get_url_path(self.system)
         nodes_data = self.system.api.get(nodes_url).get_json()['result']
         for node_data in nodes_data:
             Node.construct(self.system, node_data, rack_1.id)
+        components.mark_fetched_nodes()
 
     def page(self, page_index):
         raise NotImplementedError()  # pragma: no cover

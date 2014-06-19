@@ -13,6 +13,21 @@ class InfiniBoxSystemComponents(SystemComponentsBinder):
         super(InfiniBoxSystemComponents, self).__init__(InfiniBoxSystemComponent, system)
         self.system_component = System(self.system, {'parent_id': "", 'index': 0})
         self.cache_component(self.system_component)
+        self._fetched_nodes = False
+        self._fetched_others = False
+
+    def should_fetch_nodes(self):
+        return not self._fetched_nodes
+
+    def should_fetch_all(self):
+        return not self._fetched_others
+
+    def mark_fetched_nodes(self):
+        self._fetched_nodes = True
+
+    def mark_fetched_all(self):
+        self._fetched_others = True
+        self._fetched_nodes = True
 
 
 class ComputedIDField(Field):
