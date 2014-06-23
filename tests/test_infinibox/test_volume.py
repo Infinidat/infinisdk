@@ -1,3 +1,4 @@
+import datetime
 from functools import partial
 
 from capacity import GB
@@ -92,6 +93,11 @@ def test_clones_and_snapshots(infinibox, volume):
         assert volume.is_in_system()
     assert (not volume.has_children())
 
+
+def test_snapshot_creation_time(infinibox, volume):
+    snap = volume.create_snapshot()
+
+    assert isinstance(snap.get_creation_time(), datetime.datetime)
 
 def test_restore(infinibox, volume):
     snapshot = volume.create_snapshot()

@@ -11,6 +11,8 @@ class Field(FieldBase):
     """
     This class represents a single field exposed by a schema
     """
+    def __repr__(self):
+        return "<FIELD {}>".format(self.name)
 
     def __init__(self, *args, **kwargs):
         cached = kwargs.pop("cached", False)
