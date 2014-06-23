@@ -1,7 +1,7 @@
 import gossip
 from capacity import GB
 from collections import namedtuple
-from ..core import Field, SystemObject, CapacityType
+from ..core import Field, CapacityType, DatetimeType
 from storage_interfaces.scsi.abstracts import ScsiVolume
 from ..core.exceptions import InvalidOperationException, InfinipyException
 from ..core.api.special_values import Autogenerate
@@ -29,6 +29,7 @@ class Volume(InfiniBoxObject):
         Field("type", cached=True, is_filterable=True, is_sortable=True),
         Field("parent_id", cached=True, is_filterable=True),
         Field("provisioning", api_name="provtype", mutable=True, creation_parameter=True, is_filterable=True, is_sortable=True, default="THICK"),
+        Field("created_at", type=DatetimeType),
     ]
 
     def get_unique_key(self):
@@ -89,6 +90,9 @@ class Volume(InfiniBoxObject):
         child = self.__class__(self.system, resp.get_result())
         gossip.trigger('infinidat.post_object_creation', obj=child, data=data)
         return child
+
+    def get_creation_time(self):
+        return self.get_field("created_at", from_cache=True)
 
     def get_snapshots(self):
         return self.get_children()

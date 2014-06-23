@@ -245,7 +245,7 @@ class SystemObject(with_metaclass(FieldsMeta)):
             if value is NOTHING:
                 missed.append(field_name)
             else:
-                returned[field_name] = value
+                returned[field_name] = self.fields.get_or_fabricate(field_name).type.translator.from_api(value)
         if missed:
             raise CacheMiss(
                 "The following fields could not be obtained from cache: {0}".format(
