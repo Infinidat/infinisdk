@@ -5,6 +5,7 @@ from infinisim.infinibox import Infinibox
 @contextmanager
 def doctest_context():
     s = Infinibox()
+    s.users.get_by_name('admin').set_password('password')
     s.activate()
     try:
         yield {

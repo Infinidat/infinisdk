@@ -27,7 +27,7 @@ Authentication information can also be specified via the constructor:
 
 .. code-block:: python
 
-		>>> system = InfiniBox(SYSTEM_ADDRESS, auth=("admin", "123456"))
+		>>> system = InfiniBox(SYSTEM_ADDRESS, auth=("admin", "password"))
 
 .. note:: By default, constructing a system does not send any traffic or API calls to the system. Only performing actual actions or queries does.
 
