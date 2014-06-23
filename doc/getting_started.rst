@@ -29,6 +29,12 @@ Authentication information can also be specified via the constructor:
 
 		>>> system = InfiniBox(SYSTEM_ADDRESS, auth=("admin", "password"))
 
+SSL is disabled by default, but can be easily turned on by passing ``use_ssl=True`` to the system constructor:
+
+.. code-block:: python
+
+		>>> system = InfiniBox(SYSTEM_ADDRESS, auth=("admin", "password"), use_ssl=True)
+
 .. note:: By default, constructing a system does not send any traffic or API calls to the system. Only performing actual actions or queries does.
 
 Representing API Entities
