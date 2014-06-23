@@ -32,9 +32,96 @@ The :class:`returned lu object <.LogicalUnit>` represents the volume mapping to 
 		>>> print(int(lu))
 		1
 
+Unmapping can be done in several ways. The easiest would be to call :meth:`.Host.unmap_volume`:
 
+.. code-block:: python
+		
+		>>> host.unmap_volume(volume)
+
+Which can also receive a specific lun to unmap:
+
+.. code-block:: python
+
+		>>> lu = host.map_volume(volume, lun=2)
+
+		>>> host.unmap_volume(lun=2)
+
+The lun can also be deleted directly through its accessor object:
+
+.. code-block:: python
+
+		>>> lu = host.map_volume(volume)
+		>>> lu.unmap()
 
 
 Querying Volume Mappings
 ------------------------
 
+Iterating over available mappings of a host is fairly simple:
+
+.. code-block:: python
+
+		>>> lu = host.map_volume(volume, lun=5)
+
+		>>> host.get_luns()
+		[<LUN 5>]
+
+		>>> for lun in host.get_luns():
+		...     print("{0} is mapped to {1}".format(lun, lun.volume))
+		<LUN 5> is mapped to <Volume id=1007>
+
+There is also a shortcut to iterate over all mappings in the entire system:
+
+.. code-block:: python
+
+		>>> for lun in system.luns:
+		...     print("{0} belongs to {1} and is mapped to {2}".format(lun, lun.mapping_object, lun.volume))
+		<LUN 5> belongs to <Host id=1008> and is mapped to <Volume id=1007>
+
+
+Here is a code snippet to unmap all volumes in the system that contain 'to remove' in their names:
+
+.. code-block:: python
+
+		>>> import itertools
+
+		>>> volume.update_name('this is a volume to remove')
+
+		>>> for mapping_object in itertools.chain(system.clusters, system.hosts):
+		...     for lun in mapping_object.get_luns():
+		...         if 'to remove' in lun.volume.get_name():
+		...             print("Unmapping", lun.volume)
+		...             lun.unmap()
+		Unmapping <Volume id=1007>
+
+
+Of course there is a much more convenient shortcut for unmapping a volume from all hosts, using the :meth:`.Volume.unmap` shortcut:
+
+.. code-block:: python
+
+		>>> lu = host.map_volume(volume)
+		>>> host.is_volume_mapped(volume)
+		True
+		>>> volume.unmap()
+		>>> host.is_volume_mapped(volume)
+		False
+
+Clusters and Hosts
+------------------
+
+Manipulating clusters is done with the :class:`.Cluster` class:
+
+.. code-block:: python
+
+		>>> cluster = system.clusters.create()
+		>>> cluster.add_host(host)
+
+		>>> lu = cluster.map_volume(volume)
+		
+		>>> [host_lu] = host.get_luns()
+
+		>>> host_lu
+		<LUN 11>
+		
+		>>> host_lu.is_clustered()
+		True

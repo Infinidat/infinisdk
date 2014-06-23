@@ -13,6 +13,10 @@ class LogicalUnit(object):
         self.host_id = host_id
         self.additional_data = kwargs
 
+    @property
+    def volume(self):
+        return self.system.volumes.safe_get_by_id(self.volume_id)
+
     def get_host(self):
         """ Returns the host to which this LU belongs
         """
@@ -26,6 +30,18 @@ class LogicalUnit(object):
         if not self.host_cluster_id:
             return None
         return self.system.clusters.get_by_id_lazy(self.host_cluster_id)
+
+    def get_mapping_object(self):
+        returned = self.get_cluster()
+        if returned is None:
+            returned = self.get_host()
+
+        return returned
+
+    mapping_object = property(get_mapping_object)
+
+    def is_clustered(self):
+        return self.get_cluster() is not None
 
     def get_volume(self):
         """ Returns the volume mapped to this LU
@@ -56,7 +72,7 @@ class LogicalUnit(object):
         return self.get_lun()
 
     def __repr__(self):
-        return "LogicalUnit {0} (lun {1})".format(self.id, self.get_lun())
+        return "<LUN {0}>".format(self.get_lun())
 
     def __eq__(self, other):
         return type(other) == type(self) and other.id == self.id
@@ -113,3 +129,6 @@ class LogicalUnitContainer(object):
 
     def __contains__(self, item):
         return item in itervalues(self.luns)
+
+    def __repr__(self):
+        return "[{0}]".format(", ".join(map(str, self)))

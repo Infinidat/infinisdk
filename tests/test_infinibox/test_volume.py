@@ -10,6 +10,12 @@ from infinisdk.core.exceptions import (APICommandFailed,
 from ..conftest import create_pool, create_volume
 
 
+def test_unmapping(infinibox, volume, host):
+    host.map_volume(volume)
+    assert host.is_volume_mapped(volume)
+    volume.unmap()
+    assert not host.is_volume_mapped(volume)
+
 def test_creation(infinibox, volume, pool):
     pool = infinibox.pools.create()
     kwargs = {'name': 'some_volume_name',

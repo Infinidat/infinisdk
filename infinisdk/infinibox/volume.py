@@ -134,10 +134,14 @@ class Volume(InfiniBoxObject):
         .. seealso:: :meth:`.SystemObject.purge`
         """
         if self.is_mapped():
-            for lun in self.get_logical_units().luns.values():
-                lun.unmap()
+            self.unmap()
+
         for child in self.get_children():
             child.purge()
         super(Volume, self).purge()
+
+    def unmap(self):
+        for lun in self.get_logical_units().luns.values():
+            lun.unmap()
 
 ScsiVolume.register(Volume)

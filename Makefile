@@ -1,5 +1,8 @@
 default: test
 
+.PHONY: doc
+doc: docs
+
 docs: env
 	.env/bin/python setup.py build_sphinx -a -E
 

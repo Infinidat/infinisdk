@@ -1,6 +1,22 @@
 import pytest
 
 
+def test_system_luns(infinibox, host, volume):
+    lu = host.map_volume(volume)
+
+    assert list(infinibox.luns) == [lu]
+
+    lu.delete()
+
+def test_system_luns_with_cluster(infinibox, host, cluster, volume):
+    lu = cluster.map_volume(volume)
+
+    cluster.add_host(host)
+
+    assert list(infinibox.luns) == [lu]
+
+    lu.delete()
+
 def test_no_luns_mapped(infinibox, host, cluster):
     luns = host.get_luns()
     assert len(luns) == 0
@@ -8,6 +24,13 @@ def test_no_luns_mapped(infinibox, host, cluster):
     pool = infinibox.pools.create()
     vol = infinibox.volumes.create(pool=pool)
     assert (not host.is_volume_mapped(vol))
+
+
+def test_mapping_object(infinibox, host, cluster, volume):
+    for mapping_obj in [host, cluster]:
+        lu = mapping_obj.map_volume(volume)
+        assert lu.mapping_object == lu.get_mapping_object() == mapping_obj
+        lu.unmap()
 
 def test_map_volume_to_cluster(infinibox, host, cluster, volume):
     assert (not volume.is_mapped())
@@ -32,6 +55,24 @@ def test_map_volume_to_cluster(infinibox, host, cluster, volume):
     lu.unmap()
     assert len(cluster.get_luns()) == 0
     assert (not volume.is_mapped())
+
+
+def test_lun_is_clustered(infinibox, host, cluster, volume):
+    lu = host.map_volume(volume)
+    assert not lu.is_clustered()
+
+    lu.unmap()
+
+    lu = cluster.map_volume(volume)
+    assert lu.is_clustered()
+
+    cluster.add_host(host)
+
+    [lu] = host.get_luns()
+    assert lu.is_clustered()
+
+    lu.unmap()
+
 
 def test_map_volume_to_host(infinibox, host, cluster, volume):
     assert (not volume.is_mapped())
@@ -58,6 +99,7 @@ def test_map_volume_to_host(infinibox, host, cluster, volume):
     lu.unmap()
     assert len(host.get_luns()) == 0
     assert (not volume.is_mapped())
+
 
 def test_multiple_luns_mapping_objects(infinibox, host, cluster, volume1, volume2):
     host.map_volume(volume1)

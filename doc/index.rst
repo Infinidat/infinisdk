@@ -18,6 +18,7 @@ Contents:
 
    getting_started
    querying
+   mappings
    examples
    extending
    api

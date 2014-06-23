@@ -1,12 +1,15 @@
+import itertools
+
 from ..core.api import APITarget
 from ..core.config import config
-from .components import InfiniBoxSystemComponents
-from .events import Events, EmailRule
-from .volume import Volume
-from .pool import Pool
-from .host import Host
 from .cluster import Cluster
+from .components import InfiniBoxSystemComponents
+from .events import EmailRule, Events
+from .host import Host
+from .lun import LogicalUnit
+from .pool import Pool
 from .user import User
+from .volume import Volume
 
 
 class InfiniBox(APITarget):
@@ -32,6 +35,15 @@ class InfiniBox(APITarget):
     def get_approval_failure_codes(self):
         d = config.get_path('infinibox.approval_required_codes')
         return d
+
+    def get_luns(self):
+        for mapping_obj in itertools.chain(self.clusters, self.hosts):
+            for lun in mapping_obj.get_luns():
+                if lun.is_clustered() and not isinstance(mapping_obj, self.clusters.object_type):
+                    continue
+                yield lun
+
+    luns = property(get_luns)
 
     def get_state(self):
         return self.components.system_component.get_state()
