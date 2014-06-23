@@ -1,9 +1,13 @@
+import requests
+from sentinels import NOTHING
+
 from ..core import SystemObject
-from ..core.exceptions import InfiniSDKException
-from .lun import LogicalUnitContainer, LogicalUnit
+from ..core.exceptions import APICommandFailed, InfiniSDKException
+from .lun import LogicalUnit, LogicalUnitContainer
 
 
 class InfiniBoxObject(SystemObject):
+
     def _get_metadata_uri(self):
         return "metadata/{0}".format(self.id)
 
@@ -13,9 +17,14 @@ class InfiniBoxObject(SystemObject):
     def set_metadata(self, key, value):
         return self._get_result(self.system.api.post(self._get_metadata_uri(), data={key: value}))
 
-    def get_metadata_value(self, key):
+    def get_metadata_value(self, key, default=NOTHING):
         metadata_url = '{0}/{1}'.format(self._get_metadata_uri(), key)
-        return self._get_result(self.system.api.get(metadata_url))
+        try:
+            return self._get_result(self.system.api.get(metadata_url))
+        except APICommandFailed as caught:
+            if caught.status_code != requests.codes.not_found or default is NOTHING:
+                raise
+            return default
 
     def get_all_metadata(self):
         return self._get_result(self.system.api.get(self._get_metadata_uri()))
@@ -24,7 +33,7 @@ class InfiniBoxObject(SystemObject):
         return self.system.api.delete("{0}/{1}".format(self._get_metadata_uri(), key))
 
     def clear_metadata(self):
-        return self.system.api.delete(self._get_metadata_uri())
+        self.system.api.delete(self._get_metadata_uri())
 
 
 class InfiniBoxLURelatedObject(InfiniBoxObject):
@@ -68,8 +77,10 @@ class InfiniBoxLURelatedObject(InfiniBoxObject):
         """
         if volume:
             if lun is not None:
-                raise InfiniSDKException('unmap_volume does not support volume & lun together')
+                raise InfiniSDKException(
+                    'unmap_volume does not support volume & lun together')
             lun = volume.get_lun(self)
         elif lun is None:
-            raise InfiniSDKException('unmap_volume does must get or volume or lun')
+            raise InfiniSDKException(
+                'unmap_volume does must get or volume or lun')
         LogicalUnit._unmap(self, int(lun))
