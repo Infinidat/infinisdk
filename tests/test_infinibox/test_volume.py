@@ -93,6 +93,14 @@ def test_snapshot_creation_time(infinibox, volume):
 
     assert isinstance(snap.get_creation_time(), datetime.datetime)
 
+def test_snapshot_creation_time_filtering(infinibox, volume):
+    snap = volume.create_snapshot()
+
+    for vol in infinibox.volumes.find(infinibox.volumes.fields.created_at < snap.get_creation_time()):
+        found = True
+        assert vol.get_creation_time() < snap.get_creation_time()
+    assert found
+
 def test_restore(infinibox, volume):
     snapshot = volume.create_snapshot()
 

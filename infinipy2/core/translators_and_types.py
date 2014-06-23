@@ -1,3 +1,4 @@
+import calendar
 import datetime
 
 from capacity import byte, Capacity
@@ -20,7 +21,7 @@ CapacityType = TypeInfo(type=Capacity, api_type=int,
 class DatetimeTranslator(ValueTranslator):
 
     def _to_api(self, value):
-        raise NotImplementedError()  # pragma: no cover
+        return calendar.timegm(value.utctimetuple())
 
     def _from_api(self, value):
         return datetime.datetime.fromtimestamp(value)
