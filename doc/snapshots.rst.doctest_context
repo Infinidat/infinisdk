@@ -1,0 +1,23 @@
+# -*- mode: python -*-
+import flux
+import arrow
+import datetime
+from contextlib import contextmanager
+from infinisim.infinibox import Infinibox as Simulator
+from infinisdk import InfiniBox
+
+@contextmanager
+def doctest_context():
+    simulator = Simulator()
+    simulator.activate()
+    system = InfiniBox(simulator)
+    pool = system.pools.create()
+    volume = system.volumes.create(pool=pool)
+    try:
+        yield {
+            "current_time": arrow.get(flux.current_timeline.time()).replace(days=+10),
+            "system": system,
+            "volume": volume,
+        }
+    finally:
+        simulator.deactivate()
