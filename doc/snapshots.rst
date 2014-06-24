@@ -35,7 +35,7 @@ You can inspect the snapshot's creation time:
 		>>> creation_time = snap.get_creation_time()
 		>>> delta = current_time - creation_time
 		>>> delta.days
-		10
+		15
 
 .. note:: times are represented as `Arrow objects <http://crsmithdev.com/arrow/>`_. See the `relevant documentation <http://crsmithdev.com/arrow/#user-s-guide>`_ for more details on how to use and manipulate these values.
 
@@ -46,5 +46,6 @@ Here is an example for clearing snapshot older than 10 days:
 		
 		>>> cutoff = current_time.replace(days=-10)
 		>>> for snapshot in system.volumes.find(system.volumes.fields.created_at < cutoff, parent_id=volume.id):
-		...     print("Deleting:", snapshot)
+		...     print("Deleting snapshot with id:", snapshot.id)
 		...     snapshot.delete()
+		Deleting snapshot with id: 1008
