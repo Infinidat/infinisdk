@@ -3,14 +3,29 @@ import itertools
 import os
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
+_PKG_ROOT = os.path.join(_HERE, "..", "infinisdk")
 
 _FORBIDDEN_STRINGS = ["infinipy"]
 
+def test_copyright():
+    missing = []
+    for path, _, filenames in os.walk(_PKG_ROOT):
+        for filename in filenames:
+            if not filename.endswith(".py"):
+                continue
+            filename = os.path.join(path, filename)
+            with open(filename) as f:
+                source = f.read()
+
+            if 'Copyright' not in source:
+                missing.append(filename)
+    assert not missing, "Files are missing copyright notice:\n{0}".format("\n".join(sorted(missing)))
+
 def test_no_infinipy_string():
     errors = []
-    pkg_path = os.path.join(_HERE, "..", "infinisdk")
-    assert os.path.isdir(pkg_path)
-    for path, dirnames, filenames in os.walk(pkg_path):
+
+    assert os.path.isdir(_PKG_ROOT)
+    for path, dirnames, filenames in os.walk(_PKG_ROOT):
         for name in itertools.chain(dirnames, filenames):
             _check_forbidden_strings(name, errors)
 
