@@ -18,10 +18,10 @@ Contents:
 
    getting_started
    querying
+   volumes
    mappings
    snapshots
    metadata
-   examples
    extending
    api
 

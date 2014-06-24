@@ -7,9 +7,12 @@ from infinisdk import InfiniBox
 def doctest_context():
     simulator = Simulator()
     simulator.activate()
+    system = InfiniBox(simulator)
+    pool = system.pools.create()
     try:
         yield {
-            "system": InfiniBox(simulator)
+            "system": system,
+            "pool": pool,
         }
     finally:
         simulator.deactivate()

@@ -40,7 +40,9 @@ You can inspect the snapshot's creation time:
 .. note:: times are represented as `Arrow objects <http://crsmithdev.com/arrow/>`_. See the `relevant documentation <http://crsmithdev.com/arrow/#user-s-guide>`_ for more details on how to use and manipulate these values.
 
 
-Here is an example for clearing snapshot older than 10 days:
+
+Example: Deleting Snapshots by Creation Time
+--------------------------------------------
 
 .. code-block:: python
 		
