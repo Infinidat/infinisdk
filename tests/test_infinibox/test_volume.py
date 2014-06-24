@@ -1,10 +1,13 @@
-import datetime
+import time
+import arrow
 from functools import partial
 
+import flux
 from capacity import GB
 
 import gossip
 import pytest
+from infinipy2.core.translators_and_types import MillisecondsDatetimeTranslator
 from infinipy2.core.exceptions import (APICommandFailed,
                                        InvalidOperationException)
 
@@ -91,14 +94,23 @@ def test_clones_and_snapshots(infinibox, volume):
 def test_snapshot_creation_time(infinibox, volume):
     snap = volume.create_snapshot()
 
-    assert isinstance(snap.get_creation_time(), datetime.datetime)
+    assert isinstance(snap.get_creation_time(), arrow.Arrow)
+
+
+def test_created_at_field_type_conversion():
+    now = arrow.get(int(time.time() * 1000) / 1000.0)
+    translator = MillisecondsDatetimeTranslator()
+    converted = translator.from_api(translator.to_api(now))
+    assert converted == now
 
 def test_snapshot_creation_time_filtering(infinibox, volume):
+    flux.current_timeline.sleep(1) # set a differentiator between volume creation time and snapshot time
     snap = volume.create_snapshot()
+    query = infinibox.volumes.find(infinibox.volumes.fields.created_at < snap.get_creation_time())
 
-    for vol in infinibox.volumes.find(infinibox.volumes.fields.created_at < snap.get_creation_time()):
+    for vol in query:
         found = True
-        assert vol.get_creation_time() < snap.get_creation_time()
+        assert vol != snap
     assert found
 
 def test_restore(infinibox, volume):
@@ -130,6 +142,7 @@ def test_invalid_child_operation(infinibox, volume):
     with pytest.raises(InvalidOperationException):
         volume.create_clone()
 
+    flux.current_timeline.sleep(5)
     snapshot = volume.create_snapshot()
     with pytest.raises(InvalidOperationException):
         snapshot.create_snapshot()
