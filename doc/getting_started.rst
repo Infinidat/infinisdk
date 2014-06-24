@@ -111,5 +111,5 @@ Querying objects of various types is done relatively easily through InfiniSDK. T
 		>>> list(system.volumes)
 		[]
 
-.. seealso:: querying
+.. seealso:: :ref:`querying`
 
