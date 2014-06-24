@@ -19,6 +19,7 @@ Contents:
    getting_started
    querying
    mappings
+   snapshots
    metadata
    examples
    extending
