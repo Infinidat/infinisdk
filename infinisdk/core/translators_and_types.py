@@ -1,5 +1,4 @@
-import datetime
-
+import arrow
 from capacity import byte, Capacity
 
 from api_object_schema import TypeInfo, ValueTranslator
@@ -17,13 +16,13 @@ CapacityType = TypeInfo(type=Capacity, api_type=int,
                         translator=CapacityTranslator())
 
 
-class DatetimeTranslator(ValueTranslator):
+class MillisecondsDatetimeTranslator(ValueTranslator):
 
     def _to_api(self, value):
-        raise NotImplementedError()  # pragma: no cover
+        return int(value.float_timestamp * 1000)
 
     def _from_api(self, value):
-        return datetime.datetime.fromtimestamp(value)
+        return arrow.get(value / 1000.0)
 
-DatetimeType = TypeInfo(type=datetime.datetime,
-                        api_type=float, translator=DatetimeTranslator())
+MillisecondsDatetimeType = TypeInfo(type=arrow.Arrow,
+                                    api_type=float, translator=MillisecondsDatetimeTranslator())

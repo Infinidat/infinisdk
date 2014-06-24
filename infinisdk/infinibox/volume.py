@@ -1,7 +1,7 @@
 import gossip
 from capacity import GB
 from collections import namedtuple
-from ..core import Field, CapacityType, DatetimeType
+from ..core import Field, CapacityType, MillisecondsDatetimeType
 from storage_interfaces.scsi.abstracts import ScsiVolume
 from ..core.exceptions import InvalidOperationException, InfiniSDKException
 from ..core.api.special_values import Autogenerate
@@ -29,7 +29,7 @@ class Volume(InfiniBoxObject):
         Field("type", cached=True, is_filterable=True, is_sortable=True),
         Field("parent_id", cached=True, is_filterable=True),
         Field("provisioning", api_name="provtype", mutable=True, creation_parameter=True, is_filterable=True, is_sortable=True, default="THICK"),
-        Field("created_at", type=DatetimeType),
+        Field("created_at", type=MillisecondsDatetimeType),
     ]
 
     def get_unique_key(self):
