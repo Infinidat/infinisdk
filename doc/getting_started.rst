@@ -23,19 +23,32 @@ In your Python interpreter, import the :class:`infinisdk.InfiniBox <infinisdk.in
 
 .. note:: ``SYSTEM_ADDRESS`` can be a hostname for your system's management address, or an IP address
 
+SSL is disabled by default, but can be easily turned on by passing ``use_ssl=True`` to the system constructor:
+
+.. code-block:: python
+
+		>>> system = InfiniBox(SYSTEM_ADDRESS, use_ssl=True)
+
+.. note:: By default, constructing a system does not send any traffic or API calls to the system. Only performing actual actions or queries does.
+
+
+Authentication
+--------------
+
 Authentication information can also be specified via the constructor:
 
 .. code-block:: python
 
 		>>> system = InfiniBox(SYSTEM_ADDRESS, auth=("admin", "password"))
 
-SSL is disabled by default, but can be easily turned on by passing ``use_ssl=True`` to the system constructor:
+Another way authentication information can be provided is through a ``.ini`` file. Create a file named ``~/.infinidat/infinisdk.ini``, with the following structure::
 
-.. code-block:: python
+  [infinibox]
+  username=admin
+  password=password
 
-		>>> system = InfiniBox(SYSTEM_ADDRESS, auth=("admin", "password"), use_ssl=True)
+Now constructing an InfiniBox object will use the credentials above by default.
 
-.. note:: By default, constructing a system does not send any traffic or API calls to the system. Only performing actual actions or queries does.
 
 Representing API Entities
 -------------------------

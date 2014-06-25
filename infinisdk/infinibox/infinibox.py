@@ -14,7 +14,7 @@
 import itertools
 
 from ..core.api import APITarget
-from ..core.config import config
+from ..core.config import config, get_ini_option
 from .cluster import Cluster
 from .components import InfiniBoxSystemComponents
 from .events import EmailRule, Events
@@ -32,8 +32,10 @@ class InfiniBox(APITarget):
 
 
     def _get_api_auth(self):
-        d = config.get_path('infinibox.defaults.system_api')
-        return (d['username'], d['password'])
+        defaults = config.get_path('infinibox.defaults.system_api')
+        username = get_ini_option("infinibox", "username", defaults['username'])
+        password = get_ini_option("infinibox", "password", defaults['password'])
+        return (username, password)
 
     def _get_api_timeout(self):
         return config.get_path('infinibox.defaults.system_api.timeout_seconds')
@@ -50,7 +52,7 @@ class InfiniBox(APITarget):
         return d
 
     def get_luns(self):
-        for mapping_obj in itertools.chain(self.clusters, self.hosts):
+        for mapping_obj in itaertools.chain(self.clusters, self.hosts):
             for lun in mapping_obj.get_luns():
                 if lun.is_clustered() and not isinstance(mapping_obj, self.clusters.object_type):
                     continue
