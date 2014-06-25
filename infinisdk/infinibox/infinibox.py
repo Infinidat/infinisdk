@@ -52,7 +52,7 @@ class InfiniBox(APITarget):
         return d
 
     def get_luns(self):
-        for mapping_obj in itaertools.chain(self.clusters, self.hosts):
+        for mapping_obj in itertools.chain(self.clusters, self.hosts):
             for lun in mapping_obj.get_luns():
                 if lun.is_clustered() and not isinstance(mapping_obj, self.clusters.object_type):
                     continue
