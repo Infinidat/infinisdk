@@ -8,6 +8,7 @@ _INSTALL_REQUIERS = [
     "api_object_schema>=1.3.0",
     "arrow",
     "capacity",
+    "colorama",
     "infi.pyutils",
     "logbook",
     "requests>=1.2.0",

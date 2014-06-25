@@ -1,27 +1,31 @@
 ###!
 ### Infinidat Ltd.  -  Proprietary and Confidential Material
-### 
+###
 ### Copyright (C) 2014, Infinidat Ltd. - All Rights Reserved
-### 
+###
 ### NOTICE: All information contained herein is, and remains the property of Infinidat Ltd.
 ### All information contained herein is protected by trade secret or copyright law.
 ### The intellectual and technical concepts contained herein are proprietary to Infinidat Ltd.,
 ### and may be protected by U.S. and Foreign Patents, or patents in progress.
-### 
+###
 ### Redistribution and use in source or binary forms, with or without modification,
 ### are strictly forbidden unless prior written permission is obtained from Infinidat Ltd.
 ###!
 import json
+import sys
 from contextlib import contextmanager
 
 import requests
 from logbook import Logger
-from sentinels import NOTHING
-
-from .special_values import translate_special_values
-from ..._compat import httplib, get_timedelta_total_seconds, string_types
-from ..exceptions import APICommandFailed, CommandNotApproved, APITransportFailure
+from sentinels import NOTHING, Sentinel
 from urlobject import URLObject as URL
+
+import colorama
+
+from ..._compat import get_timedelta_total_seconds, httplib, string_types
+from ..exceptions import (APICommandFailed, APITransportFailure,
+                          CommandNotApproved)
+from .special_values import translate_special_values
 
 _logger = Logger(__name__)
 
@@ -41,6 +45,8 @@ def _join_path(url, path):
         _url = _url.with_query(path.query)
     return _url
 
+_INTERACTIVE = Sentinel('INTERACTIVE')
+
 class API(object):
     def __init__(self, target, use_ssl, ssl_cert):
         super(API, self).__init__()
@@ -54,7 +60,8 @@ class API(object):
         self._session.cert = ssl_cert
         if not ssl_cert:
             self._session.verify = False
-        self.set_auth(*self.system.get_api_auth())
+        self.set_auth(*self.system.
+                      get_api_auth())
         self._session.auth = self.system.get_api_auth()
         self._session.headers["content-type"] = "application/json"
         self._urls = [self._url_from_address(address, use_ssl) for address in target.get_api_addresses()]
@@ -78,6 +85,10 @@ class API(object):
     def get_unapproved_context(self):
         """A context marking all operations as unapproved (not confirmed)"""
         return self.get_approval_context(False)
+
+    def set_interactive_approval(self):
+        """Causes an interactive prompt whenever a command requires approval from the user"""
+        self._approved = _INTERACTIVE
 
     def set_auth(self, username_or_auth, password=NOTHING):
         """
@@ -148,8 +159,8 @@ class API(object):
         for url in urls:
             full_url = _join_path(url, URL(path))
             # TODO: make approved deduction smarter
-            if http_method != "get" and self._approved and not path.startswith("/api/internal/"):
-                full_url = full_url.add_query_param("approved", "true")
+            if http_method != "get" and self._approved == True and not path.startswith("/api/internal/"):
+                full_url = self._with_approved(full_url)
             hostname = full_url.hostname
             _logger.debug("{0} <-- {1} {2}", hostname, http_method.upper(), full_url)
             if data is not None:
@@ -166,20 +177,55 @@ class API(object):
         return returned
 
     def request(self, http_method, path, assert_success=True, **kwargs):
-        try:
-            returned = self._request(http_method, path, **kwargs)
-        except requests.exceptions.RequestException as e:
-            raise APITransportFailure(e)
-
-        if assert_success:
+        did_interactive_confirmation = False
+        while True:
             try:
-                returned.assert_success()
-            except APICommandFailed as e:
-                if e.response.get_error():
-                    if e.response.get_error().get('code') in self.system.get_approval_failure_codes():
-                        raise CommandNotApproved(e.response)
-                raise
-        return returned
+                returned = self._request(http_method, path, **kwargs)
+            except requests.exceptions.RequestException as e:
+                raise APITransportFailure(e)
+
+            if assert_success:
+                try:
+                    returned.assert_success()
+                except APICommandFailed as e:
+                    if self._is_approval_required(e):
+                        reason = self._get_unapproved_reason(e.response.response.json())
+                        exception = CommandNotApproved(e.response, reason)
+                        if self._approved is _INTERACTIVE and not did_interactive_confirmation:
+                            did_interactive_confirmation = True
+                            if self._ask_approval_interactively(http_method, path, reason):
+                                path = self._with_approved(path)
+                                continue
+                            raise exception
+                    raise
+            return returned
+
+    def _with_approved(self, path):
+        return path.set_query_param('approved', 'true')
+
+    def _ask_approval_interactively(self, method, path, reason):
+        if not reason:
+            reason = "API operation requires approval: {0} {1}".format(method, path)
+        msg = "{0} Approve? [y/N] ".format(reason)
+        if sys.stdout.isatty():
+            msg = colorama.Fore.YELLOW + msg + colorama.Fore.RESET
+        return raw_input(msg).strip().lower() in ['yes', 'y']
+
+    def _is_approval_required(self, exception):
+        if exception.response.get_error():
+            return exception.response.get_error().get('code') in self.system.get_approval_failure_codes()
+        return False
+
+    def _get_unapproved_reason(self, json):
+        if json:
+            error = json.get('error')
+            if error:
+                reasons = error.get('reasons')
+                if reasons:
+                    return reasons[0]
+                return error.get('message')
+        return None
+
 
     def _get_possible_urls(self, address=None):
 

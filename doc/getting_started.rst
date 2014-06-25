@@ -50,6 +50,29 @@ Another way authentication information can be provided is through a ``.ini`` fil
 Now constructing an InfiniBox object will use the credentials above by default.
 
 
+Approving Dangerous Operations
+------------------------------
+
+By default, InfiniSDK performs operations regardless of the level of caution required for them. When a user uses a CLI or a GUI, Infinidat products often require confirmation before carrying out some dangerous operations requiring extra attention.
+
+If you want your script to interactively ask the user for confirmation for such operations, use the :meth:`.set_interactive_approval` method:
+
+.. code-block:: python
+
+		>>> system.api.set_interactive_approval()
+
+You can also approvals off temporarily, causing your script to fail with an exception in case dangerous operations are about to be carried out:
+
+.. code-block:: python
+		
+		>>> with system.api.get_unapproved_context():
+		...     pass # operations here
+
+.. seealso::
+
+   :meth:`.get_unapproved_context`, :meth:`.set_interactive_approval`
+
+
 Representing API Entities
 -------------------------
 

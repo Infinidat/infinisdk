@@ -49,15 +49,12 @@ class APICommandFailed(APICommandException):
         return repr(self)
 
 class CommandNotApproved(APICommandFailed):
-    def __init__(self, response):
+    def __init__(self, response, reason):
         super(CommandNotApproved, self).__init__(response)
-        self.reasons = []
-        json = response.response.json()
-        if json is not None:
-            self.reasons.extend((json.get("error") or {}).get("reasons") or tuple())
+        self.reason = reason
 
     def __repr__(self):
-        return "Command forbidden without explicit approval ({0})".format(", ".join(self.reasons))
+        return "Command forbidden without explicit approval ({0})".format(self.reason)
 
 class CapacityUnavailable(APICommandException):
     pass
