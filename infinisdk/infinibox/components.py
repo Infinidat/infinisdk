@@ -11,6 +11,7 @@
 ### Redistribution and use in source or binary forms, with or without modification,
 ### are strictly forbidden unless prior written permission is obtained from Infinidat Ltd.
 ###!
+from .._compat import string_types
 from ..core.field import Field
 from ..core.system_component import SystemComponentsBinder
 from ..core.system_object import SystemObject
@@ -23,23 +24,42 @@ class InfiniBoxSystemComponents(SystemComponentsBinder):
 
     def __init__(self, system):
         super(InfiniBoxSystemComponents, self).__init__(InfiniBoxSystemComponent, system)
-        self.system_component = System(self.system, {'parent_id': tuple(), 'index': 0})
+        self.system_component = System(self.system, {'parent_id': "", 'index': 0})
         self.cache_component(self.system_component)
+        self._fetched_nodes = False
+        self._fetched_others = False
+
+    def should_fetch_nodes(self):
+        return not self._fetched_nodes
+
+    def should_fetch_all(self):
+        return not self._fetched_others
+
+    def mark_fetched_nodes(self):
+        self._fetched_nodes = True
+
+    def mark_fetched_all(self):
+        self._fetched_others = True
+        self._fetched_nodes = True
 
 
 class ComputedIDField(Field):
     def extract_from_json(self, obj_class, json):
         curr_index = obj_class.fields.index.extract_from_json(obj_class, json)
+        index_str = curr_index if isinstance(curr_index, string_types) else "{0:02}".format(curr_index)
         parent_id = json[obj_class.fields.parent_id.api_name]
-        return parent_id + (obj_class.get_type_name(), curr_index)
+        return "{0}{1}{2}:{3}".format(parent_id,
+                                      "_" if parent_id else "",
+                                      obj_class.get_type_name(),
+                                      index_str)
 
 
 class InfiniBoxSystemComponent(SystemObject):
     BINDER_CLASS = SystemComponentsBinder
     BASE_URL = URL("components")
     FIELDS = [
-        ComputedIDField("id", is_identity=True),
-        Field("parent_id", add_updater=False, is_identity=True),
+        ComputedIDField("id", is_identity=True, cached=True),
+        Field("parent_id", cached=True, add_updater=False, is_identity=True),
     ]
 
     def get_parent(self):
@@ -147,7 +167,7 @@ class FcPort(InfiniBoxSystemComponent):
     FIELDS = [
         Field("wwpn", is_identity=True),
         Field("index", api_name="id", type=int, cached=True),
-        Field("node"),
+        Field("node", cached=True),
         Field("state"),
     ]
 
