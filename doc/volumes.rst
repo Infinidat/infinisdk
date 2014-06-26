@@ -55,7 +55,7 @@ Example: Deleting All Volumes with Specific Name Prefix
 .. code-block:: python
 
 		>>> for volume in system.volumes:
-		...     if volume.get_name().startswith('prefix'):
+		...     if volume.get_name(from_cache=True).startswith('prefix'):
 		...         volume.purge()
 
 
