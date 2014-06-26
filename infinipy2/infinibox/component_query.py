@@ -72,23 +72,18 @@ class InfiniBoxComponentQuery(object):
         components = self.system.components
         if not components.should_fetch_all():
             return
-        Rack = components.racks.object_type
-        rack_1_url = Rack.get_specific_rack_url(1)
-        rack_1_data = self.system.api.get(rack_1_url).get_json()['result']
-        system_component = components.system_component
-        Rack.construct(self.system, rack_1_data, system_component.id)
+        components.get_rack_1().refresh()
         components.mark_fetched_all()
 
     def _fetch_nodes(self):
         components = self.system.components
         if not components.should_fetch_nodes():
             return
-        rack_1 = components.racks.choose()
-        Node = components.nodes.object_type
-        nodes_url = Node.get_url_path(self.system)
-        nodes_data = self.system.api.get(nodes_url).get_json()['result']
-        for node_data in nodes_data:
-            Node.construct(self.system, node_data, rack_1.id)
+        rack_1 = components.get_rack_1()
+        url = rack_1.get_this_url_path().add_query_param('fields','enclosures_number,rack,nodes')
+        rack_data_without_enclosures = self.system.api.get(url).get_json()['result']
+        rack_data_without_enclosures['enclosures'] = []
+        type(rack_1).construct(self.system, rack_data_without_enclosures, rack_1.get_parent().id)
         components.mark_fetched_nodes()
 
     def page(self, page_index):

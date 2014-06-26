@@ -34,16 +34,6 @@ def test_system_component_does_not_perform_api_get(infinibox):
     system_component = infinibox.components.system_component
     assert system_component.get_index() == 0
 
-def test_get_component_by_id_lazily(infinibox):
-    rack_1_id = "system:00_rack:01"
-    with pytest.raises(NotImplementedError):
-        infinibox.components.get_by_id_lazy(rack_1_id)
-    infinibox.components.enclosures.choose()  # Initializing components...
-
-    component = infinibox.components.get_by_id_lazy(rack_1_id)
-    assert component.get_index() == 1
-    assert component.get_type_name() == 'rack'
-
 def test_system_component(infinibox):
     _basic_check_for_component(infinibox, System, None, False)
     system_component = infinibox.components.system_component

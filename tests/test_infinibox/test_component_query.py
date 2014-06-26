@@ -1,6 +1,7 @@
 import pytest
 import random
 from infinipy2.core.config import config
+from infinipy2.infinibox.components import Enclosure, Node
 
 NO_OF_ENCLOSURES_DRIVES = config.get_path('infinibox.defaults.enlosure_drives.total_count.mock')
 
@@ -67,8 +68,24 @@ def test_get_item(infinibox):
     enc1 = random.choice(enclosures)
     enclosures.remove(enc1)
     enc2 = random.choice(enclosures)
-    Enclosure = infinibox.components.enclosures.object_type
 
     assert isinstance(enc1, Enclosure)
     assert isinstance(enc2, Enclosure)
     assert enc1 != enc2
+
+def test_rack_refresh(infinibox):
+    components = infinibox.components
+    comp_no = len(components._components_by_id)
+    rack_1 = components.get_rack_1()
+
+    # Currently only Rack#1 & System Component
+    assert comp_no == 2
+    assert not any(isinstance(comp, (Node, Enclosure)) for comp in components._components_by_id)
+
+    nodes_no = len(components.nodes)
+    comp_with_nodes_no = len(components._components_by_id)
+    assert comp_no + nodes_no < comp_with_nodes_no
+    assert not any(isinstance(comp, Enclosure) for comp in components._components_by_id)
+
+    rack_1.refresh()
+    assert comp_with_nodes_no < len(components._components_by_id)

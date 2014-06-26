@@ -13,6 +13,9 @@ class InfiniBoxSystemComponents(SystemComponentsBinder):
         super(InfiniBoxSystemComponents, self).__init__(InfiniBoxSystemComponent, system)
         self.system_component = System(self.system, {'parent_id': "", 'index': 0})
         self.cache_component(self.system_component)
+        Rack = self.racks.object_type
+        self._rack_1 = Rack(self.system, {'parent_id': self.system_component.id, 'rack': 1})
+        self.cache_component(self._rack_1)
         self._fetched_nodes = False
         self._fetched_others = False
 
@@ -29,16 +32,22 @@ class InfiniBoxSystemComponents(SystemComponentsBinder):
         self._fetched_others = True
         self._fetched_nodes = True
 
+    def get_rack_1(self):
+        return self._rack_1
+
 
 class ComputedIDField(Field):
-    def extract_from_json(self, obj_class, json):
-        curr_index = obj_class.fields.index.extract_from_json(obj_class, json)
-        index_str = curr_index if isinstance(curr_index, string_types) else "{0:02}".format(curr_index)
-        parent_id = json[obj_class.fields.parent_id.api_name]
+    def compute_obj_id(self, obj_index, parent_id, obj_class):
+        index_str = obj_index if isinstance(obj_index, string_types) else "{0:02}".format(obj_index)
         return "{0}{1}{2}:{3}".format(parent_id,
                                       "_" if parent_id else "",
                                       obj_class.get_type_name(),
                                       index_str)
+
+    def extract_from_json(self, obj_class, json):
+        curr_index = obj_class.fields.index.extract_from_json(obj_class, json)
+        parent_id = json[obj_class.fields.parent_id.api_name]
+        return self.compute_obj_id(curr_index, parent_id, obj_class)
 
 
 class InfiniBoxSystemComponent(SystemObject):
@@ -82,6 +91,10 @@ class InfiniBoxSystemComponent(SystemObject):
     def get_sub_components(self):
         return self.system.components.find(parent_id=self.id)
 
+    def refresh(self):
+        data = self.system.api.get(self.get_this_url_path()).get_json()['result']
+        self.construct(self.system, data, self.get_parent_id())
+
     @classmethod
     def construct(cls, system, data, parent_id):
         data['parent_id'] = parent_id
@@ -92,11 +105,11 @@ class InfiniBoxSystemComponent(SystemObject):
             object_type = system.components._COMPONENTS_BY_TYPE_NAME.get(component_type, InfiniBoxSystemComponent)
             returned = object_type(system, data)
             system.components.cache_component(returned)
-            for sub_class in object_type._get_sub_components_classes():
-                for sub_class_data in data[sub_class.get_plural_name()]:
-                    sub_class.construct(system, sub_class_data, component_id)
         else:
             returned.update_field_cache(data)
+        for sub_class in returned._get_sub_components_classes():
+            for sub_class_data in data[sub_class.get_plural_name()]:
+                sub_class.construct(system, sub_class_data, component_id)
         return returned
 
 
