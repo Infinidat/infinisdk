@@ -1,4 +1,4 @@
-Extending InfiniSDK2
+Extending InfiniSDK
 ===================
 
 InfiniSDK2 is focused on providing the official InfiniBox API as provided to the customer by Infinidat. However, some uses may require accessing internal or custom APIs, or wrapping more complex sequences in convenient API calls. Examples of this can be technician APIs, development utilities, customer macros and more.

@@ -22,6 +22,7 @@ Contents:
    mappings
    snapshots
    metadata
+   events
    extending
    api
 

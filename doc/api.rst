@@ -58,6 +58,14 @@ infinibox.clusters
    :members:
    :inherited-members:
 
+infinibox.events
+~~~~~~~~~~~~~~~~
+
+.. automodule:: infinisdk.core.events
+
+.. autoclass:: Event
+   :members:
+
 Infinibox Utilities
 ~~~~~~~~~~~~~~~~~~~
 

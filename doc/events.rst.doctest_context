@@ -1,0 +1,18 @@
+# -*- mode: python -*-
+from contextlib import contextmanager
+from infinisim.infinibox import Infinibox as Simulator
+from infinisdk.infinibox import InfiniBox
+
+@contextmanager
+def doctest_context():
+    simulator = Simulator()
+    for i in range(3):
+        simulator.events.add_event(code='VOLUME_CREATE')
+        simulator.events.add_event(code='VOLUME_DELETE')
+    simulator.activate()
+    try:
+        yield {
+            "system": InfiniBox(simulator),
+        }
+    finally:
+        simulator.deactivate()
