@@ -64,3 +64,8 @@ class AttributeAlreadyExists(InfinipyException):
         self._attr = attr
         msg = "{0} already exists for {1}".format(attr, obj)
         super(AttributeAlreadyExists, self).__init__(msg)
+
+class VersionNotSupported(InfinipyException):
+    def __init__(self, version):
+        msg = "System version '{0}' is not supported by this version of Infinipy".format(version)
+        super(VersionNotSupported, self).__init__(msg)

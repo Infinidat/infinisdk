@@ -22,6 +22,11 @@ config = confetti.Config(dict(
         )),
     ),
     infinibox=dict(
+
+        compatible_versions = [
+            r"^1.5(?:[\.-].*)$",
+        ],
+
         defaults=dict(
             system_api=dict(
                 username="infinidat",

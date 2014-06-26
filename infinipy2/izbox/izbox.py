@@ -17,6 +17,9 @@ class IZBox(APITarget):
         port = address.base_url.netloc.port or 80
         return (address.base_url.netloc.hostname, port)
 
+    def check_version(self):
+        pass # TODO: implement version checking for IZBox
+
     def get_approval_failure_codes(self):
         d = config.get_path('izbox.approval_required_codes')
         return d

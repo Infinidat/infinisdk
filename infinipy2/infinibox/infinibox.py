@@ -1,5 +1,8 @@
+import re
+
 from ..core.api import APITarget
 from ..core.config import config
+from ..core.exceptions import VersionNotSupported
 from .components import InfiniBoxSystemComponents
 from .events import Events, EmailRule
 from .volume import Volume
@@ -13,6 +16,11 @@ class InfiniBox(APITarget):
     OBJECT_TYPES = [Volume, Pool, Host, Cluster, User, EmailRule]
     SYSTEM_EVENTS_TYPE = Events
     SYSTEM_COMPONENTS_TYPE = InfiniBoxSystemComponents
+
+    def check_version(self):
+        version = self.get_version()
+        if not any(re.match(regexp, version) for regexp in config.root.infinibox.compatible_versions):
+            raise VersionNotSupported(version)
 
     def _get_api_auth(self):
         d = config.get_path('infinibox.defaults.system_api')

@@ -46,6 +46,7 @@ class API(object):
         self._session.headers["content-type"] = "application/json"
         self._urls = [self._url_from_address(address, use_ssl) for address in target.get_api_addresses()]
         self._active_url = None
+        self._checked_version = False
 
     @contextmanager
     def get_approval_context(self, value):
@@ -116,6 +117,14 @@ class API(object):
 
         :rtype: :class:`.Response`
         """
+        if not self._checked_version:
+            self._checked_version = True
+            try:
+                self.system.check_version()
+            except:
+                self._checked_version = False
+                raise
+
         returned = None
         kwargs.setdefault("timeout", self._default_request_timeout)
         raw_data = kwargs.pop("raw_data", False)
