@@ -116,6 +116,12 @@ def test__equality(system):
     diff_type1 = SampleDerivedObject(system1, {"id": 100})
     assert NotImplemented == diff_type1.__eq__(diff_type2)
 
+def test_get_fields_without_field_names(system):
+    user = system.users.choose()
+    fields = user.get_fields()
+    # For both infinibox & izbox, "username" is the API name for "name" field
+    assert "name" in fields
+    assert "username" not in fields
 
 def test_object_creation_missing_fields():
     with pytest.raises(MissingFields):

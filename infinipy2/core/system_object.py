@@ -238,6 +238,8 @@ class SystemObject(with_metaclass(FieldsMeta)):
         return field.api_name
 
     def _get_fields_from_cache(self, field_names):
+        if not field_names:
+            field_names = self.fields.get_all_field_names_or_fabricate(self._cache.keys())
         returned = {}
         missed = []
         for field_name in field_names:
