@@ -8,7 +8,7 @@ with open(os.path.join(_ROOT, "COPYRIGHT")) as copyright_file:
     _COPYRIGHT_TEXT = copyright_file.read()
 
 _COPYRIGHT = "\n".join(
-    "### {0}".format(line)
+    "### {0}".format(line).strip()
     for line in _COPYRIGHT_TEXT.splitlines())
 
 _COPYRIGHT_MARKER = "###!"
