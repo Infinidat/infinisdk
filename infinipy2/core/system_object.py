@@ -281,6 +281,7 @@ class SystemObject(with_metaclass(FieldsMeta)):
                 update_dict.pop(field_name)
 
         self.system.api.put(self.get_this_url_path(), data=update_dict)
+        self.update_field_cache(update_dict)
 
     def delete(self):
         """
