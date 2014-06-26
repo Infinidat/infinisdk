@@ -111,6 +111,20 @@ All fields can be accessed via the :meth:`get_field <infinisdk.core.system_objec
 		>>> pool.get_field('name') == 'yet_another_name'
 		True
 
+.. _caching:
+
+Caching
+-------
+
+Whenever an object attribute is fetched, it is cached for later use. By default, getting fields always fetches them from the system, but it may sometimes be necessary to reduce the traffic to and from the system by using the already-fetched cache. ``.get_field``, ``get_fields`` and the various getter methods receive a ``from_cache`` parameter that make them prefer using the cache:
+
+.. code-block:: python
+
+		>>> print(pool.get_field('name', from_cache=True))
+		yet_another_name
+
+You can also disable fetching if the field is not in the cache, by passing ``fetch_if_not_cached=False``.
+
 .. _capacities: 
 
 Storage Capacity Handling
