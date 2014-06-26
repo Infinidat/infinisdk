@@ -10,11 +10,11 @@ Creating volumes is done with the ``create`` method:
 
 		>>> v = system.volumes.create(pool=pool, name='my_vol')
 
-It is also possible to create multiple volumes with a single line, by calling :meth:`.create_volumes`:
+It is also possible to create multiple volumes with a single line, by calling :meth:`.create_many`:
 
 .. code-block:: python
 
-		>>> vols = system.volumes.create_volumes(pool=pool, name='vol', count=5)
+		>>> vols = system.volumes.create_many(pool=pool, name='vol', count=5)
 		>>> len(vols)
 		5
 		>>> for vol in vols:

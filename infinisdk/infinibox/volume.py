@@ -36,7 +36,14 @@ _install_gossip_hooks()
 
 class VolumesBinder(TypeBinder):
 
-    def create_volumes(self, *args, **kwargs):
+    def create_many(self, *args, **kwargs):
+        """
+        Creates multiple volumes with a single call. Parameters are just like ``volumes.create``, only with the
+        addition of the ``count`` parameter
+
+        :param count: number of volumes to create. Defaults to 1.
+        :rtype: list of volumes
+        """
         name = kwargs.pop('name', None)
         if name is None:
             name = Autogenerate('vol_{uuid}').generate()

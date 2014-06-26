@@ -177,10 +177,10 @@ def test_object_creation_hooks_for_child_volumes(infinibox, volume):
     gossip.unregister_token(hook_ident)
 
 
-def test_create_volumes(infinibox, pool):
+def test_create_many(infinibox, pool):
 
     name = 'some_name'
-    vols = infinibox.volumes.create_volumes(pool=pool, count=5, name=name)
+    vols = infinibox.volumes.create_many(pool=pool, count=5, name=name)
 
     assert len(vols) == 5
 

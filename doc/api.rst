@@ -24,6 +24,9 @@ infinibox.volumes
 
 .. automodule:: infinisdk.infinibox.volume
 
+.. autoclass:: VolumesBinder
+   :members:
+
 .. autoclass:: Volume
    :members:
    :inherited-members:
