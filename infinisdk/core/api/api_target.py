@@ -48,6 +48,12 @@ class APITarget(with_metaclass(abc.ABCMeta)):
         self.components = self.SYSTEM_COMPONENTS_TYPE(self)
         self.events = self.SYSTEM_EVENTS_TYPE(self)
 
+    def check_version(self):
+        """Called automatically by the API on the first request made to the system. Should fetch and verify the
+        system version to make sure it can be operated against.
+        """
+        raise NotImplementedError() # pragma: no cover
+
     def get_collections_names(self):
         return [obj_type.get_plural_name() for obj_type in self.OBJECT_TYPES]
 

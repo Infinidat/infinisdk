@@ -116,7 +116,7 @@ All fields can be accessed via the :meth:`get_field <infinisdk.core.system_objec
 Storage Capacity Handling
 -------------------------
 
-Infinipy reflects data sizes using the ``capacity`` module, allowing easy computations and manipulations of data sizes, including units:
+InfiniSDK reflects data sizes using the ``capacity`` module, allowing easy computations and manipulations of data sizes, including units:
 
 .. code-block:: python
 

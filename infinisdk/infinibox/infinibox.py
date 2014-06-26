@@ -12,10 +12,13 @@
 ### are strictly forbidden unless prior written permission is obtained from Infinidat Ltd.
 ###!
 import itertools
+import re
 
 from ..core.api import APITarget
 from ..core.config import config, get_ini_option
+from ..core.exceptions import VersionNotSupported
 from .cluster import Cluster
+
 from .components import InfiniBoxSystemComponents
 from .events import EmailRule, Events
 from .host import Host
@@ -30,6 +33,10 @@ class InfiniBox(APITarget):
     SYSTEM_EVENTS_TYPE = Events
     SYSTEM_COMPONENTS_TYPE = InfiniBoxSystemComponents
 
+    def check_version(self):
+        version = self.get_version()
+        if not any(re.match(regexp, version) for regexp in config.root.infinibox.compatible_versions):
+            raise VersionNotSupported(version)
 
     def _get_api_auth(self):
         defaults = config.get_path('infinibox.defaults.system_api')

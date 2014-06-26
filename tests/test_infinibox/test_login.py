@@ -12,4 +12,4 @@ def test_invalid_login(infinibox):
         with pytest.raises(APICommandFailed) as caught:
             infinibox.login()
 
-        assert caught.value.status_code == codes.forbidden
+        assert caught.value.status_code in (codes.forbidden, codes.unauthorized)

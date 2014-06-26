@@ -74,3 +74,8 @@ class AttributeAlreadyExists(InfiniSDKException):
         self._attr = attr
         msg = "{0} already exists for {1}".format(attr, obj)
         super(AttributeAlreadyExists, self).__init__(msg)
+
+class VersionNotSupported(InfiniSDKException):
+    def __init__(self, version):
+        msg = "System version '{0}' is not supported by this version of InfiniSDK".format(version)
+        super(VersionNotSupported, self).__init__(msg)

@@ -4,6 +4,7 @@ import os
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
 _PKG_ROOT = os.path.join(_HERE, "..", "infinisdk")
+_DOCS_ROOT = os.path.join(_HERE, "..", "doc")
 
 _FORBIDDEN_STRINGS = ["infinipy"]
 
@@ -24,19 +25,20 @@ def test_copyright():
 def test_no_infinipy_string():
     errors = []
 
-    assert os.path.isdir(_PKG_ROOT)
-    for path, dirnames, filenames in os.walk(_PKG_ROOT):
-        for name in itertools.chain(dirnames, filenames):
-            _check_forbidden_strings(name, errors)
+    for root in (_PKG_ROOT, _DOCS_ROOT):
+        assert os.path.isdir(root)
+        for path, dirnames, filenames in os.walk(root):
+            for name in itertools.chain(dirnames, filenames):
+                _check_forbidden_strings(name, errors)
 
-        for filename in filenames:
-            if filename.endswith((".py", ".rst", ".md")):
-                with open(os.path.join(path, filename)) as f:
-                    for lineno, line in enumerate(f, start=1):
-                        line = line.lower()
-                        for s in _FORBIDDEN_STRINGS:
-                            if s in line:
-                                errors.append("{0}, line {1}: contains {2!r}".format(filename, lineno, s))
+            for filename in filenames:
+                if filename.endswith((".py", ".rst", ".md")):
+                    with open(os.path.join(path, filename)) as f:
+                        for lineno, line in enumerate(f, start=1):
+                            line = line.lower()
+                            for s in _FORBIDDEN_STRINGS:
+                                if s in line:
+                                    errors.append("{0}, line {1}: contains {2!r}".format(filename, lineno, s))
 
     for error in errors:
         print(error)
