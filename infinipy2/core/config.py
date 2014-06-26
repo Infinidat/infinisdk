@@ -2,6 +2,9 @@ import confetti
 
 
 config = confetti.Config(dict(
+
+    check_version_compatibility = True,
+
     defaults=dict(
         system_api_port=80,
     ),
