@@ -16,7 +16,11 @@ from ConfigParser import ConfigParser
 import confetti
 
 config = confetti.Config(dict(
+
+    check_version_compatibility=True,
+
     ini_file_path="~/.infinidat/infinisdk.ini",
+
     defaults=dict(
         system_api_port=80,
     ),

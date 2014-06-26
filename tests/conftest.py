@@ -3,6 +3,7 @@ from forge import Forge
 import flux
 import pytest
 from infinisdk.core import extensions
+from infinisdk.core.config import config
 from infinisdk.infinibox import InfiniBox
 from infinisdk.izbox import IZBox
 from infinisim.infinibox import Infinibox as InfiniboxSimulator
@@ -23,6 +24,11 @@ def freeze_timeline(request):
     def restore():
         flux.current_timeline.set_time_factor(prev)
     flux.current_timeline.set_time_factor(0)
+
+@pytest.fixture(scope="session", autouse=True)
+def disable_version_checks():
+    # speeds up the tests...
+    config.root.check_version_compatibility = False
 
 @pytest.fixture(autouse=True, scope='function')
 def cleanup_extensions(request):

@@ -1,7 +1,9 @@
 import re
 
 import pytest
+
 from infinisdk import InfiniBox
+from infinisdk.core.config import config
 from infinisdk.core.exceptions import VersionNotSupported
 
 
@@ -23,6 +25,16 @@ def test_incompatible_version_stays_incompatible(incompatible_system):
     for retry in range(3):
         with pytest.raises(VersionNotSupported):
             incompatible_system.api.get('name')
+
+@pytest.fixture(scope="module", autouse=True)
+def restore_version_checks(request):
+
+    prev = config.root.check_version_compatibility
+    config.root.check_version_compatibility = True
+
+    @request.addfinalizer
+    def restore():
+        config.root.check_version_compatibility = prev
 
 
 @pytest.fixture

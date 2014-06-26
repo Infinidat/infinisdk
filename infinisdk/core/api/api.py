@@ -23,6 +23,7 @@ from urlobject import URLObject as URL
 import colorama
 
 from ..._compat import get_timedelta_total_seconds, httplib, string_types
+from ..config import config
 from ..exceptions import (APICommandFailed, APITransportFailure,
                           CommandNotApproved)
 from .special_values import translate_special_values
@@ -145,7 +146,7 @@ class API(object):
 
         :rtype: :class:`.Response`
         """
-        if not self._checked_version:
+        if not self._checked_version and config.root.check_version_compatibility:
             self._checked_version = True
             try:
                 self.system.check_version()
