@@ -1,19 +1,20 @@
-###!
-### Infinidat Ltd.  -  Proprietary and Confidential Material
-### 
-### Copyright (C) 2014, Infinidat Ltd. - All Rights Reserved
-### 
-### NOTICE: All information contained herein is, and remains the property of Infinidat Ltd.
-### All information contained herein is protected by trade secret or copyright law.
-### The intellectual and technical concepts contained herein are proprietary to Infinidat Ltd.,
-### and may be protected by U.S. and Foreign Patents, or patents in progress.
-### 
-### Redistribution and use in source or binary forms, with or without modification,
-### are strictly forbidden unless prior written permission is obtained from Infinidat Ltd.
-###!
+# !
+# Infinidat Ltd.  -  Proprietary and Confidential Material
+###
+# Copyright (C) 2014, Infinidat Ltd. - All Rights Reserved
+###
+# NOTICE: All information contained herein is, and remains the property of Infinidat Ltd.
+# All information contained herein is protected by trade secret or copyright law.
+# The intellectual and technical concepts contained herein are proprietary to Infinidat Ltd.,
+# and may be protected by U.S. and Foreign Patents, or patents in progress.
+###
+# Redistribution and use in source or binary forms, with or without modification,
+# are strictly forbidden unless prior written permission is obtained from Infinidat Ltd.
+# !
 import gossip
 from capacity import GB
 from collections import namedtuple
+from ..core.type_binder import TypeBinder
 from ..core import Field, CapacityType, MillisecondsDatetimeType
 from storage_interfaces.scsi.abstracts import ScsiVolume
 from ..core.exceptions import InvalidOperationException, InfiniSDKException
@@ -23,7 +24,8 @@ from .system_object import InfiniBoxObject
 from .lun import LogicalUnit, LogicalUnitContainer
 
 PROVISIONING = namedtuple('Provisioning', ['Thick', 'Thin'])('THICK', 'THIN')
-VOLUME_TYPES = namedtuple('VolumeTypes', ['Master', 'Snapshot', 'Clone'])('MASTER', 'SNAP', 'CLONE')
+VOLUME_TYPES = namedtuple('VolumeTypes', ['Master', 'Snapshot', 'Clone'])(
+    'MASTER', 'SNAP', 'CLONE')
 
 
 def _install_gossip_hooks():
@@ -32,16 +34,36 @@ def _install_gossip_hooks():
 _install_gossip_hooks()
 
 
+class VolumesBinder(TypeBinder):
+
+    def create_volumes(self, *args, **kwargs):
+        name = kwargs.pop('name', None)
+        if name is None:
+            name = Autogenerate('vol_{uuid}').generate()
+        count = kwargs.pop('count', 1)
+        return [self.create(*args, name='{0}_{1}'.format(name, i), **kwargs)
+                for i in range(1, count + 1)]
+
+
 class Volume(InfiniBoxObject):
 
+    BINDER_CLASS = VolumesBinder
+
     FIELDS = [
-        Field("id", type=int, is_identity=True, is_filterable=True, is_sortable=True),
-        Field("name", creation_parameter=True, mutable=True, is_filterable=True, is_sortable=True, default=Autogenerate("vol_{uuid}")),
-        Field("size", creation_parameter=True, mutable=True, is_filterable=True, is_sortable=True, default=GB, type=CapacityType),
-        Field("pool", type=int, api_name="pool_id", creation_parameter=True, is_filterable=True, is_sortable=True, binding=ObjectIdBinding()),
+        Field("id", type=int, is_identity=True,
+              is_filterable=True, is_sortable=True),
+        Field(
+            "name", creation_parameter=True, mutable=True, is_filterable=True,
+            is_sortable=True, default=Autogenerate("vol_{uuid}")),
+        Field("size", creation_parameter=True, mutable=True,
+              is_filterable=True, is_sortable=True, default=GB, type=CapacityType),
+        Field("pool", type=int, api_name="pool_id", creation_parameter=True,
+              is_filterable=True, is_sortable=True, binding=ObjectIdBinding()),
         Field("type", cached=True, is_filterable=True, is_sortable=True),
         Field("parent_id", cached=True, is_filterable=True),
-        Field("provisioning", api_name="provtype", mutable=True, creation_parameter=True, is_filterable=True, is_sortable=True, default="THICK"),
+        Field(
+            "provisioning", api_name="provtype", mutable=True, creation_parameter=True,
+            is_filterable=True, is_sortable=True, default="THICK"),
         Field("created_at", type=MillisecondsDatetimeType),
     ]
 
@@ -63,9 +85,11 @@ class Volume(InfiniBoxObject):
         if not name:
             name = Autogenerate('vol_{uuid}')
         data = {'name': name, 'parent_id': self.get_id()}
-        gossip.trigger('infinidat.pre_object_creation', data=data, system=self.system, cls=type(self))
+        gossip.trigger('infinidat.pre_object_creation',
+                       data=data, system=self.system, cls=type(self))
         try:
-            resp = self.system.api.post(self.get_url_path(self.system), data=data)
+            resp = self.system.api.post(
+                self.get_url_path(self.system), data=data)
         except Exception:
             gossip.trigger('infinidat.object_operation_failure')
             gossip.trigger('infinidat.cancel_fork', vol=self)
@@ -82,7 +106,8 @@ class Volume(InfiniBoxObject):
 
     def create_snapshot(self, name=None):
         if self.is_snapshot():
-            raise InvalidOperationException('Cannot create snapshot for snapshot')
+            raise InvalidOperationException(
+                'Cannot create snapshot for snapshot')
         return self._create_child(name)
 
     def restore(self, snapshot):
@@ -94,9 +119,11 @@ class Volume(InfiniBoxObject):
         if not name:
             name = Autogenerate('vol_{uuid}')
         data = {'name': name}
-        gossip.trigger('infinidat.pre_object_creation', data=data, system=self.system, cls=type(self))
+        gossip.trigger('infinidat.pre_object_creation',
+                       data=data, system=self.system, cls=type(self))
         try:
-            resp = self.system.api.post(self.get_this_url_path().add_path('own_snapshot'), data=data)
+            resp = self.system.api.post(
+                self.get_this_url_path().add_path('own_snapshot'), data=data)
         except Exception:
             gossip.trigger('infinidat.object_operation_failure')
             raise
@@ -119,11 +146,14 @@ class Volume(InfiniBoxObject):
 
     def get_lun(self, mapping_object):
         def is_mapping_object_lu(lu_data):
-            lu_mapping_id = lu_data['host_cluster_id'] if lu_data['clustered'] else lu_data['host_id']
+            lu_mapping_id = lu_data['host_cluster_id'] if lu_data[
+                'clustered'] else lu_data['host_id']
             return lu_mapping_id == mapping_object.id
-        lus = [LogicalUnit(system=self.system, **lu_data) for lu_data in self._get_luns_data_from_url() if is_mapping_object_lu(lu_data)]
+        lus = [LogicalUnit(system=self.system, **lu_data)
+               for lu_data in self._get_luns_data_from_url() if is_mapping_object_lu(lu_data)]
         if len(lus) > 1:
-            raise InfiniSDKException("There shouldn't be multiple luns for volume-mapping object pair")
+            raise InfiniSDKException(
+                "There shouldn't be multiple luns for volume-mapping object pair")
         return lus[0] if lus else None
 
     def get_logical_units(self):

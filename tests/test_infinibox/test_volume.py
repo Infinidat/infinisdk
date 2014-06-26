@@ -175,3 +175,14 @@ def test_object_creation_hooks_for_child_volumes(infinibox, volume):
     assert l == ['pre_a_snap', 'post_a_snap', 'pre_a_clone', 'post_a_clone']
 
     gossip.unregister_token(hook_ident)
+
+
+def test_create_volumes(infinibox, pool):
+
+    name = 'some_name'
+    vols = infinibox.volumes.create_volumes(pool=pool, count=5, name=name)
+
+    assert len(vols) == 5
+
+    for index, vol in enumerate(vols, start=1):
+        assert vol.get_name() == '{0}_{1}'.format(name, index)

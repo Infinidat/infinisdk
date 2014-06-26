@@ -10,6 +10,22 @@ Creating volumes is done with the ``create`` method:
 
 		>>> v = system.volumes.create(pool=pool, name='my_vol')
 
+It is also possible to create multiple volumes with a single line, by calling :meth:`.create_volumes`:
+
+.. code-block:: python
+
+		>>> vols = system.volumes.create_volumes(pool=pool, name='vol', count=5)
+		>>> len(vols)
+		5
+		>>> for vol in vols:
+		...     print(vol.get_name())
+		vol_1
+		vol_2
+		vol_3
+		vol_4
+		vol_5
+
+
 We can now access various attributes of the volume:
 
 .. code-block:: python
@@ -39,7 +55,7 @@ Example: Deleting All Volumes with Specific Name Prefix
 .. code-block:: python
 
 		>>> for volume in system.volumes:
-		...     if volume.get_name(use_cached=True).startswith('prefix'):
+		...     if volume.get_name().startswith('prefix'):
 		...         volume.purge()
 
 
