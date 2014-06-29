@@ -11,11 +11,14 @@ from .lun import LogicalUnit, LogicalUnitContainer
 
 PROVISIONING = namedtuple('Provisioning', ['Thick', 'Thin'])('THICK', 'THIN')
 VOLUME_TYPES = namedtuple('VolumeTypes', ['Master', 'Snapshot', 'Clone'])('MASTER', 'SNAP', 'CLONE')
+_BEGIN_FORK_HOOK = "infinidat.io.begin_fork"
+_CANCEL_FORK_HOOK = "infinidat.io.cancel_fork"
+_FINISH_FORK_HOOK = "infinidat.io.finish_fork"
 
 
 def _install_gossip_hooks():
-    for phase in ["begin", "cancel", "finish"]:
-        gossip.define("{0}_fork".format(phase))
+    for hook_name in [_BEGIN_FORK_HOOK, _CANCEL_FORK_HOOK, _FINISH_FORK_HOOK]:
+        gossip.define(hook_name)
 _install_gossip_hooks()
 
 
@@ -46,7 +49,7 @@ class Volume(InfiniBoxObject):
         return self.get_type() == VOLUME_TYPES.Clone
 
     def _create_child(self, name):
-        gossip.trigger('infinidat.begin_fork', vol=self)
+        gossip.trigger(_BEGIN_FORK_HOOK, vol=self)
         if not name:
             name = Autogenerate('vol_{uuid}')
         data = {'name': name, 'parent_id': self.get_id()}
@@ -55,11 +58,11 @@ class Volume(InfiniBoxObject):
             resp = self.system.api.post(self.get_url_path(self.system), data=data)
         except Exception:
             gossip.trigger('infinidat.object_operation_failure')
-            gossip.trigger('infinidat.cancel_fork', vol=self)
+            gossip.trigger(_CANCEL_FORK_HOOK, vol=self)
             raise
         child = self.__class__(self.system, resp.get_result())
         gossip.trigger('infinidat.post_object_creation', obj=child, data=data)
-        gossip.trigger('infinidat.finish_fork', vol=self, child=child)
+        gossip.trigger(_FINISH_FORK_HOOK, vol=self, child=child)
         return child
 
     def create_clone(self, name=None):
