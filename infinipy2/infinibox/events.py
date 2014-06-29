@@ -22,7 +22,7 @@ class Events(EventsBase):
         return [level_info['name'] for level_info in sorted_levels]
 
     def get_levels_name_to_number_mapping(self):
-        return {level_info['name']: level_info['value'] for level_info in self._get_events_types()['levels']}
+        return dict((level_info['name'], level_info['value']) for level_info in self._get_events_types()['levels'])
 
 
 class EmailRule(SystemObject):
