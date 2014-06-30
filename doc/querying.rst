@@ -81,6 +81,16 @@ Object fields can be used to perform more complex queries, using operators. For 
 		vol3
 		vol4
 
+There is also a shorter syntax for writing the above piece of code, using the ``Q`` shortcut available from InfiniSDK:
+
+.. code-block:: python
+
+		>>> from infinisdk import Q
+
+		>>> vols = system.volumes.find(Q.name != 'vol1')
+		>>> len(vols)
+		4
+
 And here is a query to find all volumes greater than 1 GiB in size:
 
 .. code-block:: python
