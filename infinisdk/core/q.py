@@ -11,6 +11,17 @@
 ### Redistribution and use in source or binary forms, with or without modification,
 ### are strictly forbidden unless prior written permission is obtained from Infinidat Ltd.
 ###!
-from .core.q import Q
+from . import field
 
-from .infinibox import InfiniBox
+
+class _Q(object):
+
+    def __getattribute__(self, name):
+        if name.startswith("_"):
+            return super(_Q, self).__getattribute__(name)
+        return QField(name)
+
+Q = _Q()
+
+class QField(field.Field):
+    pass
