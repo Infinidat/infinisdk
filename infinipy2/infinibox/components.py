@@ -194,7 +194,7 @@ class Service(InfiniBoxSystemComponent):
 @InfiniBoxSystemComponents.install_component_type
 class System(InfiniBoxSystemComponent):
     FIELDS = [
-        Field("index", cached=True),
+        Field("index", cached=True, type=int),
         Field("state", add_getter=False),
     ]
 
