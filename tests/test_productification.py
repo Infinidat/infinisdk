@@ -6,7 +6,10 @@ _HERE = os.path.dirname(os.path.abspath(__file__))
 _PKG_ROOT = os.path.join(_HERE, "..", "infinisdk")
 _DOCS_ROOT = os.path.join(_HERE, "..", "doc")
 
-_FORBIDDEN_STRINGS = ["infinipy"]
+_FORBIDDEN_STRINGS = [
+    "infinipy",  # obviously...
+    "infinisdk2",  # results from converting only 'infinipy' to 'infinisdk', forgetting the '2'...
+]
 
 def test_copyright():
     missing = []
