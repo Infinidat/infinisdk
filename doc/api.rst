@@ -19,6 +19,9 @@ infinibox.api
 .. autoclass:: API
    :members:
 
+.. autoclass:: Response
+   :members:
+
 infinibox.volumes
 ~~~~~~~~~~~~~~~~~
 
@@ -74,7 +77,6 @@ Infinibox Utilities
 .. autoclass:: LogicalUnit
    :members:
    :special-members: __int__
-
 
 
 Core Objects

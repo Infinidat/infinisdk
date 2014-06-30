@@ -163,3 +163,35 @@ Querying objects of various types is done relatively easily through InfiniSDK. T
 
 .. seealso:: :ref:`querying`
 
+
+Accessing HTTP/REST API Directly
+--------------------------------
+
+InfiniSDK supports calling the HTTP/REST API of the system directly:
+
+.. code-block:: python
+
+		>>> response = system.api.get('system/product_id')
+
+The above accesses ``/api/rest/system/product_id``. :meth:`.API.get`, :meth:`.API.post`, :meth:`.API.delete` and :meth:`.API.put` all return :class:`infinisdk.core.api.Response` objects. Results can be fetched by :meth:`.Response.get_result`:
+
+.. code-block:: python
+
+		>>> print(response.get_result())
+		INFINIBOX
+
+You can always access the response belonging to `requests <http://docs.python-requests.org/en/latest/>`_ through ``.response``:
+
+.. code-block:: python
+
+		>>> response.response.status_code
+		200
+
+
+By default, requests are checked for success. This behavior can be overriden by providing ``assert_success=False``:
+
+.. code-block:: python
+
+		>>> response = system.api.get('nonexistent/path', assert_success=False)
+		>>> response.response.status_code
+		404

@@ -267,6 +267,9 @@ class Response(object):
         self.sent_data = data
 
     def get_json(self):
+        """
+        :returns: the json object returned from the system, or None if no json could be decoded
+        """
         try:
             return self.response.json()
         except ValueError:
@@ -276,9 +279,15 @@ class Response(object):
         return self.get_json()["result"]
 
     def get_result(self):
+        """
+        :returns: the result of the API call, extracted from the response JSON object
+        """
         return self._get_result()
 
     def get_error(self):
+        """
+        :returns: the error portion of the response as returned from the system, or None if it doesn't exist
+        """
         json = self.get_json()
         if json is not None:
             return json["error"]
@@ -287,6 +296,10 @@ class Response(object):
         return repr(self.response)
 
     def get_metadata(self):
+        """
+        :returns: the metadata portion of the response (paging information, etc.) as returned from the system, or None
+           if it doesn't exist
+        """
         return self.get_json()["metadata"]
 
     def get_page_start_index(self):
