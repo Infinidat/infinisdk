@@ -30,6 +30,7 @@ class Host(InfiniBoxLURelatedObject):
     def purge(self):
         """
         Purges this host.
+
         .. seealso:: :meth:`.SystemObject.purge`
         """
         cluster = self.get_cluster()
