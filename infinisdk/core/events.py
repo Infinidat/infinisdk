@@ -76,4 +76,10 @@ class Event(SystemObject):
     def keys(self):
         return self._cache.keys()
 
+    def get_field(self, field_name, from_cache=True, fetch_if_not_cached=True):
+        return super(Event, self).get_field(field_name, from_cache, fetch_if_not_cached)
+
+    def get_fields(self, field_names=(), from_cache=True, fetch_if_not_cached=True):
+        return super(Event, self).get_fields(field_names, from_cache, fetch_if_not_cached)
+
 collections.Mapping.register(Event)

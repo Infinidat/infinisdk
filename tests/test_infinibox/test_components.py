@@ -1,6 +1,9 @@
 import pytest
+
+import waiting
 from infinisdk._compat import string_types
 from infinisdk.core.config import config
+from infinibox_sysdefs import latest as defs
 from infinisdk.infinibox.components import (Drive, Enclosure, FcPort, Node,
                                             Rack, Service, System)
 
@@ -63,3 +66,10 @@ def test_node_component(infinibox):
 
 def test_service_component(infinibox):
     _basic_check_for_component(infinibox, Service, Node, False)
+
+def test__node_phase(infinibox):
+    node = infinibox.components.nodes.choose()
+    node.phase_out()
+    waiting.wait(lambda: node.get_state() == defs.enums.nodes.states.ready)
+    node.phase_in()
+    waiting.wait(lambda: node.get_state() == defs.enums.nodes.states.active)

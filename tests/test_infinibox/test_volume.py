@@ -10,6 +10,7 @@ import pytest
 from infinisdk.core.translators_and_types import MillisecondsDatetimeTranslator
 from infinisdk.core.exceptions import (APICommandFailed,
                                        InvalidOperationException)
+from infinisdk.infinibox.volume import _BEGIN_FORK_HOOK, _FINISH_FORK_HOOK
 
 from ..conftest import create_pool, create_volume
 
@@ -157,7 +158,10 @@ def test_invalid_child_operation(infinibox, volume):
 def test_object_creation_hooks_for_child_volumes(infinibox, volume):
     hook_ident = 'unittest_ident'
     l = []
+    fork_callbacks = []
 
+    def save_fork_callback(hook_name, **kwargs):
+        fork_callbacks.append(hook_name)
     def hook_callback(hook_type, **kwargs):
         obj_name = kwargs['data']['name']
         l.append('{0}_{1}'.format(hook_type, obj_name))
@@ -167,12 +171,16 @@ def test_object_creation_hooks_for_child_volumes(infinibox, volume):
                     'infinidat.object_operation_failure', hook_ident)
     gossip.register(partial(hook_callback, 'post'),
                     'infinidat.post_object_creation', hook_ident)
+    for fork_hook in [_BEGIN_FORK_HOOK, _FINISH_FORK_HOOK]:
+        gossip.register(partial(save_fork_callback, fork_hook), fork_hook)
 
     snapshot = volume.create_snapshot('a_snap')
     assert l == ['pre_a_snap', 'post_a_snap']
+    assert fork_callbacks == [_BEGIN_FORK_HOOK, _FINISH_FORK_HOOK]
 
     snapshot.create_clone('a_clone')
     assert l == ['pre_a_snap', 'post_a_snap', 'pre_a_clone', 'post_a_clone']
+    assert fork_callbacks == [_BEGIN_FORK_HOOK, _FINISH_FORK_HOOK]*2
 
     gossip.unregister_token(hook_ident)
 

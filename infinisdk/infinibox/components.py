@@ -175,6 +175,12 @@ class Node(InfiniBoxSystemComponent):
     def _get_sub_components_classes(cls):
         return [FcPort, Service]
 
+    def phase_out(self):
+        return self.system.api.post(self.get_this_url_path().add_path('phase_out'))
+
+    def phase_in(self):
+        return self.system.api.post(self.get_this_url_path().add_path('phase_in'))
+
 @InfiniBoxSystemComponents.install_component_type
 class FcPort(InfiniBoxSystemComponent):
     FIELDS = [
@@ -207,7 +213,7 @@ class Service(InfiniBoxSystemComponent):
 @InfiniBoxSystemComponents.install_component_type
 class System(InfiniBoxSystemComponent):
     FIELDS = [
-        Field("index", cached=True),
+        Field("index", cached=True, type=int),
         Field("state", add_getter=False),
     ]
 

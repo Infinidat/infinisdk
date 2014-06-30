@@ -11,40 +11,45 @@
 ### Redistribution and use in source or binary forms, with or without modification,
 ### are strictly forbidden unless prior written permission is obtained from Infinidat Ltd.
 ###!
-from api_object_schema import FieldBinding
+from api_object_schema import ObjectAPIBinding
 
-class InfiniSDKBinding(FieldBinding):
-    def get_api_value_from_object(self, obj):
-        """
-        returns the value of the object's field
-        """
-        return obj.get_field(self._field.name)
+from .api.special_values import SpecialValue
 
-    def set_object_value_from_api(self, obj, value):
-        """
-        update the object's field with value
-        """
-        obj.update_field(self._field.name, self.get_raw_api_value(value))
 
-    def get_raw_api_value(self, value):
-        """
-        returns the raw value which will be sent to the remote API
-        """
+class InfiniSDKBinding(ObjectAPIBinding):
+
+    def get_api_value_from_value(self, system, objtype, obj, value):
+        if isinstance(value, SpecialValue):
+            return value
+        return super(InfiniSDKBinding, self).get_api_value_from_value(system, objtype, obj, value)
+
+class RelatedObjectBinding(InfiniSDKBinding):
+
+    def __init__(self, collection_name=None, value_for_none=0):
+        super(RelatedObjectBinding, self).__init__()
+        self._collection_name = collection_name
+        self._value_for_none = value_for_none
+
+    def set_field(self, field):
+        super(RelatedObjectBinding, self).set_field(field)
+        if not self._collection_name:
+            self._collection_name = "{0}s".format(field.name)
+
+    def get_api_value_from_value(self, system, objtype, obj, value):
+        if value is None:
+            return self._value_for_none
+        return value.id
+
+    def get_value_from_api_value(self, system, objtype, obj, value):
+        if value == self._value_for_none:
+            return None
+        return getattr(system, self._collection_name).get_by_id_lazy(value)
+
+
+class PassthroughBinding(InfiniSDKBinding):
+
+    def get_api_value_from_value(self, system, objtype, obj, value):
         return value
 
-class ObjectIdBinding(InfiniSDKBinding):
-    def __init__(self, ref_collection_name=None):
-        super(ObjectIdBinding, self).__init__()
-        self._ref_collection_name = ref_collection_name
-
-    def _get_ref_collection(self, collection):
-        if self._ref_collection_name is not None:
-            return getattr(collection, self._ref_collection_name)
-        # Example: for field.name = "pool", collection will be system.pools
-        return getattr(collection, self._field.name + "s")
-
-    def get_api_value_from_object(self, obj):
-        return self._get_ref_collection(obj.system.objects).get_by_id_lazy(obj.get_field(self._field.name))
-
-    def get_raw_api_value(self, object):
-        return object.id
+    def get_value_from_api_value(self, system, objtype, obj, value):
+        return value

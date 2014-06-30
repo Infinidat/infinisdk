@@ -34,6 +34,9 @@ class Events(EventsBase):
         sorted_levels = sorted(self._get_events_types()['levels'], key=lambda d: d['value'])
         return [level_info['name'] for level_info in sorted_levels]
 
+    def get_levels_name_to_number_mapping(self):
+        return dict((level_info['name'], level_info['value']) for level_info in self._get_events_types()['levels'])
+
 
 class EmailRule(SystemObject):
 

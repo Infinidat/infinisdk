@@ -38,4 +38,4 @@ class MillisecondsDatetimeTranslator(ValueTranslator):
         return arrow.get(value / 1000.0)
 
 MillisecondsDatetimeType = TypeInfo(type=arrow.Arrow,
-                                    api_type=float, translator=MillisecondsDatetimeTranslator())
+                                    api_type=int, translator=MillisecondsDatetimeTranslator())

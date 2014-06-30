@@ -1,14 +1,14 @@
 Extending InfiniSDK
 ===================
 
-InfiniSDK2 is focused on providing the official InfiniBox API as provided to the customer by Infinidat. However, some uses may require accessing internal or custom APIs, or wrapping more complex sequences in convenient API calls. Examples of this can be technician APIs, development utilities, customer macros and more.
+InfiniSDK is focused on providing the official InfiniBox API as provided to the customer by Infinidat. However, some uses may require accessing internal or custom APIs, or wrapping more complex sequences in convenient API calls. Examples of this can be technician APIs, development utilities, customer macros and more.
 
-InfiniSDK2 provides a convenient extensibility mechanism to allow us to extend its behavior.
+InfiniSDK provides a convenient extensibility mechanism to allow us to extend its behavior.
 
 Extending Objects with Methods
 ------------------------------
 
-A very common case is adding methods to InfiniSDK2 objects. Let's assume we want to add a method to an :class:`.InfiniBox` object, to get the location of the system from a global dictionary:
+A very common case is adding methods to InfiniSDK objects. Let's assume we want to add a method to an :class:`.InfiniBox` object, to get the location of the system from a global dictionary:
 
 .. code-block:: python
 
