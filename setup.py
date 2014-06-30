@@ -5,7 +5,7 @@ with open(os.path.join(os.path.dirname(__file__), "infinipy2", "__version__.py")
     exec(version_file.read()) # pylint: disable=W0122
 
 _INSTALL_REQUIERS = [
-    "api_object_schema==1.3.3",
+    "api_object_schema>=1.4.0",
     "arrow",
     "capacity",
     "infi.pyutils",

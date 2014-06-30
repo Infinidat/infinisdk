@@ -2,9 +2,9 @@ from .exceptions import AttributeAlreadyExists
 from .system_object_utils import make_getter, make_updater
 from .field_filter import FieldFilter
 from .field_sorting import FieldSorting
+from .bindings import Infinipy2Binding
 
 from api_object_schema import Field as FieldBase
-from .bindings import Infinipy2Binding
 
 
 class Field(FieldBase):
@@ -27,6 +27,9 @@ class Field(FieldBase):
         #:Specifies if this field needs to have update function
         self.add_updater = add_updater and self.mutable
 
+    def get_default_binding_object(self):
+        return Infinipy2Binding()
+
     def notify_added_to_class(self, cls):
         if self.add_getter:
             getter_func = make_getter(self.name)
@@ -41,9 +44,6 @@ class Field(FieldBase):
             if updater_name in cls.__dict__:
                 raise AttributeAlreadyExists(cls, updater_name)
             setattr(cls, updater_name, updater_func)
-
-    def get_default_binding_object(self):
-        return Infinipy2Binding()
 
     def __neg__(self):
         return FieldSorting(self, "-")

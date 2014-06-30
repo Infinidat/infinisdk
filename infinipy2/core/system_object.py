@@ -12,6 +12,7 @@ from api_object_schema import FieldsMeta as FieldsMetaBase
 from .field import Field
 from .object_query import ObjectQuery
 from .type_binder import TypeBinder
+from .bindings import PassthroughBinding
 from .api.special_values import translate_special_values
 
 DONT_CARE = Sentinel("DONT_CARE")
@@ -25,7 +26,9 @@ _install_gossip_hooks()
 
 class FieldsMeta(FieldsMetaBase):
 
-    FIELD_FACTORY = Field
+    @classmethod
+    def FIELD_FACTORY(cls, name):
+        return Field(name, binding=PassthroughBinding())
 
 class SystemObject(with_metaclass(FieldsMeta)):
     FIELDS = []
@@ -76,7 +79,7 @@ class SystemObject(with_metaclass(FieldsMeta)):
 
     @classmethod
     def create(cls, system, **fields):
-        data = cls._get_data_for_post(fields)
+        data = cls._get_data_for_post(system, fields)
         gossip.trigger('infinidat.pre_object_creation', data=data, system=system, cls=cls)
         with _possible_api_failure_context():
             returned = cls(system, system.api.post(cls.get_url_path(system), data=data).get_result())
@@ -84,7 +87,7 @@ class SystemObject(with_metaclass(FieldsMeta)):
         return returned
 
     @classmethod
-    def _get_data_for_post(cls, fields):
+    def _get_data_for_post(cls, system, fields):
         returned = {}
         missing_fields = set()
         extra_fields = fields.copy()
@@ -104,9 +107,10 @@ class SystemObject(with_metaclass(FieldsMeta)):
             if field_value is NOTHING and field_api_value is NOTHING:
                 missing_fields.add(field.name)
             if field_value is not NOTHING:
-                returned[field.api_name] = field.binding.get_raw_api_value(field.type.translator.to_api(field_value))
+                returned[field.api_name] = field.binding.get_api_value_from_value(system, cls, None, field_value)
             else:
                 returned[field.api_name] = field_api_value
+
         if missing_fields:
             raise MissingFields("Following fields were not specified: {0}".format(", ".join(sorted(missing_fields))))
         returned.update(extra_fields)
@@ -209,8 +213,7 @@ class SystemObject(with_metaclass(FieldsMeta)):
         for field_name in field_names:
             field = self.fields.get(field_name, None)
             if field is not None:
-                #value = field.type.translator.from_api(field.extract_from_json(self, self._cache))
-                value = field.type.translator.from_api(self._cache[field.api_name])
+                value = field.binding.get_value_from_api_value(self.system, type(self), self, self._cache[field.api_name])
             else:
                 value = self._cache[field_name]
             returned[field_name] = value
@@ -247,7 +250,8 @@ class SystemObject(with_metaclass(FieldsMeta)):
             if value is NOTHING:
                 missed.append(field_name)
             else:
-                returned[field_name] = self.fields.get_or_fabricate(field_name).type.translator.from_api(value)
+                value = self.fields.get_or_fabricate(field_name).binding.get_value_from_api_value(self.system, type(self), self, value)
+                returned[field_name] = value
         if missed:
             raise CacheMiss(
                 "The following fields could not be obtained from cache: {0}".format(

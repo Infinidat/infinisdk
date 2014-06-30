@@ -5,7 +5,7 @@ from ..core import Field, CapacityType, MillisecondsDatetimeType
 from storage_interfaces.scsi.abstracts import ScsiVolume
 from ..core.exceptions import InvalidOperationException, InfinipyException
 from ..core.api.special_values import Autogenerate
-from ..core.bindings import ObjectIdBinding
+from ..core.bindings import RelatedObjectBinding
 from .system_object import InfiniBoxObject
 from .lun import LogicalUnit, LogicalUnitContainer
 
@@ -28,9 +28,9 @@ class Volume(InfiniBoxObject):
         Field("id", type=int, is_identity=True, is_filterable=True, is_sortable=True),
         Field("name", creation_parameter=True, mutable=True, is_filterable=True, is_sortable=True, default=Autogenerate("vol_{uuid}")),
         Field("size", creation_parameter=True, mutable=True, is_filterable=True, is_sortable=True, default=GB, type=CapacityType),
-        Field("pool", type=int, api_name="pool_id", creation_parameter=True, is_filterable=True, is_sortable=True, binding=ObjectIdBinding()),
+        Field("pool", type=int, api_name="pool_id", creation_parameter=True, is_filterable=True, is_sortable=True, binding=RelatedObjectBinding()),
         Field("type", cached=True, is_filterable=True, is_sortable=True),
-        Field("parent_id", cached=True, is_filterable=True),
+        Field("parent", cached=True, api_name="parent_id", binding=RelatedObjectBinding('volumes'), is_filterable=True),
         Field("provisioning", api_name="provtype", mutable=True, creation_parameter=True, is_filterable=True, is_sortable=True, default="THICK"),
         Field("created_at", type=MillisecondsDatetimeType),
     ]
@@ -127,12 +127,6 @@ class Volume(InfiniBoxObject):
 
     def has_children(self):
         return self.get_field("has_children")
-
-    def get_parent(self):
-        parent_id = self.get_parent_id()
-        if parent_id:
-            return self.system.volumes.get_by_id_lazy(parent_id)
-        return None
 
     def purge(self):
         if self.is_mapped():
