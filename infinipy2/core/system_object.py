@@ -10,6 +10,8 @@ from .._compat import with_metaclass, iteritems, itervalues, httplib
 from .exceptions import MissingFields, CacheMiss
 from api_object_schema import FieldsMeta as FieldsMetaBase
 from .field import Field
+from .field_filter import FieldFilter
+from .q import QField
 from .object_query import ObjectQuery
 from .type_binder import TypeBinder
 from .bindings import PassthroughBinding
@@ -157,6 +159,8 @@ class SystemObject(with_metaclass(FieldsMeta)):
                 predicates,
                 (cls.fields.get_or_fabricate(key) == value for key, value in iteritems(kw)))
         for pred in predicates:
+            if isinstance(pred.field, QField):
+                pred = FieldFilter(getattr(cls.fields, pred.field.name), pred.operator_name, pred.value)
             url = pred.add_to_url(url)
 
         return ObjectQuery(system, url, cls)
