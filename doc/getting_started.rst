@@ -61,7 +61,7 @@ If you want your script to interactively ask the user for confirmation for such 
 
 		>>> system.api.set_interactive_approval()
 
-You can also approvals off temporarily, causing your script to fail with an exception in case dangerous operations are about to be carried out:
+You can also turn off approvals temporarily, causing your script to fail with an exception in case dangerous operations are about to be carried out:
 
 .. code-block:: python
 		
