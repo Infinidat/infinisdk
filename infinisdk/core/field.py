@@ -42,14 +42,14 @@ class Field(FieldBase):
 
     def notify_added_to_class(self, cls):
         if self.add_getter:
-            getter_func = make_getter(self.name)
+            getter_func = make_getter(self)
             getter_name = getter_func.__name__
             if getter_name in cls.__dict__:
                 raise AttributeAlreadyExists(cls, getter_name)
             setattr(cls, getter_name, getter_func)
 
         if self.add_updater:
-            updater_func = make_updater(self.name)
+            updater_func = make_updater(self)
             updater_name = updater_func.__name__
             if updater_name in cls.__dict__:
                 raise AttributeAlreadyExists(cls, updater_name)

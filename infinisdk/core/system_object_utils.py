@@ -11,21 +11,37 @@
 ### Redistribution and use in source or binary forms, with or without modification,
 ### are strictly forbidden unless prior written permission is obtained from Infinidat Ltd.
 ###!
-def make_getter(attribute_name):
-    def getter(self, **kwargs):
-        return self.get_field(attribute_name, **kwargs)
+from capacity import Capacity
 
-    getter.__name__ = "get_{0}".format(attribute_name)
-    getter.__doc__ = "obtains the value of {0!r}".format(attribute_name)
+
+def make_getter(field):
+    def getter(self, **kwargs):
+        return self.get_field(field.name, **kwargs)
+
+    getter.__name__ = "get_{0}".format(field.name)
+    getter.__doc__ = """obtains the value of the {0.name!r} field
+
+    :rtype: {1} """.format(field, _format_type_doc(field.type.type))
     return getter
 
-def make_updater(attribute_name):
+def make_updater(field):
     def updater(self, value, **kwargs):
-        return self.update_field(attribute_name, value, **kwargs)
+        return self.update_field(field.name, value, **kwargs)
 
-    updater.__name__ = "update_{0}".format(attribute_name)
-    updater.__doc__ = "updates the value of {0!r}".format(attribute_name)
+    updater.__name__ = "update_{0}".format(field.name)
+    updater.__doc__ = """updates the value of the {0.name!r} field
+
+    :param value: The new {0.name} value to be set
+    :paramtype value: {1}""".format(field, _format_type_doc(field.type.type))
     return updater
 
-def make_getter_updater(attribute_name):
-    return make_getter(attribute_name), make_updater(attribute_name)
+def _format_type_doc(type):
+    from .system_object import SystemObject
+
+    if type is Capacity:
+        return '`Capacity <https://github.com/vmalloc/capacity#usage>`_'
+
+    if issubclass(type, SystemObject):
+        return ':class:`{1} object <{0}.{1}>`'.format(type.__module__, type.__name__)
+
+    return type.__name__

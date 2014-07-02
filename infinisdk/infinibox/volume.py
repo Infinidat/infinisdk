@@ -34,6 +34,7 @@ from ..core.exceptions import InvalidOperationException, InfiniSDKException
 from ..core.api.special_values import Autogenerate
 from ..core.bindings import RelatedObjectBinding
 from .system_object import InfiniBoxObject
+from .pool import Pool
 from .lun import LogicalUnit, LogicalUnitContainer
 
 PROVISIONING = namedtuple('Provisioning', ['Thick', 'Thin'])('THICK', 'THIN')
@@ -80,7 +81,7 @@ class Volume(InfiniBoxObject):
             is_sortable=True, default=Autogenerate("vol_{uuid}")),
         Field("size", creation_parameter=True, mutable=True,
               is_filterable=True, is_sortable=True, default=GB, type=CapacityType),
-        Field("pool", type=int, api_name="pool_id", creation_parameter=True, is_filterable=True, is_sortable=True,
+        Field("pool", type=Pool, api_name="pool_id", creation_parameter=True, is_filterable=True, is_sortable=True,
               binding=RelatedObjectBinding()),
 
         Field("type", cached=True, is_filterable=True, is_sortable=True),
