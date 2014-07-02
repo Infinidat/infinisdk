@@ -69,6 +69,14 @@ infinibox.events
 .. autoclass:: Event
    :members:
 
+Base Objects
+~~~~~~~~~~~~
+
+.. automodule:: infinisdk.infinibox.system_object
+
+.. autoclass:: InfiniBoxObject
+   :members:
+
 Infinibox Utilities
 ~~~~~~~~~~~~~~~~~~~
 

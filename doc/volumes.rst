@@ -59,3 +59,4 @@ Example: Deleting All Volumes with Specific Name Prefix
 		...         volume.purge()
 
 
+.. seealso:: :mod:`Volume API documentation <infinisdk.infinibox.volume>`

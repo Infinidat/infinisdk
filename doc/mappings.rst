@@ -125,3 +125,7 @@ Manipulating clusters is done with the :class:`.Cluster` class:
 		
 		>>> host_lu.is_clustered()
 		True
+
+.. seealso:: 
+    * :mod:`Host API documentation <infinisdk.infinibox.host>`
+    * :mod:`Cluster API documentation <infinisdk.infinibox.cluster>`

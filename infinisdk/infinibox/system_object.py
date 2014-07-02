@@ -28,9 +28,16 @@ class InfiniBoxObject(SystemObject):
         return api_response.get_json()['result']
 
     def set_metadata(self, key, value):
+        """Sets metadata key in the system associated with this object
+        """
         return self._get_result(self.system.api.post(self._get_metadata_uri(), data={key: value}))
 
     def get_metadata_value(self, key, default=NOTHING):
+        """Gets a metadata value, optionally specifying a default
+
+        :param default: if specified, the value to retrieve if the metadata key doesn't exist.
+           if not specified, and the key does not exist, the operation will raise an exception
+        """
         metadata_url = '{0}/{1}'.format(self._get_metadata_uri(), key)
         try:
             return self._get_result(self.system.api.get(metadata_url))
@@ -40,12 +47,18 @@ class InfiniBoxObject(SystemObject):
             return default
 
     def get_all_metadata(self):
+        """:returns: Dictionary of all keys and values associated as metadata for this object
+        """
         return self._get_result(self.system.api.get(self._get_metadata_uri()))
 
     def unset_metadata(self, key):
+        """Deletes a metadata key for this object
+        """
         return self.system.api.delete("{0}/{1}".format(self._get_metadata_uri(), key))
 
     def clear_metadata(self):
+        """Deletes all metadata keys for this object
+        """
         self.system.api.delete(self._get_metadata_uri())
 
 

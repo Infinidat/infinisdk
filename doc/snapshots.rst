@@ -51,3 +51,6 @@ Example: Deleting Snapshots by Creation Time
 		...     print("Deleting snapshot with id:", snapshot.id)
 		...     snapshot.delete()
 		Deleting snapshot with id: 1008
+
+
+.. seealso:: :mod:`Volume API documentation <infinisdk.infinibox.volume>`
