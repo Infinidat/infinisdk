@@ -5,11 +5,17 @@ from infinisdk.core import config
 
 @pytest.mark.parametrize("use_username", [True, False])
 @pytest.mark.parametrize("use_password", [True, False])
-def test_auth_saving(infinibox_simulator, ini_path, use_username, use_password):
+@pytest.mark.parametrize("specific_section", [True, False])
+def test_auth_saving(infinibox_simulator, ini_path, use_username, use_password, specific_section):
     new_username = "some_user"
     new_password = "some_password"
+    hostname = infinibox_simulator.get_floating_addresses()[0]
     with ini_path.open("w") as f:
-        f.write("[infinibox]\n")
+        if specific_section:
+            f.write("[infinibox:{0}]\n".format(hostname))
+        else:
+            f.write("[infinibox]\n")
+
         if use_username:
             f.write("username={0}\n".format(new_username))
             expected_username = new_username

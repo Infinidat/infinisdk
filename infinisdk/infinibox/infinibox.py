@@ -14,6 +14,8 @@
 import itertools
 import re
 
+from sentinels import NOTHING
+
 from ..core.api import APITarget
 from ..core.config import config, get_ini_option
 from ..core.exceptions import VersionNotSupported
@@ -22,7 +24,6 @@ from .cluster import Cluster
 from .components import InfiniBoxSystemComponents
 from .events import EmailRule, Events
 from .host import Host
-from .lun import LogicalUnit
 from .pool import Pool
 from .user import User
 from .volume import Volume
@@ -40,9 +41,21 @@ class InfiniBox(APITarget):
 
     def _get_api_auth(self):
         defaults = config.get_path('infinibox.defaults.system_api')
-        username = get_ini_option("infinibox", "username", defaults['username'])
-        password = get_ini_option("infinibox", "password", defaults['password'])
+        username = self._get_auth_ini_option('username', defaults['username'])
+        password = self._get_auth_ini_option('password', defaults['password'])
         return (username, password)
+
+    def _get_auth_ini_option(self, key, default):
+        for address in itertools.chain([None], self._addresses):
+            if address is None:
+                section = 'infinibox'
+            else:
+                section = 'infinibox:{0}'.format(address[0])
+            returned = get_ini_option(section, key, NOTHING)
+            if returned is not NOTHING:
+                return returned
+
+        return default
 
     def _get_api_timeout(self):
         return config.get_path('infinibox.defaults.system_api.timeout_seconds')
