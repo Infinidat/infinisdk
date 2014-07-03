@@ -67,7 +67,7 @@ class API(object):
         """
         Sets the username and password under which operations will be performed
 
-        Can be used both with a uple argument or with two arguments (username, password):
+        Can be used both with a tuple argument or with two arguments (username, password):
 
         >>> system.set_auth(('username', 'password'))
         >>> system.set_auth('username', 'password')
