@@ -42,7 +42,6 @@ class API(object):
         self._session.cert = ssl_cert
         if not ssl_cert:
             self._session.verify = False
-        self.set_auth(*self.system.get_api_auth())
         self._session.auth = self.system.get_api_auth()
         self._session.headers["content-type"] = "application/json"
         self._urls = [self._url_from_address(address, use_ssl) for address in target.get_api_addresses()]

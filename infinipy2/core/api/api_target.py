@@ -22,8 +22,6 @@ class APITarget(with_metaclass(abc.ABCMeta)):
 
         self.objects = TypeBinderContainer(self)
 
-        if auth is None:
-            auth = self._get_api_auth()
         self._auth = auth
 
         self._timeout = self._get_api_timeout()
@@ -84,10 +82,3 @@ class APITarget(with_metaclass(abc.ABCMeta)):
         :rtype: number of seconds to wait for a command to return before raising a timeout
         """
         raise NotImplementedError() # pragma: no cover
-
-    def _get_api_auth(self):
-        """
-        :rtype: tuple of (username, password) to be used by default
-        """
-        raise NotImplementedError() # pragma: no cover
-

@@ -55,6 +55,3 @@ class IZBox(APITarget):
     def _get_api_timeout(self):
         return config.get_path('izbox.defaults.system_api.timeout_seconds')
 
-    def _get_api_auth(self):
-        d = config.get_path('izbox.defaults.system_api')
-        return (d['username'], d['password'])

@@ -22,10 +22,6 @@ class InfiniBox(APITarget):
         if not any(re.match(regexp, version) for regexp in config.root.infinibox.compatible_versions):
             raise VersionNotSupported(version)
 
-    def _get_api_auth(self):
-        d = config.get_path('infinibox.defaults.system_api')
-        return (d['username'], d['password'])
-
     def _get_api_timeout(self):
         return config.get_path('infinibox.defaults.system_api.timeout_seconds')
 

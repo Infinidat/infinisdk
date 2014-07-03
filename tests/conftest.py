@@ -68,7 +68,8 @@ def izbox(izbox_simulator):
 
 @pytest.fixture
 def infinibox(infinibox_simulator):
-    return InfiniBox(infinibox_simulator)
+    user = infinibox_simulator.auth.get_current_user()
+    return InfiniBox(infinibox_simulator, auth=(user.get_username(), user.get_password()))
 
 
 @pytest.fixture

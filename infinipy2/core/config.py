@@ -11,8 +11,6 @@ config = confetti.Config(dict(
     izbox=dict(
         defaults=dict(
             system_api=dict(
-                username="infinidat",
-                password="123456",
                 timeout_seconds=180,
             ),
             events=dict(
@@ -33,8 +31,6 @@ config = confetti.Config(dict(
 
         defaults=dict(
             system_api=dict(
-                username="infinidat",
-                password="123456",
                 timeout_seconds=30,
             ),
             enlosure_drives=dict(
