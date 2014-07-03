@@ -28,9 +28,9 @@ class Volume(InfiniBoxObject):
         Field("id", type=int, is_identity=True, is_filterable=True, is_sortable=True),
         Field("name", creation_parameter=True, mutable=True, is_filterable=True, is_sortable=True, default=Autogenerate("vol_{uuid}")),
         Field("size", creation_parameter=True, mutable=True, is_filterable=True, is_sortable=True, default=GB, type=CapacityType),
-        Field("pool", type=int, api_name="pool_id", creation_parameter=True, is_filterable=True, is_sortable=True, binding=RelatedObjectBinding()),
+        Field("pool", type='infinipy2.infinibox.pool:Pool', api_name="pool_id", creation_parameter=True, is_filterable=True, is_sortable=True, binding=RelatedObjectBinding()),
         Field("type", cached=True, is_filterable=True, is_sortable=True),
-        Field("parent", cached=True, api_name="parent_id", binding=RelatedObjectBinding('volumes'), is_filterable=True),
+        Field("parent", type='infinipy2.infinibox.volume:Volume', cached=True, api_name="parent_id", binding=RelatedObjectBinding('volumes'), is_filterable=True),
         Field("provisioning", api_name="provtype", mutable=True, creation_parameter=True, is_filterable=True, is_sortable=True, default="THICK"),
         Field("created_at", type=MillisecondsDatetimeType),
     ]

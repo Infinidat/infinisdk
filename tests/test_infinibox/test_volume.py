@@ -10,10 +10,15 @@ import pytest
 from infinipy2.core.translators_and_types import MillisecondsDatetimeTranslator
 from infinipy2.core.exceptions import (APICommandFailed,
                                        InvalidOperationException)
-from infinipy2.infinibox.volume import _BEGIN_FORK_HOOK, _FINISH_FORK_HOOK
+from infinipy2.infinibox.volume import _BEGIN_FORK_HOOK, _FINISH_FORK_HOOK, Volume
+from infinipy2.infinibox.pool import Pool
 
 from ..conftest import create_pool, create_volume
 
+
+def test_field_types():
+    assert Volume.fields.parent.type.type is Volume
+    assert Volume.fields.pool.type.type is Pool
 
 def test_creation(infinibox, volume, pool):
     pool = infinibox.pools.create()
