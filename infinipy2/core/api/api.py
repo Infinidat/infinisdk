@@ -69,8 +69,8 @@ class API(object):
 
         Can be used both with a tuple argument or with two arguments (username, password):
 
-        >>> system.set_auth(('username', 'password'))
-        >>> system.set_auth('username', 'password')
+        >>> system.api.set_auth(('username', 'password'))
+        >>> system.api.set_auth('username', 'password')
         """
         if isinstance(username_or_auth, tuple):
             if password is not NOTHING:
