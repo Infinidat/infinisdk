@@ -11,6 +11,7 @@
 ### Redistribution and use in source or binary forms, with or without modification,
 ### are strictly forbidden unless prior written permission is obtained from Infinidat Ltd.
 ###!
+from .._compat import string_types
 from capacity import Capacity
 
 
@@ -21,7 +22,7 @@ def make_getter(field):
     getter.__name__ = "get_{0}".format(field.name)
     getter.__doc__ = """obtains the value of the {0.name!r} field
 
-    :rtype: {1} """.format(field, _format_type_doc(field.type.type))
+    :rtype: {1} """.format(field, _format_type_doc(field.type._type))
     return getter
 
 def make_updater(field):
@@ -32,16 +33,19 @@ def make_updater(field):
     updater.__doc__ = """updates the value of the {0.name!r} field
 
     :param value: The new {0.name} value to be set
-    :paramtype value: {1}""".format(field, _format_type_doc(field.type.type))
+    :paramtype value: {1}""".format(field, _format_type_doc(field.type._type))
     return updater
 
-def _format_type_doc(type):
+def _format_type_doc(_type):
     from .system_object import SystemObject
 
-    if type is Capacity:
+    if _type is Capacity:
         return '`Capacity <https://github.com/vmalloc/capacity#usage>`_'
 
-    if issubclass(type, SystemObject):
-        return ':class:`{1} object <{0}.{1}>`'.format(type.__module__, type.__name__)
+    if isinstance(_type, type) and issubclass(_type, SystemObject):
+        _type = '{0}.{1}'.format(_type.__module__, _type.__name__)
 
-    return type.__name__
+    if isinstance(_type, string_types):
+        return ':class:`{0} object <{0}>`'.format(_type.replace(':', '.'))
+
+    return _type.__name__

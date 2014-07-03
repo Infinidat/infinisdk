@@ -10,7 +10,8 @@ import pytest
 from infinisdk.core.translators_and_types import MillisecondsDatetimeTranslator
 from infinisdk.core.exceptions import (APICommandFailed,
                                        InvalidOperationException)
-from infinisdk.infinibox.volume import _BEGIN_FORK_HOOK, _FINISH_FORK_HOOK
+from infinisdk.infinibox.volume import _BEGIN_FORK_HOOK, _FINISH_FORK_HOOK, Volume
+from infinisdk.infinibox.pool import Pool
 
 from ..conftest import create_pool, create_volume
 
@@ -20,6 +21,10 @@ def test_unmapping(infinibox, volume, host):
     assert host.is_volume_mapped(volume)
     volume.unmap()
     assert not host.is_volume_mapped(volume)
+
+def test_field_types():
+    assert Volume.fields.parent.type.type is Volume
+    assert Volume.fields.pool.type.type is Pool
 
 def test_creation(infinibox, volume, pool):
     pool = infinibox.pools.create()

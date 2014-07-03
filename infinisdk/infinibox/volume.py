@@ -11,19 +11,6 @@
 ### Redistribution and use in source or binary forms, with or without modification,
 ### are strictly forbidden unless prior written permission is obtained from Infinidat Ltd.
 ###!
-# !
-# Infinidat Ltd.  -  Proprietary and Confidential Material
-###
-# Copyright (C) 2014, Infinidat Ltd. - All Rights Reserved
-###
-# NOTICE: All information contained herein is, and remains the property of Infinidat Ltd.
-# All information contained herein is protected by trade secret or copyright law.
-# The intellectual and technical concepts contained herein are proprietary to Infinidat Ltd.,
-# and may be protected by U.S. and Foreign Patents, or patents in progress.
-###
-# Redistribution and use in source or binary forms, with or without modification,
-# are strictly forbidden unless prior written permission is obtained from Infinidat Ltd.
-# !
 import gossip
 from capacity import GB
 from collections import namedtuple
@@ -81,11 +68,11 @@ class Volume(InfiniBoxObject):
             is_sortable=True, default=Autogenerate("vol_{uuid}")),
         Field("size", creation_parameter=True, mutable=True,
               is_filterable=True, is_sortable=True, default=GB, type=CapacityType),
-        Field("pool", type=Pool, api_name="pool_id", creation_parameter=True, is_filterable=True, is_sortable=True,
+        Field("pool", type='infinisdk.infinibox.pool:Pool', api_name="pool_id", creation_parameter=True, is_filterable=True, is_sortable=True,
               binding=RelatedObjectBinding()),
 
         Field("type", cached=True, is_filterable=True, is_sortable=True),
-        Field("parent", cached=True, api_name="parent_id", binding=RelatedObjectBinding('volumes'), is_filterable=True),
+        Field("parent", type='infinisdk.infinibox.volume:Volume', cached=True, api_name="parent_id", binding=RelatedObjectBinding('volumes'), is_filterable=True),
         Field(
             "provisioning", api_name="provtype", mutable=True, creation_parameter=True,
             is_filterable=True, is_sortable=True, default="THICK"),
