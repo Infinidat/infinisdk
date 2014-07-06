@@ -1,5 +1,4 @@
 coverage
-infi.unittest>=1.0.0
 infinisim>=18.0.post13.gb8efc5d
 izsim>=17.0.post2.g0bd4985
 pytest
