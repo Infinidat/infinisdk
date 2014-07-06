@@ -1,6 +1,6 @@
 coverage
-infinisim>=18.0.post13.gb8efc5d
-izsim>=17.0.post2.g0bd4985
+infinisim>=19
+izsim>=19
 pytest
 pyforge
 waiting
