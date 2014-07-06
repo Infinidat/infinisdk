@@ -10,6 +10,8 @@ def add_method(objtype, name=None):
 
         extension = Method(objtype, method_name, func)
         extension.activate()
+        if not hasattr(func, 'remove'):
+            func.deactivate = extension.deactivate
         return func
     return decorator
 

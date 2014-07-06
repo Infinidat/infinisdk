@@ -23,3 +23,15 @@ def test_extending(infinibox, different_name):
 
     assert infinibox.new_method(1, 2, 3) == 'InfiniBox 1 2 3'
 
+def test_removing_extensions(infinibox):
+    assert not hasattr(infinibox, 'new_method')
+
+    @extensions.add_method(InfiniBox, 'new_method')
+    def new_method(self, a, b, c):
+        return True
+
+    assert infinibox.new_method(1, 2, 3)
+
+    new_method.deactivate()
+
+    assert not hasattr(infinibox, 'new_method')
