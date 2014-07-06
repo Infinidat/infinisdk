@@ -12,7 +12,7 @@ def doctest_context():
     simulator.activate()
     try:
         yield {
-            "system": InfiniBox(simulator),
+            "system": InfiniBox(simulator, auth=('infinidat', '123456')),
         }
     finally:
         simulator.deactivate()

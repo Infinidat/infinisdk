@@ -37,6 +37,7 @@ class APITarget(with_metaclass(abc.ABCMeta)):
 
         if auth is None:
             auth = self._get_api_auth()
+
         self._auth = auth
 
         self._timeout = self._get_api_timeout()
@@ -47,6 +48,9 @@ class APITarget(with_metaclass(abc.ABCMeta)):
 
         self.components = self.SYSTEM_COMPONENTS_TYPE(self)
         self.events = self.SYSTEM_EVENTS_TYPE(self)
+
+    def _get_api_auth(self):
+        return None
 
     def check_version(self):
         """Called automatically by the API on the first request made to the system. Should fetch and verify the
@@ -97,10 +101,3 @@ class APITarget(with_metaclass(abc.ABCMeta)):
         :rtype: number of seconds to wait for a command to return before raising a timeout
         """
         raise NotImplementedError() # pragma: no cover
-
-    def _get_api_auth(self):
-        """
-        :rtype: tuple of (username, password) to be used by default
-        """
-        raise NotImplementedError() # pragma: no cover
-

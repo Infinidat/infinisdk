@@ -46,4 +46,6 @@ def incompatible_system(infinibox_simulator):
     infinibox_simulator.set_version('{0}.{1}'.format(major, minor + 1))
 
     #simply initializing a system does not carry out any API commands
-    return InfiniBox(infinibox_simulator.get_floating_addresses()[0])
+    user = infinibox_simulator.auth.get_current_user()
+    auth = (user.get_username(), user.get_password())
+    return InfiniBox(infinibox_simulator.get_floating_addresses()[0], auth=auth)

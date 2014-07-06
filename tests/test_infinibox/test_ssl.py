@@ -18,7 +18,11 @@ def test_ssl_port(ssl_infinibox):
 
 @pytest.fixture
 def ssl_infinibox(request, infinibox_simulator, ssl_certificate):
-    returned = InfiniBox(infinibox_simulator.get_floating_addresses()[0], use_ssl=True, ssl_cert=ssl_certificate)
+    user = infinibox_simulator.auth.get_current_user()
+    auth = (user.get_username(), user.get_password())
+    returned = InfiniBox(
+        infinibox_simulator.get_floating_addresses()[0], use_ssl=True,
+        ssl_cert=ssl_certificate, auth=auth)
     assert returned.api._session.cert == ssl_certificate
     return returned
 

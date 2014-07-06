@@ -61,8 +61,6 @@ class API(object):
         self._session.cert = ssl_cert
         if not ssl_cert:
             self._session.verify = False
-        self.set_auth(*self.system.
-                      get_api_auth())
         self._session.auth = self.system.get_api_auth()
         self._session.headers["content-type"] = "application/json"
         self._urls = [self._url_from_address(address, use_ssl) for address in target.get_api_addresses()]
@@ -98,8 +96,8 @@ class API(object):
 
         Can be used both with a tuple argument or with two arguments (username, password):
 
-        >>> system.set_auth(('username', 'password'))
-        >>> system.set_auth('username', 'password')
+        >>> system.api.set_auth(('username', 'password'))
+        >>> system.api.set_auth('username', 'password')
         """
         if isinstance(username_or_auth, tuple):
             if password is not NOTHING:

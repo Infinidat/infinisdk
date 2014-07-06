@@ -40,10 +40,16 @@ class InfiniBox(APITarget):
             raise VersionNotSupported(version)
 
     def _get_api_auth(self):
-        defaults = config.get_path('infinibox.defaults.system_api')
-        username = self._get_auth_ini_option('username', defaults['username'])
-        password = self._get_auth_ini_option('password', defaults['password'])
-        return (username, password)
+        username = self._get_auth_ini_option('username', None)
+        password = self._get_auth_ini_option('password', None)
+        if not username and not password:
+            return None
+        elif not username:
+            username = 'admin'
+        elif not password:
+            password = ''
+
+        return username, password
 
     def _get_auth_ini_option(self, key, default):
         for address in itertools.chain([None], self._addresses):

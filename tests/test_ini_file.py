@@ -20,14 +20,20 @@ def test_auth_saving(infinibox_simulator, ini_path, use_username, use_password, 
             f.write("username={0}\n".format(new_username))
             expected_username = new_username
         else:
-            expected_username = "infinidat"
+            expected_username = "admin"
         if use_password:
             f.write("password={0}".format(new_password))
             expected_password = new_password
         else:
-            expected_password = "123456"
+            expected_password = ""
     s = InfiniBox(infinibox_simulator)
-    assert s.api.get_auth() == (expected_username, expected_password)
+
+    if use_username or use_password:
+        expected_auth = (expected_username, expected_password)
+    else:
+        expected_auth = None
+
+    assert s.api.get_auth() == expected_auth
 
 @pytest.fixture
 def ini_path(request, tmpdir):
