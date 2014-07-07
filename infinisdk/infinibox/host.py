@@ -27,18 +27,6 @@ class Host(InfiniBoxLURelatedObject):
         Field("host_cluster_id", type=int, is_filterable=True),
     ]
 
-    def purge(self):
-        """
-        Purges this host.
-
-        .. seealso:: :meth:`.SystemObject.purge`
-        """
-        cluster = self.get_cluster()
-        if cluster is not None:
-            cluster.remove_host(self)
-        for lun in self.get_luns():
-            self.unmap_volume(lun=lun)
-        super(Host, self).purge()
 
     def get_cluster(self):
         """

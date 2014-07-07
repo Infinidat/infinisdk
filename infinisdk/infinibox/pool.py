@@ -39,13 +39,3 @@ class Pool(InfiniBoxObject):
 
     def discard_owner(self, user):
         self.system.api.delete(self._get_pool_owners_url(user.id), data={})
-
-    def purge(self):
-        """
-        Purges this pool.
-
-        .. seealso:: :meth:`.SystemObject.purge`
-        """
-        for volume in self.get_volumes():
-            volume.purge()
-        super(Pool, self).purge()

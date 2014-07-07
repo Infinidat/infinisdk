@@ -9,6 +9,7 @@ _DOCS_ROOT = os.path.join(_HERE, "..", "doc")
 _FORBIDDEN_STRINGS = [
     "infinipy",  # obviously...
     "infinisdk2",  # results from converting only 'infinipy' to 'infinisdk', forgetting the '2'...
+    "purge", # has been moved to infinisdk_internal
 ]
 
 def test_copyright():

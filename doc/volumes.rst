@@ -44,9 +44,6 @@ Deleting a volume is done with :meth:`.Volume.delete`:
 
 		>>> v.delete()
 
-.. note:: :meth:`.Volume.delete` *only attempts to delete the volume*. In case more cleanup is needed (like unmapping from hosts), it will fail. For this, you can use the :meth:`.Volume.purge` method.
-
-
 
 
 Example: Deleting All Volumes with Specific Name Prefix
@@ -56,7 +53,7 @@ Example: Deleting All Volumes with Specific Name Prefix
 
 		>>> for volume in system.volumes:
 		...     if volume.get_name(from_cache=True).startswith('prefix'):
-		...         volume.purge()
+		...         volume.delete()
 
 
 .. seealso:: :mod:`Volume API documentation <infinisdk.infinibox.volume>`

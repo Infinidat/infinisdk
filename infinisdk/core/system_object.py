@@ -307,16 +307,8 @@ class SystemObject(with_metaclass(FieldsMeta)):
     def delete(self):
         """
         Deletes this object.
-
-        .. note:: does nothing except sending the deletion request. See :meth:`.purge` for forcibly deleting objects.
         """
         self.system.api.delete(self.get_this_url_path())
-
-    def purge(self):
-        """
-        Deletes this object, doing all necessary operations to ensure deletion is successful.
-        """
-        self.delete()
 
     @cached_method
     def get_this_url_path(self):

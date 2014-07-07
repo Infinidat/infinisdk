@@ -180,19 +180,6 @@ class Volume(InfiniBoxObject):
     def has_children(self):
         return self.get_field("has_children")
 
-    def purge(self):
-        """
-        Purges this volume
-
-        .. seealso:: :meth:`.SystemObject.purge`
-        """
-        if self.is_mapped():
-            self.unmap()
-
-        for child in self.get_children():
-            child.purge()
-        super(Volume, self).purge()
-
     def unmap(self):
         for lun in self.get_logical_units().luns.values():
             lun.unmap()
