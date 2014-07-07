@@ -1,6 +1,8 @@
 import pytest
 from infinipy2.core import extensions
 from infinipy2.infinibox import InfiniBox
+from infinipy2.infinibox.system_object import SystemObject
+from infinipy2.infinibox.volume import Volume
 
 
 def test_no_extensions_by_default():
@@ -35,3 +37,21 @@ def test_removing_extensions(infinibox):
     new_method.deactivate()
 
     assert not hasattr(infinibox, 'new_method')
+
+def test_extending_hierarchy(request, infinibox):
+
+    Parent = SystemObject
+    Child = Volume
+    assert issubclass(Child, Parent)
+
+    @extensions.add_method(Parent, 'method1')
+    def method1(self):
+        pass
+
+    request.addfinalizer(method1.deactivate)
+
+    @extensions.add_method(Child, 'method1')
+    def method1(self):
+        pass
+
+    request.addfinalizer(method1.deactivate)

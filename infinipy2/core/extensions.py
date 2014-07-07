@@ -25,7 +25,7 @@ class Method(object):
     def __init__(self, objtype, name, func):
         super(Method, self).__init__()
         assert isinstance(objtype, type)
-        assert not hasattr(objtype, name)
+        assert name not in objtype.__dict__
         self._objtype = objtype
         self._name = name
         self._func = func
@@ -39,5 +39,6 @@ class Method(object):
         active.append(self)
 
     def deactivate(self):
+        assert self._objtype.__dict__[self._name] is self
         delattr(self._objtype, self._name)
         active.remove(self)
