@@ -13,8 +13,10 @@
 ###!
 import functools
 
+from sentinels import Sentinel
 from urlobject import URLObject as URL
 
+DONT_CARE = Sentinel("DONT_CARE")
 
 def add_comma_separated_query_param(url, param_name, value):
     """

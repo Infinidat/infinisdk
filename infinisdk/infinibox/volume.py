@@ -93,6 +93,7 @@ class Volume(InfiniBoxObject):
         return self.get_type() == VOLUME_TYPES.Clone
 
     def _create_child(self, name):
+        self.refresh('has_children')
         gossip.trigger(_BEGIN_FORK_HOOK, vol=self)
         if not name:
             name = Autogenerate('vol_{uuid}')

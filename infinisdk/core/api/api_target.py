@@ -48,9 +48,25 @@ class APITarget(with_metaclass(abc.ABCMeta)):
 
         self.components = self.SYSTEM_COMPONENTS_TYPE(self)
         self.events = self.SYSTEM_EVENTS_TYPE(self)
+        self._caching_enabled = True
 
     def _get_api_auth(self):
         return None
+
+    def disable_caching(self):
+        """Disables field caching, and causes each field fetching to fetch the actual up-to-date value from the system
+        """
+        self._caching_enabled = False
+
+    def enable_caching(self):
+        """Enables field caching, and causes each field fetching to use the cache by default
+        """
+        self._caching_enabled = True
+
+    def is_caching_enabled(self):
+        """Returns whether caching is currently enabled
+        """
+        return self._caching_enabled
 
     def check_version(self):
         """Called automatically by the API on the first request made to the system. Should fetch and verify the

@@ -103,6 +103,7 @@ Of course there is a much more convenient shortcut for unmapping a volume from a
 		>>> host.is_volume_mapped(volume)
 		True
 		>>> volume.unmap()
+		>>> host.refresh()
 		>>> host.is_volume_mapped(volume)
 		False
 
@@ -118,6 +119,7 @@ Manipulating clusters is done with the :class:`.Cluster` class:
 
 		>>> lu = cluster.map_volume(volume)
 		
+		>>> host.refresh()
 		>>> [host_lu] = host.get_luns()
 
 		>>> host_lu

@@ -20,6 +20,7 @@ def test_unmapping(infinibox, volume, host):
     host.map_volume(volume)
     assert host.is_volume_mapped(volume)
     volume.unmap()
+    host.refresh()
     assert not host.is_volume_mapped(volume)
 
 def test_field_types():
