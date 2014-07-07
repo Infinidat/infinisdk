@@ -8,6 +8,7 @@ from infinipy2.infinibox.volume import Volume
 def test_no_extensions_by_default():
     assert len(extensions.active) == 0
 
+
 @pytest.mark.parametrize('different_name', [True, False])
 def test_extending(infinibox, different_name):
     with pytest.raises(AttributeError):
@@ -25,6 +26,7 @@ def test_extending(infinibox, different_name):
 
     assert infinibox.new_method(1, 2, 3) == 'InfiniBox 1 2 3'
 
+
 def test_removing_extensions(infinibox):
     assert not hasattr(infinibox, 'new_method')
 
@@ -37,6 +39,18 @@ def test_removing_extensions(infinibox):
     new_method.deactivate()
 
     assert not hasattr(infinibox, 'new_method')
+
+
+def test_removing_extensions_twice(infinibox):
+    @extensions.add_method(InfiniBox, 'new_method')
+    def new_method(self, a, b, c):
+        return True
+
+    new_method.deactivate()
+    new_method.deactivate()
+
+    assert not hasattr(infinibox, 'new_method')
+
 
 def test_extending_hierarchy(request, infinibox):
 

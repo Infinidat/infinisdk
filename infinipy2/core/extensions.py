@@ -29,6 +29,7 @@ class Method(object):
         self._objtype = objtype
         self._name = name
         self._func = func
+        self._active = False
 
     def __get__(self, obj, objclass):
         return functools.partial(self._func, obj)
@@ -36,9 +37,14 @@ class Method(object):
     def activate(self):
         assert self not in active
         setattr(self._objtype, self._name, self)
+        self._active = True
         active.append(self)
 
     def deactivate(self):
+        if not self._active:
+            return
         assert self._objtype.__dict__[self._name] is self
         delattr(self._objtype, self._name)
+        self._active = False
         active.remove(self)
+        assert self._name not in self._objtype.__dict__
