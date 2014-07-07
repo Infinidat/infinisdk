@@ -48,3 +48,16 @@ class Method(object):
         self._active = False
         active.remove(self)
         assert self._name not in self._objtype.__dict__
+
+    def __repr__(self):
+        return "<{0}:{1}>".format(self._objtype.__name__, self._name)
+
+
+
+
+
+
+
+
+
+
