@@ -3,6 +3,7 @@ from .system_object_utils import make_getter, make_updater
 from .field_filter import FieldFilter
 from .field_sorting import FieldSorting
 from .bindings import Infinipy2Binding
+from .utils import DONT_CARE
 
 from api_object_schema import Field as FieldBase
 
@@ -15,7 +16,7 @@ class Field(FieldBase):
         return "<FIELD {}>".format(self.name)
 
     def __init__(self, *args, **kwargs):
-        cached = kwargs.pop("cached", False)
+        cached = kwargs.pop("cached", DONT_CARE)
         add_getter = kwargs.pop("add_getter", True)
         add_updater = kwargs.pop("add_updater", True)
         super(Field, self).__init__(*args, **kwargs)

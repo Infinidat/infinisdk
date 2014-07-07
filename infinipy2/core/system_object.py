@@ -1,7 +1,7 @@
 import itertools
 import gossip
 from contextlib import contextmanager
-from sentinels import NOTHING, Sentinel
+from sentinels import NOTHING
 from infi.pyutils.lazy import cached_method
 from urlobject import URLObject as URL
 
@@ -16,8 +16,8 @@ from .object_query import ObjectQuery
 from .type_binder import TypeBinder
 from .bindings import PassthroughBinding
 from .api.special_values import translate_special_values
+from .utils import DONT_CARE
 
-DONT_CARE = Sentinel("DONT_CARE")
 
 def _install_gossip_hooks():
     for (hook, operation) in itertools.product(["pre", "post"], ['creation', 'deletion', 'update']):
@@ -44,6 +44,15 @@ class SystemObject(with_metaclass(FieldsMeta)):
         self.system = system
         self._cache = initial_data
         self.id = self.fields.id.extract_from_json(self, self._cache)
+
+    def refresh(self, *field_names):
+        """Discards the cached field values of this object, causing the next fetch to retrieve the fresh value from the system
+        """
+        if field_names:
+            for field_name in field_names:
+                self._cache.pop(self.fields.get_or_fabricate(field_name).api_name, None)
+        else:
+            self._cache.clear()
 
     def __eq__(self, other):
         if type(self) is not type(other):
@@ -228,14 +237,20 @@ class SystemObject(with_metaclass(FieldsMeta)):
         if from_cache is not DONT_CARE:
             return from_cache
 
-
         if not field_names:
             return False
 
+        cache_enabled = self.system.is_caching_enabled()
+
         for field_name in field_names:
             field = self.fields.get_or_fabricate(field_name)
-            if not field.cached and not field.is_identity:
+            should_get_from_cache = field.cached
+            if should_get_from_cache is DONT_CARE:
+                should_get_from_cache = cache_enabled
+
+            if not should_get_from_cache:
                 return False
+
         return True
 
     def _get_field_api_name_if_defined(self, field_name):
@@ -290,6 +305,7 @@ class SystemObject(with_metaclass(FieldsMeta)):
 
         self.system.api.put(self.get_this_url_path(), data=update_dict)
         self.update_field_cache(update_dict)
+        self.refresh(*update_dict)
 
     def delete(self):
         """

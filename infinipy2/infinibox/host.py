@@ -33,6 +33,7 @@ class Host(InfiniBoxLURelatedObject):
         data = dict(address=port_wwn, type=port_type)
         url = "{0}/ports".format(self.get_this_url_path())
         self.system.api.post(url, data=data)
+        self.refresh('ports')
 
     def add_fc_port(self, port_address):
         return self._add_port('fc', port_address)
@@ -45,6 +46,7 @@ class Host(InfiniBoxLURelatedObject):
         url = "{0}/ports/{1}/{2}".format(self.get_this_url_path(),
                                          port_type, port_wwn)
         self.system.api.delete(url)
+        self.refresh('ports')
 
     def get_fc_ports(self):
         return self._get_ports('fc')

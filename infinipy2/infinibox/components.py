@@ -137,7 +137,7 @@ class Enclosure(InfiniBoxSystemComponent):
     FIELDS = [
         Field("index", api_name="id", type=int, is_identity=True, cached=True),
         Field("drives", type=list),
-        Field("state"),
+        Field("state", cached=False),
     ]
 
     @classmethod
@@ -151,7 +151,7 @@ class Node(InfiniBoxSystemComponent):
         Field("name"),
         Field("fc_ports", type=list),
         Field("drives", type=list),
-        Field("state"),
+        Field("state", cached=False),
     ]
 
     @classmethod
@@ -174,7 +174,7 @@ class FcPort(InfiniBoxSystemComponent):
         Field("wwpn", is_identity=True),
         Field("index", api_name="id", type=int, cached=True),
         Field("node", cached=True),
-        Field("state"),
+        Field("state", cached=False),
     ]
 
     @classmethod
@@ -187,21 +187,21 @@ class Drive(InfiniBoxSystemComponent):
         Field("index", api_name="drive_index", type=int, is_identity=True, cached=True),
         Field("enclosure_index", type=int, cached=True),
         Field("serial_number"),
-        Field("state"),
+        Field("state", cached=False),
     ]
 
 @InfiniBoxSystemComponents.install_component_type
 class Service(InfiniBoxSystemComponent):
     FIELDS = [
         Field("index", api_name="name", is_identity=True, cached=True),
-        Field("state"),
+        Field("state", cached=False),
     ]
 
 @InfiniBoxSystemComponents.install_component_type
 class System(InfiniBoxSystemComponent):
     FIELDS = [
         Field("index", cached=True, type=int),
-        Field("state", add_getter=False),
+        Field("state", add_getter=False, cached=False),
     ]
 
     @cached_method

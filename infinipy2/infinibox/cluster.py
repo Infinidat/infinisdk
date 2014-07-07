@@ -15,10 +15,14 @@ class Cluster(InfiniBoxLURelatedObject):
     def add_host(self, host):
         url = "{0}/hosts".format(self.get_this_url_path())
         self.system.api.post(url, data={"id" : host.id})
+        self.refresh('hosts')
+        host.refresh('host_cluster_id')
 
     def remove_host(self, host):
         url = "{0}/hosts/{1}".format(self.get_this_url_path(), host.id)
         self.system.api.delete(url)
+        self.refresh('hosts')
+        host.refresh('host_cluster_id')
 
     def get_hosts(self):
         return [self.system.hosts.get_by_id_lazy(host_attrs['id'])

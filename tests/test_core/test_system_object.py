@@ -17,7 +17,10 @@ class SampleDerivedObject(SampleBaseObject):
     ]
 
 
-_fake_system = object()
+class FakeSystem(object):
+
+    def is_caching_enabled(self):
+        return False
 
 def test_num_fields(system):
     assert len(SampleBaseObject.fields) == 2
@@ -44,13 +47,13 @@ def test_get_from_cache_miss(system):
         obj.get_field("number", from_cache=True, fetch_if_not_cached=False)
 
 def test_get_from_cache_hit(system):
-    obj = SampleDerivedObject(_fake_system, {"id": 1, "number": 2})
+    obj = SampleDerivedObject(FakeSystem(), {"id": 1, "number": 2})
     assert obj.id == 1
     assert 2 == obj.get_field('number', from_cache=True)
 
 def test_get_from_cache_by_default(system):
     value = "some_value_here"
-    obj = SampleDerivedObject(_fake_system, {"id": 1, "cached_by_default": value})
+    obj = SampleDerivedObject(FakeSystem(), {"id": 1, "cached_by_default": value})
     assert obj.get_field('cached_by_default') == value
 
 def test_auto_getter_attribute_already_exists_in_same_class(system):
@@ -74,7 +77,7 @@ def test_auto_getter_attribute_already_exists_in_base_class1(system):
         def get_id(self): return self._id
         def update_id(self, value): self._id = value
 
-    some_derived_obj = SomeDerivedObject(_fake_system, {"id": 1})
+    some_derived_obj = SomeDerivedObject(FakeSystem(), {"id": 1})
     assert some_derived_obj.get_id() == 'other id'
     some_derived_obj.update_id('bla bla')
     assert some_derived_obj.get_id() == 'bla bla'
@@ -88,7 +91,7 @@ def test_auto_getter_attribute_already_exists_in_base_class2(system):
     class SomeDerivedObject(SomeObject):
         FIELDS = [Field("id", type=int, cached=True, mutable=True)]
 
-    some_derived_obj = SomeDerivedObject(_fake_system, {"id": 1})
+    some_derived_obj = SomeDerivedObject(FakeSystem(), {"id": 1})
     assert some_derived_obj.get_id() == 1
 
 
@@ -125,7 +128,7 @@ def test_get_fields_without_field_names(system):
 
 def test_object_creation_missing_fields():
     with pytest.raises(MissingFields):
-        SampleDerivedObject.create(_fake_system)
+        SampleDerivedObject.create(FakeSystem())
 
 def test_update_field_updates_its_cache(system):
     new_name = "testing_update_field_caching"

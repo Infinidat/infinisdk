@@ -30,6 +30,8 @@ def test_map_volume_to_cluster(infinibox, host, cluster, volume):
     assert lu.get_cluster() == cluster
 
     lu.unmap()
+    cluster.refresh()
+    volume.refresh()
     assert len(cluster.get_luns()) == 0
     assert (not volume.is_mapped())
 
@@ -56,6 +58,8 @@ def test_map_volume_to_host(infinibox, host, cluster, volume):
     assert lu.get_host() == host
 
     lu.unmap()
+    host.refresh()
+    volume.refresh()
     assert len(host.get_luns()) == 0
     assert (not volume.is_mapped())
 
