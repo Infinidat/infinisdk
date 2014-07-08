@@ -94,6 +94,7 @@ def test_clones_and_snapshots(infinibox, volume):
         obj.delete()
         assert not obj.is_in_system()
         assert volume.is_in_system()
+    volume.refresh()
     assert (not volume.has_children())
 
 
