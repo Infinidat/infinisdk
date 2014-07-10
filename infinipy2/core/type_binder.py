@@ -22,10 +22,20 @@ class TypeBinder(object):
         return self.object_type.fields
 
     def find(self, *predicates, **kw):
-        """
-        Returns all objects with desired predicates.
+        """Queries objects according to predicstes. Can receive arguments in two possible forms:
 
-        Proxy for :func:`.SystemObject.find`.
+        1. Direct keyword arguments, for filtering for equality::
+
+            system.volumes.find(size=GiB)
+
+        2. Complex predicates, using the comparators::
+
+            system.volumes.find(system.volumes.fields.size > GiB)
+            system.volumes.find(Q.name != 'some_name')
+
+        :rtype: Lazy query result object.
+
+        .. seealso:: :class:`infinipy2.core.object_query:ObjectQuery`
         """
         return self.object_type.find(self.system, *predicates, **kw)
 
