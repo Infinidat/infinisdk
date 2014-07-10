@@ -38,6 +38,14 @@ We can also combine this with filtering. The following example filters by specif
 		<Event id=1002>
 		<Event id=1000>
 
-		
+Example: Getting all Events Newer than a Specific Sequence Number
+-----------------------------------------------------------------
 
-.. note:: Unlike regular InfiniSDK objects, event objects cache all of their properties and never fetch them again unless explicitly instructed to do so. See :ref:`caching` for more information.
+.. code-block:: python
+
+		>>> from infinisdk import Q
+		>>> for e in system.events.find(Q.seq_num>=1004):
+		...     print(e)
+		<Event id=1004>
+		<Event id=1005>
+		

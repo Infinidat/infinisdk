@@ -182,7 +182,7 @@ class SystemObject(with_metaclass(FieldsMeta)):
                 (cls.fields.get_or_fabricate(key) == value for key, value in iteritems(kw)))
         for pred in predicates:
             if isinstance(pred.field, QField):
-                pred = FieldFilter(getattr(cls.fields, pred.field.name), pred.operator_name, pred.value)
+                pred = FieldFilter(cls.fields.get_or_fabricate(pred.field.name), pred.operator_name, pred.value)
             url = pred.add_to_url(url)
 
         return ObjectQuery(system, url, cls)

@@ -1,5 +1,13 @@
 import pytest
 
+from infinisdk import Q
+
+
+def test_filter_by_seq_num(infinibox):
+    for i in range(5):
+        e = infinibox.events.create_custom_event(description='some description')
+
+    assert len(infinibox.events.find(Q.seq_num>=e['seq_num']-5))
 
 def test_create_custom_event(infinibox):
     description = 'test events'
