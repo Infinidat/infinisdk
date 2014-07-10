@@ -181,6 +181,10 @@ class Node(InfiniBoxSystemComponent):
     def phase_in(self):
         return self.system.api.post(self.get_this_url_path().add_path('phase_in'))
 
+    def __repr__(self):
+        return '<Node {0}>'.format(self.get_field('index'))
+
+
 @InfiniBoxSystemComponents.install_component_type
 class FcPort(InfiniBoxSystemComponent):
     FIELDS = [
