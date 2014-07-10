@@ -47,7 +47,7 @@ Another way authentication information can be provided is through an ``.ini`` fi
   username=admin
   password=password
 
-Now constructing an InfiniBox object will use the credentials above by default. You can also specify authorization for specific system, by adding sections to the .ini file titled ``infinibox:<system name>``::
+Now constructing an InfiniBox object will use the credentials above by default. You can also specify authorization for specific system, by adding sections to the **.ini** file titled ``infinibox:<system name>``::
 
   [infinibox] # will be used for default
   username=defaultlogin
