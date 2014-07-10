@@ -23,6 +23,7 @@ Contents:
    snapshots
    metadata
    events
+   components
    extending
    api
 

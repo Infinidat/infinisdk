@@ -16,7 +16,7 @@ Nodes
 FC Ports
 --------
 
-For each Node, you can use the :meth:`.get_fc_ports` method to obtain the FC ports it contains. Each FC port is returned as a Python dictionary containing its attributes
+For each Node, you can use the :meth:`.Node.get_fc_ports` method to obtain the FC ports it contains. Each FC port is returned as a Python dictionary containing its attributes
 
 .. code-block:: python
 

@@ -69,6 +69,14 @@ infinibox.events
 .. autoclass:: Event
    :members:
 
+infinibox.components
+~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: infinisdk.infinibox.components
+
+.. autoclass:: Node
+   :members:
+
 Base Objects
 ~~~~~~~~~~~~
 
