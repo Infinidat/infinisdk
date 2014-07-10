@@ -41,7 +41,7 @@ Authentication information can also be specified via the constructor:
 
 		>>> system = InfiniBox(SYSTEM_ADDRESS, auth=("admin", "password"))
 
-Another way authentication information can be provided is through a ``.ini`` file. Create a file named ``~/.infinidat/infinisdk.ini``, with the following structure::
+Another way authentication information can be provided is through an ``.ini`` file. Create a file named ``~/.infinidat/infinisdk.ini``, with the following structure::
 
   [infinibox]
   username=admin
@@ -84,7 +84,7 @@ You can also turn off approvals temporarily, causing your script to fail with an
 Representing API Entities
 -------------------------
 
-InfiniSDK provides reflection for objects or entities defined on the system in the form of Pythonic objects. This makes creation, deletion and manipulation easier. Supported objects are defined as Python classes such as :class:`infinisdk.infinibox.volume.Volume` or :class:`infinisdk.infinibox.pool.Pool`, and are accessed more easily through **collection proxies**, such as *system.volumes*, *system.pools* etc. For each supported object type ``X``, there exists ``system.Xs``.
+InfiniSDK provides reflection for objects or entities defined on the system in the form of Pythonic objects. This makes creation, deletion and manipulation of objects easier. Supported objects are defined as Python classes such as :class:`infinisdk.infinibox.volume.Volume` or :class:`infinisdk.infinibox.pool.Pool`, and are accessed more easily through **collection proxies**, such as *system.volumes*, *system.pools* etc. For each supported object type ``X``, there exists ``system.Xs``.
 
 The following examples illustrate how to use those proxies.
 
@@ -124,14 +124,24 @@ All fields can be accessed via the :meth:`get_field <infinisdk.core.system_objec
 Caching
 -------
 
-Whenever an object attribute is fetched, it is cached for later use. By default, getting fields always fetches them from the system, but it may sometimes be necessary to reduce the traffic to and from the system by using the already-fetched cache. ``.get_field``, ``get_fields`` and the various getter methods receive a ``from_cache`` parameter that make them prefer using the cache:
+Whenever an object attribute is fetched, it is cached for later use. By default, getting fields always fetches them from the cache of the requested object.
 
-.. code-block:: python
+In case you need to fetch an up-to-date value for a field, there are several options:
 
-		>>> print(pool.get_field('name', from_cache=True))
-		yet_another_name
+1. Use ``from_cache=False``:
 
-You can also disable fetching if the field is not in the cache, by passing ``fetch_if_not_cached=False``.
+   .. code-block:: python
+
+		   >>> print(pool.get_field('name', from_cache=True))
+		   yet_another_name
+
+   The above forces InfiniSDK to fetch the name from the system regardless of the cache
+
+2. Disable caching completely:
+
+   .. code-block:: python
+
+		   >>> system.disable_caching()
 
 .. _capacities: 
 
@@ -152,7 +162,7 @@ InfiniSDK reflects data sizes using the ``capacity`` module, allowing easy compu
 		>>> print(size // GiB)
 		931
 
-.. seealso:: `documentation for the capacity module <https://github.com/vmalloc/capacity/>`_
+.. seealso:: `Documentation for the capacity module <https://github.com/vmalloc/capacity/>`_
 		
 
 

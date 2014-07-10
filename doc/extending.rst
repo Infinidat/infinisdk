@@ -1,7 +1,7 @@
 Extending InfiniSDK
 ===================
 
-InfiniSDK is focused on providing the official InfiniBox API as provided to the customer by Infinidat. However, some uses may require accessing internal or custom APIs, or wrapping more complex sequences in convenient API calls. Examples of this can be technician APIs, development utilities, customer macros and more.
+InfiniSDK focuses on providing the official InfiniBox API as provided to the customer by Infinidat. However, some uses may require accessing internal or custom APIs, or wrapping more complex sequences in convenient API calls. Examples of this can be technician APIs, development utilities, customer macros and more.
 
 InfiniSDK provides a convenient extensibility mechanism to allow us to extend its behavior.
 
@@ -26,7 +26,7 @@ By default, of course, we don't have such a mechanism:
    AttributeError: ...
 
 
-We head off to write our new method, and use :func:`infinisdk.core.extensions.add_method` to attach it to infinibox objects
+We head off to write our new method, and use :func:`infinisdk.core.extensions.add_method` to attach it to InfiniBox objects
 
 .. code-block:: python
 

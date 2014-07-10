@@ -12,7 +12,7 @@ infinibox
 infinibox.api
 ~~~~~~~~~~~~~
 
-``infinibox.api`` is the sub-object responsible of sending API requests to the system. It also holds the current authentication information for the session.
+``infinibox.api`` is the sub-object responsible for sending API requests to the system. It also holds the current authentication information for the session.
 
 .. automodule:: infinisdk.core.api.api
 

@@ -20,7 +20,7 @@ def make_getter(field):
         return self.get_field(field.name, **kwargs)
 
     getter.__name__ = "get_{0}".format(field.name)
-    getter.__doc__ = """obtains the value of the {0.name!r} field
+    getter.__doc__ = """Obtains the value of the {0.name!r} field
 
     :rtype: {1} """.format(field, _format_type_doc(field.type._type))
     return getter
@@ -30,7 +30,7 @@ def make_updater(field):
         return self.update_field(field.name, value, **kwargs)
 
     updater.__name__ = "update_{0}".format(field.name)
-    updater.__doc__ = """updates the value of the {0.name!r} field
+    updater.__doc__ = """Updates the value of the {0.name!r} field
 
     :param value: The new {0.name} value to be set
     :paramtype value: {1}""".format(field, _format_type_doc(field.type._type))

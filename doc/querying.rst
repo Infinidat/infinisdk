@@ -45,7 +45,7 @@ Getting a single object has an even easier shortcut -- ``get``, which assumes on
 		>>> v
 		<Volume id=1007>
 
-It will fail for either 0 or more than one are returned:
+It will fail if either 0 or several objects are returned:
 
 .. code-block:: python
 
@@ -60,7 +60,7 @@ It will fail for either 0 or more than one are returned:
 		ObjectNotFound
 
 
-There is also ``safe_get``, returning ``None`` instead of raising an exception if no object was found:
+There is also ``safe_get``, returning ``None`` instead of raising an exception if no object is found:
 
 .. code-block:: python
 

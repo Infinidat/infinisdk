@@ -38,7 +38,7 @@ Unmapping can be done in several ways. The easiest would be to call :meth:`.Host
 		
 		>>> host.unmap_volume(volume)
 
-Which can also receive a specific lun to unmap:
+Which can also receive a specific LUN to unmap:
 
 .. code-block:: python
 
@@ -46,7 +46,7 @@ Which can also receive a specific lun to unmap:
 
 		>>> host.unmap_volume(lun=2)
 
-The lun can also be deleted directly through its accessor object:
+The LUN can also be deleted directly through its accessor object:
 
 .. code-block:: python
 

@@ -119,7 +119,7 @@ class API(object):
     @contextmanager
     def auth_context(self, username, password):
         """
-        Changes the API auth information for the duration of the context:
+        Changes the API authentication information for the duration of the context:
 
         >>> with system.api.auth_context('username', 'password'):
         ...     ... # execute operations as 'username'
@@ -257,7 +257,7 @@ class Response(object):
     def __init__(self, method, url, data, resp):
         super(Response, self).__init__()
         self.method = method
-        #: response object as returned from ``requests``
+        #: Response object as returned from ``requests``
         self.response = resp
         #: URLObject of the final location the response was obtained from
         self.url = url
@@ -266,7 +266,7 @@ class Response(object):
 
     def get_json(self):
         """
-        :returns: the json object returned from the system, or None if no json could be decoded
+        :returns: The JSON object returned from the system, or None if no json could be decoded
         """
         try:
             return self.response.json()
@@ -278,13 +278,13 @@ class Response(object):
 
     def get_result(self):
         """
-        :returns: the result of the API call, extracted from the response JSON object
+        :returns: The result of the API call, extracted from the response JSON object
         """
         return self._get_result()
 
     def get_error(self):
         """
-        :returns: the error portion of the response as returned from the system, or None if it doesn't exist
+        :returns: The error portion of the response as returned from the system, or None if it doesn't exist
         """
         json = self.get_json()
         if json is not None:
@@ -295,7 +295,7 @@ class Response(object):
 
     def get_metadata(self):
         """
-        :returns: the metadata portion of the response (paging information, etc.) as returned from the system, or None
+        :returns: The metadata portion of the response (paging information, etc.) as returned from the system, or None
            if it doesn't exist
         """
         return self.get_json()["metadata"]

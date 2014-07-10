@@ -46,7 +46,7 @@ class Host(InfiniBoxLURelatedObject):
 
     def add_fc_port(self, port_address):
         """
-        Adds a FC port address (WWN) to this host
+        Adds an FC port address (WWN) to this host
         :param port_address: A string representing the WWN to add (e.g. ``00:11:22:33:44:55:66``)
         """
         return self._add_port('fc', port_address)

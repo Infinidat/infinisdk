@@ -157,9 +157,9 @@ class SystemObject(with_metaclass(FieldsMeta)):
         """
         Returns a dict representing the default arguments as implicitly constructed by infinisdk to fulfill a ``create`` call
 
-        .. note:: this will cause generation of defaults, which will have side effects if they are special values
+        .. note:: This will cause generation of defaults, which will have side effects if they are special values
 
-        .. note:: this does not necessarily generate all fields that are passable into ``create``, only mandatory fields
+        .. note:: This does not necessarily generate all fields that are passable into ``create``, only mandatory fields
         """
         return translate_special_values(dict(
             (field.name, field.generate_default())
@@ -192,7 +192,7 @@ class SystemObject(with_metaclass(FieldsMeta)):
         Gets the value of a single field from the system
 
         :param cache: Attempt to use the last cached version of the field value
-        :param fetch_if_not_cached: pass as False to force only from cache
+        :param fetch_if_not_cached: Pass ``False`` to force only from cache
         """
         return self.get_fields([field_name], from_cache=from_cache, fetch_if_not_cached=fetch_if_not_cached)[field_name]
 
@@ -301,8 +301,7 @@ class SystemObject(with_metaclass(FieldsMeta)):
         self._update_fields({field_name: field_value})
 
     def update_fields(self, **update_dict):
-        """
-        Atomically update a group of fields and respective values (given as a dictionary)
+        """Atomically updates a group of fields and respective values (given as a dictionary)
         """
         self._update_fields(update_dict)
 
