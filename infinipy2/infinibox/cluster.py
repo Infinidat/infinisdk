@@ -12,6 +12,11 @@ class Cluster(InfiniBoxLURelatedObject):
         Field("hosts", api_name="hosts", type=list, add_getter=False, add_updater=False),
     ]
 
+    def purge(self):
+        for lun in self.get_luns(from_cache=False):
+            self.unmap_volume(lun=lun)
+        super(Cluster, self).purge()
+
     def add_host(self, host):
         url = "{0}/hosts".format(self.get_this_url_path())
         self.system.api.post(url, data={"id" : host.id})

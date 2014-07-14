@@ -1,4 +1,5 @@
 from ..core import Field
+from ..core.bindings import RelatedObjectBinding
 from ..core.api.special_values import Autogenerate
 from .system_object import InfiniBoxLURelatedObject
 from infi.dtypes.wwn import WWN
@@ -11,22 +12,16 @@ class Host(InfiniBoxLURelatedObject):
         Field("name", creation_parameter=True, mutable=True, is_filterable=True, is_sortable=True, default=Autogenerate("host_{uuid}")),
         Field("luns", type=list, add_getter=False, add_updater=False),
         Field("ports", type=list, add_getter=False, add_updater=False),
-        Field("host_cluster_id", type=int, is_filterable=True),
+        Field("cluster", api_name="host_cluster_id", type='infinipy2.infinibox.cluster:Cluster', is_filterable=True, binding=RelatedObjectBinding()),
     ]
 
     def purge(self):
-        cluster = self.get_cluster()
+        cluster = self.get_cluster(from_cache=False)
         if cluster is not None:
             cluster.remove_host(self)
-        for lun in self.get_luns():
+        for lun in self.get_luns(from_cache=False):
             self.unmap_volume(lun=lun)
         super(Host, self).purge()
-
-    def get_cluster(self):
-        cluster_id = self.get_host_cluster_id()
-        if cluster_id == 0:
-            return None
-        return self.system.clusters.get_by_id_lazy(cluster_id)
 
     def _add_port(self, port_type, port_address):
         port_wwn = str(WWN(port_address))

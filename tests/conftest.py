@@ -88,16 +88,26 @@ def infinibox_simulator(request):
     return returned
 
 @pytest.fixture
-def cluster(infinibox, request):
+def cluster(request, infinibox):
     returned = infinibox.clusters.create()
-    request.addfinalizer(returned.delete)
+    request.addfinalizer(returned.purge)
     return returned
 
 @pytest.fixture
 def host(request, infinibox):
     returned = infinibox.hosts.create()
-    request.addfinalizer(returned.delete)
+    request.addfinalizer(returned.purge)
     return returned
+
+@pytest.fixture(params=["host", "cluster"])
+def mapping_object_type(request, infinibox):
+    return request.param
+
+@pytest.fixture
+def mapping_object(host, cluster, mapping_object_type):
+    if mapping_object_type == 'host':
+        return host
+    return cluster
 
 @pytest.fixture
 def user(infinibox):
