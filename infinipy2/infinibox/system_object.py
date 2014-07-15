@@ -1,5 +1,5 @@
-from ..core import SystemObject
-from ..core.exceptions import InfinipyException
+from ..core.system_object import SystemObject, DONT_CARE
+from ..core.exceptions import InfinipyException, CacheMiss
 from .lun import LogicalUnitContainer, LogicalUnit
 
 
@@ -28,6 +28,32 @@ class InfiniBoxObject(SystemObject):
 
 
 class InfiniBoxLURelatedObject(InfiniBoxObject):
+
+    def get_lun(self, lun, from_cache=DONT_CARE, fetch_if_not_cached=True):
+        fetch_from_cache = self._deduce_from_cache(["luns"], from_cache)
+        if fetch_from_cache:
+            try:
+                return self.get_luns(from_cache=from_cache, fetch_if_not_cached=False)[lun]
+            except (KeyError, CacheMiss):
+                if not fetch_if_not_cached:
+                    raise CacheMiss('LUN {0} is not cached'.format(int(lun)))
+
+        url = self.get_this_url_path().add_path('luns/{0}'.format(lun))
+        lun_info = self.system.api.get(url).get_result()
+        lu = LogicalUnit(system=self.system, **lun_info)
+        luns = self._cache.get('luns')
+        if luns is None:
+            # If luns is not in cache -> a luns refresh was requested...
+            return lu
+
+        for cached_lun_info in luns:
+            if cached_lun_info['lun'] == lun:
+                cached_lun_info.update(lun_info)
+                break
+        else:
+            luns.append(lun_info)
+        self.update_field_cache({'luns': luns})
+        return lu
 
     def get_luns(self, *args, **kwargs):
         luns_info = self.get_field('luns', *args, **kwargs)

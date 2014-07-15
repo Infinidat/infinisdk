@@ -1,4 +1,5 @@
 import pytest
+from infinipy2.core.exceptions import CacheMiss
 
 
 def test_no_luns_mapped(infinibox, host, cluster):
@@ -92,3 +93,16 @@ def test_multiple_luns_mapping_objects(infinibox, host, cluster, volume1, volume
 
     host_lu.delete()
     cluster_lu.delete()
+
+def test_get_specific_lun(infinibox, mapping_object, volume1, volume2):
+    lu_from_post = mapping_object.map_volume(volume1)
+    with pytest.raises(CacheMiss):
+        lu_from_getter = mapping_object.get_lun(int(lu_from_post), fetch_if_not_cached=False)
+    lu_from_getter = mapping_object.get_lun(int(lu_from_post), fetch_if_not_cached=True)
+    assert lu_from_post == lu_from_getter
+    assert mapping_object._cache.get('luns') is None
+    mapping_object.get_luns()
+    assert len(mapping_object._cache.get('luns')) == 1
+
+    infinibox.enable_caching()
+    mapping_object.map_volume(volume2)
