@@ -12,6 +12,7 @@
 ### are strictly forbidden unless prior written permission is obtained from Infinidat Ltd.
 ###!
 from ..core import Field
+from ..core.bindings import RelatedObjectBinding
 from ..core.api.special_values import Autogenerate
 from .system_object import InfiniBoxLURelatedObject
 from infi.dtypes.wwn import WWN
@@ -24,18 +25,8 @@ class Host(InfiniBoxLURelatedObject):
         Field("name", creation_parameter=True, mutable=True, is_filterable=True, is_sortable=True, default=Autogenerate("host_{uuid}")),
         Field("luns", type=list, add_getter=False, add_updater=False),
         Field("ports", type=list, add_getter=False, add_updater=False),
-        Field("host_cluster_id", type=int, is_filterable=True),
+        Field("cluster", api_name="host_cluster_id", type='infinisdk.infinibox.cluster:Cluster', is_filterable=True, binding=RelatedObjectBinding()),
     ]
-
-
-    def get_cluster(self):
-        """
-        :return: the :class:`.Cluster` object this host belongs to, or ``None``
-        """
-        cluster_id = self.get_host_cluster_id()
-        if cluster_id == 0:
-            return None
-        return self.system.clusters.get_by_id_lazy(cluster_id)
 
     def _add_port(self, port_type, port_address):
         port_wwn = str(WWN(port_address))

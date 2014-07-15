@@ -15,7 +15,7 @@ coverage: env
 env: .env/.up-to-date
 
 develop_env: env
-	.env/bin/pip install -e ../ecosystem -e ../infinibox_sysdefs -e ../infinisim
+	.env/bin/pip install -e ../ecosystem -e ../infinibox_sysdefs -e ../infinisim -e ../infinisdk_internal
 
 .env/.up-to-date: setup.py Makefile
 	virtualenv .env

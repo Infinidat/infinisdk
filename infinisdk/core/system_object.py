@@ -317,7 +317,6 @@ class SystemObject(with_metaclass(FieldsMeta)):
 
         self.system.api.put(self.get_this_url_path(), data=update_dict)
         self.update_field_cache(update_dict)
-        self.refresh(*update_dict)
 
     def delete(self):
         """

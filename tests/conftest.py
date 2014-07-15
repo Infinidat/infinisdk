@@ -1,15 +1,19 @@
-from forge import Forge
+from contextlib import contextmanager
 
 import flux
+import logbook.compat
+from forge import Forge
+
 import pytest
 from infinisdk.core import extensions
 from infinisdk.core.config import config
 from infinisdk.infinibox import InfiniBox
 from infinisdk.izbox import IZBox
+from infinisdk_internal import disable as disable_infinisdk_internal
+from infinisdk_internal import enable as enable_infinisdk_internal
 from infinisim.infinibox import Infinibox as InfiniboxSimulator
 from izsim import Simulator as IZBoxSimulator
 
-import logbook.compat
 
 @pytest.fixture(scope="session", autouse=True)
 def setup_logging(request):
@@ -88,16 +92,41 @@ def infinibox_simulator(request):
     return returned
 
 @pytest.fixture
-def cluster(infinibox, request):
+def cluster(request, infinibox):
     returned = infinibox.clusters.create()
-    request.addfinalizer(returned.delete)
+    request.addfinalizer(_get_purge_callback(returned))
     return returned
 
 @pytest.fixture
 def host(request, infinibox):
     returned = infinibox.hosts.create()
-    request.addfinalizer(returned.delete)
+    request.addfinalizer(_get_purge_callback(returned))
     return returned
+
+
+def _get_purge_callback(obj):
+    def cleanup():
+        with enabling_infinisdk_internal():
+            obj.purge()
+    return cleanup
+
+@contextmanager
+def enabling_infinisdk_internal():
+    enable_infinisdk_internal()
+    try:
+        yield
+    finally:
+        disable_infinisdk_internal()
+
+@pytest.fixture(params=["host", "cluster"])
+def mapping_object_type(request, infinibox):
+    return request.param
+
+@pytest.fixture
+def mapping_object(host, cluster, mapping_object_type):
+    if mapping_object_type == 'host':
+        return host
+    return cluster
 
 @pytest.fixture
 def user(infinibox):
