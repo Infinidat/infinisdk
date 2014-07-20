@@ -3,54 +3,98 @@ import itertools
 import os
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
-_PKG_ROOT = os.path.join(_HERE, "..", "infinisdk")
-_DOCS_ROOT = os.path.join(_HERE, "..", "doc")
+_PROJ_ROOT = os.path.join(_HERE, "..")
+_SRC_ROOT = os.path.abspath(os.path.join(_HERE, 'infinisdk')) + '/'
+
+assert not _SRC_ROOT.endswith('//')
 
 _FORBIDDEN_STRINGS = [
     "infinipy",  # obviously...
-    "infinisdk2",  # results from converting only 'infinipy' to 'infinisdk', forgetting the '2'...
-    "purge", # has been moved to infinisdk_internal
+    # results from converting only 'infinipy' to 'infinisdk', forgetting the
+    # '2'...
+    "infinisdk2",
+    "purge",  # has been moved to infinisdk_internal
 ]
+
 
 def test_copyright():
     missing = []
-    for path, _, filenames in os.walk(_PKG_ROOT):
-        for filename in filenames:
-            if not filename.endswith(".py"):
-                continue
-            filename = os.path.join(path, filename)
-            with open(filename) as f:
-                source = f.read()
+    for is_file, filename in _iter_checked_filenames():
+        if not is_file:
+            continue
 
-            if 'Copyright' not in source:
-                missing.append(filename)
-    assert not missing, "Files are missing copyright notice:\n{0}".format("\n".join(sorted(missing)))
+        if not filename.endswith(".py"):
+            continue
+
+        if not filename.startswith(_SRC_ROOT):
+            continue
+
+        with open(filename) as f:
+            source = f.read()
+
+        if 'Copyright' not in source:
+            missing.append(filename)
+    assert not missing, "Files are missing copyright notice:\n{0}".format(
+        "\n".join(sorted(missing)))
+
 
 def test_no_infinipy_string():
     errors = []
 
-    for root in (_PKG_ROOT, _DOCS_ROOT):
-        assert os.path.isdir(root)
-        for path, dirnames, filenames in os.walk(root):
-            for name in itertools.chain(dirnames, filenames):
-                _check_forbidden_strings(name, errors)
+    for is_file, filename in _iter_checked_filenames():
 
-            for filename in filenames:
-                if filename.endswith((".py", ".rst", ".md")):
-                    with open(os.path.join(path, filename)) as f:
-                        for lineno, line in enumerate(f, start=1):
-                            line = line.lower()
-                            for s in _FORBIDDEN_STRINGS:
-                                if s in line:
-                                    errors.append("{0}, line {1}: contains {2!r}".format(filename, lineno, s))
+        basename = os.path.basename(filename)
+
+        _check_forbidden_strings(filename, basename, errors)
+
+        if not is_file:
+            continue
+
+        if basename == _without_pyc(os.path.basename(__file__)):
+            # we are allowed to contain 'infinipy' in this file of
+            # course
+            continue
+
+        with open(filename) as f:
+            for lineno, line in enumerate(f, start=1):
+                line = line.lower()
+                for s in _FORBIDDEN_STRINGS:
+
+                    if s == 'purge' and basename.startswith('test_') or basename == 'conftest.py':
+                        continue
+
+                    if s in line:
+                        errors.append(
+                            "{0}, line {1}: contains {2!r}".format(filename, lineno, s))
 
     for error in errors:
         print(error)
     assert not errors, "Forbidden strings appear in code"
 
-def _check_forbidden_strings(s, errors):
+
+def _without_pyc(filename):
+    if filename.endswith('.pyc'):
+        return filename[:-1]
+    return filename
+
+
+def _iter_checked_filenames():
+    for path, dirnames, filenames in os.walk(_PROJ_ROOT):
+
+        for excluded in ('.git', '.env'):
+            if excluded in dirnames:
+                dirnames.remove(excluded)
+
+        for dirname in dirnames:
+            yield False, os.path.abspath(os.path.join(path, dirname))
+
+        for filename in filenames:
+            if filename.endswith(('.py', '.rst', '.md')):
+                yield True, os.path.abspath(os.path.join(path, filename))
+
+def _check_forbidden_strings(entity, s, errors):
     orig = s
     s = s.lower()
     for forbidden_str in _FORBIDDEN_STRINGS:
         if forbidden_str in s:
-            errors.append("{0}: contains {1}".format(orig, forbidden_str))
+            errors.append("{0}: contains {1}".format(entity, forbidden_str))
