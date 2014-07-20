@@ -14,15 +14,19 @@ coverage: env
 
 env: .env/.up-to-date
 
-develop_env: env
-	.env/bin/pip install -e ../ecosystem -e ../infinibox_sysdefs -e ../infinisim -e ../infinisdk_internal
-
 .env/.up-to-date: setup.py Makefile
 	virtualenv .env
 	.env/bin/pip install -e .
 	.env/bin/pip install Sphinx alabaster
-	.env/bin/pip install -r test_requirements.txt
+	.env/bin/pip install -i http://pypi01.infinidat.com/simple -r test_requirements.txt
 	touch .env/.up-to-date
+
+develop_deps:
+	virtualenv .env
+	.env/bin/pip install -i http://pypi01.infinidat.com/simple -e ../ecosystem -e ../infinibox_sysdefs -e ../infinisim -e ../infinisdk_internal
+
+develop_env: develop_deps env
+
 
 jenkins-docker-test:
 	docker pull docker.infinidat.com/python-detox
