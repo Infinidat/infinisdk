@@ -69,8 +69,9 @@ The emitted logs also include the full debug outputs of the API calls made to th
 
 		>>> import logbook
 		>>> import sys
-		>>> with logbook.NullHandler(), \
-		...      logbook.StreamHandler(sys.stderr, level=logbook.INFO):
+		>>> with logbook.NestedSetup([
+		...        logbook.NullHandler(),
+		...        logbook.StreamHandler(sys.stderr, level=logbook.INFO)]):
 		...     pass  # your code here
 
 .. seealso:: `Logbook's documentation <http://logbook.pocoo.org>`_
