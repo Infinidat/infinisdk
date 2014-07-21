@@ -81,7 +81,7 @@ def _without_pyc(filename):
 def _iter_checked_filenames():
     for path, dirnames, filenames in os.walk(_PROJ_ROOT):
 
-        for excluded in ('.git', '.env'):
+        for excluded in ('.git', '.env', '.tox'):
             if excluded in dirnames:
                 dirnames.remove(excluded)
 
