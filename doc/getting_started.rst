@@ -58,6 +58,24 @@ Now constructing an InfiniBox object will use the credentials above by default. 
   password=otherpassword
 
 
+Logging
+-------
+
+InfiniSDK uses `Logbook <http://logbook.pocoo.org>`_ for logging, and by default all logs are emitted to the standard error stream. 
+
+The emitted logs also include the full debug outputs of the API calls made to the system, which might be a bit too much in some cases, overflowing your console unnecessarily. If you prefer less verbosity, you can set up a different logging scheme. For instance, the following code will only emit ``INFO`` logs to the console:
+
+.. code-block:: python
+
+		>>> import logbook
+		>>> import sys
+		>>> with logbook.NullHandler(), \
+		...      logbook.StreamHandler(sys.stderr, level=logbook.INFO):
+		...     pass  # your code here
+
+.. seealso:: `Logbook's documentation <http://logbook.pocoo.org>`_
+
+
 Approving Dangerous Operations
 ------------------------------
 

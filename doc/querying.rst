@@ -81,7 +81,7 @@ Object fields can be used to perform more complex queries, using operators. For 
 		vol3
 		vol4
 
-There is also a shorter syntax for writing the above piece of code, using the ``Q`` shortcut available from InfiniSDK:
+The above code leverages Python's operator overloading to generate on-the-fly query filters. There is also a shorter syntax for writing the above piece of code, using the ``Q`` shortcut available from InfiniSDK:
 
 .. code-block:: python
 
@@ -90,6 +90,8 @@ There is also a shorter syntax for writing the above piece of code, using the ``
 		>>> vols = system.volumes.find(Q.name != 'vol1')
 		>>> len(vols)
 		4
+
+.. note:: ``Q.x != y`` is merely a shortcut for ``SomeObject.fields.x != y``, and provides no other additional functionality besides shortening the syntax.
 
 And here is a query to find all volumes greater than 1 GiB in size:
 
