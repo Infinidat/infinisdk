@@ -14,20 +14,17 @@
 import gossip
 from collections import namedtuple
 from ..core.exceptions import InvalidOperationException
-from ..core.api.special_values import Autogenerate
 from .system_object import InfiniBoxObject
 
 _BEGIN_FORK_HOOK = "infinidat.sdk.begin_fork"
 _CANCEL_FORK_HOOK = "infinidat.sdk.cancel_fork"
 _FINISH_FORK_HOOK = "infinidat.sdk.finish_fork"
 
+
 class BaseDataEntity(InfiniBoxObject):
     PROVISIONING = namedtuple('Provisioning', ['Thick', 'Thin'])('THICK', 'THIN')
     ENTITY_TYPES = namedtuple('VolumeTypes', ['Master', 'Snapshot', 'Clone'])('MASTER', 'SNAP', 'CLONE')
 
-    def get_unique_key(self):
-        system_id = self.system.get_api_addresses()[0][0]
-        return (system_id, self.get_name())
 
     def is_master(self):
         return self.get_type() == self.ENTITY_TYPES.Master

@@ -158,7 +158,8 @@ def test_get_not_exist_attribute(infinibox, volume):
 
 
 def test_unique_key(infinibox, volume):
-    assert volume.get_unique_key() is not None
+    with pytest.raises(AttributeError):
+        volume.get_unique_key()
 
 
 def test_invalid_child_operation(infinibox, volume):
