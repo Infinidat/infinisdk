@@ -14,12 +14,14 @@
 from ..core.field import Field
 from ..core.bindings import InfiniSDKBinding
 from ..core.system_component import SystemComponentsBinder
-from ..core.system_object import SystemObject
+from ..core.system_object import SystemObject, APICommandFailed
 from infi.pyutils.lazy import cached_method
 from .component_query import InfiniBoxComponentQuery
 from ..core.bindings import ListOfRelatedComponentBinding
 
 from urlobject import URLObject as URL
+import gossip
+
 
 class InfiniBoxSystemComponents(SystemComponentsBinder):
 
@@ -168,10 +170,26 @@ class Node(InfiniBoxSystemComponent):
         return cls.BASE_URL.add_path(cls.get_plural_name())
 
     def phase_out(self):
-        return self.system.api.post(self.get_this_url_path().add_path('phase_out'))
+        hook_tags = ['infinibox', 'node_{0}'.format(self.get_index())]
+        gossip.trigger_with_tags('infinidat.infinibox.pre_node_phase_out', {'node': self}, tags=hook_tags)
+        try:
+            res = self.system.api.post(self.get_this_url_path().add_path('phase_out'))
+        except APICommandFailed as e:
+            gossip.trigger_with_tags('infinidat.infinibox.node_phase_out_failure', {'node': self, 'exc': e}, tags=hook_tags)
+            raise
+        gossip.trigger_with_tags('infinidat.infinibox.post_node_phase_out', {'node': self}, tags=hook_tags)
+        return res
 
     def phase_in(self):
-        return self.system.api.post(self.get_this_url_path().add_path('phase_in'))
+        hook_tags = ['infinibox', 'node_{0}'.format(self.get_index())]
+        gossip.trigger_with_tags('infinidat.infinibox.pre_node_phase_in', {'node': self}, tags=hook_tags)
+        try:
+            res = self.system.api.post(self.get_this_url_path().add_path('phase_in'))
+        except APICommandFailed as e:
+            gossip.trigger_with_tags('infinidat.infinibox.node_phase_in_failure', {'node': self, 'exc': e}, tags=hook_tags)
+            raise
+        gossip.trigger_with_tags('infinidat.infinibox.post_node_phase_in', {'node': self}, tags=hook_tags)
+        return res
 
     def __repr__(self):
         return '<Node {0}>'.format(self.get_index())
