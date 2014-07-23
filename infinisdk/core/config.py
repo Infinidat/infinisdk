@@ -11,7 +11,7 @@
 ### Redistribution and use in source or binary forms, with or without modification,
 ### are strictly forbidden unless prior written permission is obtained from Infinidat Ltd.
 ###!
-from ConfigParser import ConfigParser
+from .._compat import ConfigParser
 
 import confetti
 

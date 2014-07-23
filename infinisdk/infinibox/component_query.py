@@ -11,9 +11,10 @@
 ### Redistribution and use in source or binary forms, with or without modification,
 ### are strictly forbidden unless prior written permission is obtained from Infinidat Ltd.
 ###!
-from .._compat import itervalues, iteritems, sorted, cmp
 import operator
+from numbers import Number
 
+from .._compat import cmp, iteritems, itervalues, sorted
 
 
 class InfiniBoxComponentQuery(object):
@@ -23,7 +24,6 @@ class InfiniBoxComponentQuery(object):
         self.predicates = predicates
         self.kw = kw
         self.sort_criteria = tuple()
-
 
     def _get_items(self):
         def _sort_cmp_items(x, y):
@@ -56,7 +56,7 @@ class InfiniBoxComponentQuery(object):
         return len([item for item in self])
 
     def __getitem__(self, index):
-        if index < 0:
+        if isinstance(index, Number) and index < 0:
             raise NotImplementedError("Negative indices not supported yet")
         return [item for item in self][index]
 

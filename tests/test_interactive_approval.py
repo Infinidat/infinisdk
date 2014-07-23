@@ -1,4 +1,5 @@
 from contextlib import contextmanager
+from infinisdk import _compat
 from infinisdk.core.exceptions import CommandNotApproved
 
 import pytest
@@ -12,7 +13,8 @@ def test_interactive_approval(infinibox, volume, interactive_approval):
 
 @pytest.fixture
 def interactive_approval(request, approved):
-    real_raw_input = __builtins__['raw_input']
+
+    prev_raw_input = _compat.raw_input
 
     returned = InteractiveApproval()
     returned.approved = approved
@@ -24,11 +26,11 @@ def interactive_approval(request, approved):
             return "y\n"
         return "n\n"
 
-    __builtins__['raw_input'] = fake_raw_input
+    _compat.raw_input = fake_raw_input
 
     @request.addfinalizer
     def cleanup():
-        __builtins__['raw_input'] = real_raw_input
+        _compat = prev_raw_input
 
     return returned
 

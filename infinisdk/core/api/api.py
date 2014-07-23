@@ -22,6 +22,7 @@ from urlobject import URLObject as URL
 
 import colorama
 
+from ... import _compat
 from ..._compat import get_timedelta_total_seconds, httplib, string_types
 from ..config import config
 from ..exceptions import (APICommandFailed, APITransportFailure,
@@ -217,7 +218,8 @@ class API(object):
         msg = "{0} Approve? [y/N] ".format(reason)
         if sys.stdout.isatty():
             msg = colorama.Fore.YELLOW + msg + colorama.Fore.RESET
-        return raw_input(msg).strip().lower() in ['yes', 'y']
+        # note: call through module to allow stubbing
+        return _compat.raw_input(msg).strip().lower() in ['yes', 'y']
 
     def _is_approval_required(self, exception):
         if exception.response.get_error():

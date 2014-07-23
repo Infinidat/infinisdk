@@ -32,7 +32,7 @@ CapacityType = TypeInfo(type=Capacity, api_type=int,
 class MillisecondsDatetimeTranslator(ValueTranslator):
 
     def _to_api(self, value):
-        return int(value.float_timestamp * 1000)
+        return int(value.float_timestamp * 1000.0)
 
     def _from_api(self, value):
         return arrow.get(value / 1000.0)

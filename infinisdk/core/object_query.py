@@ -11,6 +11,7 @@
 ### Redistribution and use in source or binary forms, with or without modification,
 ### are strictly forbidden unless prior written permission is obtained from Infinidat Ltd.
 ###!
+from numbers import Number
 from .._compat import xrange
 from .utils import add_comma_separated_query_param
 from .field import Field
@@ -56,7 +57,7 @@ class ObjectQuery(object):
         return self._total_num_objects % self._requested_page_size
 
     def __getitem__(self, index):
-        if index < 0:
+        if isinstance(index, Number) and index < 0:
             raise NotImplementedError("Negative indices not supported yet")
 
         self._fetch(index)

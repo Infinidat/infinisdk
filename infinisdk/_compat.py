@@ -34,10 +34,14 @@ if PY2:
 
     string_types = (basestring,)
 
-    import __builtin__ as _builtins
+
+    import __builtin__ as builtins
 
     from cStringIO import StringIO
+    from ConfigParser import ConfigParser
     import httplib
+
+    raw_input = builtins.raw_input
 
     def iteritems(d):
         return d.iteritems() # not dict.iteritems!!! we support ordered dicts as well
@@ -49,9 +53,9 @@ if PY2:
         return d.iterkeys()
 
     from itertools import izip as zip
-    xrange = _builtins.xrange
-    sorted = _builtins.sorted
-    cmp = _builtins.cmp
+    xrange = builtins.xrange
+    sorted = builtins.sorted
+    cmp = builtins.cmp
 
 else:
 
@@ -60,12 +64,15 @@ else:
 
     string_types = (str,)
 
-    import builtins as _builtins
+    import builtins
 
     from io import StringIO
+    from configparser import ConfigParser
     import http.client as httplib
 
-    zip = _builtins.zip
+    raw_input = input
+
+    zip = builtins.zip
     xrange = range
 
     def iteritems(d):
@@ -80,7 +87,7 @@ else:
     def sorted(iterable, cmp=None, key=None, reverse=False):
         if cmp is not None:
             key=functools.cmp_to_key(cmp)
-        return _builtins.sorted(iterable, key=key, reverse=reverse)
+        return builtins.sorted(iterable, key=key, reverse=reverse)
 
     def cmp(x, y):
         if x > y:

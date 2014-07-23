@@ -110,12 +110,15 @@ def test_snapshot_creation_time(infinibox, volume):
 
     assert isinstance(snap.get_creation_time(), arrow.Arrow)
 
-
-def test_created_at_field_type_conversion():
-    now = arrow.get(int(time.time() * 1000) / 1000.0)
+@pytest.mark.parametrize('current_time', [1406113997.675789, 1406114887.452333, time.time()])
+def test_created_at_field_type_conversion(current_time):
+    now = arrow.get(int(current_time * 1000) / 1000.0)
     translator = MillisecondsDatetimeTranslator()
     converted = translator.from_api(translator.to_api(now))
-    assert converted == now
+    assert converted == _rounded_to_millsecs(now)
+
+def _rounded_to_millsecs(arrow_timestamp):
+    return arrow.get(int(arrow_timestamp.float_timestamp * 1000) / 1000.0)
 
 def test_snapshot_creation_time_filtering(infinibox, volume):
     flux.current_timeline.sleep(1) # set a differentiator between volume creation time and snapshot time
