@@ -6,8 +6,8 @@ with open(os.path.join(os.path.dirname(__file__), "infinisdk", "__version__.py")
 
 _INSTALL_REQUIERS = [
     "api_object_schema>=1.4.2",
+    "python-dateutil", #  required to work around https://github.com/crsmithdev/arrow/issues/120
     "arrow",
-    "python-dateutil",
     "capacity",
     "colorama",
     "infi.pyutils",
