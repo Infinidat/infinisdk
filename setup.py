@@ -7,6 +7,7 @@ with open(os.path.join(os.path.dirname(__file__), "infinisdk", "__version__.py")
 _INSTALL_REQUIERS = [
     "api_object_schema>=1.4.2",
     "arrow",
+    "python-dateutil",
     "capacity",
     "colorama",
     "infi.pyutils",
