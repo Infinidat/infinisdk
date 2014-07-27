@@ -18,6 +18,7 @@ Contents:
 
    getting_started
    querying
+   system_object
    volumes
    mappings
    snapshots
