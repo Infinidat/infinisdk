@@ -12,6 +12,7 @@ from infinisdk.core.exceptions import (APICommandFailed,
                                        InvalidOperationException)
 from infinisdk.infinibox.volume import _BEGIN_FORK_HOOK, _FINISH_FORK_HOOK, Volume
 from infinisdk.infinibox.pool import Pool
+from infinisdk.infinibox.scsi_serial import SCSISerial
 
 from ..conftest import create_pool, create_volume
 
@@ -22,6 +23,9 @@ def test_unmapping(infinibox, volume, host):
     volume.unmap()
     host.refresh()
     assert not host.is_volume_mapped(volume)
+
+def test_serial(infinibox, volume):
+    assert isinstance(volume.get_serial(), SCSISerial)
 
 def test_field_types():
     assert Volume.fields.parent.type.type is Volume

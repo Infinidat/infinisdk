@@ -23,6 +23,7 @@ from ..core.bindings import RelatedObjectBinding
 from .system_object import InfiniBoxObject
 from .pool import Pool
 from .lun import LogicalUnit, LogicalUnitContainer
+from .scsi_serial import SCSISerial
 
 PROVISIONING = namedtuple('Provisioning', ['Thick', 'Thin'])('THICK', 'THIN')
 VOLUME_TYPES = namedtuple('VolumeTypes', ['Master', 'Snapshot', 'Clone'])(
@@ -77,6 +78,7 @@ class Volume(InfiniBoxObject):
             "provisioning", api_name="provtype", mutable=True, creation_parameter=True,
             is_filterable=True, is_sortable=True, default="THICK"),
         Field("created_at", type=MillisecondsDatetimeType),
+        Field("serial", type=SCSISerial),
     ]
 
     def get_unique_key(self):
