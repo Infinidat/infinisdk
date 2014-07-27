@@ -1,3 +1,4 @@
+import binascii
 import struct
 
 
@@ -20,7 +21,7 @@ class SCSISerial(object):
             self.reserved = _parse_hex_long(self.serial[6:11])
             self.system_id = _parse_hex_long(self.serial[11:15])
             self.volume_id = _parse_hex_long(self.serial[15:])
-        except (TypeError,):
+        except (TypeError, binascii.Error):
             self.ieee_company_id = self.reserved = self.system_id = self.volume_id = None
 
     def __repr__(self):
@@ -46,4 +47,4 @@ def _parse_hex_long(s):
         s = s.rjust(min_size, '0')
     elif len(s) % 2 != 0:
         s = '0{0}'.format(s)
-    return struct.unpack('>Q', s.decode('hex'))[0]
+    return struct.unpack('>Q', binascii.a2b_hex(s))[0]
