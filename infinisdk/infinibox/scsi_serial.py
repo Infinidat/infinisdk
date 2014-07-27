@@ -4,22 +4,19 @@ import struct
 
 class SCSISerial(object):
 
-    # Composed of:
-    # IEEE_company_id - 24bit,
-    # reserved-20bit,
-    # system_id-16bit
-    # volume_id-64bit
-
     def __init__(self, serial):
         super(SCSISerial, self).__init__()
+        #: the string representation (hexadecimal) of the serial number
         self.serial = serial
-        self._decode()
 
-    def _decode(self):
         try:
+            #: the IEEE company id (24 bits)
             self.ieee_company_id = _parse_hex_long(self.serial[:6])
+            # 20 bits
             self.reserved = _parse_hex_long(self.serial[6:11])
+            #: unique system id (16 bits)
             self.system_id = _parse_hex_long(self.serial[11:15])
+            #: the volume id (64 bits)
             self.volume_id = _parse_hex_long(self.serial[15:])
         except (TypeError, binascii.Error):
             self.ieee_company_id = self.reserved = self.system_id = self.volume_id = None

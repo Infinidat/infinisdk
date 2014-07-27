@@ -42,6 +42,25 @@ We can now access various attributes of the volume:
 		>>> v.get_size()
 		1*GB
 
+Volume Serials
+--------------
+
+InfiniSDK exposes the volume WWN serial number through a custom type, enabling you to parse it easier:
+
+.. code-block:: python
+
+		>>> serial = v.get_serial()
+		>>> print(serial) # doctest: +ELLIPSIS
+		742b0...3ef
+		>>> serial.ieee_company_id
+		7613199
+		>>> unused = serial.system_id
+		...
+		>>> serial.volume_id
+		1007
+
+.. seealso:: :class:`.SCSISerial`
+
 Deleting Volumes
 ----------------
 

@@ -94,6 +94,12 @@ Infinibox Utilities
    :members:
    :special-members: __int__
 
+.. automodule:: infinisdk.infinibox.scsi_serial
+
+.. autoclass:: SCSISerial
+   :members:
+
+
 
 Core Objects
 ~~~~~~~~~~~~
