@@ -42,6 +42,8 @@ config = confetti.Config(dict(
 
         compatible_versions = [
             r"^1.5(?:[\.-].*)$",
+            r"^1.6(?:[\.-].*)$",
+            r"^2.0(?:[\.-].*)$",
         ],
 
         defaults=dict(
