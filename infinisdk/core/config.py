@@ -41,7 +41,7 @@ config = confetti.Config(dict(
     infinibox=dict(
 
         compatible_versions = [
-            r"^1.5(?:[\.-].*)$",
+            r"^1\.5\.[\.0-9]+$",
         ],
 
         defaults=dict(
