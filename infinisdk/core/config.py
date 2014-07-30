@@ -12,6 +12,7 @@
 ### are strictly forbidden unless prior written permission is obtained from Infinidat Ltd.
 ###!
 from .._compat import ConfigParser
+from .version_compatibility import All
 
 import confetti
 
@@ -41,7 +42,7 @@ config = confetti.Config(dict(
     infinibox=dict(
 
         compatible_versions = [
-            r"^1\.5\.[\.0-9]+$",
+            All(1, 5),
         ],
 
         defaults=dict(

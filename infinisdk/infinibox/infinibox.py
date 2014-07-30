@@ -36,7 +36,8 @@ class InfiniBox(APITarget):
 
     def check_version(self):
         version = self.get_version()
-        if not any(re.match(regexp, version) for regexp in config.root.infinibox.compatible_versions):
+        if not any(version_compatibility.matches(version)
+                   for version_compatibility in config.root.infinibox.compatible_versions):
             raise VersionNotSupported(version)
 
     def _get_api_auth(self):
