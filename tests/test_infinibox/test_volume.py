@@ -10,7 +10,8 @@ import pytest
 from infinisdk.core.translators_and_types import MillisecondsDatetimeTranslator
 from infinisdk.core.exceptions import (APICommandFailed,
                                        InvalidOperationException)
-from infinisdk.infinibox.volume import _BEGIN_FORK_HOOK, _FINISH_FORK_HOOK, Volume
+from infinisdk.infinibox.base_data_entity import _BEGIN_FORK_HOOK, _FINISH_FORK_HOOK
+from infinisdk.infinibox.volume import Volume
 from infinisdk.infinibox.pool import Pool
 from infinisdk.infinibox.scsi_serial import SCSISerial
 

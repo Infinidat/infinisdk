@@ -20,18 +20,10 @@ from storage_interfaces.scsi.abstracts import ScsiVolume
 from ..core.exceptions import InvalidOperationException, InfiniSDKException
 from ..core.api.special_values import Autogenerate
 from ..core.bindings import RelatedObjectBinding
-from .system_object import InfiniBoxObject
+from .base_data_entity import BaseDataEntity
 from .pool import Pool
 from .lun import LogicalUnit, LogicalUnitContainer
 from .scsi_serial import SCSISerial
-
-PROVISIONING = namedtuple('Provisioning', ['Thick', 'Thin'])('THICK', 'THIN')
-VOLUME_TYPES = namedtuple('VolumeTypes', ['Master', 'Snapshot', 'Clone'])(
-    'MASTER', 'SNAP', 'CLONE')
-_BEGIN_FORK_HOOK = "infinidat.sdk.begin_fork"
-_CANCEL_FORK_HOOK = "infinidat.sdk.cancel_fork"
-_FINISH_FORK_HOOK = "infinidat.sdk.finish_fork"
-
 
 
 class VolumesBinder(TypeBinder):
@@ -52,7 +44,7 @@ class VolumesBinder(TypeBinder):
                 for i in range(1, count + 1)]
 
 
-class Volume(InfiniBoxObject):
+class Volume(BaseDataEntity):
 
     BINDER_CLASS = VolumesBinder
 
@@ -82,44 +74,7 @@ class Volume(InfiniBoxObject):
         return (system_id, self.get_name())
 
     def is_master_volume(self):
-        return self.get_type() == VOLUME_TYPES.Master
-
-    def is_snapshot(self):
-        return self.get_type() == VOLUME_TYPES.Snapshot
-
-    def is_clone(self):
-        return self.get_type() == VOLUME_TYPES.Clone
-
-    def _create_child(self, name):
-        self.refresh('has_children')
-        hook_tags = self._get_tags_for_object_operations(self.system)
-        gossip.trigger_with_tags(_BEGIN_FORK_HOOK, {'vol': self}, tags=hook_tags)
-        if not name:
-            name = Autogenerate('vol_{uuid}')
-        data = {'name': name, 'parent_id': self.get_id()}
-        try:
-            child = self._create(self.system, self.get_url_path(self.system), data=data, tags=hook_tags)
-        except Exception:
-            gossip.trigger_with_tags(_CANCEL_FORK_HOOK, {'vol': self}, tags=hook_tags)
-            raise
-        gossip.trigger_with_tags(_FINISH_FORK_HOOK, {'vol': self, 'child': child}, tags=hook_tags)
-        return child
-
-    def create_clone(self, name=None):
-        if self.is_snapshot():
-            return self._create_child(name)
-        raise InvalidOperationException('Cannot create clone for volume/clone')
-
-    def create_snapshot(self, name=None):
-        if self.is_snapshot():
-            raise InvalidOperationException(
-                'Cannot create snapshot for snapshot')
-        return self._create_child(name)
-
-    def restore(self, snapshot):
-        snapshot_data = int(snapshot.get_field('data'))
-        restore_url = self.get_this_url_path().add_path('restore')
-        self.system.api.post(restore_url, data=snapshot_data, raw_data=True)
+        return self.is_master()
 
     def own_replication_snapshot(self, name=None):
         if not name:
@@ -127,15 +82,6 @@ class Volume(InfiniBoxObject):
         data = {'name': name}
         child = self._create(self.system, self.get_this_url_path().add_path('own_snapshot'), data=data)
         return child
-
-    def get_creation_time(self):
-        return self.get_field("created_at", from_cache=True)
-
-    def get_snapshots(self):
-        return self.get_children(type=VOLUME_TYPES.Snapshot)
-
-    def get_clones(self):
-        return self.get_children(type=VOLUME_TYPES.Clone)
 
     def _get_luns_data_from_url(self):
         res = self.system.api.get(self.get_this_url_path().add_path('luns'))
@@ -158,12 +104,6 @@ class Volume(InfiniBoxObject):
 
     def is_mapped(self):
         return self.get_field("mapped")
-
-    def get_children(self, **kwargs):
-        return self.find(self.system, parent_id=self.get_id(), **kwargs)
-
-    def has_children(self):
-        return self.get_field("has_children")
 
     def unmap(self):
         for lun in self.get_logical_units().luns.values():

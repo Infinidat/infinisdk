@@ -27,10 +27,14 @@ from .host import Host
 from .pool import Pool
 from .user import User
 from .volume import Volume
+from .filesystem import Filesystem
+from .export import Export
+from .ipdomain import IPDomain
+from .portgroup import PortGroup
 
 
 class InfiniBox(APITarget):
-    OBJECT_TYPES = [Volume, Pool, Host, Cluster, User, EmailRule]
+    OBJECT_TYPES = [Volume, Pool, Host, Cluster, User, EmailRule, Filesystem, Export, IPDomain, PortGroup]
     SYSTEM_EVENTS_TYPE = Events
     SYSTEM_COMPONENTS_TYPE = InfiniBoxSystemComponents
 

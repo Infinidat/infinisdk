@@ -53,3 +53,20 @@ class PassthroughBinding(InfiniSDKBinding):
 
     def get_value_from_api_value(self, system, objtype, obj, value):
         return value
+
+class ListToDictBinding(InfiniSDKBinding):
+    """
+    Binding for simple api quircks, where api expects the following:
+    [ { "name" : value1 }, { "name" : value2 } ]
+    InfiniSDK will use a simple list of strings:
+    [ value1, value2 ]
+    """
+    def __init__(self, key):
+        super(ListToDictBinding, self).__init__()
+        self.key = key
+
+    def get_value_from_api_value(self, system, objtype, obj, value):
+        return [d[self.key] for d in obj.get_field(self._field.name)]
+
+    def get_api_value_from_value(self, system, objtype, obj, value):
+        return [{self.key:val} for val in value]
