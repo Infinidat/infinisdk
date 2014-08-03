@@ -3,7 +3,7 @@ import arrow
 from functools import partial
 
 import flux
-from capacity import GB
+from capacity import GB, Capacity
 
 import gossip
 import pytest
@@ -26,6 +26,9 @@ def test_unmapping(infinibox, volume, host):
 
 def test_serial(infinibox, volume):
     assert isinstance(volume.get_serial(), SCSISerial)
+
+def test_allocated(infinibox, volume):
+    assert isinstance(volume.get_allocated(), Capacity)
 
 def test_field_types():
     assert Volume.fields.parent.type.type is Volume
