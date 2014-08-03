@@ -28,7 +28,7 @@ class LogicalUnit(object):
 
     @property
     def volume(self):
-        return self.system.volumes.safe_get_by_id(self.volume_id)
+        return self.system.volumes.get_by_id_lazy(self.volume_id)
 
     def get_host(self):
         """ Returns the host to which this LU belongs
