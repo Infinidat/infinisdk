@@ -7,7 +7,8 @@ class All(object):
         self.minor = minor
 
     def matches(self, version_string):
-        parts = version_string.split('.')
+        removed_labels = version_string.split("-")[0]
+        parts = removed_labels.split('.')
         try:
             major = int(parts[0])
             minor = int(parts[1])

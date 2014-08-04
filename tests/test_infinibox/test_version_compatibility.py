@@ -74,6 +74,7 @@ def major_minor(request):
 
 @pytest.fixture(params=[
     '{major}.{minor}',
+    '{major}.{minor}-bla',
     '{major}.{minor}.0',
     '{major}.{minor}.1',
     '{major}.{minor}.0.1',
