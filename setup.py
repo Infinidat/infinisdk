@@ -14,7 +14,7 @@ _INSTALL_REQUIERS = [
     "logbook",
     "requests>=1.2.0",
     "sentinels",
-    "gossip>=0.6.0",
+    "gossip>=0.8.0",
     "URLObject",
     "confetti>=2.1.0",
     "infi.dtypes.wwn>=0.0.2",

@@ -183,11 +183,11 @@ def test_object_creation_hooks_for_child_volumes(infinibox, volume):
         obj_name = kwargs['data']['name']
         l.append('{0}_{1}'.format(hook_type, obj_name))
     gossip.register(partial(hook_callback, 'pre'),
-                    'infinidat.pre_object_creation', hook_ident)
+                    'infinidat.sdk.pre_object_creation', hook_ident)
     gossip.register(partial(hook_callback, 'failure'),
-                    'infinidat.object_operation_failure', hook_ident)
+                    'infinidat.sdk.object_operation_failure', hook_ident)
     gossip.register(partial(hook_callback, 'post'),
-                    'infinidat.post_object_creation', hook_ident)
+                    'infinidat.sdk.post_object_creation', hook_ident)
     for fork_hook in [_BEGIN_FORK_HOOK, _FINISH_FORK_HOOK]:
         gossip.register(partial(save_fork_callback, fork_hook), fork_hook)
 

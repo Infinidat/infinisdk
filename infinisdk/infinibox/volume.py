@@ -28,15 +28,10 @@ from .scsi_serial import SCSISerial
 PROVISIONING = namedtuple('Provisioning', ['Thick', 'Thin'])('THICK', 'THIN')
 VOLUME_TYPES = namedtuple('VolumeTypes', ['Master', 'Snapshot', 'Clone'])(
     'MASTER', 'SNAP', 'CLONE')
-_BEGIN_FORK_HOOK = "infinidat.io.begin_fork"
-_CANCEL_FORK_HOOK = "infinidat.io.cancel_fork"
-_FINISH_FORK_HOOK = "infinidat.io.finish_fork"
+_BEGIN_FORK_HOOK = "infinidat.sdk.begin_fork"
+_CANCEL_FORK_HOOK = "infinidat.sdk.cancel_fork"
+_FINISH_FORK_HOOK = "infinidat.sdk.finish_fork"
 
-
-def _install_gossip_hooks():
-    for hook_name in [_BEGIN_FORK_HOOK, _CANCEL_FORK_HOOK, _FINISH_FORK_HOOK]:
-        gossip.define(hook_name)
-_install_gossip_hooks()
 
 
 class VolumesBinder(TypeBinder):
@@ -97,22 +92,17 @@ class Volume(InfiniBoxObject):
 
     def _create_child(self, name):
         self.refresh('has_children')
-        gossip.trigger(_BEGIN_FORK_HOOK, vol=self)
+        hook_tags = self._get_tags_for_object_operations(self.system)
+        gossip.trigger_with_tags(_BEGIN_FORK_HOOK, {'vol': self}, tags=hook_tags)
         if not name:
             name = Autogenerate('vol_{uuid}')
         data = {'name': name, 'parent_id': self.get_id()}
-        gossip.trigger('infinidat.pre_object_creation',
-                       data=data, system=self.system, cls=type(self))
         try:
-            resp = self.system.api.post(
-                self.get_url_path(self.system), data=data)
+            child = self._create(self.system, self.get_url_path(self.system), data=data, tags=hook_tags)
         except Exception:
-            gossip.trigger('infinidat.object_operation_failure')
-            gossip.trigger(_CANCEL_FORK_HOOK, vol=self)
+            gossip.trigger_with_tags(_CANCEL_FORK_HOOK, {'vol': self}, tags=hook_tags)
             raise
-        child = self.__class__(self.system, resp.get_result())
-        gossip.trigger('infinidat.post_object_creation', obj=child, data=data)
-        gossip.trigger(_FINISH_FORK_HOOK, vol=self, child=child)
+        gossip.trigger_with_tags(_FINISH_FORK_HOOK, {'vol': self, 'child': child}, tags=hook_tags)
         return child
 
     def create_clone(self, name=None):
@@ -135,16 +125,7 @@ class Volume(InfiniBoxObject):
         if not name:
             name = Autogenerate('vol_{uuid}')
         data = {'name': name}
-        gossip.trigger('infinidat.pre_object_creation',
-                       data=data, system=self.system, cls=type(self))
-        try:
-            resp = self.system.api.post(
-                self.get_this_url_path().add_path('own_snapshot'), data=data)
-        except Exception:
-            gossip.trigger('infinidat.object_operation_failure')
-            raise
-        child = self.__class__(self.system, resp.get_result())
-        gossip.trigger('infinidat.post_object_creation', obj=child, data=data)
+        child = self._create(self.system, self.get_this_url_path().add_path('own_snapshot'), data=data)
         return child
 
     def get_creation_time(self):

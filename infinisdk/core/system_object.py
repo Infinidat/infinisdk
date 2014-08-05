@@ -32,18 +32,13 @@ from .api.special_values import translate_special_values
 from .utils import DONT_CARE
 
 
-def _install_gossip_hooks():
-    for (hook, operation) in itertools.product(["pre", "post"], ['creation', 'deletion', 'update']):
-        gossip.define("infinidat.{0}_object_{1}".format(hook, operation))
-    gossip.define("infinidat.object_operation_failure")
-
-_install_gossip_hooks()
 
 class FieldsMeta(FieldsMetaBase):
 
     @classmethod
     def FIELD_FACTORY(cls, name):
         return Field(name, binding=PassthroughBinding())
+
 
 class SystemObject(with_metaclass(FieldsMeta)):
     FIELDS = []
@@ -102,13 +97,23 @@ class SystemObject(with_metaclass(FieldsMeta)):
             return True
 
     @classmethod
+    def _get_tags_for_object_operations(cls, system):
+        return [cls.get_type_name().lower(), system.get_type_name().lower()]
+
+    @classmethod
+    def _create(cls, system, url, data, tags=None):
+        hook_tags = tags or cls._get_tags_for_object_operations(system)
+        gossip.trigger_with_tags('infinidat.sdk.pre_object_creation', {'data': data, 'system': system, 'cls': cls}, tags=hook_tags)
+        with _possible_api_failure_context(tags=hook_tags):
+            returned = system.api.post(url, data=data).get_result()
+        obj = cls(system, returned)
+        gossip.trigger_with_tags('infinidat.sdk.post_object_creation', {'obj': obj, 'data': data}, tags=hook_tags)
+        return obj
+
+    @classmethod
     def create(cls, system, **fields):
         data = cls._get_data_for_post(system, fields)
-        gossip.trigger('infinidat.pre_object_creation', data=data, system=system, cls=cls)
-        with _possible_api_failure_context():
-            returned = cls(system, system.api.post(cls.get_url_path(system), data=data).get_result())
-        gossip.trigger('infinidat.post_object_creation', obj=returned, data=data)
-        return returned
+        return cls._create(system, cls.get_url_path(system), data)
 
     @classmethod
     def _get_data_for_post(cls, system, fields):
@@ -322,7 +327,11 @@ class SystemObject(with_metaclass(FieldsMeta)):
         """
         Deletes this object.
         """
-        self.system.api.delete(self.get_this_url_path())
+        hook_tags = self._get_tags_for_object_operations(self.system)
+        gossip.trigger_with_tags('infinidat.sdk.pre_object_deletion', {'obj': self}, tags=hook_tags)
+        with _possible_api_failure_context(hook_tags):
+            self.system.api.delete(self.get_this_url_path())
+        gossip.trigger_with_tags('infinidat.sdk.post_object_deletion', {'obj': self}, tags=hook_tags)
 
     @cached_method
     def get_this_url_path(self):
@@ -332,9 +341,9 @@ class SystemObject(with_metaclass(FieldsMeta)):
         return "<{0} id={1}>".format(type(self).__name__, self.id)
 
 @contextmanager
-def _possible_api_failure_context():
+def _possible_api_failure_context(tags):
     try:
         yield
-    except APICommandFailed as e:
-        gossip.trigger('infinidat.object_operation_failure')
+    except APICommandFailed:
+        gossip.trigger_with_tags('infinidat.sdk.object_operation_failure', tags=tags)
         raise

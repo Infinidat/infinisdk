@@ -17,18 +17,18 @@ def hooks(forge, request):
 
     returned = Hooks()
     returned.pre_object_creation_hook = forge.create_wildcard_function_stub(
-        name="pre")
+        name="pre_hook")
     returned.post_object_creation_hook = forge.create_wildcard_function_stub(
-        name="post")
+        name="post_hook")
     returned.object_operation_failure_hook = forge.create_wildcard_function_stub(
-        name="fail")
+        name="fail_hook")
 
     gossip.register(returned.pre_object_creation_hook,
-                    'infinidat.pre_object_creation', identifier)
+                    'infinidat.sdk.pre_object_creation', identifier)
     gossip.register(returned.post_object_creation_hook,
-                    'infinidat.post_object_creation', identifier)
+                    'infinidat.sdk.post_object_creation', identifier)
     gossip.register(returned.object_operation_failure_hook,
-                    'infinidat.object_operation_failure', identifier)
+                    'infinidat.sdk.object_operation_failure', identifier)
 
     @request.addfinalizer
     def cleanup():
