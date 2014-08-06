@@ -1,4 +1,5 @@
 import pytest
+import operator
 from infinisdk.core import *
 from infinisdk.core.exceptions import ObjectNotFound, TooManyObjectsFound
 from infinisdk.izbox.filesystem import Filesystem
@@ -45,24 +46,10 @@ def test_unknown_fields(izbox, field):
                         "unknown_field=eq%3A2")
 
 
-def test_querying_ne(izbox, field):
-    assert_query_equals(Filesystem.find(izbox, field != "X"), "id=ne%3AX")
-
-
-def test_querying_ge(izbox, field):
-    assert_query_equals(Filesystem.find(izbox, field >= "X"), "id=ge%3AX")
-
-
-def test_querying_le(izbox, field):
-    assert_query_equals(Filesystem.find(izbox, field <= "X"), "id=le%3AX")
-
-
-def test_querying_gt(izbox, field):
-    assert_query_equals(Filesystem.find(izbox, field > "X"), "id=gt%3AX")
-
-
-def test_querying_lt(izbox, field):
-    assert_query_equals(Filesystem.find(izbox, field < "X"), "id=lt%3AX")
+@pytest.mark.parametrize('operator', [operator.ne, operator.ge, operator.le, operator.gt, operator.lt])
+def test_querying_operation(izbox, field, operator):
+    operand = 123
+    assert_query_equals(Filesystem.find(izbox, operator(field, operand)), "id={0}%3A{1}".format(operator.__name__, operand))
 
 
 def _get_expectation_with_range(field_name, operator_name, iterable):
