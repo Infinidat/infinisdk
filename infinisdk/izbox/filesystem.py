@@ -18,7 +18,7 @@ from ..core.api.special_values import Autogenerate
 
 class Filesystem(SystemObject):
     FIELDS = [
-        Field("id", is_identity=True),
+        Field("id", type=int, is_identity=True),
         Field("quota", api_name="quota_in_bytes",
               type=CapacityType,
               default=GB, creation_parameter=True, mutable=True),
