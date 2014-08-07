@@ -112,11 +112,13 @@ def _get_purge_callback(obj):
 
 @contextmanager
 def enabling_infinisdk_internal():
+    assert not extensions.active
     enable_infinisdk_internal()
     try:
         yield
     finally:
         disable_infinisdk_internal()
+        assert not extensions.active
 
 @pytest.fixture(params=["host", "cluster"])
 def mapping_object_type(request, infinibox):

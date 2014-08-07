@@ -36,7 +36,7 @@ def test_removing_extensions(infinibox):
 
     assert infinibox.new_method(1, 2, 3)
 
-    new_method.deactivate()
+    new_method.__extension_deactivate__()
 
     assert not hasattr(infinibox, 'new_method')
 
@@ -46,8 +46,8 @@ def test_removing_extensions_twice(infinibox):
     def new_method(self, a, b, c):
         return True
 
-    new_method.deactivate()
-    new_method.deactivate()
+    new_method.__extension_deactivate__()
+    new_method.__extension_deactivate__()
 
     assert not hasattr(infinibox, 'new_method')
 
@@ -62,10 +62,10 @@ def test_extending_hierarchy(request, infinibox):
     def method1(self):
         pass
 
-    request.addfinalizer(method1.deactivate)
+    request.addfinalizer(method1.__extension_deactivate__)
 
     @extensions.add_method(Child, 'method1')
     def method1(self):
         pass
 
-    request.addfinalizer(method1.deactivate)
+    request.addfinalizer(method1.__extension_deactivate__)
