@@ -132,10 +132,10 @@ class Volume(InfiniBoxObject):
         return self.get_field("created_at", from_cache=True)
 
     def get_snapshots(self):
-        return self.get_children()
+        return self.get_children(type=VOLUME_TYPES.Snapshot)
 
     def get_clones(self):
-        return self.get_children()
+        return self.get_children(type=VOLUME_TYPES.Clone)
 
     def _get_luns_data_from_url(self):
         res = self.system.api.get(self.get_this_url_path().add_path('luns'))
@@ -159,8 +159,8 @@ class Volume(InfiniBoxObject):
     def is_mapped(self):
         return self.get_field("mapped")
 
-    def get_children(self):
-        return self.find(self.system, parent_id=self.get_id())
+    def get_children(self, **kwargs):
+        return self.find(self.system, parent_id=self.get_id(), **kwargs)
 
     def has_children(self):
         return self.get_field("has_children")

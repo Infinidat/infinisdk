@@ -211,3 +211,16 @@ def test_create_many(infinibox, pool):
 
     for index, vol in enumerate(vols, start=1):
         assert vol.get_name() == '{0}_{1}'.format(name, index)
+
+
+def test_get_children_snapshots_and_clones(infinibox, volume):
+    snap = volume.create_snapshot()
+    clone = snap.create_clone()
+    snap2 = clone.create_snapshot()
+
+    assert set(volume.get_children()) == set(volume.get_snapshots()) == set([snap])
+    assert set(snap.get_clones()) == set(snap.get_children()) == set([clone])
+    assert set(clone.get_children()) == set(clone.get_snapshots()) == set([snap2])
+
+    assert set(snap.get_snapshots()) == set()
+    assert set(clone.get_clones()) == set()
