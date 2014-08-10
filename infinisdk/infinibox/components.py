@@ -165,6 +165,7 @@ class Node(InfiniBoxSystemComponent):
         Field("index", api_name="id", type=int, cached=True),
         Field("name"),
         Field("fc_ports", type=list),
+        Field("eth_ports", type=list),
         Field("drives", type=list),
         Field("state", cached=False),
     ]
@@ -175,7 +176,7 @@ class Node(InfiniBoxSystemComponent):
 
     @classmethod
     def _get_sub_components_classes(cls):
-        return [FcPort, Service]
+        return [EthPort, FcPort, Service]
 
     def phase_out(self):
         return self.system.api.post(self.get_this_url_path().add_path('phase_out'))
@@ -186,6 +187,29 @@ class Node(InfiniBoxSystemComponent):
     def __repr__(self):
         return '<Node {0}>'.format(self.get_index())
 
+
+@InfiniBoxSystemComponents.install_component_type
+class EthPort(InfiniBoxSystemComponent):
+    FIELDS = [
+        Field("hw_addr", is_identity=True),
+        Field("connection_speed"),
+        Field("device_name", api_name="name"),
+        Field("port_number", type=int, cached=True),
+        Field("index", api_name="id", type=int, cached=True),
+        Field("node", api_name="node_index", type=int, cached=True),
+        Field("role", cached=True),
+        Field("system_interface_port_number", type=int),
+        Field("state", cached=False),
+        Field("ip_v4_addr"),
+        Field("ip_v4_broadcast"),
+        Field("ip_v4_netmask"),
+        Field("ip_v6_addr"),
+        Field("ip_v6_netmask"),
+    ]
+
+    @classmethod
+    def get_type_name(self):
+        return "eth_port"
 
 @InfiniBoxSystemComponents.install_component_type
 class FcPort(InfiniBoxSystemComponent):
