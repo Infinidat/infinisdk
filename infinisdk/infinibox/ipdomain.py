@@ -31,8 +31,8 @@ class IPDomain(InfiniBoxObject):
     def add_ip_address(self, ip_address):
         return self.system.api.post(self.get_this_url_path().add_path("ips"), data=ip_address).get_result()
 
-    def remove_ip_address(self, ip_address, force=False):
-        url = self.get_this_url_path().add_path("ips/{0}{1}".format(ip_address, '/force' if force else ''))
+    def remove_ip_address(self, ip_address):
+        url = self.get_this_url_path().add_path("ips/{0}".format(ip_address))
         return self.system.api.delete(url).get_result()
 
     def add_port_group(self, port_group):
