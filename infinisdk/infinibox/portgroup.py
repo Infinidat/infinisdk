@@ -17,7 +17,7 @@ from .system_object import InfiniBoxObject
 from ..core.bindings import ListToDictBinding
 
 class PortGroup(InfiniBoxObject):
-    URL_PATH = 'net/pgs'
+    URL_PATH = 'network/port_groups'
 
     FIELDS = [
         Field("id", is_identity=True),

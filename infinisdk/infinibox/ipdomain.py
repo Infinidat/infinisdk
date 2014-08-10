@@ -16,7 +16,7 @@ from ..core.api.special_values import Autogenerate
 from .system_object import InfiniBoxObject
 
 class IPDomain(InfiniBoxObject):
-    URL_PATH = 'net/ipds'
+    URL_PATH = 'network/spaces'
 
     FIELDS = [
         Field("id", is_identity=True),
