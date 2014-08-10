@@ -11,8 +11,8 @@
 ### Redistribution and use in source or binary forms, with or without modification,
 ### are strictly forbidden unless prior written permission is obtained from Infinidat Ltd.
 ###!
-from .._compat import string_types
 from ..core.field import Field
+from ..core.bindings import InfiniSDKBinding
 from ..core.system_component import SystemComponentsBinder
 from ..core.system_object import SystemObject
 from infi.pyutils.lazy import cached_method
@@ -24,7 +24,7 @@ class InfiniBoxSystemComponents(SystemComponentsBinder):
 
     def __init__(self, system):
         super(InfiniBoxSystemComponents, self).__init__(InfiniBoxSystemComponent, system)
-        self.system_component = System(self.system, {'parent_id': "", 'index': 0})
+        self.system_component = System(self.system, {'parent_id': "", 'id': 0})
         self.cache_component(self.system_component)
         Rack = self.racks.object_type
         self._rack_1 = Rack(self.system, {'parent_id': self.system_component.id, 'rack': 1})
@@ -49,25 +49,26 @@ class InfiniBoxSystemComponents(SystemComponentsBinder):
         return self._rack_1
 
 
-class ComputedIDField(Field):
-    def compute_obj_id(self, obj_index, parent_id, obj_class):
-        index_str = obj_index if isinstance(obj_index, string_types) else "{0:02}".format(obj_index)
-        return "{0}{1}{2}:{3}".format(parent_id,
-                                      "_" if parent_id else "",
-                                      obj_class.get_type_name(),
-                                      index_str)
+class ComputedIDBinding(InfiniSDKBinding):
 
-    def extract_from_json(self, obj_class, json):
-        curr_index = obj_class.fields.index.extract_from_json(obj_class, json)
-        parent_id = json[obj_class.fields.parent_id.api_name]
-        return self.compute_obj_id(curr_index, parent_id, obj_class)
+    def get_api_value_from_value(self, system, objtype, obj, value):
+        return int(value.rsplit(':', 1)[1])
 
+    def get_value_from_api_object(self, system, objtype, obj, api_obj):
+        parent_id = api_obj.get('parent_id', '')
+        returned = "{0}_".format(parent_id) if parent_id else ""
+        index = objtype.fields.index.binding.get_value_from_api_object(system, objtype, obj, api_obj)
+        returned += '{0}:{1}'.format(objtype.get_type_name(), index)
+        return returned
+
+    def get_value_from_api_value(self, *args):
+        raise NotImplementedError() # pragma: no cover
 
 class InfiniBoxSystemComponent(SystemObject):
     BINDER_CLASS = SystemComponentsBinder
     BASE_URL = URL("components")
     FIELDS = [
-        ComputedIDField("id", is_identity=True, cached=True),
+        Field("id", binding=ComputedIDBinding(), is_identity=True, cached=True),
         Field("parent_id", cached=True, add_updater=False, is_identity=True),
     ]
 
@@ -111,7 +112,7 @@ class InfiniBoxSystemComponent(SystemObject):
     @classmethod
     def construct(cls, system, data, parent_id):
         data['parent_id'] = parent_id
-        component_id = cls.fields.id.extract_from_json(cls, data)
+        component_id = cls.fields.id.binding.get_value_from_api_object(system, cls, None, data)
         returned = system.components.try_get_component_by_id(component_id)
         if returned is None:
             component_type = cls.get_type_name()
@@ -129,7 +130,7 @@ class InfiniBoxSystemComponent(SystemObject):
 @InfiniBoxSystemComponents.install_component_type
 class Rack(InfiniBoxSystemComponent):
     FIELDS = [
-        Field("index", api_name="rack", type=int, is_identity=True, cached=True),
+            Field("index", api_name="rack", type=int, cached=True),
     ]
 
     @classmethod
@@ -145,10 +146,11 @@ class Rack(InfiniBoxSystemComponent):
     def _get_sub_components_classes(cls):
         return [Enclosure, Node]
 
+
 @InfiniBoxSystemComponents.install_component_type
 class Enclosure(InfiniBoxSystemComponent):
     FIELDS = [
-        Field("index", api_name="id", type=int, is_identity=True, cached=True),
+        Field("index", api_name="id", type=int, cached=True),
         Field("drives", type=list),
         Field("state", cached=False),
     ]
@@ -160,7 +162,7 @@ class Enclosure(InfiniBoxSystemComponent):
 @InfiniBoxSystemComponents.install_component_type
 class Node(InfiniBoxSystemComponent):
     FIELDS = [
-        Field("index", api_name="id", type=int, is_identity=True, cached=True),
+        Field("index", api_name="id", type=int, cached=True),
         Field("name"),
         Field("fc_ports", type=list),
         Field("drives", type=list),
@@ -182,14 +184,14 @@ class Node(InfiniBoxSystemComponent):
         return self.system.api.post(self.get_this_url_path().add_path('phase_in'))
 
     def __repr__(self):
-        return '<Node {0}>'.format(self.get_field('index'))
+        return '<Node {0}>'.format(self.get_index())
 
 
 @InfiniBoxSystemComponents.install_component_type
 class FcPort(InfiniBoxSystemComponent):
     FIELDS = [
-        Field("wwpn", is_identity=True),
         Field("index", api_name="id", type=int, cached=True),
+        Field("wwpn", is_identity=True),
         Field("node", cached=True),
         Field("state", cached=False),
     ]
@@ -210,14 +212,15 @@ class Drive(InfiniBoxSystemComponent):
 @InfiniBoxSystemComponents.install_component_type
 class Service(InfiniBoxSystemComponent):
     FIELDS = [
-        Field("index", api_name="name", is_identity=True, cached=True),
+        Field("index", api_name="name", cached=True),
+        Field("name", is_identity=True, cached=True),
         Field("state", cached=False),
     ]
 
 @InfiniBoxSystemComponents.install_component_type
 class System(InfiniBoxSystemComponent):
     FIELDS = [
-        Field("index", cached=True, type=int),
+        Field("index", api_name="id", type=int, cached=True),
         Field("state", add_getter=False, cached=False),
     ]
 

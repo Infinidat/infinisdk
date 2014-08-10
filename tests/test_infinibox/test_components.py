@@ -10,10 +10,18 @@ from infinisdk.infinibox.components import (Drive, Enclosure, FcPort, Node,
 NO_OF_ENCLOSURES_DRIVES = config.get_path('infinibox.defaults.enlosure_drives.total_count.simulator')
 
 
+def test_component_id_field(infinibox, component_collection, component):
+    assert isinstance(component.id, str)
+    assert component.get_field('id') == component.id
+    assert component_collection.get_by_id(component.id) is component
+
+
 def _basic_check_for_component(infinibox, component_type, parent_type, check_sub_components):
     sys_components = infinibox.components
     from_types_list = getattr(sys_components.types, component_type.__name__)
     assert from_types_list is component_type
+
+    assert component_type.fields.get('index') is not None
 
     collection = sys_components[component_type.get_plural_name()]
     component_instances = collection.get_all()
@@ -67,9 +75,30 @@ def test_node_component(infinibox):
 def test_service_component(infinibox):
     _basic_check_for_component(infinibox, Service, Node, False)
 
-def test__node_phase(infinibox):
+def test_node_phase(infinibox):
     node = infinibox.components.nodes.choose()
     node.phase_out()
     waiting.wait(lambda: node.get_state() == defs.enums.nodes.states.ready)
     node.phase_in()
     waiting.wait(lambda: node.get_state() == defs.enums.nodes.states.active)
+
+def test_get_all_first_drives(infinibox):
+    drives_list = infinibox.components.drives.find(index=1)
+    enclosures = infinibox.components.enclosures
+    assert len(drives_list) == len(enclosures.get_all())
+    get_expected_drive_id = lambda enc: 'system:0_rack:1_enclosure:{0}_drive:1'.format(enc.get_index())
+    assert set(get_expected_drive_id(enc) for enc in enclosures) == set(drive.get_id() for drive in drives_list)
+
+def test_get_index(infinibox):
+    node = infinibox.components.nodes.get(index=3)
+    assert node.get_index() == 3
+    assert node.get_id() == 'system:0_rack:1_node:3'
+
+
+@pytest.fixture(params=['racks', 'nodes', 'enclosures'])
+def component_collection(request, infinibox):
+    return getattr(infinibox.components, request.param)
+
+@pytest.fixture
+def component(infinibox, component_collection):
+    return list(component_collection)[0]

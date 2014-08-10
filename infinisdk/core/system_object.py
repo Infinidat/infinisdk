@@ -51,7 +51,7 @@ class SystemObject(with_metaclass(FieldsMeta)):
         #: the system to which this object belongs
         self.system = system
         self._cache = initial_data
-        self.id = self.fields.id.extract_from_json(self, self._cache)
+        self.id = self.fields.id.binding.get_value_from_api_object(system, type(self), self, self._cache)
 
     def refresh(self, *field_names):
         """Discards the cached field values of this object, causing the next fetch to retrieve the fresh value from the system
@@ -242,11 +242,8 @@ class SystemObject(with_metaclass(FieldsMeta)):
 
         returned = {}
         for field_name in field_names:
-            field = self.fields.get(field_name, None)
-            if field is not None:
-                value = field.binding.get_value_from_api_value(self.system, type(self), self, self._cache[field.api_name])
-            else:
-                value = self._cache[field_name]
+            field = self.fields.get_or_fabricate(field_name)
+            value = field.binding.get_value_from_api_object(self.system, type(self), self, self._cache)
             returned[field_name] = value
 
         return returned
@@ -283,11 +280,12 @@ class SystemObject(with_metaclass(FieldsMeta)):
         returned = {}
         missed = []
         for field_name in field_names:
-            value = self._cache.get(self._get_field_api_name_if_defined(field_name), NOTHING)
-            if value is NOTHING:
+            field = self.fields.get_or_fabricate(field_name)
+            try:
+                value = field.binding.get_value_from_api_object(self.system, type(self), self, self._cache)
+            except KeyError:
                 missed.append(field_name)
             else:
-                value = self.fields.get_or_fabricate(field_name).binding.get_value_from_api_value(self.system, type(self), self, value)
                 returned[field_name] = value
         if missed:
             raise CacheMiss(
