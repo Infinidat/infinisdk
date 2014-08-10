@@ -66,7 +66,7 @@ class ListToDictBinding(InfiniSDKBinding):
         self.key = key
 
     def get_value_from_api_value(self, system, objtype, obj, value):
-        return [d[self.key] for d in obj.get_field(self._field.name)]
+        return [d[self.key] for d in value]
 
     def get_api_value_from_value(self, system, objtype, obj, value):
         return [{self.key:val} for val in value]
