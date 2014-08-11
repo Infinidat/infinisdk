@@ -11,5 +11,17 @@ The system name and serial numbers can be obtained directly from the :class:`.In
 		>>> system_name = system.get_name()
 		>>> system_serial = system.get_serial()
 
+Getting the System Model Name
+-----------------------------
+
+The :meth:`.InfiniBox.get_model_name` method retrieves the model information, as reported by the system:
+
+.. code-block:: python
+
+		>>> print(system.get_model_name())
+		01IB...AF
+
 .. seealso:: :class:`.InfiniBox`
+
+
 

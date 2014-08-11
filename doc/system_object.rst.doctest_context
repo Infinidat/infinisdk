@@ -7,6 +7,7 @@ from infinisdk import InfiniBox
 def doctest_context():
     simulator = Simulator()
     simulator.activate()
+    simulator.api.put('/api/rest/config/mgmt/system.model_long_name', data='01IB...AF')
     system = InfiniBox(simulator, auth=('infinidat', '123456'))
     try:
         yield {
