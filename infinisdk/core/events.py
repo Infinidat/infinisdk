@@ -31,7 +31,10 @@ class Events(TypeBinder):
         return returned
 
     def get_last_event(self):
-        return self.get_last_events(1)[0]
+        events = self.get_last_events(1)
+        if len(events) > 0:
+            return events[0]
+        return None
 
     def _get_events_types_from_system(self):
         return self.system.api.get("events/types").get_result()
