@@ -38,6 +38,9 @@ class Filesystem(BaseDataEntity):
 
     def add_export(self, **kwargs):
         return self.system.exports.create(filesystem=self, **kwargs)
+
     def get_exports(self):
-        return self.system.exports.find(self.system.objects.exports.fields.filesystem_id == self.id)
+        # TODO: FIXME: INFINIBOX-11698, please revert when fixed
+        return [e for e in self.system.exports.get_all() if e.get_filesystem() == self]
+        #return self.system.exports.find(self.system.objects.exports.fields.filesystem_id == self.id)
 
