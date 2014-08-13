@@ -28,6 +28,9 @@ class Pool(InfiniBoxObject):
     def get_volumes(self):
         return self.system.volumes.find(pool_id=self.id)
 
+    def get_filesystems(self):
+        return self.system.filesystems.find(pool_id=self.id)
+
     def _get_pool_owners_url(self, owner_id=None):
         url = self.get_this_url_path().add_path('owners')
         if owner_id:
