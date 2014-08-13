@@ -29,7 +29,7 @@ class PortGroup(InfiniBoxObject):
 
     def add_port(self, port):
         url = self.get_this_url_path().add_path("ports")
-        data = self.fields.ports.binding.get_raw_api_value([port])[0]
+        data = self.fields.ports.binding.get_api_value_from_value(None, None, None, [port])[0]
         return self.system.api.post(url, data=data).get_result()
 
     def remove_port(self, port):
