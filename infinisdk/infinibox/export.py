@@ -14,6 +14,7 @@
 from ..core import Field, SystemObject
 from ..core.api.special_values import Autogenerate
 from .system_object import InfiniBoxObject
+from ..core.bindings import RelatedObjectBinding
 
 class Export(InfiniBoxObject):
     FIELDS = [
@@ -21,12 +22,6 @@ class Export(InfiniBoxObject):
         Field("name", creation_parameter=True, mutable=True, default=Autogenerate("export_{uuid}")),
         Field("export_path", creation_parameter=True, mutable=True, default=Autogenerate("/export_{uuid}")),
         Field("inner_path", creation_parameter=True, mutable=True, default='/'),
-        Field("filesystem_id", cached=True, type=int),
+        Field("filesystem", api_name = "filesystem_id", creation_parameter = True, cached=True, type=int, binding=RelatedObjectBinding()),
     ]
 
-    @classmethod
-    def create(cls, system, **fields):
-        filesystem = fields.pop('filesystem', None)
-        if isinstance(filesystem, SystemObject):
-            fields['filesystem_id'] = filesystem.id  # workaound (filesystem_id mismatch)
-        return super(Export, cls).create(system, **fields)
