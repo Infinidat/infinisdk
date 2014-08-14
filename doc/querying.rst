@@ -93,6 +93,8 @@ The above code leverages Python's operator overloading to generate on-the-fly qu
 
 .. note:: ``Q.x != y`` is merely a shortcut for ``SomeObject.fields.x != y``, and provides no other additional functionality besides shortening the syntax.
 
+.. note:: You can use the following operators ``==``, ``!=``, ``>``, ``>=``, ``<``, ``<=``, and also ``.in_(...)``, ``.not_in(...)``, ``.between(x, y)`` and ``.like("string")``. Not all operators are supported by all queries -- some limitations might apply.
+
 And here is a query to find all volumes greater than 1 GiB in size:
 
 .. code-block:: python
