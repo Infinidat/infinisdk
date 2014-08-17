@@ -1,1 +1,1 @@
-__version__ = "22.0.dev0"
+__version__ = "22.0"
