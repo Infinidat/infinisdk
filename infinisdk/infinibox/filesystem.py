@@ -40,3 +40,5 @@ class Filesystem(BaseDataEntity):
         return [e for e in self.system.exports.get_all() if e.get_filesystem() == self]
         #return self.system.exports.find(self.system.objects.exports.fields.filesystem_id == self.id)
 
+    def has_children(self):
+        return len(self.get_children()) > 0

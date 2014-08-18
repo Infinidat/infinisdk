@@ -79,7 +79,7 @@ class BaseDataEntity(InfiniBoxObject):
         return self.find(self.system, parent_id=self.get_id(), **kwargs)
 
     def has_children(self):
-        return self.get_field("has_children")
+        raise NotImplementedError
 
     def get_parent(self):
         parent_id = self.get_parent_id()

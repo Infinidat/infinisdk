@@ -105,4 +105,7 @@ class Volume(BaseDataEntity):
         for lun in self.get_logical_units().luns.values():
             lun.unmap()
 
+    def has_children(self):
+        return self.get_field("has_children")
+
 ScsiVolume.register(Volume)
