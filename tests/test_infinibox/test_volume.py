@@ -223,3 +223,23 @@ def test_get_children_snapshots_and_clones(infinibox, volume):
 
     assert set(snap.get_snapshots()) == set()
     assert set(clone.get_clones()) == set()
+
+def test_move_volume(infinibox, volume):
+    # TODO: support with_capacity parameter (TESTINF-3019)
+    with_capacity = False
+    oldpool = volume.get_pool()
+    old_virt_capacity = oldpool.get_virtual_capacity()
+    newpool = infinibox.pools.create()
+    new_virt_capacity = newpool.get_virtual_capacity()
+    assert newpool != oldpool
+    volume.move_pool(newpool, with_capacity=with_capacity)
+    assert volume.get_pool() == newpool
+    assert volume not in oldpool.get_volumes()
+    assert volume in newpool.get_volumes()
+    vol_size = volume.get_size()
+    if with_capacity:
+        assert oldpool.get_virtual_capacity() == old_virt_capacity - vol_size
+        assert newpool.get_virtual_capacity() == new_virt_capacity + vol_size
+    else:
+        assert oldpool.get_virtual_capacity() == old_virt_capacity
+        assert newpool.get_virtual_capacity() == new_virt_capacity

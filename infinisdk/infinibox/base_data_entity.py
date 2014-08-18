@@ -93,3 +93,7 @@ class BaseDataEntity(InfiniBoxObject):
     def get_creation_time(self):
         return self.get_field("created_at", from_cache=True)
 
+    @InfiniBoxObject.requires_refresh("pool")
+    def move_pool(self, target_pool, with_capacity=True):
+        data = dict(pool_id = target_pool.get_id(), with_capacity = with_capacity)
+        return self.system.api.post(self.get_this_url_path().add_path('move'), data=data)
