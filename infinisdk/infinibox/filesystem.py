@@ -32,10 +32,6 @@ class Filesystem(BaseDataEntity):
         Field("provisioning", api_name="provtype", mutable=True, creation_parameter=True, default="THICK"),
     ]
 
-    def get_unique_key(self):
-        system_id = self.system.get_api_addresses()[0][0]
-        return (system_id, self.get_name())
-
     def add_export(self, **kwargs):
         return self.system.exports.create(filesystem=self, **kwargs)
 

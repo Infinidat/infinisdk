@@ -25,6 +25,10 @@ class BaseDataEntity(InfiniBoxObject):
     PROVISIONING = namedtuple('Provisioning', ['Thick', 'Thin'])('THICK', 'THIN')
     ENTITY_TYPES = namedtuple('VolumeTypes', ['Master', 'Snapshot', 'Clone'])('MASTER', 'SNAP', 'CLONE')
 
+    def get_unique_key(self):
+        system_id = self.system.get_api_addresses()[0][0]
+        return (system_id, self.get_name())
+
     def is_master(self):
         return self.get_type() == self.ENTITY_TYPES.Master
 

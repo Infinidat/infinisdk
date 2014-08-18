@@ -69,10 +69,6 @@ class Volume(BaseDataEntity):
         Field("serial", type=SCSISerial),
     ]
 
-    def get_unique_key(self):
-        system_id = self.system.get_api_addresses()[0][0]
-        return (system_id, self.get_name())
-
     def is_master_volume(self):
         return self.is_master()
 
