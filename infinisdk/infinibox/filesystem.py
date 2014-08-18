@@ -45,3 +45,6 @@ class Filesystem(BaseDataEntity):
 
     def move_pool(self, target_pool, with_capacity=True):
         raise NotImplementedError("Not implemented in infinibox 2.0.0.0")
+
+    def restore(self, snapshot):
+        raise NotImplementedError("Not implemented in infinibox 2.0.0.0")
