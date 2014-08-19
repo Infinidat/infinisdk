@@ -141,6 +141,12 @@ def create_volume(infinibox, **kwargs):
     vol = infinibox.volumes.create(**kwargs)
     return vol
 
+def create_filesystem(infinibox, **kwargs):
+    if not kwargs.get('pool_id') and not kwargs.get('pool'):
+        kwargs['pool_id'] = create_pool(infinibox).id
+    fs = infinibox.filesystems.create(**kwargs)
+    return fs
+
 def create_pool(infinibox, **kwargs):
     pool = infinibox.pools.create(**kwargs)
     return pool
@@ -176,3 +182,7 @@ def mapped_volume(infinibox, pool, request):
     return returned
 
 volume1 = volume2 = volume
+
+@pytest.fixture
+def filesystem(infinibox, pool):
+    return create_filesystem(infinibox, pool_id=pool.id)
