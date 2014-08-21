@@ -13,6 +13,7 @@
 ###!
 import itertools
 import gossip
+import functools
 from contextlib import contextmanager
 from sentinels import NOTHING
 from infi.pyutils.lazy import cached_method
@@ -61,6 +62,22 @@ class SystemObject(with_metaclass(FieldsMeta)):
                 self._cache.pop(self.fields.get_or_fabricate(field_name).api_name, None)
         else:
             self._cache.clear()
+
+    @staticmethod
+    def requires_refresh(*fields):
+        refresh_fields = fields
+        if len(fields) == 1 and callable(fields[0]):
+            refresh_fields = []
+        def wraps(func, *args, **kwargs):
+            @functools.wraps(func)
+            def refreshes(self, *args, **kwargs):
+                returned = func(self, *args, **kwargs)
+                self.refresh(*refresh_fields)
+                return returned
+            return refreshes
+        if len(fields) == 1 and callable(fields[0]):
+            return wraps(fields[0])
+        return wraps
 
     def __eq__(self, other):
         if type(self) is not type(other):

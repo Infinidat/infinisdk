@@ -56,6 +56,35 @@ def test_get_from_cache_by_default(system):
     obj = SampleDerivedObject(FakeSystem(), {"id": 1, "cached_by_default": value})
     assert obj.get_field('cached_by_default') == value
 
+def _attach_method(instance, function):
+    import types
+    setattr(instance, function.__name__, types.MethodType(function, instance, instance.__class__))
+
+@pytest.mark.parametrize("with_fields", [True, False])
+def test_requires_refresh_decorator(system, with_fields):
+    obj = SampleDerivedObject(system, {"id": 1, "number": 2, "string": "asdf"})
+    @SystemObject.requires_refresh("number", "string")
+    def get_meaning_of_life(self, *args, **kwargs):
+        return 42
+    if with_fields:
+        get_meaning_of_life = SystemObject.requires_refresh("number", "string")(get_meaning_of_life)
+    else:
+        get_meaning_of_life = SystemObject.requires_refresh(get_meaning_of_life)
+    _attach_method(obj, get_meaning_of_life)
+    assert 1 == obj.get_field('id', from_cache=True, fetch_if_not_cached=False)
+    assert 2 == obj.get_field('number', from_cache=True, fetch_if_not_cached=False)
+    assert "asdf" == obj.get_field('string', from_cache=True, fetch_if_not_cached=False)
+    assert 42 == obj.get_meaning_of_life("Douglas", last_name="Adams")
+    if with_fields:
+        assert 1 == obj.get_field('id', from_cache=True, fetch_if_not_cached=False)
+    else:
+        with pytest.raises(CacheMiss):
+            obj.get_field("id", from_cache=True, fetch_if_not_cached=False)
+    with pytest.raises(CacheMiss):
+        obj.get_field("number", from_cache=True, fetch_if_not_cached=False)
+    with pytest.raises(CacheMiss):
+        obj.get_field("string", from_cache=True, fetch_if_not_cached=False)
+
 def test_auto_getter_attribute_already_exists_in_same_class(system):
     with pytest.raises(AttributeAlreadyExists):
         class SomeObjectForGetter(SystemObject):
