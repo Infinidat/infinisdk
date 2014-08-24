@@ -2,6 +2,21 @@ import pytest
 from infinisdk.core.exceptions import CacheMiss
 
 
+def test_unmap_clustered_lun(infinibox, host, cluster, volume):
+    cluster.add_host(host)
+    lun = cluster.map_volume(volume).lun
+
+    logical_units = volume.get_logical_units()
+    [lu] = logical_units
+    assert lu.lun == lun
+    lu.unmap()
+
+    assert not volume.get_logical_units()
+
+def test_unmap_lun_twice(infinibox, volume, logical_unit):
+    logical_unit.unmap()
+    logical_unit.unmap()
+
 def test_system_luns(infinibox, host, volume):
     lu = host.map_volume(volume)
 
@@ -150,3 +165,10 @@ def test_get_specific_lun(infinibox, mapping_object, volume1, volume2):
 
     infinibox.enable_caching()
     mapping_object.map_volume(volume2)
+
+
+@pytest.fixture
+def logical_unit(infinibox, volume, mapping_object):
+    mapping_object.map_volume(volume)
+    [returned] = volume.get_logical_units()
+    return returned
