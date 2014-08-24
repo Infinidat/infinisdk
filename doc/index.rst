@@ -26,6 +26,7 @@ Contents:
    events
    components
    extending
+   faq
    api
 
 
