@@ -11,7 +11,9 @@
 ### Redistribution and use in source or binary forms, with or without modification,
 ### are strictly forbidden unless prior written permission is obtained from Infinidat Ltd.
 ###!
-from infinisdk._compat import itervalues, string_types
+from .._compat import itervalues, string_types
+from ..core.exceptions import APICommandFailed
+import requests
 
 
 class LogicalUnit(object):
@@ -64,13 +66,20 @@ class LogicalUnit(object):
     @classmethod
     def _unmap(cls, obj, lun):
         url = obj.get_this_url_path().add_path('luns/lun/{0}'.format(lun))
-        obj.system.api.delete(url)
+        try:
+            obj.system.api.delete(url)
+        except APICommandFailed as e:
+            if e.status_code != requests.codes.not_found:
+                raise
         obj.refresh('luns')
 
     def delete(self):
         """ Deletes (or unmaps) this LU
         """
-        obj = self.get_host() or self.get_cluster()
+        if self.is_clustered():
+            obj = self.get_cluster()
+        else:
+            obj = self.get_host()
         self._unmap(obj, self.lun)
 
     unmap=delete

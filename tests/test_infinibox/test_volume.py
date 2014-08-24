@@ -17,12 +17,10 @@ from infinisdk.infinibox.scsi_serial import SCSISerial
 from ..conftest import create_pool, create_volume
 
 
-def test_unmapping(infinibox, volume, host):
-    host.map_volume(volume)
-    assert host.is_volume_mapped(volume)
-    volume.unmap()
-    host.refresh()
-    assert not host.is_volume_mapped(volume)
+def test_unmapping(infinibox, mapped_volume):
+    assert mapped_volume.get_logical_units()
+    mapped_volume.unmap()
+    assert not mapped_volume.get_logical_units()
 
 def test_serial(infinibox, volume):
     assert isinstance(volume.get_serial(), SCSISerial)

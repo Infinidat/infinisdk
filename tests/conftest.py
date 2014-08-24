@@ -153,4 +153,26 @@ def pool(infinibox):
 def volume(infinibox, pool):
     return create_volume(infinibox, pool_id=pool.id)
 
+def _map_to_cluster(infinibox, volume):
+    host = infinibox.hosts.create()
+    cluster = infinibox.clusters.create()
+    cluster.add_host(host)
+    cluster.map_volume(volume)
+
+def _map_to_host(infinibox, volume):
+    host = infinibox.hosts.create()
+    host.map_volume(volume)
+
+def _map_to_clustered_host(infinibox, volume):
+    host = infinibox.hosts.create()
+    cluster = infinibox.clusters.create()
+    cluster.add_host(host)
+    host.map_volume(volume)
+
+@pytest.fixture(params=[_map_to_cluster, _map_to_host, _map_to_clustered_host])
+def mapped_volume(infinibox, pool, request):
+    returned = create_volume(infinibox, pool=pool)
+    request.param(infinibox, returned)
+    return returned
+
 volume1 = volume2 = volume
