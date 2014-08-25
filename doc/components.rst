@@ -1,4 +1,4 @@
-System Compontents
+System Components
 ==================
 
 InfiniSDK allows inspecting the hardware components in the system, and obtaining various attributes about them.
