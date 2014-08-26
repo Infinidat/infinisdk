@@ -11,7 +11,8 @@
 ### Redistribution and use in source or binary forms, with or without modification,
 ### are strictly forbidden unless prior written permission is obtained from Infinidat Ltd.
 ###!
-from .._compat import string_types
+from .._compat import string_types, itervalues
+
 
 class TypeBinderContainer(object):
     """
@@ -47,6 +48,12 @@ class TypeBinderContainer(object):
         if isinstance(name, string_types):
             return self._binders_by_name[name]
         return self._binders_by_class[name]
+
+    def __iter__(self):
+        return itervalues(self._binders_by_name)
+
+    def __len__(self):
+        return len(self._binders_by_name)
 
     def get_types(self):
         return list(self._binders_by_class)

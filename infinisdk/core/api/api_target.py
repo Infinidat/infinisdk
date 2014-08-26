@@ -15,7 +15,7 @@ import abc
 from ..._compat import with_metaclass
 from .api import API
 from ..type_binder_container import TypeBinderContainer
-from ..config import config
+
 
 class APITarget(with_metaclass(abc.ABCMeta)):
     """
@@ -76,6 +76,9 @@ class APITarget(with_metaclass(abc.ABCMeta)):
 
     def get_collections_names(self):
         return [obj_type.get_plural_name() for obj_type in self.OBJECT_TYPES]
+
+    def get_collections(self):
+        return list(self.objects)
 
     def _normalize_addresses(self, addresses, use_ssl):
         if not isinstance(addresses[0], (list, tuple)):
