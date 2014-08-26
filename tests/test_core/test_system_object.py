@@ -58,7 +58,7 @@ def test_get_from_cache_by_default(system):
 
 def _attach_method(instance, function):
     import types
-    setattr(instance, function.__name__, types.MethodType(function, instance, instance.__class__))
+    setattr(instance, function.__name__, types.MethodType(function, instance))
 
 @pytest.mark.parametrize("with_fields", [True, False])
 def test_requires_refresh_decorator(system, with_fields):
