@@ -17,6 +17,7 @@ from ..core.system_component import SystemComponentsBinder
 from ..core.system_object import SystemObject
 from infi.pyutils.lazy import cached_method
 from .component_query import InfiniBoxComponentQuery
+from ..core.bindings import ListOfRelatedComponentBinding
 
 from urlobject import URLObject as URL
 
@@ -98,10 +99,6 @@ class InfiniBoxSystemComponent(SystemObject):
     def find(cls, system, *predicates, **kw):
         return InfiniBoxComponentQuery(system, cls, *predicates, **kw)
 
-    @classmethod
-    def _get_sub_components_classes(cls):
-        return []
-
     def get_sub_components(self):
         return self.system.components.find(parent_id=self.id)
 
@@ -121,16 +118,18 @@ class InfiniBoxSystemComponent(SystemObject):
             system.components.cache_component(returned)
         else:
             returned.update_field_cache(data)
-        for sub_class in returned._get_sub_components_classes():
-            for sub_class_data in data[sub_class.get_plural_name()]:
-                sub_class.construct(system, sub_class_data, component_id)
+        for field in cls.fields:
+            if isinstance(field.binding, ListOfRelatedComponentBinding):
+                field.binding.get_value_from_api_object(system, cls, returned, data)
         return returned
 
 
 @InfiniBoxSystemComponents.install_component_type
 class Rack(InfiniBoxSystemComponent):
     FIELDS = [
-            Field("index", api_name="rack", type=int, cached=True),
+        Field("index", api_name="rack", type=int, cached=True),
+        Field("enclosures", type=list, binding=ListOfRelatedComponentBinding()),
+        Field("nodes", type=list, binding=ListOfRelatedComponentBinding()),
     ]
 
     @classmethod
@@ -142,41 +141,31 @@ class Rack(InfiniBoxSystemComponent):
     def get_this_url_path(self):
         return self.get_specific_rack_url(self.get_index())
 
-    @classmethod
-    def _get_sub_components_classes(cls):
-        return [Enclosure, Node]
-
 
 @InfiniBoxSystemComponents.install_component_type
 class Enclosure(InfiniBoxSystemComponent):
     FIELDS = [
         Field("index", api_name="id", type=int, cached=True),
-        Field("drives", type=list),
+        Field("drives", type=list, binding=ListOfRelatedComponentBinding()),
         Field("state", cached=False),
     ]
 
-    @classmethod
-    def _get_sub_components_classes(cls):
-        return [Drive]
 
 @InfiniBoxSystemComponents.install_component_type
 class Node(InfiniBoxSystemComponent):
     FIELDS = [
         Field("index", api_name="id", type=int, cached=True),
         Field("name"),
-        Field("fc_ports", type=list),
-        Field("eth_ports", type=list),
-        Field("drives", type=list),
+        Field("fc_ports", type=list, binding=ListOfRelatedComponentBinding()),
+        Field("eth_ports", type=list, binding=ListOfRelatedComponentBinding()),
+        Field("drives", type=list, binding=ListOfRelatedComponentBinding("local_drives")),
+        Field("services", type=list, binding=ListOfRelatedComponentBinding()),
         Field("state", cached=False),
     ]
 
     @classmethod
     def get_url_path(cls, system):
         return cls.BASE_URL.add_path(cls.get_plural_name())
-
-    @classmethod
-    def _get_sub_components_classes(cls):
-        return [EthPort, FcPort, Service]
 
     def phase_out(self):
         return self.system.api.post(self.get_this_url_path().add_path('phase_out'))
@@ -187,6 +176,24 @@ class Node(InfiniBoxSystemComponent):
     def __repr__(self):
         return '<Node {0}>'.format(self.get_index())
 
+@InfiniBoxSystemComponents.install_component_type
+class LocalDrive(InfiniBoxSystemComponent):
+    FIELDS = [
+        Field("index", api_name="drive_index", type=int, cached=True),
+        Field("model"),
+        Field("vendor"),
+        Field("firmware"),
+        Field("state", cached=False),
+        Field("type"),
+        Field("serial_number"),
+    ]
+
+    @classmethod
+    def get_type_name(self):
+        return "local_drive"
+
+    def is_ssd(self):
+        return self.get_type() == 'SSD'
 
 @InfiniBoxSystemComponents.install_component_type
 class EthPort(InfiniBoxSystemComponent):

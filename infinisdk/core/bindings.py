@@ -23,6 +23,7 @@ class InfiniSDKBinding(ObjectAPIBinding):
             return value
         return super(InfiniSDKBinding, self).get_api_value_from_value(system, objtype, obj, value)
 
+
 class RelatedObjectBinding(InfiniSDKBinding):
 
     def __init__(self, collection_name=None, value_for_none=0):
@@ -46,6 +47,51 @@ class RelatedObjectBinding(InfiniSDKBinding):
         return getattr(system, self._collection_name).get_by_id_lazy(value)
 
 
+class ListOfRelatedObjectBinding(InfiniSDKBinding):
+    """
+    Binding for translating list objects info (dictionaries) to list of objects
+    API value = [{'id': 1, k: v, ...}, {'id': 2, k: v, ...}]
+    InfiniSDK will return:
+    value = [<object id=1>, <object id=2>]
+    """
+    def __init__(self, collection_name=None):
+        super(ListOfRelatedObjectBinding, self).__init__()
+        self._collection_name = collection_name
+
+    def set_field(self, field):
+        super(ListOfRelatedObjectBinding, self).set_field(field)
+        if not self._collection_name:
+            self._collection_name = field.name
+
+    def get_api_value_from_value(self, system, objtype, obj, value):
+        raise NotImplementedError("This is a read-only binding")
+
+    def _get_collection(self, system):
+        return getattr(system, self._collection_name)
+
+    def _get_related_obj(self, system, related_obj_info, obj):
+        return self._get_collection(system).object_type.construct(system, related_obj_info)
+
+    def get_value_from_api_value(self, system, objtype, obj, value):
+        return [self._get_related_obj(system, related_obj_info, obj)
+                for related_obj_info in value]
+
+
+class ListOfRelatedComponentBinding(ListOfRelatedObjectBinding):
+    """
+    Binding for translating list components info (dictionaries) to list of objects
+    API value = [{'index': 1, k: v, ...}, {'index': 2, k: v, ...}]
+    InfiniSDK will return:
+    value = [<component index=1>, <component index=2>]
+    """
+
+    def _get_collection(self, system):
+        return getattr(system.components, self._collection_name)
+
+    def _get_related_obj(self, system, related_obj_info, obj):
+        return self._get_collection(system).object_type.construct(system, related_obj_info, obj.id)
+
+
 class PassthroughBinding(InfiniSDKBinding):
 
     def get_api_value_from_value(self, system, objtype, obj, value):
@@ -53,6 +99,7 @@ class PassthroughBinding(InfiniSDKBinding):
 
     def get_value_from_api_value(self, system, objtype, obj, value):
         return value
+
 
 class ListToDictBinding(InfiniSDKBinding):
     """

@@ -14,6 +14,7 @@
 from ..core import Field
 from ..core.api.special_values import Autogenerate
 from .system_object import InfiniBoxLURelatedObject
+from ..core.bindings import ListOfRelatedObjectBinding
 
 
 class Cluster(InfiniBoxLURelatedObject):
@@ -22,7 +23,7 @@ class Cluster(InfiniBoxLURelatedObject):
         Field("id", type=int, is_identity=True, is_filterable=True, is_sortable=True),
         Field("name", creation_parameter=True, mutable=True, is_filterable=True, is_sortable=True, default=Autogenerate("cluster_{uuid}")),
         Field("luns", type=list, add_getter=False, add_updater=False),
-        Field("hosts", api_name="hosts", type=list, add_getter=False, add_updater=False),
+        Field("hosts", type=list, add_updater=False, binding=ListOfRelatedObjectBinding()),
     ]
 
     def add_host(self, host):
@@ -36,7 +37,3 @@ class Cluster(InfiniBoxLURelatedObject):
         self.system.api.delete(url)
         self.refresh('hosts')
         host.refresh('host_cluster_id')
-
-    def get_hosts(self):
-        return [self.system.hosts.get_by_id_lazy(host_attrs['id'])
-                for host_attrs in self.get_field('hosts')]
