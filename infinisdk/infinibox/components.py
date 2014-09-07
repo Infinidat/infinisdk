@@ -225,6 +225,7 @@ class FcPort(InfiniBoxSystemComponent):
         Field("wwpn", is_identity=True),
         Field("node", cached=True),
         Field("state", cached=False),
+        Field("link_state", cached=False),
     ]
 
     @classmethod
