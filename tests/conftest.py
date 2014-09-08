@@ -186,3 +186,13 @@ volume1 = volume2 = volume
 @pytest.fixture
 def filesystem(infinibox, pool):
     return create_filesystem(infinibox, pool_id=pool.id)
+
+@pytest.fixture(params=['volume', 'filesystem'])
+def data_entity_type(request):
+    return request.param
+
+@pytest.fixture
+def data_entity(infinibox, volume, filesystem, data_entity_type):
+    if data_entity_type == 'volume':
+        return volume
+    return filesystem
