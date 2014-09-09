@@ -27,6 +27,14 @@ def test_extending(infinibox, different_name):
     assert infinibox.new_method(1, 2, 3) == 'InfiniBox 1 2 3'
 
 
+def test_cannot_attach_existing_methods(infinibox, volume):
+    assert hasattr(volume, 'update_name')
+    with pytest.raises(RuntimeError):
+        @extensions.add_method(type(volume), 'update_name')
+        def set_name(self, new_name):
+            raise NotImplementedError() # pragma: no cover
+
+
 def test_removing_extensions(infinibox):
     assert not hasattr(infinibox, 'new_method')
 

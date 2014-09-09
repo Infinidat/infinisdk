@@ -37,6 +37,8 @@ class Method(object):
     def __init__(self, objtype, name, func):
         super(Method, self).__init__()
         assert isinstance(objtype, type)
+        if name in objtype.__dict__:
+            raise RuntimeError('{0.__name__} already has a method named {1!r}. Cannot attach as extension.'.format(objtype, name))
         assert name not in objtype.__dict__
         self._objtype = objtype
         self._name = name
