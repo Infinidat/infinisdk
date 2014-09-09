@@ -11,17 +11,15 @@
 ### Redistribution and use in source or binary forms, with or without modification,
 ### are strictly forbidden unless prior written permission is obtained from Infinidat Ltd.
 ###!
-import gossip
 from capacity import GB
-from collections import namedtuple
 from ..core.type_binder import TypeBinder
 from ..core import Field, CapacityType, MillisecondsDatetimeType
 from storage_interfaces.scsi.abstracts import ScsiVolume
-from ..core.exceptions import InvalidOperationException, InfiniSDKException
+from ..core.exceptions import InfiniSDKException
 from ..core.api.special_values import Autogenerate
 from ..core.bindings import RelatedObjectBinding
+from ..core.utils import deprecated
 from .base_data_entity import BaseDataEntity
-from .pool import Pool
 from .lun import LogicalUnit, LogicalUnitContainer
 from .scsi_serial import SCSISerial
 
@@ -69,6 +67,7 @@ class Volume(BaseDataEntity):
         Field("serial", type=SCSISerial),
     ]
 
+    @deprecated(message="Use volume.is_master instead")
     def is_master_volume(self):
         return self.is_master()
 
