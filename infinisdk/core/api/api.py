@@ -16,6 +16,8 @@ import sys
 from contextlib import contextmanager
 
 import requests
+from requests.exceptions import RequestException
+from requests.packages.urllib3.exceptions import ProtocolError
 from logbook import Logger
 from sentinels import NOTHING, Sentinel
 from urlobject import URLObject as URL
@@ -190,7 +192,8 @@ class API(object):
         while True:
             try:
                 returned = self._request(http_method, path, **kwargs)
-            except requests.exceptions.RequestException as e:
+            except (RequestException, ProtocolError) as e:
+                _logger.debug('Exception while sending API command to {0}: {1}', self.system, e)
                 raise APITransportFailure(e)
 
             if assert_success:

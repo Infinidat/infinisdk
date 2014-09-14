@@ -12,7 +12,7 @@ _INSTALL_REQUIERS = [
     "colorama",
     "infi.pyutils",
     "logbook",
-    "requests>=1.2.0",
+    "requests>=2.4.0",
     "sentinels",
     "gossip>=0.8.0",
     "URLObject",
