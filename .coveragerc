@@ -1,0 +1,17 @@
+[run]
+source = infinisdk
+
+[report]
+omit =
+    infinisdk/_compat.py
+    infinisdk/__version__.py
+# Regexes for lines to exclude from consideration
+exclude_lines =
+    # Have to re-enable the standard pragma
+    pragma: no cover
+
+    # Don't complain about missing debug-only code:
+    def __repr__
+
+    # Don't complain if non-runnable code isn't run:
+    if __name__ == .__main__.:

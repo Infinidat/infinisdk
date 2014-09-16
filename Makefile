@@ -10,7 +10,8 @@ test: env
 	.env/bin/py.test tests
 
 coverage: env
-	.env/bin/coverage run .env/bin/py.test tests
+	.env/bin/pip install pytest-cov
+	.env/bin/py.test tests --cov=infinisdk --cov-report=html
 
 env: .env/.up-to-date
 
