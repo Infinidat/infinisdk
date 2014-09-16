@@ -14,6 +14,7 @@
 import gossip
 from collections import namedtuple
 from ..core.exceptions import InvalidOperationException
+from ..core.system_object import APICommandFailed
 from .system_object import InfiniBoxObject
 
 _BEGIN_FORK_HOOK = "infinidat.sdk.begin_fork"
@@ -63,8 +64,15 @@ class BaseDataEntity(InfiniBoxObject):
 
     def restore(self, snapshot):
         snapshot_data = int(snapshot.get_field('data'))
+        hook_tags = self._get_tags_for_object_operations(self.system)
         restore_url = self.get_this_url_path().add_path('restore')
-        self.system.api.post(restore_url, data=snapshot_data, raw_data=True)
+        gossip.trigger_with_tags('infinidat.sdk.pre_data_restore', {'source': snapshot, 'target': self}, tags=hook_tags)
+        try:
+            self.system.api.post(restore_url, data=snapshot_data, raw_data=True)
+        except APICommandFailed as e:
+            gossip.trigger_with_tags('infinidat.sdk.data_restore_failure', {'source': snapshot, 'target': self, 'exc': e}, tags=hook_tags)
+            raise
+        gossip.trigger_with_tags('infinidat.sdk.post_data_restore', {'source': snapshot, 'target': self}, tags=hook_tags)
 
     def get_snapshots(self):
         return self.get_children(type=self.ENTITY_TYPES.Snapshot)

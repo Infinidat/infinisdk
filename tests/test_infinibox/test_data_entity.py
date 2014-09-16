@@ -161,6 +161,46 @@ def test_object_creation_hooks_for_child_entities(data_entity):
     assert l == ['pre_a_snap', 'post_a_snap', 'pre_a_clone', 'post_a_clone']
     assert fork_callbacks == [_BEGIN_FORK_HOOK, _FINISH_FORK_HOOK]*2
 
+def test_filesystem_restore(filesystem):
+  # TODO: delete this test when filesystem.restore will be implemented in system
+    snapshot = filesystem.create_snapshot('some_snapshot_to_restore_from')
+    with pytest.raises(NotImplementedError):
+        filesystem.restore(snapshot)
+
+
+def test_data_restore(volume):
+    data_entity = volume  # TODO: Change from volume to data_entity when filesystem.restore will be implemented in system
+    hook_ident = 'unittest_restore_hook'
+    callbacks = []
+    expected = []
+    password = 'some_password'
+    username = data_entity.system.users.create(role='ReadOnly', password=password).get_name()
+
+    @gossip.register('infinidat.sdk.pre_data_restore', token=hook_ident)
+    def pre_restore(source, target):
+        callbacks.append("pre_restore_{0}_from_{1}".format(target.id, source.id))
+
+    @gossip.register('infinidat.sdk.post_data_restore', token=hook_ident)
+    def post_restore(source, target):
+        callbacks.append("post_restore_{0}_from_{1}".format(target.id, source.id))
+
+    @gossip.register('infinidat.sdk.data_restore_failure', token=hook_ident)
+    def restore_failure(source, target, exc):
+        callbacks.append("restore_failure_{0}_from_{1}".format(target.id, source.id))
+
+    snapshot = data_entity.create_snapshot('some_snapshot_to_restore_from')
+    assert callbacks == []
+    data_entity.restore(snapshot)
+    args = (data_entity.id, snapshot.id)
+    expected += ['pre_restore_{0}_from_{1}'.format(*args), 'post_restore_{0}_from_{1}'.format(*args)]
+    assert callbacks == expected
+
+    with data_entity.system.api.auth_context(username, password):
+        with pytest.raises(APICommandFailed):
+            data_entity.restore(snapshot)
+    expected += ['pre_restore_{0}_from_{1}'.format(*args), 'restore_failure_{0}_from_{1}'.format(*args)]
+    assert callbacks == expected
+
     gossip.unregister_token(hook_ident)
 
 
