@@ -10,7 +10,7 @@ import pytest
 from infinisdk.core.translators_and_types import MillisecondsDatetimeTranslator
 from infinisdk.core.exceptions import (APICommandFailed,
                                        InvalidOperationException)
-from infinisdk.infinibox.base_data_entity import _BEGIN_FORK_HOOK, _FINISH_FORK_HOOK
+from infinisdk.infinibox.base_data_entity import _BEGIN_FORK_HOOK, _FINISH_FORK_HOOK, _CANCEL_FORK_HOOK
 from ..conftest import create_pool
 
 
@@ -19,7 +19,7 @@ def test_creation(pool, data_entity):
               'size': 2*GB,
               'pool_id': pool.id,
               'provisioning': 'THIN'}
-    data_entity_binder = pool.system.objects[data_entity.get_plural_name()]
+    data_entity_binder = data_entity.get_collection()
     obj = data_entity_binder.create(**kwargs)
 
     assert obj.get_name() == kwargs['name']
@@ -42,7 +42,7 @@ def test_is_master(data_entity):
 
 
 def test_get_all(data_entity):
-    data_entity_binder = data_entity.system.objects[data_entity.get_plural_name()]
+    data_entity_binder = data_entity.get_collection()
     orig_entities = list(data_entity_binder.get_all())
     new_pool = create_pool(data_entity.system)
     new_entity = data_entity_binder.create(pool=new_pool)
@@ -72,12 +72,14 @@ def _create_and_validate_children(parent_obj, child_type):
     assert all(map(validate_child, children))
     get_children_func = getattr(parent_obj, "get_{0}s".format(child_type))
     assert set(children) == set(get_children_func())
+    assert set(child.get_parent() for child in children) == set([parent_obj])
     return children
 
 
 def test_clones_and_snapshots(infinibox, data_entity):
     assert data_entity.is_master()
     assert not data_entity.has_children()
+    assert data_entity.get_parent() is None
 
     snapshots = _create_and_validate_children(data_entity, 'snapshot')
     snap = snapshots[-1]
@@ -104,7 +106,7 @@ def test_created_at_field_type_conversion(current_time):
 
 def test_snapshot_creation_time_filtering(data_entity):
     flux.current_timeline.sleep(1) # set a differentiator between filesystem creation time and snapshot time
-    data_entity_binder = data_entity.system.objects[data_entity.get_plural_name()]
+    data_entity_binder = data_entity.get_collection()
     snap = data_entity.create_snapshot()
     query = data_entity_binder.find(data_entity_binder.fields.created_at < snap.get_creation_time())
 
@@ -136,6 +138,8 @@ def test_object_creation_hooks_for_child_entities(data_entity):
     hook_ident = 'unittest_ident'
     l = []
     fork_callbacks = []
+    password = 'some_password'
+    username = data_entity.system.users.create(role='ReadOnly', password=password).get_name()
 
     def save_fork_callback(hook_name, **kwargs):
         fork_callbacks.append(hook_name)
@@ -144,13 +148,15 @@ def test_object_creation_hooks_for_child_entities(data_entity):
         obj_name = kwargs['data']['name']
         l.append('{0}_{1}'.format(hook_type, obj_name))
 
+    def hook_failure_callback(**kwargs):
+        l.append('failure')
+
     gossip.register(partial(hook_callback, 'pre'),
                     'infinidat.sdk.pre_object_creation', hook_ident)
-    gossip.register(partial(hook_callback, 'failure'),
-                    'infinidat.sdk.object_operation_failure', hook_ident)
+    gossip.register(hook_failure_callback, 'infinidat.sdk.object_operation_failure', hook_ident)
     gossip.register(partial(hook_callback, 'post'),
                     'infinidat.sdk.post_object_creation', hook_ident)
-    for fork_hook in [_BEGIN_FORK_HOOK, _FINISH_FORK_HOOK]:
+    for fork_hook in [_BEGIN_FORK_HOOK, _FINISH_FORK_HOOK, _CANCEL_FORK_HOOK]:
         gossip.register(partial(save_fork_callback, fork_hook), fork_hook)
 
     snapshot = data_entity.create_snapshot('a_snap')
@@ -160,6 +166,23 @@ def test_object_creation_hooks_for_child_entities(data_entity):
     snapshot.create_clone('a_clone')
     assert l == ['pre_a_snap', 'post_a_snap', 'pre_a_clone', 'post_a_clone']
     assert fork_callbacks == [_BEGIN_FORK_HOOK, _FINISH_FORK_HOOK]*2
+
+    with data_entity.system.api.auth_context(username, password):
+        with pytest.raises(APICommandFailed):
+            data_entity.create_snapshot('failed_snap')
+
+    with data_entity.system.api.auth_context(username, password):
+        with pytest.raises(APICommandFailed):
+            snapshot.create_clone('failed_clone')
+
+    assert l == ['pre_a_snap', 'post_a_snap',
+                 'pre_a_clone', 'post_a_clone',
+                 'pre_failed_snap', 'failure',
+                 'pre_failed_clone', 'failure']
+    assert fork_callbacks == [_BEGIN_FORK_HOOK, _FINISH_FORK_HOOK]*2 + [_BEGIN_FORK_HOOK, _CANCEL_FORK_HOOK]*2
+
+    gossip.unregister_token(hook_ident)
+
 
 def test_filesystem_restore(filesystem):
   # TODO: delete this test when filesystem.restore will be implemented in system
