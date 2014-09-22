@@ -1,3 +1,5 @@
+import itertools
+
 import pytest
 from infinisdk.core import extensions
 from infinisdk.infinibox import InfiniBox
@@ -32,7 +34,29 @@ def test_cannot_attach_existing_methods(infinibox, volume):
     with pytest.raises(RuntimeError):
         @extensions.add_method(type(volume), 'update_name')
         def set_name(self, new_name):
-            raise NotImplementedError() # pragma: no cover
+            raise NotImplementedError()  # pragma: no cover
+
+
+def test_add_attribute(infinibox):
+    assert not hasattr(infinibox, 'attached')
+
+    @extensions.add_attribute(type(infinibox))
+    def attached(self):
+        return 'value'
+
+    assert infinibox.attached == 'value'
+
+
+def test_add_attribute_computed_once(infinibox):
+    assert not hasattr(infinibox, 'attached')
+    counter = itertools.count()
+
+    @extensions.add_attribute(type(infinibox))
+    def attached(self):
+        return next(counter)
+
+    for i in range(3):
+        assert infinibox.attached == 0
 
 
 def test_removing_extensions(infinibox):

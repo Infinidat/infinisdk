@@ -1,19 +1,22 @@
-###!
-### Infinidat Ltd.  -  Proprietary and Confidential Material
+# !
+# Infinidat Ltd.  -  Proprietary and Confidential Material
 ###
-### Copyright (C) 2014, Infinidat Ltd. - All Rights Reserved
+# Copyright (C) 2014, Infinidat Ltd. - All Rights Reserved
 ###
-### NOTICE: All information contained herein is, and remains the property of Infinidat Ltd.
-### All information contained herein is protected by trade secret or copyright law.
-### The intellectual and technical concepts contained herein are proprietary to Infinidat Ltd.,
-### and may be protected by U.S. and Foreign Patents, or patents in progress.
+# NOTICE: All information contained herein is, and remains the property of Infinidat Ltd.
+# All information contained herein is protected by trade secret or copyright law.
+# The intellectual and technical concepts contained herein are proprietary to Infinidat Ltd.,
+# and may be protected by U.S. and Foreign Patents, or patents in progress.
 ###
-### Redistribution and use in source or binary forms, with or without modification,
-### are strictly forbidden unless prior written permission is obtained from Infinidat Ltd.
-###!
+# Redistribution and use in source or binary forms, with or without modification,
+# are strictly forbidden unless prior written permission is obtained from Infinidat Ltd.
+# !
 import functools
 
+from sentinels import NOTHING
+
 active = []
+
 
 def add_method(objtype, name=None):
     def decorator(func):
@@ -27,26 +30,39 @@ def add_method(objtype, name=None):
         return func
     return decorator
 
+
+def add_attribute(objtype, name=None):
+    def decorator(property_func):
+        property_name = name
+        if property_name is None:
+            property_name = property_func.__name__
+
+        extension = Property(objtype, property_name, property_func)
+        extension.activate()
+        property_func.__extension_deactivate__ = extension.deactivate
+        return property_func
+    return decorator
+
+
 def clear_all():
     for x in list(active):
         x.deactivate()
     assert not active
 
-class Method(object):
+
+class Attachment(object):
 
     def __init__(self, objtype, name, func):
-        super(Method, self).__init__()
+        super(Attachment, self).__init__()
         assert isinstance(objtype, type)
         if name in objtype.__dict__:
-            raise RuntimeError('{0.__name__} already has a method named {1!r}. Cannot attach as extension.'.format(objtype, name))
+            raise RuntimeError(
+                '{0.__name__} already has a method named {1!r}. Cannot attach as extension.'.format(objtype, name))
         assert name not in objtype.__dict__
         self._objtype = objtype
         self._name = name
         self._func = func
         self._active = False
-
-    def __get__(self, obj, objclass):
-        return functools.partial(self._func, obj)
 
     def activate(self):
         assert self not in active
@@ -67,11 +83,17 @@ class Method(object):
         return "<{0}:{1}>".format(self._objtype.__name__, self._name)
 
 
+class Method(Attachment):
+
+    def __get__(self, obj, objclass):
+        return functools.partial(self._func, obj)
 
 
+class Property(Attachment):
 
+    _cache = NOTHING
 
-
-
-
-
+    def __get__(self, obj, objclass):
+        if self._cache is NOTHING:
+            self._cache = self._func(obj)
+        return self._cache
