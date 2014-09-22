@@ -32,6 +32,11 @@ from .export import Export
 from .ipdomain import IPDomain
 from .portgroup import PortGroup
 
+try:
+    from infinisim.core.context import lookup_simulator_by_address
+except ImportError:
+    lookup_simulator_by_address = None
+
 
 class InfiniBox(APITarget):
     OBJECT_TYPES = [Volume, Pool, Host, Cluster, User, EmailRule, Filesystem, Export, IPDomain, PortGroup]
@@ -96,6 +101,15 @@ class InfiniBox(APITarget):
 
     def is_simulator(self):
         return "simulator" in self.get_name()
+
+    def get_simulator(self):
+        if lookup_simulator_by_address is None:
+            return None
+        for url in self.api.urls:
+            returned = lookup_simulator_by_address(url.hostname)
+            if returned is not None:
+                return returned
+        return None
 
     def is_mock(self):
         return "mock" in self.get_name()

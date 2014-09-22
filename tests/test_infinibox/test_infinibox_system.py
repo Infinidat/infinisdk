@@ -10,6 +10,9 @@ def test_get_api_auth(infinibox):
 def test_get_api_timeout(infinibox):
     assert infinibox.get_api_timeout() == 30
 
+def test_get_simulator(infinibox, infinibox_simulator):
+    assert infinibox.get_simulator() is infinibox_simulator
+
 def test_multiple_metadata_creation(infinibox, volume):
     metadata_d = {'some_key':  'some_value',
                   'other_key': 'other_value',

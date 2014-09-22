@@ -70,6 +70,10 @@ class API(object):
         self._active_url = None
         self._checked_version = False
 
+    @property
+    def urls(self):
+        return list(self._urls)
+
     @contextmanager
     def get_approval_context(self, value):
         """A context manager that controls whether requests are automatically approved (confirmed)
