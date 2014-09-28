@@ -63,12 +63,12 @@ class BaseDataEntity(InfiniBoxObject):
         return self._create_child(name)
 
     def restore(self, snapshot):
-        snapshot_data = int(snapshot.get_field('data'))
+        snapshot_id = snapshot.id
         hook_tags = self._get_tags_for_object_operations(self.system)
         restore_url = self.get_this_url_path().add_path('restore')
         gossip.trigger_with_tags('infinidat.sdk.pre_data_restore', {'source': snapshot, 'target': self}, tags=hook_tags)
         try:
-            self.system.api.post(restore_url, data=snapshot_data, raw_data=True)
+            self.system.api.post(restore_url, data=snapshot_id, raw_data=True)
         except APICommandFailed as e:
             gossip.trigger_with_tags('infinidat.sdk.data_restore_failure', {'source': snapshot, 'target': self, 'exc': e}, tags=hook_tags)
             raise

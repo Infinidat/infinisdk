@@ -23,20 +23,6 @@ def test_field_types():
     assert Volume.fields.pool.type.type is Pool
 
 
-def test_restore(infinibox, volume):
-    snapshot = volume.create_snapshot()
-
-    assert volume.is_master_volume()
-    assert snapshot.is_snapshot()
-
-    volume.restore(snapshot)
-    last_event = infinibox.events.get_last_event()
-    assert last_event['code'] == 'VOLUME_RESTORE'
-
-    snapshot.delete()
-    assert (not snapshot.is_in_system())
-
-
 def test_create_many(infinibox, pool):
 
     name = 'some_name'

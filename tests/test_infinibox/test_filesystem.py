@@ -45,16 +45,3 @@ def test_filesystem_children_deletion(filesystem):
 def test_field_types():
     assert Filesystem.fields.parent.type.type is Filesystem
     assert Filesystem.fields.pool.type.type is Pool
-
-
-def test_restore(infinibox, filesystem):
-    snapshot = filesystem.create_snapshot()
-
-    assert filesystem.is_master()
-    assert snapshot.is_snapshot()
-
-    with pytest.raises(NotImplementedError) as caught:
-        filesystem.restore(snapshot)
-
-    snapshot.delete()
-    assert (not snapshot.is_in_system())

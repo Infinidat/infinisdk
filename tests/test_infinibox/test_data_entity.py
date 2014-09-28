@@ -184,15 +184,7 @@ def test_object_creation_hooks_for_child_entities(data_entity):
     gossip.unregister_token(hook_ident)
 
 
-def test_filesystem_restore(filesystem):
-  # TODO: delete this test when filesystem.restore will be implemented in system
-    snapshot = filesystem.create_snapshot('some_snapshot_to_restore_from')
-    with pytest.raises(NotImplementedError):
-        filesystem.restore(snapshot)
-
-
-def test_data_restore(volume):
-    data_entity = volume  # TODO: Change from volume to data_entity when filesystem.restore will be implemented in system
+def test_data_restore(data_entity):
     hook_ident = 'unittest_restore_hook'
     callbacks = []
     expected = []
@@ -214,6 +206,8 @@ def test_data_restore(volume):
     snapshot = data_entity.create_snapshot('some_snapshot_to_restore_from')
     assert callbacks == []
     data_entity.restore(snapshot)
+    last_event = data_entity.system.events.get_last_event()
+    assert last_event['code'] == "{0}_RESTORE".format(data_entity.get_type_name().upper())
     args = (data_entity.id, snapshot.id)
     expected += ['pre_restore_{0}_from_{1}'.format(*args), 'post_restore_{0}_from_{1}'.format(*args)]
     assert callbacks == expected
