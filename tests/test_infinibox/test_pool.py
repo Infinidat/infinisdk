@@ -1,7 +1,7 @@
 from infinisdk._compat import xrange, iteritems
 from infinisdk.core import CapacityType
 from capacity import TB, KiB, Capacity
-from ..conftest import create_volume, create_pool
+from ..conftest import create_volume, create_pool, create_filesystem
 
 
 def update_all_capacities_in_dict_to_api(d):
@@ -59,3 +59,19 @@ def test_get_all(infinibox, pool):
 def test_get_volumes(infinibox, pool):
     volumes = [create_volume(infinibox, pool_id=pool.id) for i in xrange(5)]
     assert list(pool.get_volumes()) == volumes
+
+def test_get_filesystems(infinibox, pool):
+    filesystems = [create_filesystem(infinibox, pool_id=pool.id) for i in xrange(5)]
+    assert list(pool.get_filesystems()) == filesystems
+
+def test_get_master_volumes(infinibox, pool):
+    volumes = [create_volume(infinibox, pool_id=pool.id) for i in xrange(5)]
+    snapshots = [vol.create_snapshot() for vol in volumes]
+    assert list(pool.get_volumes()) == volumes + snapshots
+    assert list(pool.get_volumes(type=infinibox.volumes.object_type.ENTITY_TYPES.Master)) == volumes
+
+def test_get_master_filesystems(infinibox, pool):
+    filesystems = [create_filesystem(infinibox, pool_id=pool.id) for i in xrange(5)]
+    snapshots = [fs.create_snapshot() for fs in filesystems]
+    assert list(pool.get_filesystems()) == filesystems + snapshots
+    assert list(pool.get_filesystems(type=infinibox.filesystems.object_type.ENTITY_TYPES.Master)) == filesystems

@@ -25,11 +25,11 @@ class Pool(InfiniBoxObject):
         Field("physical_capacity", creation_parameter=True, mutable=True, default=TB, type=CapacityType, is_filterable=True, is_sortable=True),
     ]
 
-    def get_volumes(self):
-        return self.system.volumes.find(pool_id=self.id)
+    def get_volumes(self, **kwargs):
+        return self.system.volumes.find(pool_id=self.id, **kwargs)
 
-    def get_filesystems(self):
-        return self.system.filesystems.find(pool_id=self.id)
+    def get_filesystems(self, **kwargs):
+        return self.system.filesystems.find(pool_id=self.id, **kwargs)
 
     def _get_pool_owners_url(self, owner_id=None):
         url = self.get_this_url_path().add_path('owners')
