@@ -5,7 +5,7 @@ from infinisdk._compat import string_types
 from infinisdk.core.config import config
 from infinibox_sysdefs import latest as defs
 from infinisdk.infinibox.components import (Drive, Enclosure, FcPort, Node,
-                                            Rack, Service, System)
+                                            Rack, Service, System, ServiceCluster)
 
 NO_OF_ENCLOSURES_DRIVES = config.get_path('infinibox.defaults.enlosure_drives.total_count.simulator')
 
@@ -74,6 +74,13 @@ def test_node_component(infinibox):
 
 def test_service_component(infinibox):
     _basic_check_for_component(infinibox, Service, Node, False)
+
+def test_service_cluster(infinibox):
+    _basic_check_for_component(infinibox, ServiceCluster, None, False)
+    service_cluster = infinibox.components.service_clusters.choose()
+    assert isinstance(service_cluster.get_state(from_cache=False), string_types)
+    service = infinibox.components.services.choose(name=service_cluster.get_name())
+    assert service.get_service_cluster() is service_cluster
 
 def test_node_phase(infinibox):
     node = infinibox.components.nodes.choose()

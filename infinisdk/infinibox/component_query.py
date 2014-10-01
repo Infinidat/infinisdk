@@ -78,6 +78,8 @@ class InfiniBoxComponentQuery(object):
         if self.object_type in [self.system.components.nodes.object_type,
                                 self.system.components.services.object_type]:
             self._fetch_nodes()
+        elif self.object_type is self.system.components.service_clusters.object_type:
+            self._fetch_service_clusters()
         else:
             self._fetch_all()
 
@@ -98,6 +100,13 @@ class InfiniBoxComponentQuery(object):
         rack_data_without_enclosures['enclosures'] = []
         type(rack_1).construct(self.system, rack_data_without_enclosures, rack_1.get_parent().id)
         components.mark_fetched_nodes()
+
+    def _fetch_service_clusters(self):
+        service_cluster_type = self.system.components.service_clusters.object_type
+        url = service_cluster_type.get_url_path(self.system)
+        clusters_data = self.system.api.get(url).get_json()['result']
+        for cluster_data in clusters_data:
+            service_cluster_type.construct(self.system, cluster_data, None)
 
     def page(self, page_index):
         raise NotImplementedError()  # pragma: no cover

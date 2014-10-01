@@ -1,4 +1,4 @@
-infinisim>=22.0.post12.g02bb9c1
+infinisim>=25.0.post2.gb62ea03
 infinisdk_internal>=0.0.0.post9.g36bd55e
 izsim>=19
 pytest

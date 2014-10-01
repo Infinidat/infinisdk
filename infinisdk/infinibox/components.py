@@ -207,7 +207,7 @@ class LocalDrive(InfiniBoxSystemComponent):
     ]
 
     @classmethod
-    def get_type_name(self):
+    def get_type_name(cls):
         return "local_drive"
 
     def is_ssd(self):
@@ -233,7 +233,7 @@ class EthPort(InfiniBoxSystemComponent):
     ]
 
     @classmethod
-    def get_type_name(self):
+    def get_type_name(cls):
         return "eth_port"
 
 @InfiniBoxSystemComponents.install_component_type
@@ -247,7 +247,7 @@ class FcPort(InfiniBoxSystemComponent):
     ]
 
     @classmethod
-    def get_type_name(self):
+    def get_type_name(cls):
         return "fc_port"
 
 @InfiniBoxSystemComponents.install_component_type
@@ -266,6 +266,45 @@ class Service(InfiniBoxSystemComponent):
         Field("name", is_identity=True, cached=True),
         Field("state", cached=False),
     ]
+
+    def get_service_cluster(self):
+        return self.system.components.service_clusters.get(name=self.get_name())
+
+    def start(self):
+        self.get_service_cluster().start(node=self.get_parent())
+
+    def stop(self):
+        self.get_service_cluster().stop(node=self.get_parent())
+
+@InfiniBoxSystemComponents.install_component_type
+class ServiceCluster(InfiniBoxSystemComponent):
+    FIELDS = [
+        Field("index", api_name="name", cached=True),
+        Field("name", is_identity=True, cached=True),
+        Field("state", api_name="cluster_state", cached=False),
+        ]
+
+    @classmethod
+    def get_type_name(cls):
+        return "service_cluster"
+
+    @classmethod
+    def get_url_path(cls, system):
+        return URL('services')
+
+    @cached_method
+    def get_this_url_path(self):
+        services_url = self.get_url_path(self.system)
+        this_url = services_url.add_path(str(self.get_index()))
+        return this_url
+
+    def start(self, node=None):
+        data = {'node_id': node.id} if node else None
+        self.system.api.post(self.get_this_url_path().add_path('start'), data=data)
+
+    def stop(self, node=None):
+        data = {'node_id': node.id} if node else None
+        self.system.api.post(self.get_this_url_path().add_path('stop'), data=data)
 
 @InfiniBoxSystemComponents.install_component_type
 class System(InfiniBoxSystemComponent):
