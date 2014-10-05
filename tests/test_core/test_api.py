@@ -54,23 +54,13 @@ def test_specific_address_doesnt_change_active_url(izbox, izbox_simulator):
     assert izbox.api._active_url == new_url
 
 
-def test_api_transport_error(izbox, request):
-    def fake_request(api_obj, *args, **kwargs):
-        raise requests.exceptions.ConnectionError('FakeConnectionError')
-
-    def set_request(new_request):
-        curr_val = izbox.api._request
-        izbox.api._request = new_request
-        return curr_val
-
-    orig_request = set_request(fake_request)
-
-    @request.addfinalizer
-    def cleanup():
-        set_request(orig_request)
-
-    with pytest.raises(APITransportFailure):
-        izbox.api.post("/api/izbox_simulator/echo_post")
+def test_api_transport_error(system):
+    url = '/some/fake/path'
+    with pytest.raises(APITransportFailure) as e:
+        system.api.get(url, address=('fake_domain_address', 12345))
+    transport_repr = repr(e.value)
+    assert url in transport_repr
+    assert 'get' in transport_repr
 
 
 def test_relative_api(system):

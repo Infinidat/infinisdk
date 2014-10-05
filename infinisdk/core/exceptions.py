@@ -11,6 +11,8 @@
 ### Redistribution and use in source or binary forms, with or without modification,
 ### are strictly forbidden unless prior written permission is obtained from Infinidat Ltd.
 ###!
+from munch import munchify
+
 class InfiniSDKException(Exception):
     pass
 
@@ -24,7 +26,15 @@ class APICommandException(InfiniSDKException):
     pass
 
 class APITransportFailure(APICommandException):
-    pass
+    def __init__(self, request_kwargs, *args, **kwargs):
+        super(APITransportFailure, self).__init__(*args, **kwargs)
+        self.attrs = munchify(request_kwargs)
+
+    def __repr__(self):
+        return ("API Transport Failure\n\t"
+                "Request: {self.attrs.method} {self.attrs.url}\n\t"
+                "Message: {self.message}".format(self=self))
+
 
 class APICommandFailed(APICommandException):
     def __init__(self, response):
