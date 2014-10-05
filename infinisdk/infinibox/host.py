@@ -11,14 +11,49 @@
 ### Redistribution and use in source or binary forms, with or without modification,
 ### are strictly forbidden unless prior written permission is obtained from Infinidat Ltd.
 ###!
+import requests
+
 from ..core import Field
+from ..core.type_binder import TypeBinder
 from ..core.bindings import RelatedObjectBinding
+from ..core.exceptions import APICommandFailed
 from ..core.api.special_values import Autogenerate
 from .system_object import InfiniBoxLURelatedObject
 from infi.dtypes.wwn import WWN
 
 
+class HostBinder(TypeBinder):
+    """Implements *system.hosts*
+    """
+
+    def get_host_id_by_initiator_address(self, address):
+        """:return: an id of a host object defined on a system having the specified FC address configured, None if none exists
+        """
+        try:
+            return self.system.api.get("hosts/host_id_by_initiator_address/{0}".format(address)).get_result()
+        except APICommandFailed as e:
+            if e.response.response.status_code != requests.codes.not_found:
+                raise
+            return None
+
+    def get_host_by_initiator_address(self, address):
+        """:return: a host object defined on a system having the specified FC address configured, None if none exists
+        """
+        host_id = self.get_host_id_by_initiator_address(address)
+        if host_id is not None:
+            return Host(self.system, {'id': host_id})
+        return None
+
+    def has_registered_initiator_address(self, address):
+        """:return: whether or not there exists a host object on the system with the specified FC address configured
+        """
+        return self.get_host_id_by_initiator_address(address) is not None
+
+
+
 class Host(InfiniBoxLURelatedObject):
+
+    BINDER_CLASS = HostBinder
 
     FIELDS = [
         Field("id", type=int, is_identity=True, is_filterable=True, is_sortable=True),

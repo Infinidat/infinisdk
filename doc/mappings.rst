@@ -16,6 +16,32 @@ Creating hosts is the same like creating any other management object through Inf
 		>>> print(host.get_name())
 		production01
 
+Adding/Removing Ports
+---------------------
+
+Adding and removing FC ports can be done with :func:`.Host.add_fc_port` and :func:`.Host.remove_fc_port`:
+
+.. code-block:: python
+
+		>>> address = '00:01:02:03:04:05:06:07'
+		>>> host.add_fc_port(address)
+		>>> host.remove_fc_port(address)
+
+
+Querying Host by Defined FC Port
+--------------------------------
+
+You can quickly check if a system has a host :func:`system.hosts.get_host_id_by_initiator_address <infinisdk.infinibox.host.HostBinder.get_host_id_by_initiator_address>`, :func:`system.hosts.get_host_by_initiator_address <infinisdk.infinibox.host.HostBinder.get_host_by_initiator_address>` and :func:`system.hosts.has_registered_initiator_address <infinisdk.infinibox.host.HostBinder.has_registered_initiator_address>`:
+
+.. code-block:: python
+
+		>>> system.hosts.has_registered_initiator_address(address)
+		False
+		>>> host.add_fc_port(address)
+		>>> system.hosts.get_host_by_initiator_address(address) == host
+		True
+
+
 Mapping and Unmapping Volumes and Snapshots
 -------------------------------------------
 

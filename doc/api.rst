@@ -46,7 +46,14 @@ infinibox.pools
 infinibox.hosts
 ~~~~~~~~~~~~~~~
 
+*infinibox.hosts* is of type :class:`.HostBinder` described below.
+
 .. automodule:: infinisdk.infinibox.host
+
+.. autoclass:: HostBinder
+   :members:
+
+Individual host objects are of type :class:`.Host`:
 
 .. autoclass:: Host
    :members:
