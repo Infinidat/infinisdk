@@ -9,6 +9,11 @@ def test_unmapping(infinibox, mapped_volume):
     mapped_volume.unmap()
     assert not mapped_volume.get_logical_units()
 
+def test_write_protection(volume):
+    assert not volume.get_write_protected()
+    volume.update_write_protected(True)
+    assert volume.get_write_protected()
+
 
 def test_serial(infinibox, volume):
     assert isinstance(volume.get_serial(), SCSISerial)

@@ -26,7 +26,6 @@ class BaseDataEntity(InfiniBoxObject):
     PROVISIONING = namedtuple('Provisioning', ['Thick', 'Thin'])('THICK', 'THIN')
     ENTITY_TYPES = namedtuple('VolumeTypes', ['Master', 'Snapshot', 'Clone'])('MASTER', 'SNAP', 'CLONE')
 
-
     def is_master(self):
         """Returns whether or not this entity is a master entity (not a snapshot and not a clone)
         """
