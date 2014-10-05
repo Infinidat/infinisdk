@@ -29,11 +29,12 @@ class APITransportFailure(APICommandException):
     def __init__(self, request_kwargs, *args, **kwargs):
         super(APITransportFailure, self).__init__(*args, **kwargs)
         self.attrs = munchify(request_kwargs)
+        self.error_desc = str(self.args[0]) if len(args) == 1 else ''
 
     def __repr__(self):
         return ("API Transport Failure\n\t"
                 "Request: {self.attrs.method} {self.attrs.url}\n\t"
-                "Message: {self.message}".format(self=self))
+                "Error Description: {self.error_desc}".format(self=self))
 
 
 class APICommandFailed(APICommandException):
