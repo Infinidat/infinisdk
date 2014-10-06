@@ -39,6 +39,8 @@ class RelatedObjectBinding(InfiniSDKBinding):
     def get_api_value_from_value(self, system, objtype, obj, value):
         if value is None:
             return self._value_for_none
+        if isinstance(value, SpecialValue):
+            return value
         return value.id
 
     def get_value_from_api_value(self, system, objtype, obj, value):
@@ -116,4 +118,6 @@ class ListToDictBinding(InfiniSDKBinding):
         return [d[self.key] for d in value]
 
     def get_api_value_from_value(self, system, objtype, obj, value):
+        if isinstance(value, SpecialValue):
+            return value
         return [{self.key:val} for val in value]
