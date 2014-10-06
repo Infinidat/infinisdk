@@ -11,6 +11,8 @@
 ### Redistribution and use in source or binary forms, with or without modification,
 ### are strictly forbidden unless prior written permission is obtained from Infinidat Ltd.
 ###!
+import os
+
 from .._compat import ConfigParser
 from .version_compatibility import All
 
@@ -66,7 +68,7 @@ def get_ini_option(section, option, default=None):
     global _cached_ini_parser
     if _cached_ini_parser is None:
         _cached_ini_parser = ConfigParser()
-        _cached_ini_parser.read(config.root.ini_file_path)
+        _cached_ini_parser.read(os.path.expanduser((config.root.ini_file_path)))
 
     if _cached_ini_parser.has_option(section, option):
         return _cached_ini_parser.get(section, option)
