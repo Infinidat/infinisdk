@@ -213,6 +213,12 @@ class LocalDrive(InfiniBoxSystemComponent):
     def get_type_name(cls):
         return "local_drive"
 
+    @cached_method
+    def get_this_url_path(self):
+        parent_url = self.get_parent().get_this_url_path()
+        this_url = parent_url.add_path("drives").add_path(str(self.get_index()))
+        return this_url
+
     def is_ssd(self):
         return self.get_type() == 'SSD'
 

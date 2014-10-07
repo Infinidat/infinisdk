@@ -39,6 +39,13 @@ def _basic_check_for_component(infinibox, component_type, parent_type):
     is_sub_component = lambda obj: is_component_instance(obj.get_parent())
     assert all(map(is_sub_component, sub_components))
 
+    assert infinibox.api.get(component_instance.get_this_url_path())
+
+    if component_type not in [System]:
+        for field in component_type.fields:
+            component_instance.get_field(field.name)
+
+
 def test_system_component_does_not_perform_api_get(infinibox):
     infinibox.api = None
     system_component = infinibox.components.system_component
