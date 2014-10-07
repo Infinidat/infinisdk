@@ -39,14 +39,3 @@ class User(SystemObject):
     def request_reset_password(self):
         url = self.get_this_url_path().add_path('reset_password')
         self.system.api.post(url)
-
-
-    def is_in_system(self):
-        #FIXME: Remove this function when INFINIBOX-7647 will be fixed...
-        # The Bug: InfiniBox returns FORBIDDEN status_code instead of not exists
-        try:
-            return super(User, self).is_in_system()
-        except CommandNotApproved as e:
-            if e.response.get_error().get('code') == 'BAD_USER':
-                return False
-            raise
