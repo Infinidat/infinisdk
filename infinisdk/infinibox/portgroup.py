@@ -25,6 +25,7 @@ class PortGroup(InfiniBoxObject):
         Field("node", api_name="node_id", creation_parameter=True, mutable=False, type=int),
         Field("state"),
         Field("name", creation_parameter=True, mutable=True, default=Autogenerate("pg_{uuid}")), # should contain the node id somehow
+        Field("enabled", type=bool, mutable=True, add_getter=False, add_updater=False),
     ]
 
     def add_port(self, port):
@@ -43,3 +44,6 @@ class PortGroup(InfiniBoxObject):
     def enable(self):
         url = self.get_this_url_path().add_path("enable")
         return self.system.api.post(url, data = "1")
+
+    def is_enabled(self):
+        return self.get_field('enabled')
