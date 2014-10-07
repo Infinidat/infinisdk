@@ -169,6 +169,9 @@ class Node(InfiniBoxSystemComponent):
     def get_url_path(cls, system):
         return cls.BASE_URL.add_path(cls.get_plural_name())
 
+    def get_service(self, service_name):
+        return self.system.components.services.get(parent_id=self.id, name=service_name)
+
     def phase_out(self):
         hook_tags = ['infinibox', 'node_{0}'.format(self.get_index())]
         gossip.trigger_with_tags('infinidat.infinibox.pre_node_phase_out', {'node': self}, tags=hook_tags)
@@ -297,6 +300,10 @@ class ServiceCluster(InfiniBoxSystemComponent):
         services_url = self.get_url_path(self.system)
         this_url = services_url.add_path(str(self.get_index()))
         return this_url
+
+    def get_services(self):
+        return [self.system.components.nodes.get(index=service_info['node_id']).get_service(self.get_name())
+                for service_info in self.get_field('node_states')]
 
     def start(self, node=None):
         data = {'node_id': node.id} if node else None

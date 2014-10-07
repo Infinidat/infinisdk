@@ -71,6 +71,8 @@ def test_node_component(infinibox):
     _basic_check_for_component(infinibox, Node, Rack, True)
     node = infinibox.components.nodes.choose()
     assert isinstance(node.get_state(), string_types)
+    assert all(isinstance(service, Service) for service in node.get_services())
+    assert [node.get_service('core')] == [service for service in node.get_services() if service.get_name() == 'core']
 
 def test_service_component(infinibox):
     _basic_check_for_component(infinibox, Service, Node, False)
@@ -81,6 +83,8 @@ def test_service_cluster(infinibox):
     assert isinstance(service_cluster.get_state(from_cache=False), string_types)
     service = infinibox.components.services.choose(name=service_cluster.get_name())
     assert service.get_service_cluster() is service_cluster
+    assert service in service_cluster.get_services()
+    assert all(isinstance(service, Service) for service in service_cluster.get_services())
 
 def test_node_phase(infinibox):
     node = infinibox.components.nodes.choose()
