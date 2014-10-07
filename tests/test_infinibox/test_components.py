@@ -102,6 +102,11 @@ def test_service_cluster(infinibox):
     assert service.get_service_cluster() is service_cluster
     assert service in service_cluster.get_services()
     assert all(isinstance(service, Service) for service in service_cluster.get_services())
+    node = infinibox.components.nodes.choose()
+    service_cluster.stop(node)
+    service_cluster.start(node)
+    service_cluster.stop()
+    service_cluster.start()
 
 def test_local_drive_component(infinibox):
     _basic_check_for_component(infinibox, LocalDrive, Node)

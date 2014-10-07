@@ -313,11 +313,11 @@ class ServiceCluster(InfiniBoxSystemComponent):
                 for service_info in self.get_field('node_states')]
 
     def start(self, node=None):
-        data = {'node_id': node.id} if node else None
+        data = {'node_id': node.get_index()} if node else {}
         self.system.api.post(self.get_this_url_path().add_path('start'), data=data)
 
     def stop(self, node=None):
-        data = {'node_id': node.id} if node else None
+        data = {'node_id': node.get_index()} if node else {}
         self.system.api.post(self.get_this_url_path().add_path('stop'), data=data)
 
 @InfiniBoxSystemComponents.install_component_type
