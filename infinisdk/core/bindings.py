@@ -49,6 +49,27 @@ class RelatedObjectBinding(InfiniSDKBinding):
         return getattr(system, self._collection_name).get_by_id_lazy(value)
 
 
+class RelatedComponentBinding(InfiniSDKBinding):
+
+    def __init__(self, collection_name=None, api_index_name=None):
+        super(RelatedComponentBinding, self).__init__()
+        self._collection_name = collection_name
+        self._api_index_name = api_index_name
+
+    def set_field(self, field):
+        super(RelatedComponentBinding, self).set_field(field)
+        if not self._collection_name:
+            self._collection_name = "{0}s".format(field.name)
+            self._api_index_name = 'index'
+
+    def get_api_value_from_value(self, system, objtype, obj, value):
+        raise NotImplementedError('Cannot find api value from object')
+
+    def get_value_from_api_value(self, system, objtype, obj, value):
+        kwargs = {self._api_index_name: value}
+        return system.components[self._collection_name].get(**kwargs)
+
+
 class ListOfRelatedObjectBinding(InfiniSDKBinding):
     """
     Binding for translating list objects info (dictionaries) to list of objects

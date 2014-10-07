@@ -12,12 +12,11 @@
 ### are strictly forbidden unless prior written permission is obtained from Infinidat Ltd.
 ###!
 from ..core.field import Field
-from ..core.bindings import InfiniSDKBinding
 from ..core.system_component import SystemComponentsBinder
 from ..core.system_object import SystemObject, APICommandFailed
 from infi.pyutils.lazy import cached_method
 from .component_query import InfiniBoxComponentQuery
-from ..core.bindings import ListOfRelatedComponentBinding
+from ..core.bindings import InfiniSDKBinding, ListOfRelatedComponentBinding, RelatedComponentBinding
 
 from urlobject import URLObject as URL
 import gossip
@@ -207,6 +206,7 @@ class LocalDrive(InfiniBoxSystemComponent):
         Field("state", cached=False),
         Field("type"),
         Field("serial_number"),
+        Field("node", api_name="node_index", type=int, cached=True, binding=RelatedComponentBinding()),
     ]
 
     @classmethod
@@ -224,7 +224,7 @@ class EthPort(InfiniBoxSystemComponent):
         Field("device_name", api_name="name"),
         Field("port_number", type=int, cached=True),
         Field("index", api_name="id", type=int, cached=True),
-        Field("node", api_name="node_index", type=int, cached=True),
+        Field("node", api_name="node_index", type=int, cached=True, binding=RelatedComponentBinding()),
         Field("role", cached=True),
         Field("system_interface_port_number", type=int),
         Field("state", cached=False),
@@ -244,7 +244,7 @@ class FcPort(InfiniBoxSystemComponent):
     FIELDS = [
         Field("index", api_name="id", type=int, cached=True),
         Field("wwpn", is_identity=True),
-        Field("node", cached=True),
+        Field("node", api_name="node_index", type=int, cached=True, binding=RelatedComponentBinding()),
         Field("state", cached=False),
         Field("link_state", cached=False),
     ]
@@ -258,6 +258,7 @@ class Drive(InfiniBoxSystemComponent):
     FIELDS = [
         Field("index", api_name="drive_index", type=int, is_identity=True, cached=True),
         Field("enclosure_index", type=int, cached=True),
+        Field("enclosure", api_name="enclosure_index", type=int, cached=True, binding=RelatedComponentBinding()),
         Field("serial_number"),
         Field("state", cached=False),
     ]
