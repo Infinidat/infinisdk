@@ -163,9 +163,11 @@ class API(object):
         kwargs.setdefault("timeout", self._default_request_timeout)
         raw_data = kwargs.pop("raw_data", False)
         data = kwargs.pop("data", None)
+        sent_json_object = None
         if data is not None and not isinstance(data, string_types):
             if not raw_data:
                 data = translate_special_values(data)
+            sent_json_object = data
             data = json.dumps(data)
 
         specified_address = kwargs.pop("address", None)
@@ -179,7 +181,7 @@ class API(object):
             hostname = full_url.hostname
             _logger.debug("{0} <-- {1} {2}", hostname, http_method.upper(), full_url)
             if data is not None:
-                _logger.debug("{0} <-- DATA: {1}" , hostname, data)
+                self._log_sent_data(hostname, data, sent_json_object)
             response = self._session.request(http_method, full_url, data=data, **kwargs)
             elapsed = get_timedelta_total_seconds(response.elapsed)
             _logger.debug("{0} --> {1} {2} (took {3:.04f}s)", hostname, response.status_code, response.reason, elapsed)
@@ -190,6 +192,17 @@ class API(object):
                     self._active_url = url
                 break
         return returned
+
+    def _log_sent_data(self, hostname, data, sent_json_object):
+        try:
+            # Hide potential passwords included in JSON
+            if isinstance(sent_json_object, dict) and 'password' in sent_json_object:
+                data = json.dumps(
+                    dict(sent_json_object, password='*' * len(sent_json_object['password']))
+                    )
+        except Exception:
+            pass
+        _logger.debug("{0} <-- DATA: {1}" , hostname, data)
 
     def request(self, http_method, path, assert_success=True, **kwargs):
         did_interactive_confirmation = False

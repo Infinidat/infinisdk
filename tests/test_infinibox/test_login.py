@@ -1,11 +1,22 @@
 from requests import codes
 import pytest
+import logbook
 
 from infinisdk.core.exceptions import APICommandFailed
 
 
 def test_login(infinibox):
     infinibox.login()
+
+def test_passwords_are_not_logged(infinibox):
+    with logbook.TestHandler() as handler:
+        password = '12345678'
+        infinibox.api.set_auth('user', password)
+        with pytest.raises(APICommandFailed):
+            infinibox.login()
+    for record in handler.records:
+        assert password not in record.message
+
 
 def test_invalid_login(infinibox):
     with infinibox.api.auth_context('a', 'b'):
