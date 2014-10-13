@@ -13,6 +13,7 @@
 ###!
 import json
 import sys
+import socket
 from contextlib import contextmanager
 
 import requests
@@ -209,7 +210,7 @@ class API(object):
         while True:
             try:
                 returned = self._request(http_method, path, **kwargs)
-            except (RequestException, ProtocolError) as e:
+            except (RequestException, ProtocolError, socket.error) as e:
                 request_kwargs = dict(url=path, method=http_method, **kwargs)
                 _logger.debug('Exception while sending API command to {0}: {1}', self.system, e)
                 raise APITransportFailure(request_kwargs, e)
