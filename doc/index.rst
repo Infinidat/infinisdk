@@ -19,6 +19,7 @@ Contents:
    getting_started
    querying
    system_object
+   pools
    volumes
    mappings
    snapshots

@@ -12,12 +12,28 @@
 ### are strictly forbidden unless prior written permission is obtained from Infinidat Ltd.
 ###!
 from capacity import TB
+from ..core.type_binder import TypeBinder
 from ..core import Field, CapacityType
 from ..core.api.special_values import Autogenerate
 from .system_object import InfiniBoxObject
 
+class PoolBinder(TypeBinder):
+    """Implements *system.pools*
+    """
+
+    def get_administered_pools(self):
+        """Returns the pools that can be managed by the current user
+        """
+        resp = self.system.api.get('/api/rest/pools/administered_pools')
+        return [Pool(self.system, pool_info)
+                for pool_info in resp.get_result()]
+
+
 
 class Pool(InfiniBoxObject):
+
+    BINDER_CLASS = PoolBinder
+
     FIELDS = [
         Field("id", type=int, is_identity=True, is_filterable=True, is_sortable=True),
         Field("name", creation_parameter=True, mutable=True, is_filterable=True, is_sortable=True, default=Autogenerate("pool_{uuid}")),

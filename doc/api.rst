@@ -37,7 +37,13 @@ infinibox.volumes
 infinibox.pools
 ~~~~~~~~~~~~~~~
 
+*infinibox.pools* is of type :class:`.PoolBinder` described below.
+
+
 .. automodule:: infinisdk.infinibox.pool
+
+.. autoclass:: PoolBinder
+   :members:
 
 .. autoclass:: Pool
    :members:

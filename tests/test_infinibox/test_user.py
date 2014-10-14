@@ -3,6 +3,7 @@ import flux
 from ecosystem.mocks.mock_mailboxer import get_simulated_mail_server
 import re
 
+
 def test_name(infinibox, user):
     curr_name = user.get_name()
     new_name = 'other_user_name'
@@ -11,6 +12,17 @@ def test_name(infinibox, user):
     assert curr_name.startswith('user_')
     assert curr_name != new_name
     assert user.get_name() == new_name
+
+
+def test_get_administered_pools_no_pool(infinibox, user):
+    assert infinibox.pools.get_administered_pools() == []
+
+
+def test_get_administered_pools_with_pools(infinibox, user):
+    pool = infinibox.objects.pools.create()
+    pool.add_owner(user)
+    assert infinibox.pools.get_administered_pools() == [pool]
+
 
 def test_creation(infinibox, user):
     kwargs = {"role": "ReadOnly",
@@ -26,10 +38,12 @@ def test_creation(infinibox, user):
     user.delete()
     assert (not user.is_in_system())
 
+
 def test_password(infinibox, user):
     with pytest.raises(AttributeError):
         user.get_password()
     user.update_password('some_password')
+
 
 def test_email(infinibox, user):
     orig_email = user.get_email()
@@ -39,6 +53,7 @@ def test_email(infinibox, user):
     assert orig_email != new_email
     assert user.get_email() == new_email
 
+
 def test_role(infinibox, user):
     orig_role = user.get_role()
     new_role = 'ReadOnly'
@@ -46,6 +61,7 @@ def test_role(infinibox, user):
     user.update_role(new_role)
     assert orig_role != new_role
     assert user.get_role() == new_role
+
 
 def test_get_pools(infinibox, user):
     flux.current_timeline.sleep(1)
@@ -62,13 +78,16 @@ def test_get_pools(infinibox, user):
     pool.discard_owner(user)
     assert user.get_pools() == []
 
+
 def _get_token_from_mail(simulator, mail_address):
     msg = _get_last_mailboxer_msg(simulator, mail_address)
     return re.findall("token=(.*)\"", msg.content)[0]
 
+
 def _get_last_mailboxer_msg(simulator, mail_address):
     msg = get_simulated_mail_server(simulator).get_messages(mail_address)
     return msg[0]
+
 
 def test_reset_password(infinibox, infinibox_simulator, user):
     user_email = user.get_email()

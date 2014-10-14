@@ -1,0 +1,21 @@
+# -*- mode: python -*-
+from contextlib import contextmanager
+
+from capacity import TiB
+
+from infinisdk import InfiniBox
+from infinisim.infinibox import Infinibox as Simulator
+
+
+@contextmanager
+def doctest_context():
+    simulator = Simulator()
+    simulator.activate()
+    system = InfiniBox(simulator, auth=('infinidat', '123456'))
+    try:
+        yield {
+            "system": system,
+            "TiB": TiB,
+        }
+    finally:
+        simulator.deactivate()

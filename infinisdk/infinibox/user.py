@@ -14,6 +14,7 @@
 from ..core import Field, SystemObject
 from ..core.api.special_values import Autogenerate
 from ..core.exceptions import CommandNotApproved
+from ..core.utils import deprecated
 
 
 class User(SystemObject):
@@ -26,7 +27,13 @@ class User(SystemObject):
         Field("password", creation_parameter=True, add_getter=False, mutable=True, default="12345678"),
     ]
 
+    @deprecated(message='Use User.get_owned_pools or User.get_administered_pools instead')
     def get_pools(self):
+        return self.get_owned_pools()
+
+    def get_owned_pools(self):
+        """Returns the pools that are owned by this user
+        """
         pools_url = "{0}/pools".format(self.get_this_url_path())
         resp = self.system.api.get(pools_url)
         return [self.system.pools.get_by_id(pool_info['id'])
