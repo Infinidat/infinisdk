@@ -118,4 +118,4 @@ class BaseDataEntity(InfiniBoxObject):
         """Moves this entity to a new pool, optionally along with its needed capacity
         """
         data = dict(pool_id = target_pool.get_id(), with_capacity = with_capacity)
-        return self.system.api.post(self.get_this_url_path().add_path('move'), data=data)
+        self.system.api.post(self.get_this_url_path().add_path('move'), data=data)
