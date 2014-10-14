@@ -61,6 +61,17 @@ InfiniSDK exposes the volume WWN serial number through a custom type, enabling y
 
 .. seealso:: :class:`.SCSISerial`
 
+Moving Between Pools
+--------------------
+
+Use :meth:`.Volume.move_pool` to move a volume between pools:
+
+.. code-block:: python
+
+		>>> new_pool = system.pools.create()
+		>>> v.move_pool(new_pool)
+
+
 Deleting Volumes
 ----------------
 
@@ -69,6 +80,7 @@ Deleting a volume is done with :meth:`.Volume.delete`:
 .. code-block:: python
 
 		>>> v.delete()
+
 
 
 

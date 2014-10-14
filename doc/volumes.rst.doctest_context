@@ -8,11 +8,10 @@ def doctest_context():
     simulator = Simulator()
     simulator.activate()
     system = InfiniBox(simulator, auth=('infinidat', '123456'))
-    pool = system.pools.create()
     try:
         yield {
             "system": system,
-            "pool": pool,
+            "pool": system.pools.create(),
         }
     finally:
         simulator.deactivate()
