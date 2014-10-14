@@ -22,6 +22,12 @@ def test_unmapping(infinibox, mapped_volume):
     mapped_volume.unmap()
     assert not mapped_volume.get_logical_units()
 
+def test_move_pool(infinibox, volume, pool):
+    new_pool = create_pool(infinibox)
+    assert volume.get_pool() == pool
+    volume.move_pool(new_pool)
+    assert volume.get_pool() == new_pool
+
 def test_serial(infinibox, volume):
     assert isinstance(volume.get_serial(), SCSISerial)
 

@@ -188,4 +188,12 @@ class Volume(InfiniBoxObject):
         for lun in self.get_logical_units().luns.values():
             lun.unmap()
 
+    def move_pool(self, target_pool):
+        """Moves this volume to a new pool
+        """
+        data = {'pool_id': target_pool.get_id()}
+        self.refresh('pool')
+        self.system.api.post(self.get_this_url_path().add_path('move'), data=data)
+
+
 ScsiVolume.register(Volume)

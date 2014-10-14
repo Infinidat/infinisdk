@@ -1,5 +1,5 @@
 coverage
-infinisim>=20.0.post2.gf8a617d
+infinisim>=26.0
 infinisdk_internal==22.0
 izsim>=19
 pytest
