@@ -1,6 +1,6 @@
 coverage
 infinisim>=20.0.post2.gf8a617d
-infinisdk_internal>=0.0.0.post9.g36bd55e
+infinisdk_internal==22.0
 izsim>=19
 pytest
 pyforge

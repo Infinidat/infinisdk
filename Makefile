@@ -14,7 +14,7 @@ coverage: env
 
 env: .env/.up-to-date
 
-.env/.up-to-date: setup.py Makefile
+.env/.up-to-date: setup.py Makefile test_requirements.txt
 	virtualenv .env
 	.env/bin/pip install -e .
 	.env/bin/pip install Sphinx alabaster
