@@ -42,6 +42,12 @@ class IPDomain(InfiniBoxObject):
         url = self.get_this_url_path().add_path("ports").add_path(port_group.id)
         return self.system.api.delete(url).get_result()
 
+    def disable_ip_address(self, ip_address):
+        self.system.api.post(self.get_this_url_path().add_path('ips').add_path(ip_address).add_path('disable'))
+
+    def enable_ip_address(self, ip_address):
+        self.system.api.post(self.get_this_url_path().add_path('ips').add_path(ip_address).add_path('enable'))
+
     def disable(self):
         url = self.get_this_url_path().add_path("disable")
         return self.system.api.post(url, data = "1")

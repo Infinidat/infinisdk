@@ -8,6 +8,11 @@ def test_disable_enable(port_group):
 def test_disable_enable_ipdomain(infinibox, ipdomain):
     _disable_enable(ipdomain)
 
+def test_disable_enable_ipdomain_ip(infinibox, ipdomain):
+    ips = ipdomain.get_field('ips')
+    ipdomain.disable_ip_address(ips[0])
+    ipdomain.enable_ip_address(ips[0])
+
 
 def _disable_enable(obj):
     obj.disable()
