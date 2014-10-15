@@ -27,6 +27,13 @@ def test_extending(infinibox, different_name):
             return "{0} {1} {2} {3}".format(type(self).__name__, a, b, c)
 
     assert infinibox.new_method(1, 2, 3) == 'InfiniBox 1 2 3'
+    assert infinibox.new_method.__self__ is infinibox
+    assert infinibox.new_method.im_self is infinibox
+    assert infinibox.new_method.im_class is type(infinibox)
+    if different_name:
+        assert infinibox.new_method.im_func is some_other_name
+    else:
+        assert infinibox.new_method.im_func is new_method
 
 
 def test_cannot_attach_existing_methods(infinibox, volume):

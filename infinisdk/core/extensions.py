@@ -86,7 +86,11 @@ class Attachment(object):
 class Method(Attachment):
 
     def __get__(self, obj, objclass):
-        return functools.partial(self._func, obj)
+        method = functools.partial(self._func, obj)
+        method.__self__ = method.im_self = obj
+        method.im_class = objclass
+        method.im_func = self._func
+        return method
 
 
 class Property(Attachment):
