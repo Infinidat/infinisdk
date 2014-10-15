@@ -2,12 +2,10 @@ import pytest
 
 
 def test_disable_enable(port_group):
-    pytest.skip('need infinisim network configuration support')
     _disable_enable(port_group)
 
 
 def test_disable_enable_ipdomain(infinibox, ipdomain):
-    pytest.skip('need infinisim network configuration support')
     _disable_enable(ipdomain)
 
 
@@ -20,10 +18,12 @@ def _disable_enable(obj):
 
 @pytest.fixture
 def port_group(infinibox, node):
+    pytest.skip('need infinisim network configuration support')
     return infinibox.portgroups.create(node=node.get_index())
 
 @pytest.fixture
 def ipdomain(infinibox):
+    pytest.skip('need infinisim network configuration support')
     return infinibox.ipdomains.create()
 
 
