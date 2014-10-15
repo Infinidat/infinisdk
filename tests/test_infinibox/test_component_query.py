@@ -1,5 +1,6 @@
 import pytest
 import random
+from infinisdk import Q
 from infinisdk.core.config import config
 from infinisdk.infinibox.components import Enclosure, Node
 
@@ -51,6 +52,16 @@ def test_filter_with_kw(infinibox):
     services = infinibox.components.services
     for service in services.find(state="ACTIVE"):
         assert service.get_state() == 'ACTIVE'
+
+def test_filter_with_Q_predicates(infinibox):
+    services = infinibox.components.services
+    for service in services.find(Q.state == "ACTIVE"):
+        assert service.get_state() == 'ACTIVE'
+
+def test_filtering_by_special_operators(infinibox):
+    query = infinibox.components.services.find(Q.name.like('cor'))
+    with pytest.raises(NotImplementedError):
+        list(query)
 
 def test_get_length(infinibox):
     found_components = infinibox.components.find()

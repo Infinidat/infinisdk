@@ -65,7 +65,10 @@ class InfiniBoxComponentQuery(object):
             self.object_type != type(item)):
             return False
         for predicate in self.predicates:
-            op_func = getattr(operator, predicate.operator_name)
+            try:
+                op_func = getattr(operator, predicate.operator_name)
+            except AttributeError:
+                raise NotImplementedError("Filtering by {0} operator is not supported".format(predicate.operator_name))
             item_value = item.get_field(predicate.field.name)
             if not op_func(item_value, predicate.value):
                 return False
