@@ -41,3 +41,12 @@ class IPDomain(InfiniBoxObject):
     def remove_port_group(self, port_group):
         url = self.get_this_url_path().add_path("ports").add_path(port_group.id)
         return self.system.api.delete(url).get_result()
+
+    def disable(self):
+        url = self.get_this_url_path().add_path("disable")
+        return self.system.api.post(url, data = "1")
+
+    def enable(self):
+        url = self.get_this_url_path().add_path("enable")
+        return self.system.api.post(url, data = "1")
+
