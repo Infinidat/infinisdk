@@ -269,24 +269,25 @@ class Drive(InfiniBoxSystemComponent):
         Field("state", cached=False),
     ]
 
+class NoneForNonExists(InfiniSDKBinding):
+    # INFINIBOX-12634: Workaround until all services would have the same fields
+    def get_value_from_api_object(self, system, objtype, obj, api_obj):
+        try:
+            return super(NoneForNonExists, self).get_value_from_api_object(system, objtype, obj, api_obj)
+        except KeyError:
+            return None
+
 @InfiniBoxSystemComponents.install_component_type
 class Service(InfiniBoxSystemComponent):
     FIELDS = [
         Field("index", api_name="name", cached=True),
         Field("name", is_identity=True, cached=True),
-        Field("role", add_getter=False),
+        Field("role", binding=NoneForNonExists()),
         Field("state", cached=False),
     ]
 
     def get_service_cluster(self):
         return self.system.components.service_clusters.get(name=self.get_name())
-
-    def get_role(self, *args, **kwargs):
-        # INFINIBOX-12634: Workaround until all services would have the same fields
-        try:
-            return self.get_field('role', *args, **kwargs)
-        except KeyError:
-            return None
 
     def start(self):
         self.get_service_cluster().start(node=self.get_parent())
