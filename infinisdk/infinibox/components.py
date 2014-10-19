@@ -274,11 +274,19 @@ class Service(InfiniBoxSystemComponent):
     FIELDS = [
         Field("index", api_name="name", cached=True),
         Field("name", is_identity=True, cached=True),
+        Field("role", add_getter=False),
         Field("state", cached=False),
     ]
 
     def get_service_cluster(self):
         return self.system.components.service_clusters.get(name=self.get_name())
+
+    def get_role(self, *args, **kwargs):
+        # INFINIBOX-12634: Workaround until all services would have the same fields
+        try:
+            return self.get_field('role', *args, **kwargs)
+        except KeyError:
+            return None
 
     def start(self):
         self.get_service_cluster().start(node=self.get_parent())
