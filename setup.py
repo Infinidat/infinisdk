@@ -5,7 +5,7 @@ with open(os.path.join(os.path.dirname(__file__), "infinisdk", "__version__.py")
     exec(version_file.read()) # pylint: disable=W0122
 
 _INSTALL_REQUIERS = [
-    "api_object_schema>=1.4.2",
+    "api_object_schema>=1.5.0",
     "python-dateutil", #  required to work around https://github.com/crsmithdev/arrow/issues/120
     "arrow",
     "capacity",

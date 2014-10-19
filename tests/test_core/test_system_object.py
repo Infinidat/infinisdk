@@ -31,6 +31,15 @@ def test_querying_fields_by_name(system):
     assert SampleDerivedObject.fields.name.type.type is str
     assert SampleDerivedObject.fields.number.type.type is int
 
+def test_bound_fields(system_object):
+    field = system_object.fields.id
+    assert field.object is system_object
+    assert field.name == 'id'
+
+def test_bound_fields_are_not_cached(system_object):
+    assert system_object.fields.name is not system_object.fields.name
+    assert system_object.fields.name is not system_object.fields.fields.name
+
 def test_no_fields(system):
     class EmptyObject(SystemObject):
         pass
@@ -165,3 +174,8 @@ def test_update_field_updates_its_cache(system):
     assert user.get_field("name", from_cache=True) != new_name
     user.update_name(new_name)
     assert user.get_field("name", from_cache=True) == new_name
+
+
+@pytest.fixture(params=[SampleBaseObject, SampleDerivedObject])
+def system_object(request, system):
+    return request.param(system, {'id': 1})
