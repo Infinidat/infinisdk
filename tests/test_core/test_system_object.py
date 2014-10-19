@@ -46,7 +46,7 @@ def test_no_fields(system):
 
     assert len(EmptyObject.fields) == 0
 
-def test_unexist_field(system):
+def test_nonexistent_field(system):
     assert not hasattr(SampleDerivedObject.fields, "fake_field")
 
 def test_get_from_cache_miss(system):
