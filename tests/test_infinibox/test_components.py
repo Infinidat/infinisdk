@@ -89,10 +89,14 @@ def test_node_component(infinibox):
     node = infinibox.components.nodes.choose()
     assert isinstance(node.get_state(), string_types)
     assert all(isinstance(service, Service) for service in node.get_services())
+    assert all(node is service.get_node() for service in node.get_services())
     assert [node.get_service('core')] == [service for service in node.get_services() if service.get_name() == 'core']
 
 def test_service_component(infinibox):
     _basic_check_for_component(infinibox, Service, Node)
+    service = infinibox.components.service_clusters.choose().get_services()[0]
+    assert service.get_node().get_index() == 1
+    assert service.is_master()
 
 def test_service_cluster(infinibox):
     _basic_check_for_component(infinibox, ServiceCluster, None)
@@ -102,11 +106,29 @@ def test_service_cluster(infinibox):
     assert service.get_service_cluster() is service_cluster
     assert service in service_cluster.get_services()
     assert all(isinstance(service, Service) for service in service_cluster.get_services())
-    node = infinibox.components.nodes.choose()
+
+def test_services_enable_disable(infinibox):
+    service_cluster = infinibox.components.service_clusters.choose()
+    service = service_cluster.get_services()[-1]
+    node = service.get_node()
+    assert service.is_active()
+    assert service_cluster.is_active()
+
     service_cluster.stop(node)
+    assert not service.is_active()
+    assert service_cluster.is_active()
+
     service_cluster.start(node)
+    assert service.is_active()
+    assert service_cluster.is_active()
+
     service_cluster.stop()
+    assert not service.is_active()
+    assert not service_cluster.is_active()
+
     service_cluster.start()
+    assert service.is_active()
+    assert service_cluster.is_active()
 
 def test_local_drive_component(infinibox):
     _basic_check_for_component(infinibox, LocalDrive, Node)

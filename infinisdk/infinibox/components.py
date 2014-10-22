@@ -298,6 +298,15 @@ class Service(InfiniBoxSystemComponent):
     def stop(self):
         self.get_service_cluster().stop(node=self.get_parent())
 
+    def is_active(self):
+        return self.get_state() == 'ACTIVE'
+
+    def is_master(self):
+        return self.get_role() == 'MASTER'
+
+    def get_node(self):
+        return self.get_parent()
+
 @InfiniBoxSystemComponents.install_component_type
 class ServiceCluster(InfiniBoxSystemComponent):
     FIELDS = [
@@ -331,6 +340,9 @@ class ServiceCluster(InfiniBoxSystemComponent):
     def stop(self, node=None):
         data = {'node_id': node.get_index()} if node else {}
         self.system.api.post(self.get_this_url_path().add_path('stop'), data=data)
+
+    def is_active(self):
+        return self.get_state() == 'ACTIVE'
 
 @InfiniBoxSystemComponents.install_component_type
 class System(InfiniBoxSystemComponent):
