@@ -47,3 +47,6 @@ class PortGroup(InfiniBoxObject):
 
     def is_enabled(self):
         return self.get_field('enabled')
+
+    def __repr__(self):
+        return "<{0} id={1} node={2}>".format(type(self).__name__, self.id, self.get_field("node"))
