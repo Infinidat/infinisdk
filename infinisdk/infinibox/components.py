@@ -20,6 +20,7 @@ from ..core.bindings import InfiniSDKBinding, ListOfRelatedComponentBinding, Rel
 
 from urlobject import URLObject as URL
 import gossip
+import sentinels
 
 
 class InfiniBoxSystemComponents(SystemComponentsBinder):
@@ -269,20 +270,22 @@ class Drive(InfiniBoxSystemComponent):
         Field("state", cached=False),
     ]
 
-class NoneForNonExists(InfiniSDKBinding):
+FIELD_NOT_EXISTS = sentinels.Sentinel('FIELD_NOT_EXISTS')
+
+class NotExistsSupportBinding(InfiniSDKBinding):
     # INFINIBOX-12634: Workaround until all services would have the same fields
     def get_value_from_api_object(self, system, objtype, obj, api_obj):
         try:
-            return super(NoneForNonExists, self).get_value_from_api_object(system, objtype, obj, api_obj)
+            return super(NotExistsSupportBinding, self).get_value_from_api_object(system, objtype, obj, api_obj)
         except KeyError:
-            return None
+            return FIELD_NOT_EXISTS
 
 @InfiniBoxSystemComponents.install_component_type
 class Service(InfiniBoxSystemComponent):
     FIELDS = [
         Field("index", api_name="name", cached=True),
         Field("name", is_identity=True, cached=True),
-        Field("role", binding=NoneForNonExists()),
+        Field("role", binding=NotExistsSupportBinding()),
         Field("state", cached=False),
     ]
 
