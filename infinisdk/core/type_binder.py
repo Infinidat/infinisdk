@@ -34,6 +34,11 @@ class TypeBinder(object):
     def fields(self):
         return self.object_type.fields
 
+    def get_mutable_fields(self):
+        """Returns a list of all mutable fields for this object type
+        """
+        return [f for f in self.fields if f.mutable]
+
     def find(self, *predicates, **kw):
         """Queries objects according to predicstes. Can receive arguments in two possible forms:
 
