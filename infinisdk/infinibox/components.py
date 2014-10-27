@@ -14,6 +14,7 @@
 from ..core.field import Field
 from ..core.system_component import SystemComponentsBinder
 from ..core.system_object import SystemObject, APICommandFailed
+from ..core.type_binder import TypeBinder
 from infi.pyutils.lazy import cached_method
 from .component_query import InfiniBoxComponentQuery
 from ..core.bindings import InfiniSDKBinding, ListOfRelatedComponentBinding, RelatedComponentBinding
@@ -67,8 +68,15 @@ class ComputedIDBinding(InfiniSDKBinding):
     def get_value_from_api_value(self, *args):
         raise NotImplementedError() # pragma: no cover
 
+class InfiniBoxComponentBinder(TypeBinder):
+    def get_by_id_lazy(self, id):
+        returned = self.safe_get_by_id(id)
+        if returned is None:
+            raise NotImplementedError("Initializing infinibox components lazily is not yet supported") # pragma: no cover
+        return returned
+
 class InfiniBoxSystemComponent(SystemObject):
-    BINDER_CLASS = SystemComponentsBinder
+    BINDER_CLASS = InfiniBoxComponentBinder
     BASE_URL = URL("components")
     FIELDS = [
         Field("id", binding=ComputedIDBinding(), is_identity=True, cached=True),

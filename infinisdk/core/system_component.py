@@ -12,7 +12,6 @@
 ### are strictly forbidden unless prior written permission is obtained from Infinidat Ltd.
 ###!
 from .._compat import itervalues, iterkeys
-from .field import Field
 from .type_binder import TypeBinder
 
 class SystemComponentsBinder(TypeBinder):
@@ -81,7 +80,7 @@ class SpecificComponentBinderGetter(object):
     def __get__(self, components_binder, _):
         returned = getattr(components_binder, self.cached_name, None)
         if returned is None:
-            returned = SpecificComponentBinder(self.object_type, components_binder.system)
+            returned = self.object_type.bind(components_binder.system)
             setattr(components_binder, self.cached_name, returned)
         return returned
 

@@ -154,6 +154,13 @@ def test_get_index(infinibox):
     assert node.get_index() == 3
     assert node.get_id() == 'system:0_rack:1_node:3'
 
+def test_get_by_id_lazy(infinibox):
+    with pytest.raises(NotImplementedError):
+        infinibox.components.get_by_id_lazy(123456)
+    with pytest.raises(NotImplementedError):
+        infinibox.components.nodes.get_by_id_lazy(123456)
+    node = infinibox.components.nodes.choose()
+    assert node is infinibox.components.nodes.get_by_id_lazy(node.id)
 
 @pytest.fixture(params=['racks', 'nodes', 'enclosures'])
 def component_collection(request, infinibox):

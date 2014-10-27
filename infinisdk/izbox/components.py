@@ -14,6 +14,7 @@
 from ..core.field import Field
 from ..core.system_component import SystemComponentsBinder
 from ..core.system_object import SystemObject
+from ..core.type_binder import TypeBinder
 
 from infi.pyutils.lazy import cached_method
 
@@ -34,8 +35,17 @@ class IZBoxSystemComponents(SystemComponentsBinder):
     def get_type_infos_from_system(self):
         return self.system.api.get("components/types").get_result()
 
+class IZBoxComponentBinder(TypeBinder):
+
+    def get_by_id_lazy(self, id):
+        returned = self.system.components.try_get_component_by_id(id)
+        if returned is None:
+            returned = self.object_type(self.system, {"id": id, "type": self.object_type.get_type_name()})
+            self.system.components.cache_component(returned)
+        return returned
+
 class IZBoxSystemComponent(SystemObject):
-    BINDER_CLASS = SystemComponentsBinder
+    BINDER_CLASS = IZBoxComponentBinder
 
     FIELDS = [
         Field("id", type=int, is_identity=True),
