@@ -13,7 +13,7 @@
 ###!
 from ..core.field import Field
 from ..core.system_component import SystemComponentsBinder
-from ..core.system_object import SystemObject, APICommandFailed
+from ..core.system_object import SystemObject, APICommandFailed, ObjectNotFound
 from ..core.type_binder import TypeBinder
 from infi.pyutils.lazy import cached_method
 from .component_query import InfiniBoxComponentQuery
@@ -298,7 +298,10 @@ class Service(InfiniBoxSystemComponent):
     ]
 
     def get_service_cluster(self):
-        return self.system.components.service_clusters.get(name=self.get_name())
+        try:
+            return self.system.components.service_clusters.get(name=self.get_name())
+        except ObjectNotFound:
+            raise NotImplementedError("This service ({0}) doesn't support CLM".format(self.get_name()))
 
     def start(self):
         self.get_service_cluster().start(node=self.get_parent())

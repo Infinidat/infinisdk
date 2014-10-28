@@ -107,6 +107,16 @@ def test_service_cluster(infinibox):
     assert service in service_cluster.get_services()
     assert all(isinstance(service, Service) for service in service_cluster.get_services())
 
+def test_enable_disble_unclustered_service(infinibox):
+    node = infinibox.components.nodes.choose()
+    mgmt_service = node.get_service('mgmt')
+    with pytest.raises(NotImplementedError):
+        mgmt_service.stop()
+    with pytest.raises(NotImplementedError):
+        mgmt_service.start()
+    with pytest.raises(NotImplementedError):
+        mgmt_service.get_service_cluster()
+
 def test_services_enable_disable(infinibox):
     service_cluster = infinibox.components.service_clusters.choose()
     service = service_cluster.get_services()[-1]
