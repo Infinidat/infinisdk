@@ -49,6 +49,23 @@ class RelatedObjectBinding(InfiniSDKBinding):
         return getattr(system, self._collection_name).get_by_id_lazy(value)
 
 
+class ListOfRelatedObjectIDsBinding(RelatedObjectBinding):
+    """
+    Binding for translating list objects info (dictionaries) to list of objects
+    API value = [1, 2]
+    InfiniSDK will return:
+    value = [<object id=1>, <object id=2>]
+    """
+    def get_api_value_from_value(self, system, objtype, obj, value):
+        if isinstance(value, SpecialValue):
+            return value
+        return [single_value.id for single_value in value]
+
+    def get_value_from_api_value(self, system, objtype, obj, value):
+        obj_getter = getattr(system, self._collection_name).get_by_id_lazy
+        return [obj_getter(obj_id) for obj_id in value]
+
+
 class RelatedComponentBinding(InfiniSDKBinding):
 
     def __init__(self, collection_name=None, api_index_name=None):

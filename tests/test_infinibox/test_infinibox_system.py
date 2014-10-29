@@ -54,7 +54,7 @@ def test_get_collections_names(infinibox):
     assert 'volumes' in collections_names
 
 def test_single_metadata_creation_on_all_infinibox_objects(infinibox, volume):
-    ignore_types = ['volumes', 'filesystems', 'exports', 'ipdomains', 'users', 'emailrules', 'portgroups']
+    ignore_types = ['volumes', 'filesystems', 'exports', 'network_spaces', 'users', 'emailrules', 'network_interfaces']
 
     type_classes = [obj_type for obj_type in infinibox.OBJECT_TYPES
                     if obj_type.get_plural_name() not in ignore_types]

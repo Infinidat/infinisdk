@@ -1,17 +1,18 @@
 import pytest
 
 
-def test_disable_enable(port_group):
-    _disable_enable(port_group)
+def test_disable_enable(network_interface):
+    _disable_enable(network_interface)
 
 
-def test_disable_enable_ipdomain(infinibox, ipdomain):
-    _disable_enable(ipdomain)
+def test_disable_enable_network_space(infinibox, network_space):
+    _disable_enable(network_space)
 
-def test_disable_enable_ipdomain_ip(infinibox, ipdomain):
-    ips = ipdomain.get_field('ips')
-    ipdomain.disable_ip_address(ips[0])
-    ipdomain.enable_ip_address(ips[0])
+
+def test_disable_enable_network_space_ip(infinibox, network_space):
+    ips = network_space.get_field('ips')
+    network_space.disable_ip_address(ips[0])
+    network_space.enable_ip_address(ips[0])
 
 
 def _disable_enable(obj):
@@ -22,14 +23,15 @@ def _disable_enable(obj):
 
 
 @pytest.fixture
-def port_group(infinibox, node):
+def network_interface(infinibox, node):
     pytest.skip('need infinisim network configuration support')
-    return infinibox.portgroups.create(node=node.get_index())
+    return infinibox.network_interfaces.create(node=node.get_index())
+
 
 @pytest.fixture
-def ipdomain(infinibox):
+def network_space(infinibox):
     pytest.skip('need infinisim network configuration support')
-    return infinibox.ipdomains.create()
+    return infinibox.network_spaces.create()
 
 
 @pytest.fixture(params=[0, 1, 2])

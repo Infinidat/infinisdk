@@ -11,22 +11,28 @@
 ### Redistribution and use in source or binary forms, with or without modification,
 ### are strictly forbidden unless prior written permission is obtained from Infinidat Ltd.
 ###!
-from ..core import Field, SystemObject
+from ..core import Field
+from ..core.bindings import ListOfRelatedObjectIDsBinding
 from ..core.api.special_values import Autogenerate
 from .system_object import InfiniBoxObject
 
-class IPDomain(InfiniBoxObject):
+
+class NetworkSpace(InfiniBoxObject):
     URL_PATH = 'network/spaces'
 
     FIELDS = [
-        Field("id", is_identity=True),
-        Field("name", creation_parameter=True, mutable=True, default=Autogenerate("ipdomain_{uuid}")),
+        Field("id", is_identity=True, type=int, cached=True),
+        Field("name", creation_parameter=True, mutable=True, default=Autogenerate("network_space_{uuid}")),
         Field("network_config", creation_parameter=True, mutable=True, type=dict, default=dict),
-        Field("port_groups", creation_parameter=True, optional=True, mutable=True, type=list, add_updater=False),
-        Field("services", creation_parameter=True, optional=True, type=list),
+        Field("interfaces", creation_parameter=True, mutable=True, type=list, add_updater=False, binding=ListOfRelatedObjectIDsBinding('network_interfaces')),
+        Field("service", creation_parameter=True, default="NAS_SERVICE"),
         Field("ips", creation_parameter=False, mutable=False, type=list),
         Field("automatic_ip_failback", creation_parameter=True, mutable=True, optional=True, type=bool),
     ]
+
+    @classmethod
+    def get_type_name(cls):
+        return 'network_space'
 
     def add_ip_address(self, ip_address):
         return self.system.api.post(self.get_this_url_path().add_path("ips"), data=ip_address).get_result()

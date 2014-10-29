@@ -11,22 +11,28 @@
 ### Redistribution and use in source or binary forms, with or without modification,
 ### are strictly forbidden unless prior written permission is obtained from Infinidat Ltd.
 ###!
-from ..core import Field, SystemObject
+from ..core import Field
 from ..core.api.special_values import Autogenerate
 from .system_object import InfiniBoxObject
 from ..core.bindings import ListToDictBinding
 
-class PortGroup(InfiniBoxObject):
-    URL_PATH = 'network/port_groups'
+
+class NetworkInterface(InfiniBoxObject):
+    URL_PATH = 'network/interfaces'
 
     FIELDS = [
-        Field("id", is_identity=True),
-        Field("ports", creation_parameter=True, mutable=True, type=list, default=list, add_updater=False, binding=ListToDictBinding(key="name")),
+        Field("id", is_identity=True, type=int, cached=True),
+        Field("ports", optional=True, creation_parameter=True, mutable=True, type=list, default=list, add_updater=False, binding=ListToDictBinding(key="name")),
         Field("node", api_name="node_id", creation_parameter=True, mutable=False, type=int),
         Field("state"),
+        Field("type", creation_parameter=True, default="PORT_GROUP"),
         Field("name", creation_parameter=True, mutable=True, default=Autogenerate("pg_{uuid}")), # should contain the node id somehow
         Field("enabled", type=bool, mutable=True, add_getter=False, add_updater=False),
     ]
+
+    @classmethod
+    def get_type_name(cls):
+        return 'network_interface'
 
     def add_port(self, port):
         url = self.get_this_url_path().add_path("ports")

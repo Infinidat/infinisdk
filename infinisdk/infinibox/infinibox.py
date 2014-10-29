@@ -12,7 +12,6 @@
 ### are strictly forbidden unless prior written permission is obtained from Infinidat Ltd.
 ###!
 import itertools
-import re
 
 from sentinels import NOTHING
 
@@ -29,8 +28,8 @@ from .user import User
 from .volume import Volume
 from .filesystem import Filesystem
 from .export import Export
-from .ipdomain import IPDomain
-from .portgroup import PortGroup
+from .network_space import NetworkSpace
+from .network_interface import NetworkInterface
 
 try:
     from infinisim.core.context import lookup_simulator_by_address
@@ -39,7 +38,7 @@ except ImportError:
 
 
 class InfiniBox(APITarget):
-    OBJECT_TYPES = [Volume, Pool, Host, Cluster, User, EmailRule, Filesystem, Export, IPDomain, PortGroup]
+    OBJECT_TYPES = [Volume, Pool, Host, Cluster, User, EmailRule, Filesystem, Export, NetworkSpace, NetworkInterface]
     SYSTEM_EVENTS_TYPE = Events
     SYSTEM_COMPONENTS_TYPE = InfiniBoxSystemComponents
 
