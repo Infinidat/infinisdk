@@ -22,11 +22,11 @@ env: .env/.up-to-date
 	.env/bin/pip install -i http://pypi01.infinidat.com/simple -r test_requirements.txt
 	touch .env/.up-to-date
 
-develop_deps:
+.develop_deps:
 	virtualenv .env
-	.env/bin/pip install -i http://pypi01.infinidat.com/simple -e ../ecosystem -e ../infinibox_sysdefs -e ../infinisim -e ../infinisdk_internal -e ../izsim
+	.env/bin/pip install -i http://pypi01.infinidat.com/simple -e ../ecosystem -e ../infinibox_sysdefs -e ../infinisim -e ../infinisdk_internal
 
-develop_env: develop_deps env
+develop_env: .develop_deps env
 
 
 jenkins-docker-test:
