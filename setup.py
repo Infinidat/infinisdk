@@ -20,6 +20,7 @@ _INSTALL_REQUIERS = [
     "infi.dtypes.wwn>=0.0.2",
     "storage_interfaces",
     "flux",
+    "pact>=1.0.0",
 ]
 
 setup(name="infinisdk",
