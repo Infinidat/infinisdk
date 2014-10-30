@@ -6,21 +6,21 @@ with open(os.path.join(os.path.dirname(__file__), "infinisdk", "__version__.py")
 
 _INSTALL_REQUIERS = [
     "api_object_schema>=1.5.0",
-    "python-dateutil", #  required to work around https://github.com/crsmithdev/arrow/issues/120
     "arrow",
     "capacity",
     "colorama",
+    "confetti>=2.1.0",
+    "flux",
+    "gossip>=0.8.0",
+    "infi.dtypes.wwn>=0.0.2",
     "infi.pyutils",
     "logbook",
+    "pact>=1.0.0",
+    "python-dateutil", #  required to work around https://github.com/crsmithdev/arrow/issues/120
     "requests>=2.4.0",
     "sentinels",
-    "gossip>=0.8.0",
-    "URLObject",
-    "confetti>=2.1.0",
-    "infi.dtypes.wwn>=0.0.2",
     "storage_interfaces",
-    "flux",
-    "pact>=1.0.0",
+    "URLObject",
 ]
 
 setup(name="infinisdk",
