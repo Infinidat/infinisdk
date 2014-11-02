@@ -106,3 +106,7 @@ else:
 
     def get_timedelta_total_seconds(d):
         return d.total_seconds()
+try:
+    from collections import OrderedDict
+except ImportError: # python 2.6
+    from ordereddict import OrderedDict

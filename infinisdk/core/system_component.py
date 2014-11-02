@@ -11,7 +11,7 @@
 ### Redistribution and use in source or binary forms, with or without modification,
 ### are strictly forbidden unless prior written permission is obtained from Infinidat Ltd.
 ###!
-from .._compat import itervalues, iterkeys
+from .._compat import itervalues, iterkeys, OrderedDict
 from .type_binder import TypeBinder
 
 class SystemComponentsBinder(TypeBinder):
@@ -21,7 +21,7 @@ class SystemComponentsBinder(TypeBinder):
 
     def __init__(self, base_component_type, system):
         super(SystemComponentsBinder, self).__init__(base_component_type, system)
-        self._components_by_id = {}
+        self._components_by_id = OrderedDict()
 
     def get_component_types(self):
         """

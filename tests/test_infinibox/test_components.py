@@ -172,6 +172,14 @@ def test_get_by_id_lazy(infinibox):
     node = infinibox.components.nodes.choose()
     assert node is infinibox.components.nodes.get_by_id_lazy(node.id)
 
+@pytest.mark.parametrize('component_binder_name', ['nodes', 'enclosures', 'drives', 'local_drives'])
+def test_get_components_sorted_by_index_and_parent_index(infinibox, component_binder_name):
+    comp_binder = infinibox.components[component_binder_name]
+    sorting_lambda = lambda comp: (comp.get_parent().get_index(), comp.get_index())
+    ordered_list = sorted(comp_binder.get_all(), key=sorting_lambda)
+    regular_list = list(comp_binder.get_all())
+    assert regular_list == ordered_list
+
 @pytest.fixture(params=['racks', 'nodes', 'enclosures'])
 def component_collection(request, infinibox):
     return getattr(infinibox.components, request.param)
