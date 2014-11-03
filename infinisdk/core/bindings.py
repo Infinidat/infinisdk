@@ -77,10 +77,11 @@ class RelatedComponentBinding(InfiniSDKBinding):
         super(RelatedComponentBinding, self).set_field(field)
         if not self._collection_name:
             self._collection_name = "{0}s".format(field.name)
+        if not self._api_index_name:
             self._api_index_name = 'index'
 
     def get_api_value_from_value(self, system, objtype, obj, value):
-        raise NotImplementedError('Cannot find api value from object')
+        return value.get_field(self._api_index_name)
 
     def get_value_from_api_value(self, system, objtype, obj, value):
         kwargs = {self._api_index_name: value}

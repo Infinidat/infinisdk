@@ -196,3 +196,15 @@ def data_entity(infinibox, volume, filesystem, data_entity_type):
     if data_entity_type == 'volume':
         return volume
     return filesystem
+
+
+@pytest.fixture
+def network_interface(infinibox):
+    node = infinibox.components.nodes.get(index=1)
+    return infinibox.network_interfaces.create(node=node)
+
+
+@pytest.fixture
+def network_space(infinibox, network_interface):
+    network_config = {'netmask': 19, 'network': '127.0.0.1', 'default_gateway': '127.0.0.1'}
+    return infinibox.network_spaces.create(interfaces=[network_interface], network_config=network_config)

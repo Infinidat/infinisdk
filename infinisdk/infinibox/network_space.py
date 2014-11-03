@@ -23,8 +23,8 @@ class NetworkSpace(InfiniBoxObject):
     FIELDS = [
         Field("id", is_identity=True, type=int, cached=True),
         Field("name", creation_parameter=True, mutable=True, default=Autogenerate("network_space_{uuid}")),
-        Field("network_config", creation_parameter=True, mutable=True, type=dict, default=dict),
-        Field("interfaces", creation_parameter=True, mutable=True, type=list, add_updater=False, binding=ListOfRelatedObjectIDsBinding('network_interfaces')),
+        Field("network_config", creation_parameter=True, mutable=True, type=dict),
+        Field("interfaces", creation_parameter=True, mutable=True, type=list, binding=ListOfRelatedObjectIDsBinding('network_interfaces')),
         Field("service", creation_parameter=True, default="NAS_SERVICE"),
         Field("ips", creation_parameter=False, mutable=False, type=list),
         Field("automatic_ip_failback", creation_parameter=True, mutable=True, optional=True, type=bool),
@@ -35,30 +35,20 @@ class NetworkSpace(InfiniBoxObject):
         return 'network_space'
 
     def add_ip_address(self, ip_address):
-        return self.system.api.post(self.get_this_url_path().add_path("ips"), data=ip_address).get_result()
+        res = self.system.api.post(self.get_this_url_path().add_path("ips"), data=ip_address).get_result()
+        self.refresh('ips')
+        return res
 
     def remove_ip_address(self, ip_address):
         url = self.get_this_url_path().add_path("ips/{0}".format(ip_address))
-        return self.system.api.delete(url).get_result()
-
-    def add_port_group(self, port_group):
-        return self.system.api.post(self.get_this_url_path().add_path("ports"), data=port_group.id).get_result()
-
-    def remove_port_group(self, port_group):
-        url = self.get_this_url_path().add_path("ports").add_path(port_group.id)
-        return self.system.api.delete(url).get_result()
+        res = self.system.api.delete(url).get_result()
+        self.refresh('ips')
+        return res
 
     def disable_ip_address(self, ip_address):
         self.system.api.post(self.get_this_url_path().add_path('ips').add_path(ip_address).add_path('disable'))
+        self.refresh('ips')
 
     def enable_ip_address(self, ip_address):
         self.system.api.post(self.get_this_url_path().add_path('ips').add_path(ip_address).add_path('enable'))
-
-    def disable(self):
-        url = self.get_this_url_path().add_path("disable")
-        return self.system.api.post(url, data = "1")
-
-    def enable(self):
-        url = self.get_this_url_path().add_path("enable")
-        return self.system.api.post(url, data = "1")
-
+        self.refresh('ips')

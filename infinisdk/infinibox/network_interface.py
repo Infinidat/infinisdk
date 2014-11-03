@@ -14,7 +14,7 @@
 from ..core import Field
 from ..core.api.special_values import Autogenerate
 from .system_object import InfiniBoxObject
-from ..core.bindings import ListToDictBinding
+from ..core.bindings import ListToDictBinding, RelatedComponentBinding
 
 
 class NetworkInterface(InfiniBoxObject):
@@ -23,11 +23,10 @@ class NetworkInterface(InfiniBoxObject):
     FIELDS = [
         Field("id", is_identity=True, type=int, cached=True),
         Field("ports", optional=True, creation_parameter=True, mutable=True, type=list, default=list, add_updater=False, binding=ListToDictBinding(key="name")),
-        Field("node", api_name="node_id", creation_parameter=True, mutable=False, type=int),
+        Field("node", api_name="node_id", creation_parameter=True, mutable=False, type=int, binding=RelatedComponentBinding()),
         Field("state"),
         Field("type", creation_parameter=True, default="PORT_GROUP"),
         Field("name", creation_parameter=True, mutable=True, default=Autogenerate("pg_{uuid}")), # should contain the node id somehow
-        Field("enabled", type=bool, mutable=True, add_getter=False, add_updater=False),
     ]
 
     @classmethod
@@ -50,9 +49,6 @@ class NetworkInterface(InfiniBoxObject):
     def enable(self):
         url = self.get_this_url_path().add_path("enable")
         return self.system.api.post(url, data = "1")
-
-    def is_enabled(self):
-        return self.get_field('enabled')
 
     def __repr__(self):
         return "<{0} id={1} node={2}>".format(type(self).__name__, self.id, self.get_field("node"))
