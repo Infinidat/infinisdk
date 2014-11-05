@@ -46,6 +46,12 @@ class Autogenerate(SpecialValue):
         current_time = flux.current_timeline.time()
         return self.template.format(time=current_time, timestamp=int(current_time * 1000), ordinal=next(counter), uuid=_LAZY_UUID_FACTORY)
 
+class RawValue(SpecialValue):
+    def __init__(self, value):
+        self._value = value
+    def get_raw_value(self):
+        return self._value
+
 class _LazyUUIDFactory(object):
     def __str__(self):
         return str(uuid1()).lower().replace("-", "")
@@ -61,6 +67,8 @@ def translate_special_values(d):
                 d.pop(key)
             elif isinstance(value, Autogenerate):
                 d[key] = value.generate()
+            elif isinstance(value, RawValue):
+                d[key] = value.get_raw_value()
             else:
                 raise NotImplementedError() # pragma: no cover
     return d
