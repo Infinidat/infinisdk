@@ -331,7 +331,8 @@ class SystemObject(with_metaclass(FieldsMeta)):
                 field = self.fields[field_name]
             except LookupError:
                 continue
-            update_dict[field.api_name] = field.type.translator.to_api(field_value)
+            translated_value = field.binding.get_api_value_from_value(self.system, type(self), self, field_value)
+            update_dict[field.api_name] = translated_value
             if field.api_name != field_name:
                 update_dict.pop(field_name)
 
