@@ -58,17 +58,21 @@ class _LazyUUIDFactory(object):
 
 _LAZY_UUID_FACTORY = _LazyUUIDFactory()
 
-def translate_special_values(d):
-    for key, value in list(iteritems(d)):
-        if isinstance(value, dict):
-            translate_special_values(value)
-        elif isinstance(value, SpecialValue):
-            if value is OMIT:
-                d.pop(key)
-            elif isinstance(value, Autogenerate):
-                d[key] = value.generate()
-            elif isinstance(value, RawValue):
-                d[key] = value.get_raw_value()
-            else:
-                raise NotImplementedError() # pragma: no cover
-    return d
+def translate_special_values_dict(data_dict):
+    for key, value in list(iteritems(data_dict)):
+        if value is OMIT:
+            data_dict.pop(key)
+        else:
+            data_dict[key] = translate_special_values(value)
+    return data_dict
+
+def translate_special_values(data):
+    if isinstance(data, dict):
+        return translate_special_values_dict(data)
+    elif isinstance(data, SpecialValue):
+        if isinstance(data, Autogenerate):
+            return data.generate()
+        elif isinstance(data, RawValue):
+            return data.get_raw_value()
+        raise NotImplementedError() # pragma: no cover
+    return data

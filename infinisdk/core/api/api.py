@@ -165,11 +165,13 @@ class API(object):
         raw_data = kwargs.pop("raw_data", False)
         data = kwargs.pop("data", None)
         sent_json_object = None
-        if data is not None and not isinstance(data, string_types):
-            if not raw_data:
+        if data is not None:
+            if raw_data:
+                sent_json_object = data
+            else:
                 data = translate_special_values(data)
-            sent_json_object = data
-            data = json.dumps(data)
+                sent_json_object = data
+                data = json.dumps(data)
 
         specified_address = kwargs.pop("address", None)
         urls = self._get_possible_urls(specified_address)
