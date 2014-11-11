@@ -24,7 +24,7 @@ class NetworkInterface(InfiniBoxObject):
         Field("id", is_identity=True, type=int, cached=True),
         Field("ports", optional=True, creation_parameter=True, mutable=True, type=list, default=list, add_updater=False, binding=ListToDictBinding(key="name")),
         Field("node", api_name="node_id", creation_parameter=True, mutable=False, type=int, binding=RelatedComponentBinding()),
-        Field("state"),
+        Field("state", cached=False),
         Field("type", creation_parameter=True, default="PORT_GROUP"),
         Field("name", creation_parameter=True, mutable=True, default=Autogenerate("pg_{uuid}")), # should contain the node id somehow
     ]
@@ -44,11 +44,15 @@ class NetworkInterface(InfiniBoxObject):
 
     def disable(self):
         url = self.get_this_url_path().add_path("disable")
-        return self.system.api.post(url, data = "1")
+        return self.system.api.post(url)
 
     def enable(self):
         url = self.get_this_url_path().add_path("enable")
-        return self.system.api.post(url, data = "1")
+        return self.system.api.post(url)
+
+    def is_enabled(self):
+        # FIXME: Need to be changed after INFINIBOX-12968 will be resolved
+        return self.get_state() == 'OK'
 
     def __repr__(self):
         return "<{0} id={1} node={2}>".format(type(self).__name__, self.id, self.get_field("node"))

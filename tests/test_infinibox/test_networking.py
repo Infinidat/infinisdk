@@ -1,12 +1,11 @@
 from infinisdk._compat import xrange
 
-def test_disable_enable_network_interface(infinibox, network_interface, infinibox_simulator):
-    sim_obj = infinibox_simulator.network_interfaces.get(network_interface.id)
-    assert sim_obj.is_enabled()
+def test_disable_enable_network_interface(infinibox, network_interface):
+    assert network_interface.is_enabled()
     network_interface.disable()
-    assert not sim_obj.is_enabled()
+    assert not network_interface.is_enabled()
     network_interface.enable()
-    assert sim_obj.is_enabled()
+    assert network_interface.is_enabled()
 
 
 def test_disable_enable_network_space_ip(infinibox, network_space):
