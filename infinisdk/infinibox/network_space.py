@@ -12,6 +12,7 @@
 ### are strictly forbidden unless prior written permission is obtained from Infinidat Ltd.
 ###!
 from ..core import Field
+from ..core.translators_and_types import MunchType, MunchListType
 from ..core.bindings import ListOfRelatedObjectIDsBinding
 from ..core.api.special_values import Autogenerate
 from .system_object import InfiniBoxObject
@@ -23,10 +24,10 @@ class NetworkSpace(InfiniBoxObject):
     FIELDS = [
         Field("id", is_identity=True, type=int, cached=True),
         Field("name", creation_parameter=True, mutable=True, default=Autogenerate("network_space_{uuid}")),
-        Field("network_config", creation_parameter=True, mutable=True, type=dict),
+        Field("network_config", creation_parameter=True, mutable=True, type=MunchType),
         Field("interfaces", creation_parameter=True, mutable=True, type=list, binding=ListOfRelatedObjectIDsBinding('network_interfaces')),
         Field("service", creation_parameter=True, default="NAS_SERVICE"),
-        Field("ips", creation_parameter=False, mutable=False, type=list),
+        Field("ips", creation_parameter=False, mutable=False, type=MunchListType),
         Field("automatic_ip_failback", creation_parameter=True, mutable=True, optional=True, type=bool),
     ]
 

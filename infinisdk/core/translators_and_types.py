@@ -12,6 +12,7 @@
 ### are strictly forbidden unless prior written permission is obtained from Infinidat Ltd.
 ###!
 import arrow
+import munch
 from capacity import byte, Capacity
 
 from api_object_schema import TypeInfo, ValueTranslator
@@ -27,6 +28,32 @@ class CapacityTranslator(ValueTranslator):
 
 CapacityType = TypeInfo(type=Capacity, api_type=int,
                         translator=CapacityTranslator())
+
+
+class MunchTranslator(ValueTranslator):
+
+    def _to_api(self, value):
+        if isinstance(value, munch.Munch):
+            return value.toDict()
+        return value
+
+    def _from_api(self, value):
+        return munch.munchify(value)
+
+class MunchListTraslator(ValueTranslator):
+
+    def __init__(self, *args, **kwargs):
+        super(MunchListTraslator, self).__init__(*args, **kwargs)
+        self._translator = MunchTranslator()
+
+    def _to_api(self, value):
+        return [self._translator._to_api(single_value) for single_value in value]
+
+    def _from_api(self, value):
+        return [self._translator._from_api(single_value) for single_value in value]
+
+MunchType = TypeInfo(type=munch.Munch, api_type=dict, translator=MunchTranslator())
+MunchListType = TypeInfo(type=list, api_type=list, translator=MunchListTraslator())
 
 
 class MillisecondsDatetimeTranslator(ValueTranslator):

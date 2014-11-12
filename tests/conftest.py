@@ -198,13 +198,25 @@ def data_entity(infinibox, volume, filesystem, data_entity_type):
     return filesystem
 
 
+def create_network_interface(infinibox, **kwargs):
+    if not kwargs.get('node') and not kwargs.get('node_id'):
+        kwargs['node'] = infinibox.components.nodes.get(index=1)
+    return infinibox.network_interfaces.create(**kwargs)
+
+
+def create_network_space(infinibox, **kwargs):
+    if not kwargs.get('network_config'):
+        kwargs['network_config'] = {'netmask': 19, 'network': '127.0.0.1', 'default_gateway': '127.0.0.1'}
+    if not kwargs.get('interfaces'):
+        kwargs['interfaces'] = [create_network_interface(infinibox)]
+    return infinibox.network_spaces.create(**kwargs)
+
+
 @pytest.fixture
 def network_interface(infinibox):
-    node = infinibox.components.nodes.get(index=1)
-    return infinibox.network_interfaces.create(node=node)
+    return create_network_interface(infinibox)
 
 
 @pytest.fixture
 def network_space(infinibox, network_interface):
-    network_config = {'netmask': 19, 'network': '127.0.0.1', 'default_gateway': '127.0.0.1'}
-    return infinibox.network_spaces.create(interfaces=[network_interface], network_config=network_config)
+    return create_network_space(infinibox, interfaces=[network_interface])
