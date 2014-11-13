@@ -24,7 +24,7 @@ def test_get_administered_pools_with_pools(infinibox, user):
     assert infinibox.pools.get_administered_pools() == [pool]
 
 
-def test_creation(infinibox, user):
+def test_creation_deletion(infinibox, user):
     kwargs = {"role": "ReadOnly",
               "name": "some_user_name",
               "email": "fake@email.com",
