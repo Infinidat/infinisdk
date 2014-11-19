@@ -121,10 +121,6 @@ def test_get_not_exist_attribute(data_entity):
     received_error = caught.value.response.get_error()
     assert isinstance(received_error, dict)
 
-def test_unique_key(data_entity):
-    with pytest.raises(AttributeError):
-        data_entity.get_unique_key()
-
 def test_invalid_child_operation(data_entity):
     with pytest.raises(InvalidOperationException):
         data_entity.create_clone()

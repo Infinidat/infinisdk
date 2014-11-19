@@ -89,7 +89,10 @@ class SystemObject(with_metaclass(FieldsMeta)):
         return not (self == other)
 
     def __hash__(self):
-        return hash((self.system, type(self), self.id))
+        return hash(self.get_unique_key())
+
+    def get_unique_key(self):
+        return (self.system, type(self), self.id)
 
     @classmethod
     def construct(cls, system, data):
