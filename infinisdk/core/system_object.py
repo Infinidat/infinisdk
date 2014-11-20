@@ -92,7 +92,7 @@ class SystemObject(with_metaclass(FieldsMeta)):
         return hash(self.get_unique_key())
 
     def get_unique_key(self):
-        return (self.system, type(self), self.id)
+        return (self.system, type(self).__name__, self.id)
 
     @classmethod
     def construct(cls, system, data):
