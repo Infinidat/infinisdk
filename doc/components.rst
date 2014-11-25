@@ -26,4 +26,22 @@ For each Node, you can use the :meth:`.Node.get_fc_ports` method to obtain the F
 		...             print('Port', fc_port.get_field('wwpn'), 'of', node, 'is down!')
 
 
+Services
+--------
+
+Use :meth:`.Node.get_service` to get a service by its name:
+
+.. code-block:: python
+       
+       >>> node.get_service('mgmt')
+       <Service id=system:0_rack:1_node:3_service:mgmt>
+
+Or get a specific service type (core/mgmt):
+
+.. code-block:: python
+       
+       >>> s = node.get_management_service()
+       >>> s = node.get_core_service()
+
+
 

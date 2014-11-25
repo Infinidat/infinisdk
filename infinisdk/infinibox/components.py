@@ -179,12 +179,20 @@ class Node(InfiniBoxSystemComponent):
         return cls.BASE_URL.add_path(cls.get_plural_name())
 
     def get_service(self, service_name):
+        """Get a service object by its type name
+
+        :param service_name: the service name (mgmt/core/etc.)
+        """
         return self.system.components.services.get(parent_id=self.id, name=service_name)
 
     def get_management_service(self):
+        """Gets the management service running on this node
+        """
         return self.get_service('mgmt')
 
     def get_core_service(self):
+        """Gets the core service running on this node
+        """
         return self.get_service('core')
 
     def phase_out(self):
