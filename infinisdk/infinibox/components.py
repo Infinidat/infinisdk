@@ -181,6 +181,12 @@ class Node(InfiniBoxSystemComponent):
     def get_service(self, service_name):
         return self.system.components.services.get(parent_id=self.id, name=service_name)
 
+    def get_management_service(self):
+        return self.get_service('mgmt')
+
+    def get_core_service(self):
+        return self.get_service('core')
+
     def phase_out(self):
         hook_tags = ['infinibox', 'node_{0}'.format(self.get_index())]
         gossip.trigger_with_tags('infinidat.infinibox.pre_node_phase_out', {'node': self}, tags=hook_tags)
