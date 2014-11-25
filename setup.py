@@ -15,6 +15,7 @@ _INSTALL_REQUIERS = [
     "infi.dtypes.wwn>=0.0.2",
     "infi.pyutils",
     "logbook",
+    "munch",
     "pact>=1.0.0",
     "python-dateutil", #  required to work around https://github.com/crsmithdev/arrow/issues/120
     "requests>=2.4.0",
