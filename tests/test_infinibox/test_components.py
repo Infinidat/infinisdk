@@ -1,3 +1,4 @@
+import flux
 import pytest
 
 import waiting
@@ -148,6 +149,7 @@ def test_local_drive_component(infinibox):
 def test_node_phase(infinibox):
     node = infinibox.components.nodes.choose()
     node.phase_out()
+    flux.current_timeline.sleep_wait_all_scheduled()
     waiting.wait(lambda: node.get_state() == defs.enums.nodes.states.ready)
     node.phase_in()
     waiting.wait(lambda: node.get_state() == defs.enums.nodes.states.active)
