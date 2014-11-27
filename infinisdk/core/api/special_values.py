@@ -51,6 +51,8 @@ class RawValue(SpecialValue):
         self._value = value
     def get_raw_value(self):
         return self._value
+    def __str__(self):
+        return "<RawValue {}>".format(self._value)
 
 class _LazyUUIDFactory(object):
     def __str__(self):
