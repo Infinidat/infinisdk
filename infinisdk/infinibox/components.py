@@ -204,7 +204,7 @@ class Node(InfiniBoxSystemComponent):
             gossip.trigger_with_tags('infinidat.sdk.node_phase_out_failure', {'node': self, 'exc': e}, tags=hook_tags)
             raise
         gossip.trigger_with_tags('infinidat.sdk.post_node_phase_out', {'node': self}, tags=hook_tags)
-        return Pact('phase out {0}'.format(self))
+        return Pact('phase out {0}'.format(self)).until(lambda: self.get_state() == 'READY')
 
     def phase_in(self):
         hook_tags = ['infinibox', 'node{0}'.format(self.get_index())]
@@ -215,7 +215,7 @@ class Node(InfiniBoxSystemComponent):
             gossip.trigger_with_tags('infinidat.sdk.node_phase_in_failure', {'node': self, 'exc': e}, tags=hook_tags)
             raise
         gossip.trigger_with_tags('infinidat.sdk.post_node_phase_in', {'node': self}, tags=hook_tags)
-        return Pact('phase in {0}'.format(self))
+        return Pact('phase in {0}'.format(self)).until(lambda: self.get_state() == 'ACTIVE')
 
     def __repr__(self):
         return '<Node {0}>'.format(self.get_index())
