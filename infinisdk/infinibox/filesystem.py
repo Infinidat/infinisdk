@@ -34,10 +34,10 @@ class Filesystem(BaseDataEntity):
               binding=RelatedObjectBinding()),
         Field("type", cached=True, is_filterable=True, is_sortable=True),
         Field("parent", type='infinisdk.infinibox.filesystem:Filesystem', cached=True, api_name="parent_id", binding=RelatedObjectBinding('filesystems'), is_filterable=True),
-        Field(
-            "provisioning", api_name="provtype", mutable=True, creation_parameter=True,
+        Field("provisioning", api_name="provtype", mutable=True, creation_parameter=True,
             is_filterable=True, is_sortable=True, default="THICK"),
         Field("created_at", type=MillisecondsDatetimeType),
+        Field("write_protected", type=bool, mutable=True, creation_parameter=True, optional=True),
     ]
 
     def add_export(self, **kwargs):
