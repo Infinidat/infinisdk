@@ -43,12 +43,15 @@ class APITarget(with_metaclass(abc.ABCMeta)):
         self._timeout = self._get_api_timeout()
         self.api = API(self, use_ssl=use_ssl, ssl_cert=ssl_cert)
 
+        self._initialize()
+        self._caching_enabled = True
+
+    def _initialize(self):
         for object_type in self.OBJECT_TYPES:
             self.objects.install(object_type)
 
         self.components = self.SYSTEM_COMPONENTS_TYPE(self)
         self.events = self.SYSTEM_EVENTS_TYPE(self)
-        self._caching_enabled = True
 
     def _get_api_auth(self):
         return None
