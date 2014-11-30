@@ -19,7 +19,7 @@ from sentinels import NOTHING
 from infi.pyutils.lazy import cached_method
 from urlobject import URLObject as URL
 
-from .exceptions import APICommandFailed, ObjectNotFound
+from .exceptions import APICommandFailed, ObjectNotFound, APITransportFailure
 from .._compat import with_metaclass, iteritems, itervalues, httplib
 from .exceptions import MissingFields, CacheMiss
 from api_object_schema import FieldsMeta as FieldsMetaBase

@@ -11,6 +11,7 @@
 ### Redistribution and use in source or binary forms, with or without modification,
 ### are strictly forbidden unless prior written permission is obtained from Infinidat Ltd.
 ###!
+
 from ..core.field import Field
 from ..core.system_component import SystemComponentsBinder
 from ..core.system_object import SystemObject, APICommandFailed, ObjectNotFound
@@ -198,8 +199,10 @@ class Node(InfiniBoxSystemComponent):
     def phase_out(self):
         hook_tags = ['infinibox', 'node{0}'.format(self.get_index())]
         gossip.trigger_with_tags('infinidat.sdk.pre_node_phase_out', {'node': self}, tags=hook_tags)
+
         try:
-            res = self.system.api.post(self.get_this_url_path().add_path('phase_out'))
+            with self.system.cluster.possible_management_take_over_context(self):
+                res = self.system.api.post(self.get_this_url_path().add_path('phase_out'))
         except APICommandFailed as e:
             gossip.trigger_with_tags('infinidat.sdk.node_phase_out_failure', {'node': self, 'exc': e}, tags=hook_tags)
             raise
@@ -219,6 +222,7 @@ class Node(InfiniBoxSystemComponent):
 
     def __repr__(self):
         return '<Node {0}>'.format(self.get_index())
+
 
 @InfiniBoxSystemComponents.install_component_type
 class LocalDrive(InfiniBoxSystemComponent):
@@ -329,6 +333,12 @@ class Service(InfiniBoxSystemComponent):
 
     def is_master(self):
         return self.get_role() == 'MASTER'
+
+    def is_secondary(self):
+        return self.get_role() == 'SECONDARY'
+
+    def is_member(self):
+        return self.get_role() == 'MEMBER'
 
     def get_node(self):
         return self.get_parent()

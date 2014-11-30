@@ -40,7 +40,7 @@ class TypeBinder(object):
         return [f for f in self.fields if f.mutable]
 
     def find(self, *predicates, **kw):
-        """Queries objects according to predicstes. Can receive arguments in two possible forms:
+        """Queries objects according to predicates. Can receive arguments in two possible forms:
 
         1. Direct keyword arguments, for filtering for equality::
 
