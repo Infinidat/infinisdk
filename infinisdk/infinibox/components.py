@@ -197,24 +197,24 @@ class Node(InfiniBoxSystemComponent):
 
     def phase_out(self):
         hook_tags = ['infinibox', 'node{0}'.format(self.get_index())]
-        gossip.trigger_with_tags('infinidat.infinibox.pre_node_phase_out', {'node': self}, tags=hook_tags)
+        gossip.trigger_with_tags('infinidat.sdk.pre_node_phase_out', {'node': self}, tags=hook_tags)
         try:
             res = self.system.api.post(self.get_this_url_path().add_path('phase_out'))
         except APICommandFailed as e:
-            gossip.trigger_with_tags('infinidat.infinibox.node_phase_out_failure', {'node': self, 'exc': e}, tags=hook_tags)
+            gossip.trigger_with_tags('infinidat.sdk.node_phase_out_failure', {'node': self, 'exc': e}, tags=hook_tags)
             raise
-        gossip.trigger_with_tags('infinidat.infinibox.post_node_phase_out', {'node': self}, tags=hook_tags)
+        gossip.trigger_with_tags('infinidat.sdk.post_node_phase_out', {'node': self}, tags=hook_tags)
         return Pact('phase out {0}'.format(self))
 
     def phase_in(self):
-        hook_tags = ['infinibox', 'node_{0}'.format(self.get_index())]
-        gossip.trigger_with_tags('infinidat.infinibox.pre_node_phase_in', {'node': self}, tags=hook_tags)
+        hook_tags = ['infinibox', 'node{0}'.format(self.get_index())]
+        gossip.trigger_with_tags('infinidat.sdk.pre_node_phase_in', {'node': self}, tags=hook_tags)
         try:
             res = self.system.api.post(self.get_this_url_path().add_path('phase_in'))
         except APICommandFailed as e:
-            gossip.trigger_with_tags('infinidat.infinibox.node_phase_in_failure', {'node': self, 'exc': e}, tags=hook_tags)
+            gossip.trigger_with_tags('infinidat.sdk.node_phase_in_failure', {'node': self, 'exc': e}, tags=hook_tags)
             raise
-        gossip.trigger_with_tags('infinidat.infinibox.post_node_phase_in', {'node': self}, tags=hook_tags)
+        gossip.trigger_with_tags('infinidat.sdk.post_node_phase_in', {'node': self}, tags=hook_tags)
         return Pact('phase in {0}'.format(self))
 
     def __repr__(self):
