@@ -196,7 +196,7 @@ class Node(InfiniBoxSystemComponent):
         return self.get_service('core')
 
     def phase_out(self):
-        hook_tags = ['infinibox', 'node_{0}'.format(self.get_index())]
+        hook_tags = ['infinibox', 'node{0}'.format(self.get_index())]
         gossip.trigger_with_tags('infinidat.infinibox.pre_node_phase_out', {'node': self}, tags=hook_tags)
         try:
             res = self.system.api.post(self.get_this_url_path().add_path('phase_out'))
