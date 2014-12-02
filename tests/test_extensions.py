@@ -65,6 +65,17 @@ def test_add_attribute_computed_once(infinibox):
     for i in range(3):
         assert infinibox.attached == 0
 
+def test_add_attribute_for_class_with_multiple_instances(infinibox):
+    assert not hasattr(infinibox, 'attached')
+    Node = infinibox.components.nodes.object_type
+
+    @extensions.add_attribute(Node)
+    def attached(self):
+        return self
+
+    for node in infinibox.components.nodes:
+        assert node.attached == node
+
 
 def test_removing_extensions(infinibox):
     assert not hasattr(infinibox, 'new_method')

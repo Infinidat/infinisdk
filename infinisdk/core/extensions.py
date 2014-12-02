@@ -95,9 +95,11 @@ class Method(Attachment):
 
 class Property(Attachment):
 
-    _cache = NOTHING
+    _cache = {}
 
     def __get__(self, obj, objclass):
-        if self._cache is NOTHING:
-            self._cache = self._func(obj)
-        return self._cache
+        cached = self._cache.get(obj, NOTHING)
+        if cached is NOTHING:
+            cached = self._func(obj)
+            self._cache[obj] = cached
+        return cached
