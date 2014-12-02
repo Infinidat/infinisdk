@@ -95,7 +95,9 @@ class Method(Attachment):
 
 class Property(Attachment):
 
-    _cache = {}
+    def __init__(self, *args, **kwargs):
+        super(Property, self).__init__(*args, **kwargs)
+        self._cache = {}
 
     def __get__(self, obj, objclass):
         cached = self._cache.get(obj, NOTHING)
