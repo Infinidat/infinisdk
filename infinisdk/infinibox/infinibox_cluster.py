@@ -1,4 +1,4 @@
-from ..core.system_object import  APICommandFailed, APITransportFailure
+from ..core.system_object import APICommandFailed, APITransportFailure
 from infi.pyutils.functors import PASS
 
 import functools
@@ -51,7 +51,7 @@ class InfiniboxCluster(object):
     def wait_for_management_takeover(self, new_management_master, deadline=300):
         """During the management takeover there's a time windows (as defined in config), in which we allow API failures
         """
-        _logger.info("Waiting for {} to become management master. deadline is {}".format(new_management_master, deadline))
+        _logger.info("Waiting for {} to become management master. deadline is {}", new_management_master, deadline)
         waiting.wait(functools.partial(self.safe_is_management_cluster_master, new_management_master), timeout_seconds=deadline, sleep_seconds=5)
 
     @staticmethod
