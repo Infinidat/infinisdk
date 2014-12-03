@@ -1,4 +1,5 @@
 from ..core.system_object import  APICommandFailed, APITransportFailure
+from infi.pyutils.functors import PASS
 
 import functools
 import waiting
@@ -32,6 +33,10 @@ class InfiniboxCluster(object):
     def get_management_secondary(self):
         return self._get_service_by_role('MGMT', 'SECONDARY')
 
+    def service_going_down_context(self, node, service_name):
+        if service_name == 'mgmt2':
+            return self.possible_management_take_over_context(node)
+        return PASS
 
     @contextmanager
     def possible_management_take_over_context(self, node):
