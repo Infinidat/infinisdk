@@ -17,7 +17,7 @@ from .system_object import InfiniBoxLURelatedObject
 from ..core.bindings import ListOfRelatedObjectBinding
 
 
-class Cluster(InfiniBoxLURelatedObject):
+class HostCluster(InfiniBoxLURelatedObject):
 
     FIELDS = [
         Field("id", type=int, is_identity=True, is_filterable=True, is_sortable=True),
@@ -37,3 +37,11 @@ class Cluster(InfiniBoxLURelatedObject):
         self.system.api.delete(url)
         self.refresh('hosts')
         host.refresh('host_cluster_id')
+
+    @classmethod
+    def get_type_name(cls):
+        return 'host_cluster'
+
+    @classmethod
+    def get_url_path(cls, system):
+        return '/api/rest/clusters'

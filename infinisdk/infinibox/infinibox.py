@@ -18,12 +18,13 @@ from sentinels import NOTHING
 from ..core.api import APITarget
 from ..core.config import config, get_ini_option
 from ..core.exceptions import VersionNotSupported
-from .cluster import Cluster
+from .host_cluster import HostCluster
 
 from .components import InfiniBoxSystemComponents
 from .infinibox_cluster import InfiniboxCluster
 from .events import EmailRule, Events
 from .host import Host
+from infinisdk.core.utils import deprecated
 from .pool import Pool
 from .user import User
 from .volume import Volume
@@ -39,7 +40,7 @@ except ImportError:
 
 
 class InfiniBox(APITarget):
-    OBJECT_TYPES = [Volume, Pool, Host, Cluster, User, EmailRule, Filesystem, Export, NetworkSpace, NetworkInterface]
+    OBJECT_TYPES = [Volume, Pool, Host, HostCluster, User, EmailRule, Filesystem, Export, NetworkSpace, NetworkInterface]
     SYSTEM_EVENTS_TYPE = Events
     SYSTEM_COMPONENTS_TYPE = InfiniBoxSystemComponents
 
@@ -52,6 +53,11 @@ class InfiniBox(APITarget):
         if not any(version_compatibility.matches(version)
                    for version_compatibility in config.root.infinibox.compatible_versions):
             raise VersionNotSupported(version)
+
+    @property
+    @deprecated(message='Use self.host_clusters')
+    def clusters(self):
+        return self.host_clusters
 
     def _get_api_auth(self):
         username = self._get_auth_ini_option('username', None)
@@ -92,9 +98,9 @@ class InfiniBox(APITarget):
         return d
 
     def get_luns(self):
-        for mapping_obj in itertools.chain(self.clusters, self.hosts):
+        for mapping_obj in itertools.chain(self.host_clusters, self.hosts):
             for lun in mapping_obj.get_luns():
-                if lun.is_clustered() and not isinstance(mapping_obj, self.clusters.object_type):
+                if lun.is_clustered() and not isinstance(mapping_obj, self.host_clusters.object_type):
                     continue
                 yield lun
 

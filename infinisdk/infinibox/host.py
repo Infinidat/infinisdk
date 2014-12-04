@@ -60,7 +60,7 @@ class Host(InfiniBoxLURelatedObject):
         Field("name", creation_parameter=True, mutable=True, is_filterable=True, is_sortable=True, default=Autogenerate("host_{uuid}")),
         Field("luns", type=list, add_getter=False, add_updater=False),
         Field("ports", type=list, add_getter=False, add_updater=False),
-        Field("cluster", api_name="host_cluster_id", type='infinisdk.infinibox.cluster:Cluster', is_filterable=True, binding=RelatedObjectBinding()),
+        Field("cluster", api_name="host_cluster_id", type='infinisdk.infinibox.host_cluster:HostCluster', is_filterable=True, binding=RelatedObjectBinding()),
     ]
 
     def _add_port(self, port_type, port_address):

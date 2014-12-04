@@ -44,7 +44,7 @@ class LogicalUnit(object):
         """
         if not self.host_cluster_id:
             return None
-        return self.system.clusters.get_by_id_lazy(self.host_cluster_id)
+        return self.system.host_clusters.get_by_id_lazy(self.host_cluster_id)
 
     def get_mapping_object(self):
         returned = self.get_cluster()
@@ -107,7 +107,7 @@ class LogicalUnitContainer(object):
         self._system = system
         self._rel_classes = (system.volumes.object_type,
                              system.hosts.object_type,
-                             system.clusters.object_type)
+                             system.host_clusters.object_type)
 
     @classmethod
     def from_logical_units(cls, system, logical_units):
