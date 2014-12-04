@@ -296,7 +296,7 @@ class Response(object):
         """
         try:
             return self.response.json()
-        except ValueError:
+        except (ValueError, TypeError):
             return None
 
     def _get_result(self):

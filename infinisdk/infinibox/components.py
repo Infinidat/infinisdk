@@ -312,7 +312,7 @@ class Service(InfiniBoxSystemComponent):
     FIELDS = [
         Field("index", api_name="name", cached=True),
         Field("name", is_identity=True, cached=True),
-        Field("role", binding=NotExistsSupportBinding()),
+        Field("role", binding=NotExistsSupportBinding(), cached=False),
         Field("state", cached=False),
     ]
 

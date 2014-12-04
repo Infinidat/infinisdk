@@ -17,9 +17,7 @@ class InfiniboxCluster(object):
         self.system = system
 
     def _get_service_by_role(self, name, role):
-        services_by_name = self.system.components.services.find(name=name.lower())
-        service_by_role = [service for service in services_by_name if service.get_role() == role.upper()][0]
-        return service_by_role
+        return self.system.components.services.get(name=name.lower(), role=role.upper())
 
     def get_core_master(self):
         return self._get_service_by_role('CORE', 'MASTER')
@@ -63,9 +61,6 @@ class InfiniboxCluster(object):
         result = False
         try:
             result = management_service.is_master()
-        except APICommandFailed:
-            pass
-        except APITransportFailure:
+        except (APICommandFailed, APITransportFailure):
             pass
         return result
-
