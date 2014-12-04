@@ -40,6 +40,7 @@ def _install_hooks():
     gossip.define('infinidat.sdk.pre_node_phase_in', tags=['infinibox', 'node1', 'node2', 'node3'])
     gossip.define('infinidat.sdk.post_node_phase_in', tags=['infinibox', 'node1', 'node2', 'node3'])
     gossip.define('infinidat.sdk.node_phase_in_failure', tags=['infinibox', 'node1', 'node2', 'node3'])
+    gossip.define('infinidat.sdk.node_phased_in', tags=['infinibox', 'node1', 'node2', 'node3'])
 
     gossip.define('infinidat.sdk.pre_node_phase_out', tags=['infinibox', 'node1', 'node2', 'node3'])
     gossip.define('infinidat.sdk.post_node_phase_out', tags=['infinibox', 'node1', 'node2', 'node3'])

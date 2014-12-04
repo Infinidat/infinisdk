@@ -175,6 +175,9 @@ class Node(InfiniBoxSystemComponent):
         Field("state", cached=False),
     ]
 
+    def is_active(self):
+        return self.get_state() == 'ACTIVE'
+
     @classmethod
     def get_url_path(cls, system):
         return cls.BASE_URL.add_path(cls.get_plural_name())
@@ -197,28 +200,34 @@ class Node(InfiniBoxSystemComponent):
         return self.get_service('core')
 
     def phase_out(self):
-        hook_tags = ['infinibox', 'node{0}'.format(self.get_index())]
-        gossip.trigger_with_tags('infinidat.sdk.pre_node_phase_out', {'node': self}, tags=hook_tags)
+        gossip.trigger_with_tags('infinidat.sdk.pre_node_phase_out', {'node': self}, tags=self._get_tags())
 
         try:
             with self.system.cluster.possible_management_take_over_context(self):
-                res = self.system.api.post(self.get_this_url_path().add_path('phase_out'))
+                self.system.api.post(self.get_this_url_path().add_path('phase_out'))
         except APICommandFailed as e:
-            gossip.trigger_with_tags('infinidat.sdk.node_phase_out_failure', {'node': self, 'exc': e}, tags=hook_tags)
+            gossip.trigger_with_tags('infinidat.sdk.node_phase_out_failure', {'node': self, 'exc': e},
+                                     tags=self._get_tags())
             raise
-        gossip.trigger_with_tags('infinidat.sdk.post_node_phase_out', {'node': self}, tags=hook_tags)
+        gossip.trigger_with_tags('infinidat.sdk.post_node_phase_out', {'node': self}, tags=self._get_tags())
         return Pact('phase out {0}'.format(self)).until(lambda: self.get_state() == 'READY')
 
+    def _get_tags(self):
+        return ['infinibox', 'node{0}'.format(self.get_index())]
+
+    def _notify_phased_in(self):
+        gossip.trigger_with_tags('infinidat.sdk.node_phased_in', {'node': self}, tags=self._get_tags())
+
     def phase_in(self):
-        hook_tags = ['infinibox', 'node{0}'.format(self.get_index())]
-        gossip.trigger_with_tags('infinidat.sdk.pre_node_phase_in', {'node': self}, tags=hook_tags)
+        gossip.trigger_with_tags('infinidat.sdk.pre_node_phase_in', {'node': self}, tags=self._get_tags())
         try:
-            res = self.system.api.post(self.get_this_url_path().add_path('phase_in'))
+            self.system.api.post(self.get_this_url_path().add_path('phase_in'))
         except APICommandFailed as e:
-            gossip.trigger_with_tags('infinidat.sdk.node_phase_in_failure', {'node': self, 'exc': e}, tags=hook_tags)
+            gossip.trigger_with_tags('infinidat.sdk.node_phase_in_failure', {'node': self, 'exc': e},
+                                     tags=self._get_tags())
             raise
-        gossip.trigger_with_tags('infinidat.sdk.post_node_phase_in', {'node': self}, tags=hook_tags)
-        return Pact('phase in {0}'.format(self)).until(lambda: self.get_state() == 'ACTIVE')
+        gossip.trigger_with_tags('infinidat.sdk.post_node_phase_in', {'node': self}, tags=self._get_tags())
+        return Pact('phase in {0}'.format(self)).until(self.is_active).then(self._notify_phased_in)
 
     def __repr__(self):
         return '<Node {0}>'.format(self.get_index())
@@ -393,3 +402,18 @@ class System(InfiniBoxSystemComponent):
 
     def get_state(self):
         return self.get_field('operational_state')['state']
+
+    def safe_get_state(self):
+        try:
+            return self.get_state()
+        except:
+            return None
+
+    def is_active(self):
+        return self.safe_get_state() == 'ACTIVE'
+
+    def is_stand_by(self):
+        return self.safe_get_state() == 'STANDBY'
+
+    def is_down(self):
+        return self.safe_get_state() is None
