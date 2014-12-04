@@ -90,4 +90,4 @@ def test_events_types_caching(system, forge):
     assert system.events._types is not None
     system.events.get_codes()
     system.events.get_levels()
-    
+
