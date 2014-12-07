@@ -151,7 +151,7 @@ In case you need to fetch an up-to-date value for a field, there are several opt
 
    .. code-block:: python
 
-		   >>> print(pool.get_field('name', from_cache=True))
+		   >>> print(pool.get_field('name', from_cache=False))
 		   yet_another_name
 
    The above forces InfiniSDK to fetch the name from the system regardless of the cache
