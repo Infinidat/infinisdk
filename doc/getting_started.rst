@@ -210,7 +210,7 @@ InfiniSDK supports calling the HTTP/REST API of the system directly:
 
 		>>> response = system.api.get('system/product_id')
 
-The above accesses ``/api/rest/system/product_id``. :meth:`.API.get`, :meth:`.API.post`, :meth:`.API.delete` and :meth:`.API.put` all return :class:`infinisdk.core.api.Response` objects. Results can be fetched by :meth:`.Response.get_result`:
+The above accesses ``/api/rest/system/product_id``. :meth:`.API.get`, :meth:`.API.post`, :meth:`.API.delete` and :meth:`.API.put` all return :class:`.Response` objects. Results can be fetched by :meth:`.Response.get_result`:
 
 .. code-block:: python
 

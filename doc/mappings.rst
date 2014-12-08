@@ -19,7 +19,7 @@ Creating hosts is the same like creating any other management object through Inf
 Adding/Removing Ports
 ---------------------
 
-Adding and removing FC ports can be done with :func:`.Host.add_fc_port` and :func:`.Host.remove_fc_port`:
+Adding and removing FC ports can be done with :func:`infinisdk.infinibox.host.Host.add_fc_port` and :func:`infinisdk.infinibox.host.Host.remove_fc_port`:
 
 .. code-block:: python
 

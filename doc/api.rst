@@ -132,3 +132,7 @@ Core Objects
 .. autoclass:: infinisdk.core.system_object.SystemObject
   :members:
 
+.. automodule:: infinisdk.core.type_binder
+
+.. autoclass:: infinisdk.core.type_binder.TypeBinder
+  :members:

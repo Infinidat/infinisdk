@@ -44,7 +44,7 @@ class FieldsMeta(FieldsMetaBase):
 class SystemObject(with_metaclass(FieldsMeta)):
     FIELDS = []
     URL_PATH = None
-    #: specifies which :class:`.TypeBinder` subclass is to be used for this type
+    #: specifies which :class:`infinisdk.core.type_binder.TypeBinder` subclass is to be used for this type
     BINDER_CLASS = TypeBinder
 
     def __init__(self, system, initial_data):

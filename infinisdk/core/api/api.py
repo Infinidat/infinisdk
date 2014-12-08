@@ -208,6 +208,8 @@ class API(object):
         _logger.debug("{0} <-- DATA: {1}" , hostname, data)
 
     def request(self, http_method, path, assert_success=True, **kwargs):
+        """Sends HTTP API request to the remote system
+        """
         did_interactive_confirmation = False
         while True:
             try:
