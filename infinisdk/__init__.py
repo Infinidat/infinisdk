@@ -37,6 +37,12 @@ def _install_hooks():
     gossip.define('infinidat.sdk.post_data_restore', tags=['infinibox', 'volume', 'filesystem'])
     gossip.define('infinidat.sdk.data_restore_failure', tags=['infinibox', 'volume', 'filesystem'])
 
+    gossip.define('infinidat.sdk.pre_creation_data_validation', tags=['infinibox', 'volume', 'filesystem'])
+    gossip.define('infinidat.sdk.pre_snapshot_creation', tags=['infinibox', 'volume', 'filesystem'])
+    gossip.define('infinidat.sdk.pre_clone_creation', tags=['infinibox', 'volume', 'filesystem'])
+
+    gossip.define('infinidat.sdk.pre_fields_update', tags=['infinibox'])
+
     gossip.define('infinidat.sdk.pre_node_phase_in', tags=['infinibox', 'node1', 'node2', 'node3'])
     gossip.define('infinidat.sdk.post_node_phase_in', tags=['infinibox', 'node1', 'node2', 'node3'])
     gossip.define('infinidat.sdk.node_phase_in_failure', tags=['infinibox', 'node1', 'node2', 'node3'])

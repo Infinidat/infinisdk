@@ -132,6 +132,7 @@ class SystemObject(with_metaclass(FieldsMeta)):
 
     @classmethod
     def create(cls, system, **fields):
+        gossip.trigger_with_tags('infinidat.sdk.pre_creation_data_validation', {'fields': fields, 'system': system, 'cls': cls})
         data = cls._get_data_for_post(system, fields)
         return cls._create(system, cls.get_url_path(system), data)
 
@@ -329,6 +330,10 @@ class SystemObject(with_metaclass(FieldsMeta)):
         self._update_fields(update_dict)
 
     def _update_fields(self, update_dict):
+        gossip.trigger_with_tags(
+            'infinidat.sdk.pre_fields_update',
+            {'source': self, 'fields': update_dict}, tags=['infinibox'])
+
         for field_name, field_value in list(iteritems(update_dict)):
             try:
                 field = self.fields[field_name]
