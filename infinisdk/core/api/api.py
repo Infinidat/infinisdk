@@ -339,6 +339,8 @@ class Response(object):
         try:
             self.response.raise_for_status()
         except requests.exceptions.HTTPError as e:
+            if self.sent_data and 'password' in self.sent_data:
+                self.sent_data = '<HIDDEN>'
             raise APICommandFailed(self)
 
 

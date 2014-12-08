@@ -12,8 +12,12 @@ def test_passwords_are_not_logged(infinibox):
     with logbook.TestHandler() as handler:
         password = '12345678'
         infinibox.api.set_auth('user', password)
-        with pytest.raises(APICommandFailed):
+        with pytest.raises(APICommandFailed) as caught:
             infinibox.login()
+
+        assert password not in str(caught.value)
+        assert password not in caught.value.response.sent_data
+
     for record in handler.records:
         assert password not in record.message
 
