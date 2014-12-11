@@ -290,11 +290,18 @@ class FcPort(InfiniBoxSystemComponent):
         Field("node", api_name="node_index", type=int, cached=True, binding=RelatedComponentBinding()),
         Field("state", cached=False),
         Field("link_state", cached=False),
+        Field("role", cached=True),
     ]
 
     @classmethod
     def get_type_name(cls):
         return "fc_port"
+
+    def is_hard_port(self):
+        return self.get_role() == 'HARD_PORT'
+
+    def is_soft_port(self):
+        return self.get_role() == 'SOFT_PORT'
 
 @InfiniBoxSystemComponents.install_component_type
 class Drive(InfiniBoxSystemComponent):
