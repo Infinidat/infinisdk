@@ -53,7 +53,7 @@ def _join_path(url, path):
 _INTERACTIVE = Sentinel('INTERACTIVE')
 
 class API(object):
-    def __init__(self, target, use_ssl, ssl_cert):
+    def __init__(self, target, auth, use_ssl, ssl_cert):
         super(API, self).__init__()
         self.system = target
         self._use_ssl = use_ssl
@@ -65,7 +65,7 @@ class API(object):
         self._session.cert = ssl_cert
         if not ssl_cert:
             self._session.verify = False
-        self._session.auth = self.system.get_api_auth()
+        self._session.auth = auth
         self._session.headers["content-type"] = "application/json"
         self._urls = [self._url_from_address(address, use_ssl) for address in target.get_api_addresses()]
         self._active_url = None
