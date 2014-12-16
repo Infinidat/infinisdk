@@ -122,6 +122,7 @@ class InfiniBoxLURelatedObject(InfiniBoxObject):
             post_data['lun'] = int(lun)
         url = self.get_this_url_path().add_path('luns')
         res = self.system.api.post(url, data=post_data)
+        volume.refresh('mapped')
         self.refresh('luns')
         return LogicalUnit(system=self.system, **res.get_result())
 
@@ -139,3 +140,5 @@ class InfiniBoxLURelatedObject(InfiniBoxObject):
                 'unmap_volume does must get or volume or lun')
         self.refresh('luns')
         LogicalUnit._unmap(self, int(lun))
+        if volume:
+            volume.refresh('mapped')

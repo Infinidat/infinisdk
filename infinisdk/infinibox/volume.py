@@ -106,6 +106,7 @@ class Volume(BaseDataEntity):
         """
         for lun in self.get_logical_units().luns.values():
             lun.unmap()
+        self.refresh('mapped')
 
     def has_children(self):
         return self.get_field("has_children")
