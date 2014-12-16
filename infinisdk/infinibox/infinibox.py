@@ -50,7 +50,7 @@ class InfiniBox(APITarget):
             raise VersionNotSupported(version)
 
     @property
-    @deprecated(message='Use self.host_clusters')
+    @deprecated(message='Use <system>.host_clusters')
     def clusters(self):
         return self.host_clusters
 
