@@ -124,6 +124,9 @@ class LogicalUnitContainer(object):
             container.add_logical_unit(lu)
         return container
 
+    def get_lun_to_volume_dict(self):
+        return dict((int(lun), lun.volume) for lun in self)
+
     def add_logical_unit(self, lu):
         self.luns[lu.get_lun()] = lu
 

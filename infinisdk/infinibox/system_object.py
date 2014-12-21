@@ -100,6 +100,9 @@ class InfiniBoxLURelatedObject(InfiniBoxObject):
         luns_info = self.get_field('luns', *args, **kwargs)
         return LogicalUnitContainer.from_dict_list(self.system, luns_info)
 
+    def get_lun_to_volume_dict(self):
+        return self.get_luns().get_lun_to_volume_dict()
+
     def is_volume_mapped(self, volume):
         """
         Returns whether or not a given volume is mapped to this object

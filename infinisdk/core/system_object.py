@@ -54,6 +54,9 @@ class SystemObject(with_metaclass(FieldsMeta)):
         self._cache = initial_data
         self.id = self.fields.id.binding.get_value_from_api_object(system, type(self), self, self._cache)
 
+    def get_system(self):
+        return self.system
+
     def refresh(self, *field_names):
         """Discards the cached field values of this object, causing the next fetch to retrieve the fresh value from the system
         """

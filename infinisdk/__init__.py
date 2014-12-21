@@ -54,6 +54,4 @@ def _install_hooks():
 
     gossip.get_or_create_group('infinidat.sdk').set_strict()
 
-
-
 _install_hooks()

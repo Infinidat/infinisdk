@@ -163,11 +163,17 @@ class Enclosure(InfiniBoxSystemComponent):
     ]
 
 
+class Nodes(InfiniBoxComponentBinder):
+    def get_by_wwpn(self, wwpn):
+        return self.system.components.fc_ports.get(wwpn=wwpn).get_node()
+
+
 @InfiniBoxSystemComponents.install_component_type
 class Node(InfiniBoxSystemComponent):
+    BINDER_CLASS = Nodes
     FIELDS = [
         Field("index", api_name="id", type=int, cached=True),
-        Field("name"),
+        Field("name", cached=True),
         Field("fc_ports", type=list, binding=ListOfRelatedComponentBinding()),
         Field("eth_ports", type=list, binding=ListOfRelatedComponentBinding()),
         Field("drives", type=list, binding=ListOfRelatedComponentBinding("local_drives")),
@@ -286,12 +292,17 @@ class EthPort(InfiniBoxSystemComponent):
 class FcPort(InfiniBoxSystemComponent):
     FIELDS = [
         Field("index", api_name="id", type=int, cached=True),
-        Field("wwpn", is_identity=True),
+        Field("wwpn", is_identity=True, cached=True),
         Field("node", api_name="node_index", type=int, cached=True, binding=RelatedComponentBinding()),
         Field("state", cached=False),
         Field("link_state", cached=False),
         Field("role", cached=True),
     ]
+
+    def is_link_up(self):
+        if self.get_state() != 'OK':
+            return False
+        return self.get_link_state().lower() in ("link up", "up")
 
     @classmethod
     def get_type_name(cls):
