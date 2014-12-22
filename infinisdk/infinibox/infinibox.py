@@ -21,7 +21,6 @@ from ..core.exceptions import VersionNotSupported
 from .host_cluster import HostCluster
 
 from .components import InfiniBoxSystemComponents
-from .infinibox_cluster import InfiniboxCluster
 from .events import EmailRule, Events
 from .host import Host
 from infinisdk.core.utils import deprecated
@@ -43,10 +42,6 @@ class InfiniBox(APITarget):
     OBJECT_TYPES = [Volume, Pool, Host, HostCluster, User, EmailRule, Filesystem, Export, NetworkSpace, NetworkInterface]
     SYSTEM_EVENTS_TYPE = Events
     SYSTEM_COMPONENTS_TYPE = InfiniBoxSystemComponents
-
-    def _initialize(self):
-        super(InfiniBox, self)._initialize()
-        self.cluster = InfiniboxCluster(self)
 
     def check_version(self):
         version = self.get_version()
