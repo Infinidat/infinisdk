@@ -146,14 +146,6 @@ def test_local_drive_component(infinibox):
     local_drive = infinibox.components.local_drives.choose()
     assert isinstance(local_drive.is_ssd(), bool)
 
-def test_node_phase(infinibox):
-    node = infinibox.components.nodes.choose()
-    node.phase_out()
-    flux.current_timeline.sleep_wait_all_scheduled()
-    waiting.wait(lambda: node.get_state() == defs.enums.nodes.states.ready)
-    node.phase_in()
-    waiting.wait(lambda: node.get_state() == defs.enums.nodes.states.active)
-
 def test_get_all_first_drives(infinibox):
     drives_list = infinibox.components.drives.find(index=1)
     enclosures = infinibox.components.enclosures

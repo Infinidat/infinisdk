@@ -184,6 +184,9 @@ class Node(InfiniBoxSystemComponent):
     def is_active(self):
         return self.get_state() == 'ACTIVE'
 
+    def is_degraded(self):
+        return self.get_state() == 'DEGRADED'
+
     @classmethod
     def get_url_path(cls, system):
         return cls.BASE_URL.add_path(cls.get_plural_name())
@@ -205,35 +208,8 @@ class Node(InfiniBoxSystemComponent):
         """
         return self.get_service('core')
 
-    def phase_out(self):
-        gossip.trigger_with_tags('infinidat.sdk.pre_node_phase_out', {'node': self}, tags=self._get_tags())
-
-        try:
-            with self.system.cluster.possible_management_take_over_context(self):
-                self.system.api.post(self.get_this_url_path().add_path('phase_out'))
-        except APICommandFailed as e:
-            gossip.trigger_with_tags('infinidat.sdk.node_phase_out_failure', {'node': self, 'exc': e},
-                                     tags=self._get_tags())
-            raise
-        gossip.trigger_with_tags('infinidat.sdk.post_node_phase_out', {'node': self}, tags=self._get_tags())
-        return Pact('phase out {0}'.format(self)).until(lambda: self.get_state() == 'READY')
-
     def _get_tags(self):
         return ['infinibox', 'node{0}'.format(self.get_index())]
-
-    def _notify_phased_in(self):
-        gossip.trigger_with_tags('infinidat.sdk.node_phased_in', {'node': self}, tags=self._get_tags())
-
-    def phase_in(self):
-        gossip.trigger_with_tags('infinidat.sdk.pre_node_phase_in', {'node': self}, tags=self._get_tags())
-        try:
-            self.system.api.post(self.get_this_url_path().add_path('phase_in'))
-        except APICommandFailed as e:
-            gossip.trigger_with_tags('infinidat.sdk.node_phase_in_failure', {'node': self, 'exc': e},
-                                     tags=self._get_tags())
-            raise
-        gossip.trigger_with_tags('infinidat.sdk.post_node_phase_in', {'node': self}, tags=self._get_tags())
-        return Pact('phase in {0}'.format(self)).until(self.is_active).then(self._notify_phased_in)
 
     def __repr__(self):
         return '<Node {0}>'.format(self.get_index())
