@@ -273,6 +273,8 @@ class FcPort(InfiniBoxSystemComponent):
         Field("state", cached=False),
         Field("link_state", cached=False),
         Field("role", cached=True),
+        Field("soft_target_addresses", cached=True),
+        Field("switch_vendor", cached=True),
     ]
 
     def is_link_up(self):
@@ -289,6 +291,11 @@ class FcPort(InfiniBoxSystemComponent):
 
     def is_soft_port(self):
         return self.get_role() == 'SOFT_PORT'
+
+    def get_target_addresses(self):
+        if self.is_soft_port():
+            return self.get_soft_target_addresses()
+        return set([self.get_wwpn()])
 
 @InfiniBoxSystemComponents.install_component_type
 class Drive(InfiniBoxSystemComponent):
