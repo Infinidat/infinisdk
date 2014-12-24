@@ -18,6 +18,7 @@ from .field_sorting import FieldSorting
 from .utils import DONT_CARE
 
 from api_object_schema import Field as FieldBase
+from sentinels import NOTHING
 from .bindings import InfiniSDKBinding
 
 
@@ -29,11 +30,16 @@ class Field(FieldBase):
         return "<FIELD {}>".format(self.name)
 
     def __init__(self, *args, **kwargs):
-        cached = kwargs.pop("cached", DONT_CARE)
+        cached = kwargs.pop("cached", NOTHING)
         add_getter = kwargs.pop("add_getter", True)
         add_updater = kwargs.pop("add_updater", True)
         super(Field, self).__init__(*args, **kwargs)
 
+        if self.is_identity:
+            assert cached in (NOTHING, True), "Identity field must be cached"
+            cached = True
+        elif cached is NOTHING:
+            cached = DONT_CARE
         #:Specifies if this field is cached by default
         self.cached = cached
         #:Specifies if this field needs to have get function
