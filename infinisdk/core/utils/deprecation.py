@@ -40,7 +40,7 @@ def deprecated(func=None, message=None):
                 func=func)
             if message is not None:
                 warning += " {0}".format(message)
-            _deprecation_logger.warning(warning)
+            _deprecation_logger.warning(warning, frame_correction=+1)
             _deprecation_locations.add(caller_location)
         return func(*args, **kwargs)
 
