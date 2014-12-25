@@ -394,15 +394,15 @@ class ServiceCluster(InfiniBoxSystemComponent):
 class System(InfiniBoxSystemComponent):
     FIELDS = [
         Field("index", api_name="id", type=int, cached=True),
-        Field("state", add_getter=False, cached=False),
+        Field("operational_state", type=dict, cached=False),
     ]
 
     @cached_method
     def get_this_url_path(self):
         return URL('system')
 
-    def get_state(self):
-        return self.get_field('operational_state')['state']
+    def get_state(self, *args, **kwargs):
+        return self.get_operational_state(*args, **kwargs)['state']
 
     def safe_get_state(self):
         try:

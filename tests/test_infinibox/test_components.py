@@ -52,6 +52,13 @@ def test_system_component_does_not_perform_api_get(infinibox):
     system_component = infinibox.components.system_component
     assert system_component.get_index() == 0
 
+def test_system_component_get_state_caching(infinibox):
+    system_component = infinibox.components.system_component
+    system_component.update_field_cache({'operational_state': {'state': 'fake_state'}})
+    assert system_component.get_state(from_cache=True) == 'fake_state'
+    assert system_component.get_state() != 'fake_state'
+
+
 def test_system_component(infinibox):
     _basic_check_for_component(infinibox, System, None)
     system_component = infinibox.components.system_component
