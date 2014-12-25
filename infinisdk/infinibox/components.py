@@ -418,3 +418,7 @@ class System(InfiniBoxSystemComponent):
 
     def is_down(self):
         return self.safe_get_state() is None
+
+    def refresh(self):
+        data = self.system.api.get(self.get_this_url_path()).get_json()['result']
+        self.update_field_cache(data)
