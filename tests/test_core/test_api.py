@@ -1,8 +1,7 @@
-import requests
-
 import pytest
 from infinisdk.core.api import Autogenerate, OMIT
-from infinisdk.core.exceptions import APICommandFailed, APITransportFailure
+from infinisdk.core.exceptions import APICommandFailed, APITransportFailure, ObjectNotFound
+from infinisdk._compat import httplib
 
 
 def test_omit_fields(izbox):
@@ -80,11 +79,34 @@ def test_normalize_addresses(system):
         get_normalized(('1.2.3.4', 80, 20), use_ssl=True)
 
 
-def test_approval_context(system):
-    with system.api.get_unapproved_context():
-        assert not system.api._approved
+def test_unapproved_context(infinibox):
+    with infinibox.api.get_unapproved_context():
+        p = infinibox.pools.create()
+        with pytest.raises(APICommandFailed) as exception:
+            p.delete()
 
-        with system.api.get_approved_context():
-            assert system.api._approved
+        assert exception.value.status_code == httplib.FORBIDDEN
+    p.delete()
 
-        assert not system.api._approved
+
+def test_query_preprocessor_context(infinibox):
+    def bad_param(request):
+        request.url = request.url.set_query_param('evilmonkey', 'true')
+
+    def wrong_id(request):
+        request.url = request.url.set_query_param('id', 'eq:99999')
+
+    p = infinibox.pools.create()
+    with infinibox.api.query_preprocessor(wrong_id):
+        with infinibox.api.query_preprocessor(bad_param):
+            with pytest.raises(APICommandFailed) as exception:
+                infinibox.pools.get(id=p.id)
+
+            assert exception.value.status_code == httplib.BAD_REQUEST
+
+        with pytest.raises(ObjectNotFound):
+            infinibox.pools.get(id=p.id)
+
+    p2 = infinibox.pools.get(id=p.id)
+    assert p == p2
+

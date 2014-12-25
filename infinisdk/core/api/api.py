@@ -11,6 +11,7 @@
 ### Redistribution and use in source or binary forms, with or without modification,
 ### are strictly forbidden unless prior written permission is obtained from Infinidat Ltd.
 ###!
+from functools import partial
 import json
 import sys
 import socket
@@ -20,13 +21,13 @@ import requests
 from requests.exceptions import RequestException
 from requests.packages.urllib3.exceptions import ProtocolError
 from logbook import Logger
-from sentinels import NOTHING, Sentinel
+from sentinels import NOTHING
 from urlobject import URLObject as URL
 
 import colorama
 
 from ... import _compat
-from ..._compat import get_timedelta_total_seconds, httplib, string_types
+from ..._compat import get_timedelta_total_seconds, httplib
 from ..config import config
 from ..exceptions import (APICommandFailed, APITransportFailure,
                           CommandNotApproved)
@@ -50,16 +51,21 @@ def _join_path(url, path):
         _url = _url.with_query(path.query)
     return _url
 
-_INTERACTIVE = Sentinel('INTERACTIVE')
+
+def _approval_preprocessor(approve, request):
+    if request.method != "get" and not request.url.path.startswith("/api/internal/"):
+        request.url = request.url.set_query_param('approved', str(approve).lower())
+
 
 class API(object):
     def __init__(self, target, auth, use_ssl, ssl_cert):
         super(API, self).__init__()
+        self._preprocessors = []
         self.system = target
         self._use_ssl = use_ssl
         self._ssl_cert = ssl_cert
         self._default_request_timeout = self.system.get_api_timeout()
-        self._approved = True
+        self._interactive = False
         self._session = requests.Session()
         assert self._session.cert is None
         self._session.cert = ssl_cert
@@ -76,15 +82,17 @@ class API(object):
         return list(self._urls)
 
     @contextmanager
+    def query_preprocessor(self, preprocessor):
+        self._preprocessors.append(preprocessor)
+        yield
+        self._preprocessors.remove(preprocessor)
+
+    @contextmanager
     def get_approval_context(self, value):
         """A context manager that controls whether requests are automatically approved (confirmed)
         """
-        old_approved_value = self._approved
-        self._approved = value
-        try:
+        with self.query_preprocessor(partial(_approval_preprocessor, value)):
             yield
-        finally:
-            self._approved = old_approved_value
 
     def get_approved_context(self):
         """A context marking all operations as approved (confirmed)"""
@@ -96,7 +104,7 @@ class API(object):
 
     def set_interactive_approval(self):
         """Causes an interactive prompt whenever a command requires approval from the user"""
-        self._approved = _INTERACTIVE
+        self._interactive = True
 
     def set_auth(self, username_or_auth, password=NOTHING):
         """
@@ -178,14 +186,20 @@ class API(object):
 
         for url in urls:
             full_url = _join_path(url, URL(path))
-            # TODO: make approved deduction smarter
-            if http_method != "get" and self._approved == True and not path.startswith("/api/internal/"):
+
+            if http_method != "get" and not self._interactive and not path.startswith("/api/internal/"):
                 full_url = self._with_approved(full_url)
             hostname = full_url.hostname
             _logger.debug("{0} <-- {1} {2}", hostname, http_method.upper(), full_url)
             if data is not None:
                 self._log_sent_data(hostname, data, sent_json_object)
-            response = self._session.request(http_method, full_url, data=data, **kwargs)
+
+            api_request = requests.Request(http_method, full_url, data=data)
+            for preprocessor in self._preprocessors:
+                preprocessor(api_request)
+            prepared = self._session.prepare_request(api_request)
+            response = self._session.send(prepared, **kwargs)
+
             elapsed = get_timedelta_total_seconds(response.elapsed)
             _logger.debug("{0} --> {1} {2} (took {3:.04f}s)", hostname, response.status_code, response.reason, elapsed)
             returned = Response(http_method, full_url, data, response)
@@ -226,7 +240,7 @@ class API(object):
                     if self._is_approval_required(e):
                         reason = self._get_unapproved_reason(e.response.response.json())
                         exception = CommandNotApproved(e.response, reason)
-                        if self._approved is _INTERACTIVE and not did_interactive_confirmation:
+                        if self._interactive and not did_interactive_confirmation:
                             did_interactive_confirmation = True
                             if self._ask_approval_interactively(http_method, path, reason):
                                 path = self._with_approved(path)

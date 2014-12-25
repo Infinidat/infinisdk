@@ -29,6 +29,7 @@ Contents:
    extending
    faq
    api
+   advanced_usage
 
 
 Indices and tables
