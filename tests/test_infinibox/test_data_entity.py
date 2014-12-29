@@ -135,7 +135,7 @@ def test_object_creation_hooks_for_child_entities(data_entity):
     l = []
     fork_callbacks = []
     password = 'some_password'
-    username = data_entity.system.users.create(role='ReadOnly', password=password).get_name()
+    username = data_entity.system.users.create(role='READ_ONLY', password=password).get_name()
 
     def save_fork_callback(hook_name, **kwargs):
         fork_callbacks.append(hook_name)
@@ -185,7 +185,7 @@ def test_data_restore(data_entity):
     callbacks = []
     expected = []
     password = 'some_password'
-    username = data_entity.system.users.create(role='ReadOnly', password=password).get_name()
+    username = data_entity.system.users.create(role='READ_ONLY', password=password).get_name()
 
     @gossip.register('infinidat.sdk.pre_data_restore', token=hook_ident)
     def pre_restore(source, target):

@@ -25,7 +25,7 @@ def test_get_administered_pools_with_pools(infinibox, user):
 
 
 def test_creation_deletion(infinibox, user):
-    kwargs = {"role": "ReadOnly",
+    kwargs = {"role": "READ_ONLY",
               "name": "some_user_name",
               "email": "fake@email.com",
               "password": "some_password"}
@@ -56,7 +56,7 @@ def test_email(infinibox, user):
 
 def test_role(infinibox, user):
     orig_role = user.get_role()
-    new_role = 'ReadOnly'
+    new_role = 'READ_ONLY'
 
     user.update_role(new_role)
     assert orig_role != new_role
@@ -65,7 +65,7 @@ def test_role(infinibox, user):
 
 def test_get_pools(infinibox, user):
     flux.current_timeline.sleep(1)
-    user = infinibox.users.create(role='PoolAdmin')
+    user = infinibox.users.create(role='POOL_ADMIN')
     assert user.get_pools() == []
 
     pool = infinibox.pools.create()
