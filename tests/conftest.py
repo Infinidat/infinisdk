@@ -86,7 +86,7 @@ def izbox_simulator(request):
 
 @pytest.fixture
 def infinibox_simulator(request):
-    returned = InfiniboxSimulator()
+    returned = InfiniboxSimulator(True)
     returned.activate()
     request.addfinalizer(returned.deactivate)
     return returned
