@@ -118,8 +118,8 @@ class BaseDataEntity(InfiniBoxObject):
         return self.get_field("created_at", from_cache=True)
 
     @InfiniBoxObject.requires_refresh("pool")
-    def move_pool(self, target_pool, with_capacity=True):
+    def move_pool(self, target_pool, with_capacity=False):
         """Moves this entity to a new pool, optionally along with its needed capacity
         """
-        data = dict(pool_id = target_pool.get_id(), with_capacity = with_capacity)
+        data = dict(pool_id=target_pool.get_id(), with_capacity=with_capacity)
         self.system.api.post(self.get_this_url_path().add_path('move'), data=data)
