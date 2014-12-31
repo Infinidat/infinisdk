@@ -187,6 +187,9 @@ class Node(InfiniBoxSystemComponent):
     def is_degraded(self):
         return self.get_state() == 'DEGRADED'
 
+    def is_failed(self):
+        return self.get_state() == 'FAILED'
+
     @classmethod
     def get_url_path(cls, system):
         return cls.BASE_URL.add_path(cls.get_plural_name())
