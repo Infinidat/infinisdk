@@ -151,9 +151,14 @@ class InfiniBox(APITarget):
         """
         return self.get_system_info('version')
 
+    def _after_login(self):
+        self.components.system_component.refresh()
+
     def login(self):
         """
         Verifies the current user against the system
         """
         username, password = self.api.get_auth()
-        return self.api.post("users/login", data={"username": username, "password": password})
+        res = self.api.post("users/login", data={"username": username, "password": password})
+        self._after_login()
+        return res
