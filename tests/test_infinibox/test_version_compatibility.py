@@ -9,15 +9,15 @@ from infinisdk.core.config import config
 from infinisdk.core.exceptions import VersionNotSupported
 
 
-def _get_name(s):
-    return s.get_name()
+def _login(s):
+    return s.login()
 
 
 def _get_volumes(s):
     return list(s.volumes)
 
 
-@pytest.mark.parametrize('operator', [_get_name, _get_volumes])
+@pytest.mark.parametrize('operator', [_login, _get_volumes])
 def test_incompatible_version(incompatible_system, operator):
     with pytest.raises(VersionNotSupported):
         operator(incompatible_system)

@@ -107,8 +107,11 @@ class APITarget(with_metaclass(abc.ABCMeta)):
     def get_api_auth(self):
         return self.api.get_auth()
 
-    def __repr__(self):
+    def _get_received_name_or_ip(self):
         return self._addresses[0][0]
+
+    def __repr__(self):
+        return self._get_received_name_or_ip()
 
     def _is_simulator(self, address):
         raise NotImplementedError() # pragma: no cover

@@ -17,7 +17,7 @@ from sentinels import NOTHING
 
 from ..core.api import APITarget
 from ..core.config import config, get_ini_option
-from ..core.exceptions import VersionNotSupported
+from ..core.exceptions import VersionNotSupported, CacheMiss
 from .host_cluster import HostCluster
 
 from .components import InfiniBoxSystemComponents
@@ -105,7 +105,7 @@ class InfiniBox(APITarget):
         return self.components.system_component.get_state()
 
     def is_simulator(self):
-        return "simulator" in self.get_name()
+        return "simulator" in self.get_system_info("name")
 
     def get_simulator(self):
         if lookup_simulator_by_address is None:
@@ -128,7 +128,10 @@ class InfiniBox(APITarget):
         """
         Returns the name of the system
         """
-        return self.get_system_info('name')
+        try:
+            return self.components.system_component.get_field('name', from_cache=True, fetch_if_not_cached=False)
+        except CacheMiss:
+            return self._get_received_name_or_ip()
 
     def get_serial(self):
         """

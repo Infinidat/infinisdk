@@ -1,5 +1,6 @@
 from infinisdk._compat import iteritems, string_types
 from logbook import Logger
+from ..conftest import disable_api_context
 
 _logger = Logger(__name__)
 
@@ -66,7 +67,7 @@ def test_single_metadata_creation_on_all_infinibox_objects(infinibox, volume):
         _validate_single_metadata_support(obj)
 
 def test_infinibox_attributes(infinibox):
-    assert infinibox.get_name().startswith('simulator')
+    assert isinstance(repr(infinibox), string_types)
     assert isinstance(infinibox.get_serial(), int)
     assert isinstance(infinibox.get_state(), string_types)
     assert isinstance(infinibox.get_version(), string_types)
@@ -74,3 +75,12 @@ def test_infinibox_attributes(infinibox):
 def test_infinibox_system_type(infinibox):
     assert infinibox.is_simulator()
     assert not infinibox.is_mock()
+
+def test_get_name(infinibox):
+    simulator_host_name = infinibox.get_simulator().get_hostname()
+    with disable_api_context(infinibox):
+        assert infinibox.get_name() == simulator_host_name
+    infinibox.components.system_component.update_field_cache({'name': 'fake_name'})
+    assert infinibox.get_name() == 'fake_name'
+    infinibox.components.system_component.refresh()
+    assert infinibox.get_name().startswith('simulator-')
