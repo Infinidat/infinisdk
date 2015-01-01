@@ -24,7 +24,7 @@ def _install_hooks():
     obj_type_name = set(tag for sys in (InfiniBox, IZBox) for obj_cls in sys.OBJECT_TYPES
             for tag in obj_cls._get_tags_for_object_operations(sys))
     for hook_name_template in ('infinidat.sdk.pre_object_{0}', 'infinidat.sdk.post_object_{0}'):
-        for operation in ('creation', 'deletion'):
+        for operation in ('creation', 'deletion', 'update'):
             full_hook_name = hook_name_template.format(operation)
             gossip.define(full_hook_name, tags=obj_type_name)
     gossip.define('infinidat.sdk.object_operation_failure', tags=obj_type_name)
