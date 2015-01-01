@@ -220,3 +220,12 @@ def network_interface(infinibox):
 @pytest.fixture
 def network_space(infinibox, network_interface):
     return create_network_space(infinibox, interfaces=[network_interface])
+
+@contextmanager
+def disable_api_context(system):
+    api = system.api
+    system.api = None
+    try:
+        yield
+    finally:
+        system.api = api

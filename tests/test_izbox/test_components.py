@@ -1,5 +1,6 @@
 import pytest
 from infinisdk._compat import string_types
+from ..conftest import disable_api_context
 
 
 def test_components_find(izbox):
@@ -60,9 +61,9 @@ def test_system_component(izbox):
 
 
 def test_system_component_does_not_perform_api_get(izbox):
-    izbox.api = None
-    system_component = izbox.components.system_component
-    assert system_component.id == 0
+    with disable_api_context(izbox):
+        system_component = izbox.components.system_component
+        assert system_component.id == 0
 
 
 def test_system_get_primary_secondary_nodes(izbox):
