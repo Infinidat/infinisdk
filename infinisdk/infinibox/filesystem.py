@@ -37,6 +37,7 @@ class Filesystem(BaseDataEntity):
         Field("provisioning", api_name="provtype", mutable=True, creation_parameter=True,
             is_filterable=True, is_sortable=True, default="THICK"),
         Field("created_at", type=MillisecondsDatetimeType),
+        Field("ssd_enabled", type=bool, mutable=True, creation_parameter=True, is_filterable=True, is_sortable=True, optional=True),
         Field("write_protected", type=bool, mutable=True, creation_parameter=True, optional=True),
     ]
 
