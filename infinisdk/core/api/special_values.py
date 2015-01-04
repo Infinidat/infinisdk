@@ -73,7 +73,7 @@ def translate_special_values(data):
     if isinstance(data, dict):
         return translate_special_values_dict(data)
     elif isinstance(data, SpecialValue):
-        if isinstance(data, Autogenerate):
+        if isinstance(data, Autogenerate) or isinstance(data, RawValue):
             return data.generate()
         raise NotImplementedError() # pragma: no cover
     return data
