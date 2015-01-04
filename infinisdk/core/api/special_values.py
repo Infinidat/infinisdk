@@ -48,8 +48,9 @@ class Autogenerate(SpecialValue):
 
 class RawValue(SpecialValue):
     def __init__(self, value):
+        super(RawValue, self).__init__()
         self._value = value
-    def get_raw_value(self):
+    def generate(self):
         return self._value
     def __str__(self):
         return "<RawValue {}>".format(self._value)
@@ -74,7 +75,5 @@ def translate_special_values(data):
     elif isinstance(data, SpecialValue):
         if isinstance(data, Autogenerate):
             return data.generate()
-        elif isinstance(data, RawValue):
-            return data.get_raw_value()
         raise NotImplementedError() # pragma: no cover
     return data
