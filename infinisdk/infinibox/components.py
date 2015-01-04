@@ -310,6 +310,11 @@ class Drive(InfiniBoxSystemComponent):
         Field("state", cached=False),
     ]
 
+    def get_paths(self, from_cache=False):
+        node_access_flags = self.get_field('nodes_access', from_cache=from_cache)
+        return [self.system.components.nodes.get(index=i)
+                for i, can_access_node in enumerate(node_access_flags,1) if can_access_node]
+
 
 @InfiniBoxSystemComponents.install_component_type
 class Service(InfiniBoxSystemComponent):

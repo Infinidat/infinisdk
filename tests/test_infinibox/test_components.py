@@ -81,6 +81,12 @@ def test_drive_component(infinibox):
     drive = infinibox.components.drives.choose()
     assert drive.get_parent() == drive.get_enclosure()
 
+def test_enclosure_drive_paths(infinibox):
+    drive = infinibox.components.drives.choose()
+    paths = drive.get_paths()
+    assert len(paths)
+    assert all([isinstance(path, Node) for path in paths])
+
 def test_fc_port_component(infinibox):
     _basic_check_for_component(infinibox, FcPort, Node)
     fc_port = infinibox.components.fc_ports.choose()
