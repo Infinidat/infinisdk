@@ -65,7 +65,7 @@ class Volume(BaseDataEntity):
             is_filterable=True, is_sortable=True, default="THICK"),
         Field("created_at", type=MillisecondsDatetimeType),
         Field("serial", type=SCSISerial),
-        Field("write_protected", type=bool, mutable=True),
+        Field("write_protected", type=bool, mutable=True, creation_parameter=True, optional=True),
     ]
 
     @deprecated(message="Use volume.is_master instead")
