@@ -310,22 +310,13 @@ class Drive(InfiniBoxSystemComponent):
         Field("state", cached=False),
     ]
 
-FIELD_NOT_EXISTS = sentinels.Sentinel('FIELD_NOT_EXISTS')
-
-class NotExistsSupportBinding(InfiniSDKBinding):
-    # INFINIBOX-12634: Workaround until all services would have the same fields
-    def get_value_from_api_object(self, system, objtype, obj, api_obj):
-        try:
-            return super(NotExistsSupportBinding, self).get_value_from_api_object(system, objtype, obj, api_obj)
-        except KeyError:
-            return FIELD_NOT_EXISTS
 
 @InfiniBoxSystemComponents.install_component_type
 class Service(InfiniBoxSystemComponent):
     FIELDS = [
         Field("index", api_name="name", cached=True),
         Field("name", is_identity=True, cached=True),
-        Field("role", binding=NotExistsSupportBinding(), cached=False),
+        Field("role", cached=False),
         Field("state", cached=False),
     ]
 
