@@ -13,16 +13,17 @@
 ###!
 from api_object_schema import ObjectAPIBinding
 
-from .api.special_values import SpecialValue
+from .api.special_values import SpecialValue,RawValue
 
 
 class InfiniSDKBinding(ObjectAPIBinding):
 
     def get_api_value_from_value(self, system, objtype, obj, value):
         if isinstance(value, SpecialValue):
+            if isinstance(value, RawValue):
+                return value.generate()
             return value
         return super(InfiniSDKBinding, self).get_api_value_from_value(system, objtype, obj, value)
-
 
 class RelatedObjectBinding(InfiniSDKBinding):
 
@@ -40,8 +41,15 @@ class RelatedObjectBinding(InfiniSDKBinding):
         if value is None:
             return self._value_for_none
         if isinstance(value, SpecialValue):
+            if isinstance(value, RawValue):
+                return value.generate()
             return value
         return value.id
+
+    def get_api_value_from_object(self, system, objtype, obj):
+        if obj is None:
+            return self._value_for_none
+        return obj.id
 
     def get_value_from_api_value(self, system, objtype, obj, value):
         if value == self._value_for_none:
@@ -58,6 +66,8 @@ class ListOfRelatedObjectIDsBinding(RelatedObjectBinding):
     """
     def get_api_value_from_value(self, system, objtype, obj, value):
         if isinstance(value, SpecialValue):
+            if isinstance(value, RawValue):
+                return value.generate()
             return value
         return [single_value.id for single_value in value]
 
@@ -136,6 +146,8 @@ class ListOfRelatedComponentBinding(ListOfRelatedObjectBinding):
 class PassthroughBinding(InfiniSDKBinding):
 
     def get_api_value_from_value(self, system, objtype, obj, value):
+        if isinstance(value, RawValue):
+            return value.generate()
         return value
 
     def get_value_from_api_value(self, system, objtype, obj, value):
@@ -158,5 +170,7 @@ class ListToDictBinding(InfiniSDKBinding):
 
     def get_api_value_from_value(self, system, objtype, obj, value):
         if isinstance(value, SpecialValue):
+            if isinstance(value, RawValue):
+                return value.generate()
             return value
         return [{self.key:val} for val in value]
