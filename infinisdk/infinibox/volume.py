@@ -49,8 +49,7 @@ class Volume(BaseDataEntity):
     FIELDS = [
         Field("id", type=int, is_identity=True,
               is_filterable=True, is_sortable=True),
-        Field(
-            "name", creation_parameter=True, mutable=True, is_filterable=True,
+        Field("name", creation_parameter=True, mutable=True, is_filterable=True,
             is_sortable=True, default=Autogenerate("vol_{uuid}")),
         Field("size", creation_parameter=True, mutable=True,
               is_filterable=True, is_sortable=True, default=GB, type=CapacityType),
@@ -59,14 +58,20 @@ class Volume(BaseDataEntity):
               binding=RelatedObjectBinding()),
 
         Field("type", cached=True, is_filterable=True, is_sortable=True),
-        Field("parent", type='infinisdk.infinibox.volume:Volume', cached=True, api_name="parent_id", binding=RelatedObjectBinding('volumes'), is_filterable=True),
-        Field(
-            "provisioning", api_name="provtype", mutable=True, creation_parameter=True,
-            is_filterable=True, is_sortable=True, default="THICK"),
-        Field("created_at", type=MillisecondsDatetimeType),
-        Field("serial", type=SCSISerial),
+        Field("provtype", cached=True, is_filterable=True, is_sortable=True),
+        Field("parent", type='infinisdk.infinibox.volume:Volume', cached=True, api_name="parent_id",
+                binding=RelatedObjectBinding('volumes'), is_filterable=True),
+        Field("provisioning", api_name="provtype", mutable=True, creation_parameter=True,
+                is_filterable=True, is_sortable=True, default="THICK"),
+        Field("created_at", type=MillisecondsDatetimeType, is_sortable=True, is_filterable=True),
+        Field("updated_at", type=MillisecondsDatetimeType, is_sortable=True, is_filterable=True),
+        Field("serial", type=SCSISerial, is_filterable=True, is_sortable=True),
         Field("ssd_enabled", type=bool, mutable=True, creation_parameter=True, is_filterable=True, is_sortable=True, optional=True),
-        Field("write_protected", type=bool, mutable=True, creation_parameter=True, optional=True),
+        Field("write_protected", type=bool, mutable=True, creation_parameter=True, optional=True
+              , is_filterable=True, is_sortable=True),
+        Field("depth", type=int, is_sortable=True,is_filterable=True),
+        Field("mapped", type=bool, is_sortable=True,is_filterable=True),
+        Field("has_children", type=bool),
     ]
 
     @deprecated(message="Use volume.is_master instead")

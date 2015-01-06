@@ -13,7 +13,7 @@
 ###!
 import requests
 
-from ..core import Field
+from ..core import Field, MillisecondsDatetimeType
 from ..core.type_binder import TypeBinder
 from ..core.bindings import RelatedObjectBinding
 from ..core.exceptions import APICommandFailed
@@ -61,6 +61,8 @@ class Host(InfiniBoxLURelatedObject):
         Field("luns", type=list, add_getter=False, add_updater=False),
         Field("ports", type=list, add_getter=False, add_updater=False),
         Field("cluster", api_name="host_cluster_id", type='infinisdk.infinibox.host_cluster:HostCluster', is_filterable=True, binding=RelatedObjectBinding()),
+        Field("created_at", type=MillisecondsDatetimeType, is_sortable=True, is_filterable=True),
+        Field("updated_at", type=MillisecondsDatetimeType, is_sortable=True, is_filterable=True),
     ]
 
     def _add_port(self, port_type, port_address):

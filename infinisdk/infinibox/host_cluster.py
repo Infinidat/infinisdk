@@ -11,7 +11,7 @@
 ### Redistribution and use in source or binary forms, with or without modification,
 ### are strictly forbidden unless prior written permission is obtained from Infinidat Ltd.
 ###!
-from ..core import Field
+from ..core import Field, MillisecondsDatetimeType
 from ..core.api.special_values import Autogenerate
 from .system_object import InfiniBoxLURelatedObject
 from ..core.bindings import ListOfRelatedObjectBinding
@@ -24,6 +24,8 @@ class HostCluster(InfiniBoxLURelatedObject):
         Field("name", creation_parameter=True, mutable=True, is_filterable=True, is_sortable=True, default=Autogenerate("cluster_{uuid}")),
         Field("luns", type=list, add_getter=False, add_updater=False),
         Field("hosts", type=list, add_updater=False, binding=ListOfRelatedObjectBinding()),
+        Field("created_at", type=MillisecondsDatetimeType, is_sortable=True, is_filterable=True),
+        Field("updated_at", type=MillisecondsDatetimeType, is_sortable=True, is_filterable=True),
     ]
 
     def add_host(self, host):
