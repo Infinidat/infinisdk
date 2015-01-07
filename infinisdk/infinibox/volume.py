@@ -58,7 +58,6 @@ class Volume(BaseDataEntity):
               binding=RelatedObjectBinding()),
 
         Field("type", cached=True, is_filterable=True, is_sortable=True),
-        Field("provtype", cached=True, is_filterable=True, is_sortable=True),
         Field("parent", type='infinisdk.infinibox.volume:Volume', cached=True, api_name="parent_id",
                 binding=RelatedObjectBinding('volumes'), is_filterable=True),
         Field("provisioning", api_name="provtype", mutable=True, creation_parameter=True,
