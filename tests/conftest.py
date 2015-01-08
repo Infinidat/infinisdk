@@ -93,7 +93,7 @@ def infinibox_simulator(request):
 
 @pytest.fixture
 def cluster(request, infinibox):
-    returned = infinibox.clusters.create()
+    returned = infinibox.host_clusters.create()
     request.addfinalizer(_get_purge_callback(returned))
     return returned
 
@@ -161,7 +161,7 @@ def volume(infinibox, pool):
 
 def _map_to_cluster(infinibox, volume):
     host = infinibox.hosts.create()
-    cluster = infinibox.clusters.create()
+    cluster = infinibox.host_clusters.create()
     cluster.add_host(host)
     cluster.map_volume(volume)
 
@@ -171,7 +171,7 @@ def _map_to_host(infinibox, volume):
 
 def _map_to_clustered_host(infinibox, volume):
     host = infinibox.hosts.create()
-    cluster = infinibox.clusters.create()
+    cluster = infinibox.host_clusters.create()
     cluster.add_host(host)
     host.map_volume(volume)
 

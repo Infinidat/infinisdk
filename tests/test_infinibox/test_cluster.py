@@ -13,7 +13,7 @@ def test_update_name(infinibox, cluster):
 
 def test_creation(infinibox, cluster):
     kwargs = {'name': 'some_cluster_name'}
-    cluster = infinibox.clusters.create(**kwargs)
+    cluster = infinibox.host_clusters.create(**kwargs)
 
     for k, v in iteritems(kwargs):
         assert cluster._cache[k] == v

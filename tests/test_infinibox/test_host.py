@@ -27,7 +27,7 @@ def test_creation(infinibox, host, request):
 
 
 def test_get_cluster(infinibox, host, request):
-    cluster = infinibox.clusters.create()
+    cluster = infinibox.host_clusters.create()
     request.addfinalizer(cluster.delete)
     cluster.add_host(host)
     assert host.get_cluster() == cluster
