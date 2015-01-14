@@ -122,6 +122,11 @@ def enabling_infinisdk_internal():
 def no_op_context(*args):
     yield
 
+@pytest.fixture
+def infinisdk_internal(request):
+    enable_infinisdk_internal()
+    request.addfinalizer(disable_infinisdk_internal)
+
 @pytest.fixture(params=["host", "cluster"])
 def mapping_object_type(request, infinibox):
     return request.param

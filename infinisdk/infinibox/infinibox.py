@@ -31,6 +31,7 @@ from .filesystem import Filesystem
 from .export import Export
 from .network_space import NetworkSpace
 from .network_interface import NetworkInterface
+from .link import Link
 
 try:
     from infinisim.core.context import lookup_simulator_by_address
@@ -39,7 +40,7 @@ except ImportError:
 
 
 class InfiniBox(APITarget):
-    OBJECT_TYPES = [Volume, Pool, Host, HostCluster, User, EmailRule, Filesystem, Export, NetworkSpace, NetworkInterface]
+    OBJECT_TYPES = [Volume, Pool, Host, HostCluster, User, EmailRule, Filesystem, Export, NetworkSpace, NetworkInterface, Link]
     SYSTEM_EVENTS_TYPE = Events
     SYSTEM_COMPONENTS_TYPE = InfiniBoxSystemComponents
 
