@@ -48,6 +48,7 @@ def test_creation_hook(hooks, forge, izbox):
             IsA(izbox.objects.filesystems.object_type),
             HasAttributeValue("system", izbox)),
         data=HasKeyValue("name", "test_fs"),
+        response_dict=HasKeyValue("name", "test_fs"),
     )
     forge.replay()
     izbox.objects.filesystems.create(name="test_fs", quota=GB)
