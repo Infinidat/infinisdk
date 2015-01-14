@@ -217,16 +217,17 @@ class SystemObject(with_metaclass(FieldsMeta)):
 
         return ObjectQuery(system, url, cls)
 
-    def get_field(self, field_name, from_cache=DONT_CARE, fetch_if_not_cached=True):
+    def get_field(self, field_name, from_cache=DONT_CARE, fetch_if_not_cached=True, raw_value=False):
         """
         Gets the value of a single field from the system
 
         :param cache: Attempt to use the last cached version of the field value
         :param fetch_if_not_cached: Pass ``False`` to force only from cache
         """
-        return self.get_fields([field_name], from_cache=from_cache, fetch_if_not_cached=fetch_if_not_cached)[field_name]
+        kwargs = {'from_cache': from_cache, 'fetch_if_not_cached': fetch_if_not_cached, 'raw_value': raw_value}
+        return self.get_fields([field_name], **kwargs)[field_name]
 
-    def get_fields(self, field_names=(), from_cache=DONT_CARE, fetch_if_not_cached=True):
+    def get_fields(self, field_names=(), from_cache=DONT_CARE, fetch_if_not_cached=True, raw_value=False):
         """
         Gets a set of fields from the system
 
@@ -239,7 +240,7 @@ class SystemObject(with_metaclass(FieldsMeta)):
 
         if from_cache:
             try:
-                return self._get_fields_from_cache(field_names)
+                return self._get_fields_from_cache(field_names, raw_value)
             except CacheMiss:
                 if not fetch_if_not_cached:
                     raise
@@ -265,13 +266,7 @@ class SystemObject(with_metaclass(FieldsMeta)):
         if not field_names:
             field_names = self.fields.get_all_field_names_or_fabricate(result)
 
-        returned = {}
-        for field_name in field_names:
-            field = self.fields.get_or_fabricate(field_name)
-            value = field.binding.get_value_from_api_object(self.system, type(self), self, self._cache)
-            returned[field_name] = value
-
-        return returned
+        return self._get_fields_from_cache(field_names, raw_value)
 
     def _deduce_from_cache(self, field_names, from_cache):
         if from_cache is not DONT_CARE:
@@ -299,7 +294,7 @@ class SystemObject(with_metaclass(FieldsMeta)):
             return field_name
         return field.api_name
 
-    def _get_fields_from_cache(self, field_names):
+    def _get_fields_from_cache(self, field_names, raw_value):
         if not field_names:
             field_names = self.fields.get_all_field_names_or_fabricate(self._cache.keys())
         returned = {}
@@ -307,7 +302,10 @@ class SystemObject(with_metaclass(FieldsMeta)):
         for field_name in field_names:
             field = self.fields.get_or_fabricate(field_name)
             try:
-                value = field.binding.get_value_from_api_object(self.system, type(self), self, self._cache)
+                if raw_value:
+                    value = self._cache[field.api_name]
+                else:
+                    value = field.binding.get_value_from_api_object(self.system, type(self), self, self._cache)
             except KeyError:
                 missed.append(field_name)
             else:

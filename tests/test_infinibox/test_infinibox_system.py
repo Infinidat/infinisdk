@@ -1,5 +1,8 @@
-from infinisdk._compat import iteritems, string_types
+import pytest
+from capacity import Capacity
 from logbook import Logger
+
+from infinisdk._compat import iteritems, string_types
 from ..conftest import disable_api_context
 
 _logger = Logger(__name__)
@@ -84,3 +87,17 @@ def test_get_name(infinibox):
     assert infinibox.get_name() == 'fake_name'
     infinibox.components.system_component.refresh()
     assert infinibox.get_name().startswith('simulator-')
+
+
+@pytest.mark.parametrize('from_cache', [True, False])
+@pytest.mark.parametrize('invalidate_cache', [True, False])
+def test_get_field_raw_value(volume, from_cache, invalidate_cache):
+    if invalidate_cache:
+        volume.refresh('size')
+    assert isinstance(volume.get_size(from_cache=from_cache), Capacity)
+    if invalidate_cache:
+        volume.refresh('size')
+    assert isinstance(volume.get_size(from_cache=from_cache, raw_value=False), Capacity)
+    if invalidate_cache:
+        volume.refresh('size')
+    assert isinstance(volume.get_size(from_cache=from_cache, raw_value=True), int)
