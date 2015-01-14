@@ -4,6 +4,7 @@ import pytest
 
 
 def test_filesystem_get_set_quota(izbox, filesystem):
+    pytest.skip()
     assert filesystem.get_quota() == GB
     filesystem.update_quota(3 * GB)
 
@@ -19,6 +20,7 @@ def test_create_filesystem_with_quota_direct(izbox, filesystem):
 
 
 def test_filesystem_get_set_name(izbox, filesystem, fs_name):
+    pytest.skip()
     assert filesystem.get_name() == fs_name
     filesystem.update_name("new_name")
 

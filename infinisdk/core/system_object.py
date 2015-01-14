@@ -350,9 +350,12 @@ class SystemObject(with_metaclass(FieldsMeta)):
         hook_tags = self._get_tags_for_object_operations(self.system)
         gossip.trigger_with_tags('infinidat.sdk.pre_object_update', {'obj': self, 'fields': update_dict}, tags=hook_tags)
         with _possible_api_failure_context(tags=hook_tags):
-            self.system.api.put(self.get_this_url_path(), data=update_dict)
-        self.update_field_cache(update_dict)
-        gossip.trigger_with_tags('infinidat.sdk.post_object_update', {'obj': self}, tags=hook_tags)
+            res = self.system.api.put(self.get_this_url_path(), data=update_dict)
+        response_dict = res.get_result()
+        self.update_field_cache(response_dict)
+        gossip.trigger_with_tags('infinidat.sdk.post_object_update',
+                {'obj': self, 'fields': update_dict, 'response_dict': response_dict}, tags=hook_tags)
+        return res
 
     def delete(self):
         """

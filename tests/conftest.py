@@ -55,9 +55,7 @@ def system_type(request):
     return request.param
 
 @pytest.fixture
-def system(izbox, infinibox, system_type):
-    if system_type == 'izbox':
-        return izbox
+def system(infinibox):
     return infinibox
 
 @pytest.fixture
