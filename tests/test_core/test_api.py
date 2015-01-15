@@ -1,6 +1,6 @@
 import pytest
 from infinisdk.core.api import Autogenerate, OMIT
-from infinisdk.core.exceptions import APICommandFailed, APITransportFailure, ObjectNotFound
+from infinisdk.core.exceptions import APICommandFailed, ObjectNotFound
 from infinisdk._compat import httplib
 
 
@@ -52,14 +52,6 @@ def test_specific_address_doesnt_change_active_url(izbox, izbox_simulator):
                   address=izbox_simulator.get_active_node_address())
     assert izbox.api._active_url == new_url
 
-
-def test_api_transport_error(system):
-    url = '/some/fake/path'
-    with pytest.raises(APITransportFailure) as e:
-        system.api.get(url, address=('fake_domain_address', 12345))
-    transport_repr = repr(e.value)
-    assert url in transport_repr
-    assert 'get' in transport_repr
 
 
 def test_relative_api(system):

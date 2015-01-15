@@ -3,9 +3,30 @@ from capacity import Capacity
 from logbook import Logger
 
 from infinisdk._compat import iteritems, string_types
-from ..conftest import disable_api_context
+from infinisdk.infinibox import InfiniBox
+from infinisdk.core.exceptions import SystemNotFoundException, APITransportFailure
+from ..conftest import disable_api_context, enabling_infinisdk_internal
 
 _logger = Logger(__name__)
+
+
+def test_non_exist_system():
+    infinibox = InfiniBox('fake_system')
+    with pytest.raises(SystemNotFoundException) as caught:
+        infinibox.get_version()
+        assert caught.exception.address == 'fake_system'
+
+
+def test_api_transport_error(infinibox):
+    with enabling_infinisdk_internal():
+        infinibox.op.shutdown()
+    url = infinibox.components.system_component.get_this_url_path()
+    with pytest.raises(APITransportFailure) as e:
+        infinibox.api.get(url)
+    transport_repr = repr(e.value)
+    assert url in transport_repr
+    assert 'get' in transport_repr
+
 
 
 def test_get_api_auth(infinibox):

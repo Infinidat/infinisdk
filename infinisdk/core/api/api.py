@@ -30,7 +30,7 @@ from ... import _compat
 from ..._compat import get_timedelta_total_seconds, httplib
 from ..config import config
 from ..exceptions import (APICommandFailed, APITransportFailure,
-                          CommandNotApproved)
+                          CommandNotApproved, SystemNotFoundException)
 from .special_values import translate_special_values
 
 _logger = Logger(__name__)
@@ -234,6 +234,9 @@ class API(object):
             except (RequestException, ProtocolError, socket.error) as e:
                 request_kwargs = dict(url=path, method=http_method, **kwargs)
                 _logger.debug('Exception while sending API command to {0}: {1}', self.system, e)
+                if 'gaierror' in str(e):
+                    hostname = URL(e.request.url).hostname
+                    raise SystemNotFoundException("Cannot connect {0}".format(hostname), hostname)
                 raise APITransportFailure(request_kwargs, e)
 
             if assert_success:

@@ -25,6 +25,11 @@ class CacheMiss(InfiniSDKException):
 class APICommandException(InfiniSDKException):
     pass
 
+class SystemNotFoundException(APICommandException):
+    def __init__(self, msg, sys_address=None):
+        super(SystemNotFoundException, self).__init__(msg)
+        self.address = sys_address
+
 class APITransportFailure(APICommandException):
     def __init__(self, request_kwargs, *args, **kwargs):
         super(APITransportFailure, self).__init__(*args, **kwargs)
