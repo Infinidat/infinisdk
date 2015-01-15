@@ -19,7 +19,7 @@ def test_get_administered_pools_no_pool(infinibox, user):
 
 
 def test_get_administered_pools_with_pools(infinibox, user):
-    pool = infinibox.objects.pools.create()
+    pool = infinibox.pools.create()
     pool.add_owner(user)
     assert infinibox.pools.get_administered_pools() == [pool]
 
