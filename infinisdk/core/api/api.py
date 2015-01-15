@@ -64,7 +64,7 @@ class API(object):
         self.system = target
         self._use_ssl = use_ssl
         self._ssl_cert = ssl_cert
-        self._default_request_timeout = self.system.get_api_timeout()
+        self._default_request_timeout = None
         self._interactive = False
         self._session = requests.Session()
         assert self._session.cert is None
@@ -107,6 +107,12 @@ class API(object):
     def set_interactive_approval(self):
         """Causes an interactive prompt whenever a command requires approval from the user"""
         self._interactive = True
+
+    def get_request_default_timeout(self):
+        return self._default_request_timeout
+
+    def set_request_default_timeout(self, timeout_seconds):
+        self._default_request_timeout = timeout_seconds
 
     def set_auth(self, username_or_auth, password=NOTHING):
         """

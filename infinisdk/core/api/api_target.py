@@ -38,8 +38,8 @@ class APITarget(with_metaclass(abc.ABCMeta)):
         if auth is None:
             auth = self._get_api_auth()
 
-        self._timeout = self._get_api_timeout()
         self.api = API(self, auth, use_ssl=use_ssl, ssl_cert=ssl_cert)
+        self.api.set_request_default_timeout(self._get_api_timeout())
 
         self._initialize()
         self._caching_enabled = True
@@ -102,7 +102,7 @@ class APITarget(with_metaclass(abc.ABCMeta)):
         return self._addresses
 
     def get_api_timeout(self):
-        return self._timeout
+        return self.api.get_request_default_timeout()
 
     def get_api_auth(self):
         return self.api.get_auth()
