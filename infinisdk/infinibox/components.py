@@ -241,6 +241,9 @@ class LocalDrive(InfiniBoxSystemComponent):
         this_url = parent_url.add_path("drives").add_path(str(self.get_index()))
         return this_url
 
+    def is_active(self):
+        return self.get_state() == 'ACTIVE'
+
     def is_ssd(self):
         return self.get_type() == 'SSD'
 
@@ -314,6 +317,9 @@ class Drive(InfiniBoxSystemComponent):
         node_access_flags = self.get_field('nodes_access', from_cache=from_cache)
         return [self.system.components.nodes.get(index=i)
                 for i, can_access_node in enumerate(node_access_flags,1) if can_access_node]
+
+    def is_active(self):
+        return self.get_state() == 'ACTIVE'
 
 
 @InfiniBoxSystemComponents.install_component_type
