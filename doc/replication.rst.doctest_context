@@ -1,0 +1,56 @@
+# -*- mode: python -*-
+
+from contextlib import contextmanager, nested
+
+import infinisdk_internal
+from ecosystem.mocks import MockedContext
+from infinisdk.infinibox import InfiniBox
+from infinisim.infinibox import Infinibox as Simulator
+
+_AUTH = ('infinidat', '123456')
+
+_mocked_context = MockedContext(isolated_env=True)
+
+
+@contextmanager
+def _system():
+    simulator = Simulator()
+    _mocked_context.mocks.infinilab_client.get_mocked_infinilab().add_system(simulator)
+
+    simulator.activate()
+    try:
+        system = InfiniBox(simulator, auth=_AUTH)
+        system.login()
+        yield system
+    finally:
+        simulator.activate()
+
+@contextmanager
+def _infinisdk_internal_context():
+    infinisdk_internal.enable()
+    try:
+        yield
+    finally:
+        infinisdk_internal.disable()
+
+@contextmanager
+def doctest_context():
+
+    with nested(_mocked_context, _system(), _system(), _infinisdk_internal_context()) as (_, primary, secondary, _):
+
+        primary_ns = primary.networking.ensure_default_network_space('rmr')
+        secondary_ns = secondary.networking.ensure_default_network_space('rmr')
+
+        link = primary.links.create(
+            name='link',
+            local_replication_network_space_id=primary_ns.id,
+            remote_host=secondary_ns.get_ips()[0].ip_address,
+        )
+
+        yield {
+            'link': link,
+            'primary': primary,
+            'primary_ip': primary.get_simulator().networking.allocate_ip_address('rmr'),
+            'secondary': secondary,
+            'secondary_ip': secondary.get_simulator().networking.allocate_ip_address('rmr'),
+        }

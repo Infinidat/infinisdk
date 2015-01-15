@@ -47,7 +47,6 @@ infinibox.pools
 
 .. autoclass:: Pool
    :members:
-   :inherited-members:
 
 infinibox.hosts
 ~~~~~~~~~~~~~~~
@@ -63,16 +62,35 @@ Individual host objects are of type :class:`.Host`:
 
 .. autoclass:: Host
    :members:
-   :inherited-members:
 
 infinibox.clusters
 ~~~~~~~~~~~~~~~~~~
 
-.. automodule:: infinisdk.infinibox.cluster
+.. automodule:: infinisdk.infinibox.host_cluster
 
-.. autoclass:: Cluster
+.. autoclass:: HostCluster
    :members:
-   :inherited-members:
+
+
+infinibox.replicas
+~~~~~~~~~~~~~~~~~~
+
+.. automodule:: infinisdk.infinibox.replica
+
+.. autoclass:: ReplicaBinder
+   :members:
+
+.. autoclass:: Replica
+   :members:
+
+infinibox.links
+~~~~~~~~~~~~~~~
+
+.. automodule:: infinisdk.infinibox.link
+
+.. autoclass:: Link
+   :members:
+
 
 infinibox.cluster
 ~~~~~~~~~~~~~~~~~
