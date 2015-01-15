@@ -3,20 +3,26 @@ from infinisdk._compat import iteritems
 from infinisdk.core.exceptions import APICommandFailed
 
 
-def test_get_nonexisting_metadata(infinibox, volume):
-
+def test_get_nonexisting_metadata(volume):
     with pytest.raises(APICommandFailed):
         volume.get_metadata_value('key')
 
 
-def test_get_nonexisting_metadata_default(infinibox, volume):
-
+def test_get_nonexisting_metadata_default(volume):
     assert volume.get_metadata_value('key', 2) == 2
     value = object()
     assert volume.get_metadata_value('key', value) is value
 
 
-def test_multiple_metadata_creation(infinibox, volume):
+def test_multiple_metadata_creation(volume):
+    metadata_d = {'some_key':  'some_value',
+                  'other_key': 'other_value',
+                  'last_key':  'last_value'}
+    volume.set_metadata_from_dict(metadata_d)
+    assert volume.get_all_metadata() == metadata_d
+
+
+def test_metadata_creation(infinibox, volume):
     metadata_d = {'some_key':  'some_value',
                   'other_key': 'other_value',
                   'last_key':  'last_value'}
