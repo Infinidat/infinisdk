@@ -255,13 +255,12 @@ class API(object):
                 except APICommandFailed as e:
                     if self._is_approval_required(e):
                         reason = self._get_unapproved_reason(e.response.response.json())
-                        exception = CommandNotApproved(e.response, reason)
                         if self._interactive and not did_interactive_confirmation:
                             did_interactive_confirmation = True
                             if self._ask_approval_interactively(http_method, path, reason):
                                 path = self._with_approved(path)
                                 continue
-                            raise exception
+                            raise CommandNotApproved(e.response, reason)
                     raise
             return returned
 
