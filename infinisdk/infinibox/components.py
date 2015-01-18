@@ -321,13 +321,21 @@ class Drive(InfiniBoxSystemComponent):
     def is_active(self):
         return self.get_state() == 'ACTIVE'
 
+class NotExistsSupportBinding(InfiniSDKBinding):
+    # Prior to 2.0 not all services have all the fields. For now, return None if missing.
+    # TODO: Check that system version <= 1.7
+    def get_value_from_api_object(self, system, objtype, obj, api_obj):
+        try:
+            return super(NotExistsSupportBinding, self).get_value_from_api_object(system, objtype, obj, api_obj)
+        except KeyError:
+            return None
 
 @InfiniBoxSystemComponents.install_component_type
 class Service(InfiniBoxSystemComponent):
     FIELDS = [
         Field("index", api_name="name", cached=True),
         Field("name", is_identity=True, cached=True),
-        Field("role", cached=False),
+        Field("role", binding=NotExistsSupportBinding(), cached=False),
         Field("state", cached=False),
     ]
 
