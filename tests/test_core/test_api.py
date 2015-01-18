@@ -2,6 +2,7 @@ import pytest
 from infinisdk.core.api import Autogenerate, OMIT
 from infinisdk.core.exceptions import APICommandFailed, ObjectNotFound
 from infinisdk._compat import httplib
+from ..conftest import no_op_context
 
 
 def test_omit_fields(izbox):
@@ -19,6 +20,20 @@ def test_error_response(izbox):
 
     exception_response = caught.value.response
     assert exception_response.get_error() is None
+
+
+@pytest.mark.parametrize('should_failed', [True, False])
+def test_auto_retry(system, should_failed):
+    url = "/api/rest/system"
+    retry_count = 2
+    fault_count = retry_count+1 if should_failed else retry_count
+    system.get_simulator().api.inject_fault(url, 500, count=fault_count)
+    retry_predicate = lambda exc: isinstance(exc, APICommandFailed)
+    system.api.add_auto_retry(retry_predicate, retry_count)
+    context = pytest.raises if should_failed else no_op_context
+    with context(APICommandFailed):
+        system.api.get(url)
+    system.api.remove_auto_retry(retry_predicate)
 
 
 def test_autogenerate_fields(izbox):

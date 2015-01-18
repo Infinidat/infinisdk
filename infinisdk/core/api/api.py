@@ -12,6 +12,7 @@
 ### are strictly forbidden unless prior written permission is obtained from Infinidat Ltd.
 ###!
 from functools import partial
+import flux
 import json
 import sys
 import socket
@@ -27,7 +28,7 @@ from urlobject import URLObject as URL
 import colorama
 
 from ... import _compat
-from ..._compat import get_timedelta_total_seconds, httplib
+from ..._compat import get_timedelta_total_seconds, httplib, iteritems
 from ..config import config
 from ..exceptions import (APICommandFailed, APITransportFailure,
                           CommandNotApproved, SystemNotFoundException)
@@ -66,6 +67,7 @@ class API(object):
         self._ssl_cert = ssl_cert
         self._default_request_timeout = None
         self._interactive = False
+        self._auto_retry_predicates = {}
         self._session = requests.Session()
         assert self._session.cert is None
         self._session.cert = ssl_cert
@@ -234,35 +236,50 @@ class API(object):
             pass
         _logger.debug("{0} <-- DATA: {1}" , hostname, data)
 
+    def add_auto_retry(self, retry_predicate, max_retries=1):
+        assert retry_predicate not in self._auto_retry_predicates
+        _logger.debug("Add auto-retry predicate {0} for {1} retries", retry_predicate, max_retries)
+        self._auto_retry_predicates[retry_predicate] = max_retries
+
+    def remove_auto_retry(self, retry_predicate):
+        _logger.debug("Remove auto-retry predicate {0}", retry_predicate)
+        del self._auto_retry_predicates[retry_predicate]
+
+    def _get_auto_retries_context(self):
+        return _AutoRetryContext(self._auto_retry_predicates, config.root.defaults.retry_sleep_seconds)
+
     def request(self, http_method, path, assert_success=True, **kwargs):
         """Sends HTTP API request to the remote system
         """
         did_interactive_confirmation = False
+        auto_retries_context = self._get_auto_retries_context()
         while True:
-            try:
-                returned = self._request(http_method, path, **kwargs)
-            except (RequestException, ProtocolError, socket.error) as e:
-                request_kwargs = dict(url=path, method=http_method, **kwargs)
-                _logger.debug('Exception while sending API command to {0}: {1}', self.system, e)
-                if 'gaierror' in str(e):
-                    hostname = URL(e.request.url).hostname
-                    raise SystemNotFoundException("Cannot connect {0}".format(hostname), hostname)
-                raise APITransportFailure(request_kwargs, e)
-
-            if assert_success:
+            with auto_retries_context:
                 try:
-                    returned.assert_success()
-                except APICommandFailed as e:
-                    if self._is_approval_required(e):
-                        reason = self._get_unapproved_reason(e.response.response.json())
-                        if self._interactive and not did_interactive_confirmation:
-                            did_interactive_confirmation = True
-                            if self._ask_approval_interactively(http_method, path, reason):
-                                path = self._with_approved(path)
-                                continue
-                            raise CommandNotApproved(e.response, reason)
-                    raise
-            return returned
+                    returned = self._request(http_method, path, **kwargs)
+                except (RequestException, ProtocolError, socket.error) as e:
+                    request_kwargs = dict(url=path, method=http_method, **kwargs)
+                    _logger.debug('Exception while sending API command to {0}: {1}', self.system, e)
+                    if 'gaierror' in str(e):
+                        hostname = URL(e.request.url).hostname
+                        raise SystemNotFoundException("Cannot connect {0}".format(hostname), hostname)
+                    raise APITransportFailure(request_kwargs, e)
+
+                if assert_success:
+                    try:
+                        returned.assert_success()
+                    except APICommandFailed as e:
+                        if self._is_approval_required(e):
+                            reason = self._get_unapproved_reason(e.response.response.json())
+                            if self._interactive and not did_interactive_confirmation:
+                                did_interactive_confirmation = True
+                                if self._ask_approval_interactively(http_method, path, reason):
+                                    path = self._with_approved(path)
+                                    continue
+                                raise CommandNotApproved(e.response, reason)
+                        raise
+                return returned
+        assert False, "Should never get here!"
 
     def _with_approved(self, path):
         return path.set_query_param('approved', 'true')
@@ -372,5 +389,35 @@ class Response(object):
                 self.sent_data = '<HIDDEN>'
             raise APICommandFailed(self)
 
+
+class _AutoRetryContext(object):
+    def __init__(self, global_retries_dict, retry_sleep_seconds):
+        self._retries_dict = None
+        self._global_retries_dict = global_retries_dict
+        self._retry_sleep_seconds = retry_sleep_seconds
+
+    def _should_retry_request(self, exc):
+        if self._retries_dict is None:
+            self._retries_dict = self._global_retries_dict.copy()
+        for retry_predicate, retries_left in iteritems(self._retries_dict):
+            if retries_left < 1:
+                return False
+            if retry_predicate(exc):
+                max_retries = self._global_retries_dict[retry_predicate]
+                retried_count = max_retries - retries_left + 1
+                _logger.debug("Auto retry API ({0} of {1}) by {2}: {3}",
+                        retried_count, max_retries, retry_predicate, exc)
+                self._retries_dict[retry_predicate] -= 1
+                return True
+        return False
+
+    def __enter__(self):
+        pass
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        if self._should_retry_request(exc_value):
+            flux.current_timeline.sleep(self._retry_sleep_seconds)
+            return True
+        return None
 
 # TODO : implement async request
