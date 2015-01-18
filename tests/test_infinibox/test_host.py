@@ -1,5 +1,7 @@
 import pytest
 from infinisdk._compat import iteritems
+from infinisdk.core.config import config
+from infinisdk.infinibox import InfiniBox
 
 
 def test_get_name(infinibox, host):
@@ -70,6 +72,14 @@ def test_has_registered_initiator_address(infinibox, host, registered_port_addre
         registered_port_address)
     assert not infinibox.hosts.has_registered_initiator_address(
         '00:01:02:03:04:05:06:08')
+
+
+def test_get_host_initiator_without_auth(infinibox_simulator, host, registered_port_address, backup_config):
+    config.root.check_version_compatibility = True
+    system = InfiniBox(host.system.get_simulator())  # Unauthrozied system instance
+    assert system.hosts.has_registered_initiator_address(registered_port_address)
+    assert system.hosts.get_host_id_by_initiator_address(registered_port_address) == host.id
+    assert system.hosts.get_host_by_initiator_address(registered_port_address).id == host.id
 
 
 @pytest.fixture

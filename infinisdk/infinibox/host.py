@@ -30,7 +30,8 @@ class HostBinder(TypeBinder):
         """:return: an id of a host object defined on a system having the specified FC address configured, None if none exists
         """
         try:
-            return self.system.api.get("hosts/host_id_by_initiator_address/{0}".format(address)).get_result()
+            res = self.system.api.get("hosts/host_id_by_initiator_address/{0}".format(address), check_version=False)
+            return res.get_result()
         except APICommandFailed as e:
             if e.response.response.status_code != requests.codes.not_found:
                 raise

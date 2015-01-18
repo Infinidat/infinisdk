@@ -2,6 +2,7 @@ import re
 
 import pytest
 
+from ..conftest import no_op_context
 from infinisdk.core.version_compatibility import All
 
 from infinisdk import InfiniBox
@@ -22,6 +23,14 @@ def test_incompatible_version(incompatible_system, operator):
     with pytest.raises(VersionNotSupported):
         operator(incompatible_system)
 
+    assert not incompatible_system.api._checked_version
+
+
+@pytest.mark.parametrize('should_check_version', [True, False])
+def test_ignore_version_check(incompatible_system, should_check_version):
+    op_context = pytest.raises if should_check_version else no_op_context
+    with op_context(VersionNotSupported):
+        incompatible_system.api.get('/api/rest/system', check_version=should_check_version)
     assert not incompatible_system.api._checked_version
 
 

@@ -171,7 +171,8 @@ class API(object):
 
         :rtype: :class:`.Response`
         """
-        if not self._checked_version and config.root.check_version_compatibility:
+        check_version = kwargs.pop("check_version", True)
+        if check_version and not self._checked_version and config.root.check_version_compatibility:
             self._checked_version = True
             try:
                 self.system.check_version()

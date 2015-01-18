@@ -118,6 +118,10 @@ def enabling_infinisdk_internal():
         disable_infinisdk_internal()
         assert not extensions.active
 
+@contextmanager
+def no_op_context(*args):
+    yield
+
 @pytest.fixture(params=["host", "cluster"])
 def mapping_object_type(request, infinibox):
     return request.param
@@ -227,3 +231,8 @@ def disable_api_context(system):
         yield
     finally:
         system.api = api
+
+@pytest.fixture
+def backup_config(request):
+    config.backup()
+    request.addfinalizer(config.restore)
