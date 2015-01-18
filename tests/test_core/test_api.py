@@ -54,6 +54,15 @@ def test_specific_address_doesnt_change_active_url(izbox, izbox_simulator):
 
 
 
+def test_set_source_identifier(system):
+    res = system.api.get("/api/rest/system")
+    assert res.response.request.headers['User-Agent'].startswith('python')
+
+    system.api.set_source_identifier('MyUserAgent')
+    res = system.api.get("/api/rest/system")
+    assert res.response.request.headers['User-Agent'] == 'MyUserAgent'
+
+
 def test_relative_api(system):
     system.api.get("system")
 

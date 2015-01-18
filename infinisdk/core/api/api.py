@@ -104,6 +104,9 @@ class API(object):
         """A context marking all operations as unapproved (not confirmed)"""
         return self.get_approval_context(False)
 
+    def set_source_identifier(self, identifier):
+        self._session.headers["User-Agent"] = identifier
+
     def set_interactive_approval(self):
         """Causes an interactive prompt whenever a command requires approval from the user"""
         self._interactive = True
