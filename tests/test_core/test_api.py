@@ -110,3 +110,16 @@ def test_query_preprocessor_context(infinibox):
     p2 = infinibox.pools.get(id=p.id)
     assert p == p2
 
+
+def test_query_preprocessor_context_exception(infinibox):
+    def preprocessor(_):
+        pass
+
+    assert not infinibox.api._preprocessors
+
+    with pytest.raises(Exception):
+        with infinibox.api.query_preprocessor(preprocessor):
+            assert infinibox.api._preprocessors == [preprocessor]
+            raise Exception()
+
+    assert not infinibox.api._preprocessors

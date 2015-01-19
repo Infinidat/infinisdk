@@ -84,8 +84,10 @@ class API(object):
     @contextmanager
     def query_preprocessor(self, preprocessor):
         self._preprocessors.append(preprocessor)
-        yield
-        self._preprocessors.remove(preprocessor)
+        try:
+            yield
+        finally:
+            self._preprocessors.remove(preprocessor)
 
     @contextmanager
     def get_approval_context(self, value):
