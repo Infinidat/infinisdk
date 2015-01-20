@@ -192,13 +192,14 @@ class API(object):
             if http_method != "get" and not self._interactive and not path.startswith("/api/internal/"):
                 full_url = self._with_approved(full_url)
             hostname = full_url.hostname
-            _logger.debug("{0} <-- {1} {2}", hostname, http_method.upper(), full_url)
-            if data is not None:
-                self._log_sent_data(hostname, data, sent_json_object)
-
             api_request = requests.Request(http_method, full_url, data=data)
             for preprocessor in self._preprocessors:
                 preprocessor(api_request)
+
+            _logger.debug("{0} <-- {1} {2}", hostname, http_method.upper(), api_request.url)
+            if data is not None:
+                self._log_sent_data(hostname, data, sent_json_object)
+
             prepared = self._session.prepare_request(api_request)
             response = self._session.send(prepared, **kwargs)
 
