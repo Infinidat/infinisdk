@@ -4,3 +4,4 @@ izsim>=19
 pytest
 pyforge
 waiting
+pytest-capturelog
