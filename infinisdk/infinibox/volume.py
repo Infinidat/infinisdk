@@ -103,6 +103,11 @@ class Volume(BaseDataEntity):
     def get_logical_units(self):
         return LogicalUnitContainer.from_dict_list(self.system, self._get_luns_data_from_url())
 
+    def get_replicas(self):
+        # make into a query once INFINIBOX-14572 is resolved
+        return [replica for replica in self.system.replicas
+                if replica.has_local_entity(self)]
+
     def is_mapped(self):
         return self.get_field("mapped")
 

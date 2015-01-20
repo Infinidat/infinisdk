@@ -9,6 +9,15 @@ def test_replica_creation(replica):
     pass
 
 
+def test_replica_has_local_entity(infinibox, replica, volume):
+    assert replica.has_local_entity(volume)
+    assert not replica.has_local_entity(infinibox.pools.create())
+
+
+def test_volume_get_replicas(replica, volume):
+    assert volume.get_replicas() == [replica]
+
+
 @pytest.fixture
 def replica(infinibox, secondary_infinibox, link, replica_creation_kwargs):
     return infinibox.replicas.create(

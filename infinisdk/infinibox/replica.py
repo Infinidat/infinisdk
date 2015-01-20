@@ -50,4 +50,11 @@ class Replica(InfiniBoxObject):
 
     ]
 
+    def has_local_entity(self, entity):
+        pairs = self.get_field('entity_pairs', from_cache=True)
+        for pair in pairs:
+            if pair['local_entity_id'] == entity.id:
+                return True
+        return False
+
 
