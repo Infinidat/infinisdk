@@ -41,14 +41,32 @@ class Replica(InfiniBoxObject):
 
         Field('id', type=int, is_identity=True),
         Field('link', api_name='link_id', binding=RelatedObjectBinding('links'), type='infinisdk.infinibox.link:Link', creation_parameter=True),
-        Field("name", creation_parameter=True, mutable=True, is_filterable=True,
+        Field('name', creation_parameter=True, mutable=True, is_filterable=True,
             default=Autogenerate("replica_{uuid}")),
         Field('entity_pairs', type=list, creation_parameter=True),
-        Field('sync_interval', type=int, creation_parameter=True, default=30000),
         Field('entity_type', type=str, creation_parameter=True, default='VOLUME'),
         Field('remote_pool_id', type=int, creation_parameter=True),
+        Field('state', type=str),
+        Field('sync_interval', type=int, creation_parameter=True, default=30000),
 
     ]
+
+    def suspend(self):
+        """Suspends this replica
+        """
+        self.system.api.post(self.get_this_url_path().add_path('suspend'))
+        self.refresh('state')
+
+    def resume(self):
+        """Resumes this replica
+        """
+        self.system.api.post(self.get_this_url_path().add_path('resume'))
+        self.refresh('state')
+
+    def is_suspended(self, *args, **kwargs):
+        """Returns whether or not this replica is in suspended state
+        """
+        return self.get_state(*args, **kwargs).lower() == 'suspended'
 
     def has_local_entity(self, entity):
         pairs = self.get_field('entity_pairs', from_cache=True)

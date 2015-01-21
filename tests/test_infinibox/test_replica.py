@@ -18,6 +18,14 @@ def test_volume_get_replicas(replica, volume):
     assert volume.get_replicas() == [replica]
 
 
+def test_replica_suspend_resume(replica):
+    assert not replica.is_suspended()
+    replica.suspend()
+    assert replica.is_suspended()
+    replica.resume()
+    assert not replica.is_suspended()
+
+
 @pytest.fixture
 def replica(infinibox, secondary_infinibox, link, replica_creation_kwargs):
     return infinibox.replicas.create(

@@ -244,7 +244,7 @@ def backup_config(request):
     config.backup()
     request.addfinalizer(config.restore)
 
-
+@pytest.fixture
 def link(infinibox, secondary_infinibox, infinisdk_internal, mocked_ecosystem):
     infinibox.login()  # to get the system name properly
     secondary_infinibox.login()
