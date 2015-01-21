@@ -39,10 +39,13 @@ class Pool(InfiniBoxObject):
         Field("name", creation_parameter=True, mutable=True, is_filterable=True, is_sortable=True, default=Autogenerate("pool_{uuid}")),
         Field("virtual_capacity",  creation_parameter=True, mutable=True, default=TB, type=CapacityType, is_filterable=True, is_sortable=True),
         Field("physical_capacity", creation_parameter=True, mutable=True, default=TB, type=CapacityType, is_filterable=True, is_sortable=True),
+        Field("allocated_physical_space", type=CapacityType, is_sortable=True, is_filterable=True),
+        Field("free_physical_space", type=CapacityType, is_sortable=True, is_filterable=True),
+        Field("free_virtual_space", type=CapacityType, is_sortable=True, is_filterable=True),
+        Field("reserved_capacity", type=CapacityType, is_sortable=True, is_filterable=True),
         Field("created_at", type=MillisecondsDatetimeType, is_sortable=True, is_filterable=True),
         Field("updated_at", type=MillisecondsDatetimeType, is_sortable=True, is_filterable=True),
         Field("ssd_enabled", type=bool, mutable=True, creation_parameter=True, is_filterable=True, is_sortable=True, optional=True),
-
     ]
 
     def get_volumes(self, **kwargs):

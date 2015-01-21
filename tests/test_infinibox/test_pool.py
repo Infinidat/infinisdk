@@ -75,3 +75,11 @@ def test_get_master_filesystems(infinibox, pool):
     snapshots = [fs.create_snapshot() for fs in filesystems]
     assert list(pool.get_filesystems()) == filesystems + snapshots
     assert list(pool.get_filesystems(type=infinibox.filesystems.object_type.ENTITY_TYPES.Master)) == filesystems
+
+def test_pool_capacity_fields_types(pool):
+    for field in pool.FIELDS:
+        field_name = field.name
+        if 'capacity' in field_name or 'space' in field_name:
+            assert field.type.type == Capacity
+            assert field.type.api_type == int
+            assert isinstance(pool.get_field(field_name), Capacity)
