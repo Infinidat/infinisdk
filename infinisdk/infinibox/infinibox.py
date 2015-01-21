@@ -43,6 +43,10 @@ class InfiniBox(APITarget):
     SYSTEM_EVENTS_TYPE = Events
     SYSTEM_COMPONENTS_TYPE = InfiniBoxSystemComponents
 
+    def _initialize(self):
+        super(InfiniBox, self)._initialize()
+        self.current_user = _CurrentUserProxy(self)
+
     def check_version(self):
         version = self.get_version()
         if not any(version_compatibility.matches(version)
@@ -162,3 +166,11 @@ class InfiniBox(APITarget):
         res = self.api.post("users/login", data={"username": username, "password": password})
         self._after_login()
         return res
+
+
+class _CurrentUserProxy(object):
+    def __init__(self, system):
+        self.system = system
+
+    def get_owned_pools(self):
+        return self.system.pools.get_administered_pools()
