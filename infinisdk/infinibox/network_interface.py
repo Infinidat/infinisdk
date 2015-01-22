@@ -53,6 +53,3 @@ class NetworkInterface(InfiniBoxObject):
     def is_enabled(self):
         # FIXME: Need to be changed after INFINIBOX-12968 will be resolved
         return self.get_state() == 'OK'
-
-    def __repr__(self):
-        return "<{0} id={1} node={2}>".format(type(self).__name__, self.id, self.get_field("node"))
