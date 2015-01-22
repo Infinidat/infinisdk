@@ -17,14 +17,14 @@ env: .env/.up-to-date
 
 .env/.up-to-date: setup.py Makefile
 	virtualenv .env
-	.env/bin/pip install -e .
+	.env/bin/pip install --pre -U -e .
 	.env/bin/pip install Sphinx alabaster
-	.env/bin/pip install -i http://pypi01.infinidat.com/simple -r test_requirements.txt
+	.env/bin/pip install -i http://pypi01.infinidat.com/simple --pre -U -r test_requirements.txt
 	touch .env/.up-to-date
 
 .develop_deps:
 	virtualenv .env
-	.env/bin/pip install -i http://pypi01.infinidat.com/simple -e ../ecosystem -e ../infinibox_sysdefs -e ../infinisim -e ../infinisdk_internal
+	.env/bin/pip install --pre -i http://pypi01.infinidat.com/simple -e ../ecosystem -e ../infinibox_sysdefs -e ../infinisim -e ../infinisdk_internal
 
 develop_env: .develop_deps env
 
