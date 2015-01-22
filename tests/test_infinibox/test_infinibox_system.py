@@ -6,6 +6,7 @@ from infinisdk._compat import iteritems, string_types
 from infinisdk.infinibox import InfiniBox
 from infinisdk.core.exceptions import SystemNotFoundException, APITransportFailure
 from ..conftest import disable_api_context, enabling_infinisdk_internal
+from infinibox_sysdefs.defs import latest as defs
 
 _logger = Logger(__name__)
 
@@ -129,3 +130,7 @@ def test_get_field_raw_value(volume, from_cache, invalidate_cache):
 
 def test_current_user_proxy(infinibox):
     assert isinstance(infinibox.current_user.get_owned_pools(), list)
+
+def test_current_user_roles(infinibox):
+    infinidat_roles = infinibox.current_user.get_roles()
+    assert infinidat_roles == [str(defs.enums.users.roles.infinidat)]

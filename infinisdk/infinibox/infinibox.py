@@ -174,3 +174,7 @@ class _CurrentUserProxy(object):
 
     def get_owned_pools(self):
         return self.system.pools.get_administered_pools()
+
+    def get_roles(self):
+        login_res = self.system.login()
+        return login_res.get_result()['roles']
