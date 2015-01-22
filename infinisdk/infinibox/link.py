@@ -29,3 +29,13 @@ class Link(InfiniBoxObject):
         Field('remote_link_id', type=int),
         Field('remote_host', type=str, creation_parameter=True),
     ]
+
+    def delete(self, force_if_remote_error=False):
+        """Deletes this link
+
+        :param force_if_remote_error: forces deletion even if remote side caused an API error
+        """
+        url = self.get_this_url_path()
+        if force_if_remote_error:
+            url = url.add_query_param('force_if_remote_error', 'true')
+        self.system.api.delete(url)

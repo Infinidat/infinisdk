@@ -46,6 +46,7 @@ class Replica(InfiniBoxObject):
         Field('entity_pairs', type=list, creation_parameter=True),
         Field('entity_type', type=str, creation_parameter=True, default='VOLUME'),
         Field('remote_pool_id', type=int, creation_parameter=True),
+        Field('remote_replica_id', type=int),
         Field('role', type=str),
         Field('state', type=str),
         Field('sync_interval', type=int, creation_parameter=True, default=30000),
