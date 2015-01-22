@@ -46,6 +46,7 @@ class Replica(InfiniBoxObject):
         Field('entity_pairs', type=list, creation_parameter=True),
         Field('entity_type', type=str, creation_parameter=True, default='VOLUME'),
         Field('remote_pool_id', type=int, creation_parameter=True),
+        Field('role', type=str),
         Field('state', type=str),
         Field('sync_interval', type=int, creation_parameter=True, default=30000),
 
@@ -68,11 +69,22 @@ class Replica(InfiniBoxObject):
         """
         return self.get_state(*args, **kwargs).lower() == 'suspended'
 
+    def change_role(self, retain_staging_area=False):
+        self.system.api.post(self.get_this_url_path()
+                                 .add_path('change_role')
+                                 .add_query_param('retain_staging_area', 'true' if retain_staging_area else 'false'))
+        self.refresh()
+
+    def is_source(self):
+        return self.get_role().lower() == 'source'
+
+    def is_target(self):
+        return not self.is_source()
+
+
     def has_local_entity(self, entity):
         pairs = self.get_field('entity_pairs', from_cache=True)
         for pair in pairs:
             if pair['local_entity_id'] == entity.id:
                 return True
         return False
-
-

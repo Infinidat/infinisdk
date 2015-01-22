@@ -9,6 +9,14 @@ def test_replica_creation(replica):
     pass
 
 
+@pytest.mark.parametrize('retain_staging_area', [True, False])
+def test_replica_change_role(replica, retain_staging_area):
+    assert replica.is_source()
+    assert not replica.is_target()
+    replica.change_role(retain_staging_area=retain_staging_area)
+    assert not replica.is_source()
+    assert replica.is_target()
+
 def test_replica_has_local_entity(infinibox, replica, volume):
     assert replica.has_local_entity(volume)
     assert not replica.has_local_entity(infinibox.pools.create())
