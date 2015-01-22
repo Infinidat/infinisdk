@@ -20,6 +20,7 @@ from infi.pyutils.lazy import cached_method
 from .component_query import InfiniBoxComponentQuery
 from ..core.bindings import InfiniSDKBinding, ListOfRelatedComponentBinding, RelatedComponentBinding
 
+from contextlib import contextmanager
 from urlobject import URLObject as URL
 
 
@@ -67,12 +68,31 @@ class ComputedIDBinding(InfiniSDKBinding):
     def get_value_from_api_value(self, *args):
         raise NotImplementedError() # pragma: no cover
 
+
 class InfiniBoxComponentBinder(TypeBinder):
+
+    _force_fetching_from_cache = False
+
+    def should_force_fetching_from_cache(self):
+        return self._force_fetching_from_cache
+
     def get_by_id_lazy(self, id):
         returned = self.safe_get_by_id(id)
         if returned is None:
             raise NotImplementedError("Initializing infinibox components lazily is not yet supported") # pragma: no cover
         return returned
+
+    @contextmanager
+    def fetch_once_context(self):
+        if not self.should_force_fetching_from_cache():
+            list(self.get_all().force_fetching_objects())
+        prev = self._force_fetching_from_cache
+        self._force_fetching_from_cache = True
+        try:
+            yield
+        finally:
+            self._force_fetching_from_cache = prev
+
 
 class InfiniBoxSystemComponent(SystemObject):
     BINDER_CLASS = InfiniBoxComponentBinder
@@ -81,6 +101,12 @@ class InfiniBoxSystemComponent(SystemObject):
         Field("id", binding=ComputedIDBinding(), is_identity=True, cached=True),
         Field("parent_id", cached=True, add_updater=False, is_identity=True),
     ]
+
+    def _deduce_from_cache(self, *args, **kwargs):
+        collection = self.system.components[self.get_plural_name()]
+        if collection.should_force_fetching_from_cache():
+            return True
+        return super(InfiniBoxSystemComponent, self)._deduce_from_cache(*args, **kwargs)
 
     def get_parent(self):
         return self.system.components.try_get_component_by_id(self.get_parent_id())

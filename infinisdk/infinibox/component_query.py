@@ -24,6 +24,11 @@ class InfiniBoxComponentQuery(object):
         self.predicates = predicates
         self.kw = kw
         self.sort_criteria = tuple()
+        self._force_fetch = False
+
+    def force_fetching_objects(self):
+        self._force_fetch = True
+        return self
 
     def _get_items(self):
         def _sort_cmp_items(x, y):
@@ -92,14 +97,14 @@ class InfiniBoxComponentQuery(object):
 
     def _fetch_all(self):
         components = self.system.components
-        if not components.should_fetch_all():
+        if not self._force_fetch and not components.should_fetch_all():
             return
         components.get_rack_1().refresh()
         components.mark_fetched_all()
 
     def _fetch_nodes(self):
         components = self.system.components
-        if not components.should_fetch_nodes():
+        if not self._force_fetch and not components.should_fetch_nodes():
             return
         rack_1 = components.get_rack_1()
         rack_1.refresh_without_enclosures()
