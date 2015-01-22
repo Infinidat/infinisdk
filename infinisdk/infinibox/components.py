@@ -16,6 +16,7 @@ from ..core.field import Field
 from ..core.system_component import SystemComponentsBinder
 from ..core.system_object import SystemObject, ObjectNotFound
 from ..core.type_binder import TypeBinder
+from ..core.translators_and_types import WWNType
 from infi.pyutils.lazy import cached_method
 from .component_query import InfiniBoxComponentQuery
 from ..core.bindings import InfiniSDKBinding, ListOfRelatedComponentBinding, RelatedComponentBinding
@@ -299,11 +300,21 @@ class EthPort(InfiniBoxSystemComponent):
     def get_type_name(cls):
         return "eth_port"
 
+class FcPorts(InfiniBoxComponentBinder):
+    def get_online_target_addresses(self):
+        addresses = []
+        with self.fetch_once_context():
+            for fc_port in self:
+                if fc_port.is_link_up():
+                    addresses.extend(fc_port.get_target_addresses())
+        return addresses
+
 @InfiniBoxSystemComponents.install_component_type
 class FcPort(InfiniBoxSystemComponent):
+    BINDER_CLASS = FcPorts
     FIELDS = [
         Field("index", api_name="id", type=int, cached=True),
-        Field("wwpn", is_identity=True, cached=True),
+        Field("wwpn", is_identity=True, cached=True, type=WWNType),
         Field("node", api_name="node_index", type=int, cached=True, binding=RelatedComponentBinding()),
         Field("state", cached=False),
         Field("link_state", cached=False),

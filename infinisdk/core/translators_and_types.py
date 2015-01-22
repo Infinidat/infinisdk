@@ -14,6 +14,7 @@
 import arrow
 import munch
 from capacity import byte, Capacity
+from infi.dtypes.wwn import WWN
 
 from api_object_schema import TypeInfo, ValueTranslator
 
@@ -66,3 +67,6 @@ class MillisecondsDatetimeTranslator(ValueTranslator):
 
 MillisecondsDatetimeType = TypeInfo(type=arrow.Arrow,
                                     api_type=int, translator=MillisecondsDatetimeTranslator())
+
+
+WWNType = TypeInfo(type=WWN, api_type=str)

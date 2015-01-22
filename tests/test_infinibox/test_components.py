@@ -2,6 +2,7 @@ import flux
 import pytest
 
 import waiting
+from infi.dtypes.wwn import WWN
 from infinisdk._compat import string_types
 from infinisdk.core.config import config
 from infinibox_sysdefs import latest as defs
@@ -92,6 +93,10 @@ def test_fc_port_component(infinibox):
     fc_port = infinibox.components.fc_ports.choose()
     assert fc_port.get_parent() == fc_port.get_node()
     assert fc_port.get_node() in infinibox.components.nodes.get_all()
+
+def test_get_online_target_addresses(infinibox):
+    addresses = infinibox.components.fc_ports.get_online_target_addresses()
+    assert all(isinstance(addr, WWN) for addr in addresses)
 
 def test_using_from_cache_context_multiple_times(infinibox):
     nodes = infinibox.components.nodes
