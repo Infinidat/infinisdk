@@ -79,7 +79,11 @@ class InfiniBoxComponentQuery(object):
 
     def _fetch(self):
         if self.object_type in [self.system.components.nodes.object_type,
-                                self.system.components.services.object_type]:
+                                self.system.components.services.object_type,
+                                self.system.components.fc_ports.object_type,
+                                self.system.components.eth_ports.object_type,
+                                self.system.components.local_drives.object_type,
+                                ]:
             self._fetch_nodes()
         elif self.object_type is self.system.components.service_clusters.object_type:
             self._fetch_service_clusters()
@@ -98,16 +102,13 @@ class InfiniBoxComponentQuery(object):
         if not components.should_fetch_nodes():
             return
         rack_1 = components.get_rack_1()
-        url = rack_1.get_this_url_path().add_query_param('fields','enclosures_number,rack,nodes')
-        rack_data_without_enclosures = self.system.api.get(url).get_json()['result']
-        rack_data_without_enclosures['enclosures'] = []
-        type(rack_1).construct(self.system, rack_data_without_enclosures, rack_1.get_parent().id)
+        rack_1.refresh_without_enclosures()
         components.mark_fetched_nodes()
 
     def _fetch_service_clusters(self):
         service_cluster_type = self.system.components.service_clusters.object_type
         url = service_cluster_type.get_url_path(self.system)
-        clusters_data = self.system.api.get(url).get_json()['result']
+        clusters_data = self.system.api.get(url).get_result()
         for cluster_data in clusters_data:
             service_cluster_type.construct(self.system, cluster_data, None)
 

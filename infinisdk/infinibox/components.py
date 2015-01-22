@@ -14,16 +14,13 @@
 
 from ..core.field import Field
 from ..core.system_component import SystemComponentsBinder
-from ..core.system_object import SystemObject, APICommandFailed, ObjectNotFound
+from ..core.system_object import SystemObject, ObjectNotFound
 from ..core.type_binder import TypeBinder
 from infi.pyutils.lazy import cached_method
 from .component_query import InfiniBoxComponentQuery
 from ..core.bindings import InfiniSDKBinding, ListOfRelatedComponentBinding, RelatedComponentBinding
 
 from urlobject import URLObject as URL
-import gossip
-from pact import Pact
-import sentinels
 
 
 class InfiniBoxSystemComponents(SystemComponentsBinder):
@@ -115,7 +112,7 @@ class InfiniBoxSystemComponent(SystemObject):
         return self.system.components.find(parent_id=self.id)
 
     def refresh(self):
-        data = self.system.api.get(self.get_this_url_path()).get_json()['result']
+        data = self.system.api.get(self.get_this_url_path()).get_result()
         self.construct(self.system, data, self.get_parent_id())
 
     @classmethod
@@ -152,6 +149,12 @@ class Rack(InfiniBoxSystemComponent):
     @cached_method
     def get_this_url_path(self):
         return self.get_specific_rack_url(self.get_index())
+
+    def refresh_without_enclosures(self):
+        data = self.get_fields(['enclosures_number','rack','nodes'], raw_value=True)
+        data['enclosures'] = []
+        self.construct(self.system, data, self.get_parent_id())
+        self.system.components.mark_fetched_nodes()
 
 
 @InfiniBoxSystemComponents.install_component_type
@@ -433,5 +436,5 @@ class System(InfiniBoxSystemComponent):
         return self.safe_get_state() is None
 
     def refresh(self):
-        data = self.system.api.get(self.get_this_url_path()).get_json()['result']
+        data = self.system.api.get(self.get_this_url_path()).get_result()
         self.update_field_cache(data)
