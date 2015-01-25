@@ -57,6 +57,8 @@ if PY2:
     sorted = builtins.sorted
     cmp = builtins.cmp
 
+    from contextlib2 import ExitStack
+
 else:
 
     import functools
@@ -95,6 +97,8 @@ else:
         elif x < y:
             return -1
         return 0
+
+    from contextlib import ExitStack
 
 
 if sys.version_info < (2, 7):

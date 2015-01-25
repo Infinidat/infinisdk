@@ -1,6 +1,8 @@
 # -*- mode: python -*-
 
-from contextlib import contextmanager, nested
+from contextlib import contextmanager
+
+from infinisdk._compat import ExitStack
 
 import infinisdk_internal
 from ecosystem.mocks import MockedContext
@@ -36,7 +38,12 @@ def _infinisdk_internal_context():
 @contextmanager
 def doctest_context():
 
-    with nested(_mocked_context, _system(), _system(), _infinisdk_internal_context()) as (_, primary, secondary, _):
+    with ExitStack() as stack:
+
+        stack.enter_context(_mocked_context)
+        primary = stack.enter_context(_system())
+        secondary = stack.enter_context(_system())
+        stack.enter_context(_infinisdk_internal_context())
 
         primary_ns = primary.networking.ensure_default_network_space('rmr')
         secondary_ns = secondary.networking.ensure_default_network_space('rmr')
