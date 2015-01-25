@@ -38,7 +38,7 @@ class ReplicaBinder(TypeBinder):
             link=link, remote_pool_id=remote_pool.id,
             entity_pairs = [{
                 'local_entity_id': volume.id,
-                'target_base_action': 'CREATE',
+                'remote_base_action': 'CREATE',
             }], entity_type='VOLUME')
 
     def replicate_volume_existing_target(self, volume, link, remote_volume):
@@ -47,7 +47,7 @@ class ReplicaBinder(TypeBinder):
             entity_pairs = [{
                 'local_entity_id': volume.id,
                 'remote_entity_id': remote_volume.id,
-                'target_base_action': 'NO_BASE_DATA',
+                'remote_base_action': 'NO_BASE_DATA',
             }], entity_type='VOLUME')
 
 

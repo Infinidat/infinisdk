@@ -69,12 +69,12 @@ def replica_creation_kwargs(volume, create_remote, secondary_pool):
 
     if create_remote:
         entity_pair.update({
-            'target_base_action': 'CREATE',
+            'remote_base_action': 'CREATE',
         })
     else:
         entity_pair.update({
             'remote_entity_id': secondary_pool.system.volumes.create(pool=secondary_pool).id,
-            'target_base_action': 'NO_BASE_DATA',
+            'remote_base_action': 'NO_BASE_DATA',
         })
 
     return {
