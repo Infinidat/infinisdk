@@ -22,14 +22,34 @@ class ReplicaBinder(TypeBinder):
     """Implements *system.replicas*
     """
 
-    def replicate_volume(self, volume, link, remote_pool):
-        """Replicates a volume, creating its remote replica on the specified pool"""
+    def replicate_volume(self, volume, link, remote_pool=None, remote_volume=None):
+        """Replicates a volume, creating its remote replica on the specified pool
+
+        :param remote_pool: if omitted, ``remote_volume`` must be specified. Otherwise, means creating target volume
+        :param remote_volume: if omitted, ``remote_pool`` must be specified. Otherwise, means creating based on existing volume on target
+        """
+        if remote_volume is None:
+            assert remote_pool is not None
+            return self.replicate_volume_create_target(volume, link, remote_pool=remote_pool)
+        return self.replicate_volume_existing_target(volume, link, remote_volume=remote_volume)
+
+    def replicate_volume_create_target(self, volume, link, remote_pool):
         return self.create(
             link=link, remote_pool_id=remote_pool.id,
             entity_pairs = [{
                 'local_entity_id': volume.id,
-                'remote_base_action': 'CREATE',
+                'target_base_action': 'CREATE',
             }], entity_type='VOLUME')
+
+    def replicate_volume_existing_target(self, volume, link, remote_volume):
+        return self.create(
+            link=link,
+            entity_pairs = [{
+                'local_entity_id': volume.id,
+                'remote_entity_id': remote_volume.id,
+                'target_base_action': 'NO_BASE_DATA',
+            }], entity_type='VOLUME')
+
 
 
 
@@ -45,7 +65,7 @@ class Replica(InfiniBoxObject):
             default=Autogenerate("replica_{uuid}")),
         Field('entity_pairs', type=list, creation_parameter=True),
         Field('entity_type', type=str, creation_parameter=True, default='VOLUME'),
-        Field('remote_pool_id', type=int, creation_parameter=True),
+        Field('remote_pool_id', type=int, creation_parameter=True, optional=True),
         Field('remote_replica_id', type=int),
         Field('role', type=str),
         Field('state', type=str),

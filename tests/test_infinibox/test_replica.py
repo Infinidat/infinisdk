@@ -9,6 +9,25 @@ def test_replica_creation(replica):
     pass
 
 
+@pytest.mark.parametrize('create_remote_volume', [True, False])
+def test_replicate_volume_shortcut(infinibox, secondary_infinibox, link, create_remote_volume, volume):
+    remote_pool = secondary_infinibox.pools.create()
+    kwargs = {}
+    if create_remote_volume:
+        kwargs['remote_pool'] = remote_pool
+    else:
+        remote_volume = kwargs['remote_volume'] = secondary_infinibox.volumes.create(
+            pool=remote_pool)
+    replica = infinibox.replicas.replicate_volume(volume, link=link, **kwargs)
+    assert replica is not None
+
+    [remote_replica] = secondary_infinibox.replicas
+    if create_remote_volume:
+        pass
+    else:
+        assert remote_replica.has_local_entity(remote_volume)
+
+
 @pytest.mark.parametrize('retain_staging_area', [True, False])
 def test_replica_change_role(replica, retain_staging_area):
     replica.suspend()
@@ -17,6 +36,7 @@ def test_replica_change_role(replica, retain_staging_area):
     replica.change_role(retain_staging_area=retain_staging_area)
     assert not replica.is_source()
     assert replica.is_target()
+
 
 def test_replica_has_local_entity(infinibox, replica, volume):
     assert replica.has_local_entity(volume)
@@ -49,12 +69,12 @@ def replica_creation_kwargs(volume, create_remote, secondary_pool):
 
     if create_remote:
         entity_pair.update({
-            'remote_base_action': 'CREATE',
+            'target_base_action': 'CREATE',
         })
     else:
         entity_pair.update({
             'remote_entity_id': secondary_pool.system.volumes.create(pool=secondary_pool).id,
-            'remote_base_action': 'NO_BASE_DATA',
+            'target_base_action': 'NO_BASE_DATA',
         })
 
     return {
