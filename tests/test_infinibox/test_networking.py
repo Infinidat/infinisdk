@@ -2,6 +2,7 @@ import pytest
 from munch import Munch
 from ..conftest import create_network_space
 from infinisdk._compat import xrange
+from infinisdk.core.api.special_values import OMIT, RawValue
 
 
 def test_disable_enable_network_interface(infinibox, network_interface):
@@ -44,3 +45,14 @@ def test_network_configuration_type(infinibox, network_config_type):
     network_space.add_ip_address(ip_address)
     ip_obj = network_space.get_ips()[0]
     assert ip_obj.ip_address == ip_obj['ip_address']
+
+
+@pytest.mark.parametrize('service_value', [None, OMIT])
+def test_create_network_space_with_no_service(infinibox, service_value):
+    network_space = create_network_space(infinibox, service=service_value)
+    assert network_space.get_service() is None
+
+def test_setting_service_to_special_value(infinibox):
+    network_space = create_network_space(infinibox, service=RawValue('NAS_SERVICE'))
+    network_space.update_service(RawValue(None))
+    assert network_space.get_service() is None
