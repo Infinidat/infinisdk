@@ -31,7 +31,7 @@ develop_env: .develop_deps env
 
 jenkins-docker-test:
 	docker pull docker.infinidat.com/python-detox
-	docker --rm run -i -v $(CURDIR):/src docker.infinidat.com/python-detox tox
+	docker  run --rm -i -v $(CURDIR):/src docker.infinidat.com/python-detox tox
 
 release: env
 	.env/bin/python scripts/build_release.py
