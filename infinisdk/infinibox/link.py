@@ -24,7 +24,7 @@ class Link(InfiniBoxObject):
         Field('id', type=int, is_identity=True, is_filterable=True, is_sortable=True),
         Field('name', creation_parameter=True, mutable=True),
         Field('local_replication_network_space', api_name='local_replication_network_space_id',
-              binding=RelatedObjectBinding(),
+              binding=RelatedObjectBinding('network_spaces'),
               type='infinisdk.infinibox.network_space:NetworkSpace', creation_parameter=True),
         Field('remote_link_id', type=int),
         Field('remote_host', type=str, creation_parameter=True),
