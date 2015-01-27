@@ -371,7 +371,16 @@ class SystemObject(with_metaclass(FieldsMeta)):
         return URL(self.get_url_path(self.system)).add_path(str(self.id))
 
     def __repr__(self):
-        return "<{0} id={1}>".format(type(self).__name__, self.id)
+        s = 'id={0}'.format(self.id)
+        for field in self.FIELDS:
+            if field.use_in_repr:
+                try:
+                    value = self.get_field(field.name, from_cache=True, fetch_if_not_cached=False)
+                except CacheMiss:
+                    value = '?'
+                s += ', {0}={1}'.format(field.name, value)
+
+        return "<{0} {1}>".format(type(self).__name__, s)
 
 @contextmanager
 def _possible_api_failure_context(tags):

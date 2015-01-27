@@ -33,6 +33,7 @@ class Field(FieldBase):
         cached = kwargs.pop("cached", NOTHING)
         add_getter = kwargs.pop("add_getter", True)
         add_updater = kwargs.pop("add_updater", True)
+        use_in_repr = kwargs.pop("use_in_repr", False)
         super(Field, self).__init__(*args, **kwargs)
 
         if self.is_identity:
@@ -46,6 +47,8 @@ class Field(FieldBase):
         self.add_getter = add_getter
         #:Specifies if this field needs to have update function
         self.add_updater = add_updater and self.mutable
+        #:Specifies that the object's __repr__ method should use this field to describe the object
+        self.use_in_repr = use_in_repr
 
     def notify_added_to_class(self, cls):
         if self.add_getter:
