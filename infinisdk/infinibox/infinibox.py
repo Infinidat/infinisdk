@@ -33,6 +33,7 @@ from .network_space import NetworkSpace
 from .network_interface import NetworkInterface
 from .link import Link
 from .replica import Replica
+from .compatability import Compatability
 
 try:
     from infinisim.core.context import lookup_simulator_by_address
@@ -49,12 +50,11 @@ class InfiniBox(APITarget):
     def _initialize(self):
         super(InfiniBox, self)._initialize()
         self.current_user = _CurrentUserProxy(self)
+        self.compat = Compatability(self)
 
     def check_version(self):
-        version = self.get_version()
-        if not any(version_compatibility.matches(version)
-                   for version_compatibility in config.root.infinibox.compatible_versions):
-            raise VersionNotSupported(version)
+        if not self.compat.can_run_on_system():
+            raise VersionNotSupported(self.get_version())
 
     @property
     @deprecated(message='Use <system>.host_clusters')

@@ -333,10 +333,14 @@ class FcPort(InfiniBoxSystemComponent):
         return "fc_port"
 
     def is_hard_port(self):
-        return self.get_role() == 'HARD_PORT'
+        if self.system.compat.has_npiv():
+            return self.get_role() == 'HARD_PORT'
+        return True
 
     def is_soft_port(self):
-        return self.get_role() == 'SOFT_PORT'
+        if self.system.compat.has_npiv():
+            return self.get_role() == 'SOFT_PORT'
+        return False
 
     def get_target_addresses(self):
         if self.is_soft_port():
