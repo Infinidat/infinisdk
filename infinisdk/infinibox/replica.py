@@ -109,3 +109,9 @@ class Replica(InfiniBoxObject):
             if pair['local_entity_id'] == entity.id:
                 return True
         return False
+
+    def delete(self, retain_staging_area=False):
+        path = self.get_this_url_path()
+        if retain_staging_area:
+            path = path.add_query_param('retain_staging_area', 'true')
+        self.system.api.delete(path)

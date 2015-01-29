@@ -9,6 +9,14 @@ def test_replica_creation(replica):
     pass
 
 
+@pytest.mark.parametrize('retain_staging_area', [True, False])
+def test_replica_deletion(replica, retain_staging_area):
+    kw = {}
+    if retain_staging_area:
+        kw['retain_staging_area'] = True
+    replica.delete(**kw)
+
+
 @pytest.mark.parametrize('create_remote_volume', [True, False])
 def test_replicate_volume_shortcut(infinibox, secondary_infinibox, link, create_remote_volume, volume):
     remote_pool = secondary_infinibox.pools.create()
