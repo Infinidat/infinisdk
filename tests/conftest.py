@@ -3,6 +3,8 @@ from contextlib import contextmanager
 import flux
 import logbook.compat
 from forge import Forge
+from packaging.version import parse as parse_version
+from munch import Munch
 
 import pytest
 
@@ -15,6 +17,8 @@ from infinisdk_internal import disable as disable_infinisdk_internal
 from infinisdk_internal import enable as enable_infinisdk_internal
 from infinisim.infinibox import Infinibox as InfiniboxSimulator
 from izsim import Simulator as IZBoxSimulator
+
+new_to_version = lambda version: pytest.mark.required_version(from_version=version)
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -70,10 +74,27 @@ def simulator(izbox_simulator, infinibox_simulator, system_type):
 def izbox(izbox_simulator):
     return IZBox(izbox_simulator)
 
+def validate_unittest_compatability_with_infinibox_version(system, **kwargs):
+    from_version = kwargs.pop('from_version', None)
+    until_version = kwargs.pop('until_version', None)
+    assert not kwargs, "Version marker got unexpected kwargs: {0}".format(list(kwargs))
+    sys_version = parse_version(system.get_version())
+
+    if from_version is not None and parse_version(from_version) > sys_version:
+        pytest.skip("System does not support this unittest (too old)")
+
+    if until_version is not None and parse_version(until_version) > sys_version:
+        pytest.skip("System does not support this unittest (too new)")
+
+_DEFAULT_REQUIRED_VERSION = Munch(kwargs={})
+
 @pytest.fixture
-def infinibox(infinibox_simulator):
+def infinibox(request, infinibox_simulator):
     user = infinibox_simulator.auth.get_current_user()
-    return InfiniBox(infinibox_simulator, auth=(user.get_username(), user.get_password()))
+    infinibox = InfiniBox(infinibox_simulator, auth=(user.get_username(), user.get_password()))
+    required_version_kwargs = getattr(request.function, 'required_version', _DEFAULT_REQUIRED_VERSION).kwargs
+    validate_unittest_compatability_with_infinibox_version(infinibox, **required_version_kwargs)
+    return infinibox
 
 
 @pytest.fixture
@@ -86,7 +107,8 @@ def izbox_simulator(request):
 
 @pytest.fixture
 def infinibox_simulator(request):
-    returned = InfiniboxSimulator(True)
+    returned = InfiniboxSimulator()
+    returned.api.set_propagate_exceptions(True)
     returned.activate()
     request.addfinalizer(returned.deactivate)
     return returned
@@ -272,5 +294,5 @@ def mocked_ecosystem(request):
 
 @pytest.fixture
 def secondary_infinibox(request):
-    returned = infinibox(infinibox_simulator(request=request))
+    returned = infinibox(request=request, infinibox_simulator=infinibox_simulator(request=request))
     return returned

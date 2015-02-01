@@ -21,7 +21,7 @@ class User(SystemObject):
 
     FIELDS = [
         Field("id", type=int, is_identity=True, is_filterable=True, is_sortable=True),
-        Field("role", creation_parameter=True, mutable=True, is_filterable=True, is_sortable=True, default="POOL_ADMIN"),
+        Field("role", creation_parameter=True, mutable=True, is_filterable=True, is_sortable=True, default="PoolAdmin"), # For backwards compatability
         Field("email", creation_parameter=True, mutable=True, default=Autogenerate("user_{timestamp}@infinidat.com")),
         Field("name", api_name="username", creation_parameter=True, mutable=True, is_filterable=True, is_sortable=True, default=Autogenerate("user_{timestamp}")),
         Field("password", creation_parameter=True, add_getter=False, mutable=True, default="12345678"),

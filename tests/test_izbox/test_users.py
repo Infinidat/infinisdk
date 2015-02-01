@@ -1,7 +1,7 @@
 
-def test_has_users(system):
-    assert system.users.find()
+def test_has_users(izbox):
+    assert izbox.users.find()
 
-def test_create_user(system):
-    user = system.users.create()
+def test_create_user(izbox):
+    user = izbox.users.create()
     assert user is not None

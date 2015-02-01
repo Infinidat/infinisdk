@@ -1,7 +1,9 @@
-import pytest
 import flux
-from ecosystem.mocks.mock_mailboxer import get_simulated_mail_server
+import pytest
 import re
+from infinibox_sysdefs import latest as defs
+from ecosystem.mocks.mock_mailboxer import get_simulated_mail_server
+from ..conftest import new_to_version
 
 
 def test_name(infinibox, user):
@@ -14,10 +16,12 @@ def test_name(infinibox, user):
     assert user.get_name() == new_name
 
 
+@new_to_version('2.0')
 def test_get_administered_pools_no_pool(infinibox, user):
     assert infinibox.pools.get_administered_pools() == []
 
 
+@new_to_version('2.0')
 def test_get_administered_pools_with_pools(infinibox, user):
     pool = infinibox.pools.create()
     pool.add_owner(user)
@@ -25,7 +29,8 @@ def test_get_administered_pools_with_pools(infinibox, user):
 
 
 def test_creation_deletion(infinibox, user):
-    kwargs = {"role": "READ_ONLY",
+    role = defs.enums.users.roles.technician.get_name()
+    kwargs = {"role": role,
               "name": "some_user_name",
               "email": "fake@email.com",
               "password": "some_password"}
@@ -56,7 +61,7 @@ def test_email(infinibox, user):
 
 def test_role(infinibox, user):
     orig_role = user.get_role()
-    new_role = 'READ_ONLY'
+    new_role = defs.enums.users.roles.technician.get_name()
 
     user.update_role(new_role)
     assert orig_role != new_role
@@ -64,8 +69,6 @@ def test_role(infinibox, user):
 
 
 def test_get_pools(infinibox, user):
-    flux.current_timeline.sleep(1)
-    user = infinibox.users.create(role='POOL_ADMIN')
     assert user.get_pools() == []
 
     pool = infinibox.pools.create()

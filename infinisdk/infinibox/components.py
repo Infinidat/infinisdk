@@ -14,7 +14,8 @@
 
 from ..core.field import Field
 from ..core.system_component import SystemComponentsBinder
-from ..core.system_object import SystemObject, ObjectNotFound
+from ..core.system_object import SystemObject
+from ..core.exceptions import ObjectNotFound
 from ..core.type_binder import TypeBinder
 from ..core.translators_and_types import WWNType
 from infi.pyutils.lazy import cached_method

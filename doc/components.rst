@@ -22,7 +22,7 @@ For each Node, you can use the :meth:`.Node.get_fc_ports` method to obtain the F
 
 		>>> for node in system.components.nodes:
 		...     for fc_port in node.get_fc_ports():
-		...         if fc_port.get_field('link_state') != 'UP':
+		...         if not fc_port.is_link_up():
 		...             print('Port', fc_port.get_field('wwpn'), 'of', node, 'is down!')
 
 

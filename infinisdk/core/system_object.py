@@ -19,8 +19,8 @@ from sentinels import NOTHING
 from infi.pyutils.lazy import cached_method
 from urlobject import URLObject as URL
 
-from .exceptions import APICommandFailed, ObjectNotFound, APITransportFailure
-from .._compat import with_metaclass, iteritems, itervalues, httplib
+from .exceptions import APICommandFailed, APITransportFailure
+from .._compat import with_metaclass, iteritems, httplib
 from .exceptions import MissingFields, CacheMiss
 from api_object_schema import FieldsMeta as FieldsMetaBase
 from .field import Field
@@ -351,6 +351,9 @@ class SystemObject(with_metaclass(FieldsMeta)):
         with _possible_api_failure_context(tags=hook_tags):
             res = self.system.api.put(self.get_this_url_path(), data=update_dict)
         response_dict = res.get_result()
+        if len(update_dict) == 1 and not isinstance(response_dict, dict):
+            [key] = update_dict.keys()
+            response_dict = {key: response_dict}
         self.update_field_cache(response_dict)
         gossip.trigger_with_tags('infinidat.sdk.post_object_update',
                 {'obj': self, 'data': update_dict, 'response_dict': response_dict}, tags=hook_tags)

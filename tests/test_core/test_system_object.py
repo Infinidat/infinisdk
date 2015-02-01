@@ -159,9 +159,8 @@ def test_object_creation_missing_fields():
     with pytest.raises(MissingFields):
         SampleDerivedObject.create(FakeSystem())
 
-def test_update_field_updates_its_cache(system):
+def test_update_field_updates_its_cache(system, user):
     new_name = "testing_update_field_caching"
-    user = system.users.create()
     assert user.get_field("name", from_cache=True) != new_name
     user.update_name(new_name)
     assert user.get_field("name", from_cache=True) == new_name

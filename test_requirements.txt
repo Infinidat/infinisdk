@@ -1,7 +1,7 @@
-infinisim>=29.0
 infinisdk_internal>=20.0
 izsim>=19
 pytest
 pyforge
 waiting
 pytest-capturelog
+packaging

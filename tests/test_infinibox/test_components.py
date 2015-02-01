@@ -1,14 +1,12 @@
-import flux
 import pytest
 
-import waiting
 from infi.dtypes.wwn import WWN
 from infinisdk._compat import string_types
 from infinisdk.core.config import config
 from infinibox_sysdefs import latest as defs
 from infinisdk.infinibox.components import (Drive, Enclosure, FcPort, Node, EthPort, LocalDrive,
                                             Rack, Service, System, ServiceCluster)
-from ..conftest import disable_api_context
+from ..conftest import disable_api_context, new_to_version
 
 NO_OF_ENCLOSURES_DRIVES = config.get_path('infinibox.defaults.enlosure_drives.total_count.simulator')
 
@@ -19,7 +17,7 @@ def test_component_id_field(infinibox, component_collection, component):
     assert component_collection.get_by_id(component.id) is component
 
 
-def _basic_check_for_component(infinibox, component_type, parent_type):
+def _basic_check_for_component(infinibox, component_type, parent_type, blacklist=None):
     sys_components = infinibox.components
     from_types_list = getattr(sys_components.types, component_type.__name__)
     assert from_types_list is component_type
@@ -44,9 +42,12 @@ def _basic_check_for_component(infinibox, component_type, parent_type):
 
     assert infinibox.api.get(component_instance.get_this_url_path())
 
+    if blacklist is None:
+        blacklist = []
     if component_type not in [System]:
         for field in component_type.fields:
-            component_instance.get_field(field.name)
+            if field not in blacklist:
+                component_instance.get_field(field.name)
 
 
 def test_system_component_does_not_perform_api_get(infinibox):
@@ -89,7 +90,7 @@ def test_enclosure_drive_paths(infinibox):
     assert all([isinstance(path, Node) for path in paths])
 
 def test_fc_port_component(infinibox):
-    _basic_check_for_component(infinibox, FcPort, Node)
+    _basic_check_for_component(infinibox, FcPort, Node, ['switch_vendor'])
     fc_port = infinibox.components.fc_ports.choose()
     assert fc_port.get_parent() == fc_port.get_node()
     assert fc_port.get_node() in infinibox.components.nodes.get_all()
@@ -127,10 +128,14 @@ def test_node_component(infinibox):
 
 def test_service_component(infinibox):
     _basic_check_for_component(infinibox, Service, Node)
+
+@new_to_version('2.0')
+def test_service_component_with_service_cluster(infinibox):
     service = infinibox.components.service_clusters.choose().get_services()[0]
     assert service.get_node().get_index() == 1
     assert service.is_master()
 
+@new_to_version('2.0')
 def test_service_cluster(infinibox):
     _basic_check_for_component(infinibox, ServiceCluster, None)
     service_cluster = infinibox.components.service_clusters.choose()
@@ -140,6 +145,7 @@ def test_service_cluster(infinibox):
     assert service in service_cluster.get_services()
     assert all(isinstance(service, Service) for service in service_cluster.get_services())
 
+@new_to_version('2.0')
 def test_enable_disble_unclustered_service(infinibox):
     node = infinibox.components.nodes.choose()
     mgmt_service = node.get_service('mgmt')
@@ -150,6 +156,7 @@ def test_enable_disble_unclustered_service(infinibox):
     with pytest.raises(NotImplementedError):
         mgmt_service.get_service_cluster()
 
+@new_to_version('2.0')
 def test_services_enable_disable(infinibox):
     service_cluster = infinibox.components.service_clusters.choose()
     service = service_cluster.get_services()[-1]
