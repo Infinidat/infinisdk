@@ -2,11 +2,26 @@ import pytest
 
 from ..conftest import infinibox as _create_infinibox
 from ..conftest import infinibox_simulator as _create_infinibox_simlator
+from infinisdk.core.exceptions import TooManyObjectsFound
 from ecosystem.mocks import MockedContext
 
 
 def test_replica_creation(replica):
     pass
+
+
+@pytest.mark.parametrize('method_name', ['get_local_volume', 'get_local_entity'])
+def test_replica_get_local_entity(replica, volume, method_name):
+    method = getattr(replica, method_name)
+    assert method() == volume
+
+
+@pytest.mark.parametrize('method_name', ['get_local_volume', 'get_local_entity'])
+def test_replica_get_local_entity_more_than_one(replica, volume, method_name):
+    method = getattr(replica, method_name)
+    replica._cache['entity_pairs'].append(replica._cache['entity_pairs'][0])
+    with pytest.raises(TooManyObjectsFound):
+        method()
 
 
 @pytest.mark.parametrize('retain_staging_area', [True, False])

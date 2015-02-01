@@ -15,6 +15,7 @@ from ..core.api.special_values import Autogenerate
 from ..core.type_binder import TypeBinder
 from ..core import Field
 from ..core.bindings import RelatedObjectBinding
+from ..core.exceptions import TooManyObjectsFound
 from .system_object import InfiniBoxObject
 
 
@@ -72,6 +73,22 @@ class Replica(InfiniBoxObject):
         Field('sync_interval', type=int, creation_parameter=True, default=30000),
 
     ]
+
+    def get_local_entity(self):
+        """Returns the local entity used for replication, assuming there is only one
+        """
+        pairs = self.get_entity_pairs(from_cache=True)
+        if self.get_field('entity_type', from_cache=True).lower() != 'volume':
+            raise NotImplementedError() # pragma: no cover
+        if len(pairs) > 1:
+            raise TooManyObjectsFound()
+        [pair] = pairs
+        return self.system.volumes.get_by_id_lazy(pair['local_entity_id'])
+
+    def get_local_volume(self):
+        """Returns the local volume, assuming there is exactly one
+        """
+        return self.get_local_entity()
 
     def suspend(self):
         """Suspends this replica
