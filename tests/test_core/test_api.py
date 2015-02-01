@@ -36,18 +36,29 @@ def test_auto_retry(system, should_failed):
     system.api.remove_auto_retry(retry_predicate)
 
 
+@pytest.fixture(scope='module', params=['', 'prefix'])
+def set_autogenerate(request):
+    old_prefix = Autogenerate.get_prefix()
+    Autogenerate.set_prefix(request.param)
+    @request.addfinalizer
+    def restore():
+        Autogenerate._ORDINALS = {}
+        Autogenerate.set_prefix(old_prefix)
+
+
 def test_autogenerate_fields(izbox):
     responses = [
         izbox.api.post(
             "/api/izsim/echo_post",
             data={"a":
                   {"b":
-                   {"name": Autogenerate("obj-{ordinal}-{time}-{timestamp}-{uuid}")}}})
+                   {"name": Autogenerate("{prefix}-obj-{ordinal}-{time}-{timestamp}-{uuid}")}}})
         for i in range(2)]
     jsons = [r.get_result() for r in responses]
     for index, json in enumerate(jsons):
         name = json["a"]["b"]["name"]
-        obj, ordinal, time, timestamp, uuid = name.split("-")
+        prefix, obj, ordinal, time, timestamp, uuid = name.split("-")
+        assert prefix == Autogenerate.get_prefix()
         assert (int(ordinal) - 1) == index
         assert (int(timestamp) // 1000) == int(float(time))
         assert uuid

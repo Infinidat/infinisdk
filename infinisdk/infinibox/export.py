@@ -19,7 +19,7 @@ from ..core.bindings import RelatedObjectBinding
 class Export(InfiniBoxObject):
     FIELDS = [
         Field("id", is_identity=True, type=int),
-        Field("export_path", creation_parameter=True, default=Autogenerate("/export_{uuid}")),
+        Field("export_path", creation_parameter=True, default=Autogenerate("/{prefix}export_{uuid}")),
         Field("inner_path", creation_parameter=True, default='/'),
         Field("filesystem", api_name = "filesystem_id", creation_parameter = True, cached=True, type=int, binding=RelatedObjectBinding()),
     ]

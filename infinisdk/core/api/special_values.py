@@ -31,12 +31,16 @@ class Autogenerate(SpecialValue):
     - time: the current time, as a floating point number
     - timestamp: an integral value designating the current time (milliseconds)
     - uuid: a unique identifier generated from uuid1
+    - prefix: a prefix added to all generated values, will be added to template unless defined in the given template
     """
 
+    _prefix = ''
     _ORDINALS = {}
 
     def __init__(self, template):
         super(Autogenerate, self).__init__()
+        if '{prefix}' not in template:
+            template = '{prefix}' + template
         self.template = template
 
     def generate(self):
@@ -44,7 +48,18 @@ class Autogenerate(SpecialValue):
         if counter is None:
             counter = self._ORDINALS[self.template] = itertools.count(1)
         current_time = flux.current_timeline.time()
-        return self.template.format(time=current_time, timestamp=int(current_time * 1000), ordinal=next(counter), uuid=_LAZY_UUID_FACTORY)
+        return self.template.format(time=current_time, timestamp=int(current_time * 1000), ordinal=next(counter), uuid=_LAZY_UUID_FACTORY, prefix=self._prefix)
+
+    @classmethod
+    def set_prefix(cls, prefix):
+        if prefix:
+            cls._prefix = prefix
+        else:
+            prefix = ''
+
+    @classmethod
+    def get_prefix(cls):
+        return cls._prefix
 
 class RawValue(SpecialValue):
     def __init__(self, value):
