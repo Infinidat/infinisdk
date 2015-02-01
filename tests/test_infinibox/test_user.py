@@ -68,18 +68,18 @@ def test_role(infinibox, user):
     assert user.get_role() == new_role
 
 
-def test_get_pools(infinibox, user):
-    assert user.get_pools() == []
+def test_get_owned_pools(infinibox, user):
+    assert user.get_owned_pools() == []
 
     pool = infinibox.pools.create()
     pool.add_owner(user)
 
-    pools = user.get_pools()
+    pools = user.get_owned_pools()
     assert len(pools) == 1
     assert pools[0] == pool
 
     pool.discard_owner(user)
-    assert user.get_pools() == []
+    assert user.get_owned_pools() == []
 
 
 def _get_token_from_mail(simulator, mail_address):

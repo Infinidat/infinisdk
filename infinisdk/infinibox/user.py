@@ -27,7 +27,7 @@ class User(SystemObject):
         Field("password", creation_parameter=True, add_getter=False, mutable=True, default="12345678"),
     ]
 
-    @deprecated(message='Use User.get_owned_pools or User.get_administered_pools instead')
+    @deprecated(message='Use User.get_owned_pools or Pool.get_administered_pools instead')
     def get_pools(self):
         return self.get_owned_pools()
 
