@@ -100,6 +100,7 @@ def test_infinibox_attributes(infinibox):
     assert isinstance(infinibox.get_serial(), int)
     assert isinstance(infinibox.get_state(), string_types)
     assert isinstance(infinibox.get_version(), string_types)
+    assert isinstance(infinibox.get_revision(), string_types)
 
 def test_infinibox_system_type(infinibox):
     assert infinibox.is_simulator()
