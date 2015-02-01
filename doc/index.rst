@@ -23,6 +23,7 @@ Contents:
    volumes
    mappings
    snapshots
+   users
    replication
    metadata
    events

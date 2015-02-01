@@ -1,0 +1,27 @@
+# -*- mode: python -*-
+from contextlib import contextmanager
+
+from capacity import TiB
+
+from infinisdk import InfiniBox
+from infinisim.infinibox import Infinibox as Simulator
+
+
+@contextmanager
+def doctest_context():
+    simulator = Simulator()
+    simulator.activate()
+    system = InfiniBox(simulator, auth=('infinidat', '123456'))
+    for user in list(system.users):
+        if user.id > 0:
+            user.delete()
+    for ldap_config in system.ldap_configs:
+        ldap_config.delete()
+    system.users.create(username='someuser', password='12345678')
+    try:
+        yield {
+            "system": system,
+            "TiB": TiB,
+        }
+    finally:
+        simulator.deactivate()

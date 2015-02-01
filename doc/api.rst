@@ -99,6 +99,22 @@ infinibox.events
 .. autoclass:: Event
    :members:
 
+infinibox.users
+~~~~~~~~~~~~~~~
+
+.. automodule:: infinisdk.infinibox.user
+
+.. autoclass:: User
+   :members:
+
+infinibox.ldap_configs
+~~~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: infinisdk.infinibox.ldap_config
+
+.. autoclass:: LDAPConfig
+   :members:
+
 infinibox.components
 ~~~~~~~~~~~~~~~~~~~~
 

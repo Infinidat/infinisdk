@@ -32,6 +32,7 @@ from .filesystem import Filesystem
 from .export import Export
 from .network_space import NetworkSpace
 from .network_interface import NetworkInterface
+from .ldap_config import LDAPConfig
 from .link import Link
 from .replica import Replica
 from .compatability import Compatability
@@ -44,7 +45,7 @@ except ImportError:
 
 class InfiniBox(APITarget):
     OBJECT_TYPES = [Volume, Pool, Host, HostCluster, User, EmailRule, Filesystem, Export,
-                    NetworkSpace, NetworkInterface, Link, Replica]
+                    NetworkSpace, NetworkInterface, Link, Replica, LDAPConfig]
     SYSTEM_EVENTS_TYPE = Events
     SYSTEM_COMPONENTS_TYPE = InfiniBoxSystemComponents
 
