@@ -12,7 +12,9 @@
 ### are strictly forbidden unless prior written permission is obtained from Infinidat Ltd.
 ###!
 
+from .._compat import ExitStack
 from ..core.field import Field
+from ..core.utils import deprecated
 from ..core.system_component import SystemComponentsBinder
 from ..core.system_object import SystemObject
 from ..core.exceptions import ObjectNotFound
@@ -22,6 +24,7 @@ from infi.pyutils.lazy import cached_method
 from .component_query import InfiniBoxComponentQuery
 from ..core.bindings import InfiniSDKBinding, ListOfRelatedComponentBinding, RelatedComponentBinding
 
+from collections import defaultdict
 from contextlib import contextmanager
 from urlobject import URLObject as URL
 
@@ -37,6 +40,13 @@ class InfiniBoxSystemComponents(SystemComponentsBinder):
         self.cache_component(self._rack_1)
         self._fetched_nodes = False
         self._fetched_others = False
+        self._deps_by_compoents_tree = defaultdict(set)
+
+    def get_depended_components_type(self, component_type):
+        deps = self._deps_by_compoents_tree[component_type].copy()
+        for dep_type in deps.copy():
+            deps.update(self.get_depended_components_type(dep_type))
+        return deps
 
     def should_fetch_nodes(self):
         return not self._fetched_nodes
@@ -85,15 +95,32 @@ class InfiniBoxComponentBinder(TypeBinder):
         return returned
 
     @contextmanager
-    def fetch_once_context(self):
-        if not self.should_force_fetching_from_cache():
-            list(self.get_all().force_fetching_objects())
+    def force_fetching_from_cache_context(self):
         prev = self._force_fetching_from_cache
         self._force_fetching_from_cache = True
         try:
             yield
         finally:
             self._force_fetching_from_cache = prev
+
+    @contextmanager
+    def _force_fetching_tree_from_cache_context(self):
+        with ExitStack() as stack:
+            stack.enter_context(self.force_fetching_from_cache_context())
+            for obj_type in self.system.components.get_depended_components_type(self.object_type):
+                obj_collection = self.system.components[obj_type]
+                stack.enter_context(obj_collection.force_fetching_from_cache_context())
+            yield
+
+    @deprecated(message='Use fetch_tree_once_context instead')
+    def fetch_once_context(self):
+        return self.fetch_tree_once_context()
+
+    def fetch_tree_once_context(self):
+        if not self.should_force_fetching_from_cache():
+            list(self.get_all().force_fetching_objects())
+        return self._force_fetching_tree_from_cache_context()
+
 
 
 class InfiniBoxSystemComponent(SystemObject):
@@ -152,6 +179,7 @@ class InfiniBoxSystemComponent(SystemObject):
             component_type = cls.get_type_name()
             object_type = system.components._COMPONENTS_BY_TYPE_NAME.get(component_type, InfiniBoxSystemComponent)
             returned = object_type(system, data)
+            system.components._deps_by_compoents_tree[type(returned.get_parent())].add(object_type)
             system.components.cache_component(returned)
         else:
             returned.update_field_cache(data)
@@ -304,7 +332,7 @@ class EthPort(InfiniBoxSystemComponent):
 class FcPorts(InfiniBoxComponentBinder):
     def get_online_target_addresses(self):
         addresses = []
-        with self.fetch_once_context():
+        with self.fetch_tree_once_context():
             for fc_port in self:
                 if fc_port.is_link_up():
                     addresses.extend(fc_port.get_target_addresses())

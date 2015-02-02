@@ -101,16 +101,22 @@ def test_get_online_target_addresses(infinibox):
 
 def test_using_from_cache_context_multiple_times(infinibox):
     nodes = infinibox.components.nodes
+    fc_ports = infinibox.components.fc_ports
     assert nodes.fields.state.cached == False
-    with nodes.fetch_once_context():
+    with nodes.fetch_tree_once_context():
         infinibox.api = None
-        with nodes.fetch_once_context():
+        with nodes.fetch_tree_once_context():
             assert nodes._force_fetching_from_cache
+            assert fc_ports._force_fetching_from_cache
             for node in nodes:
                 node.update_field_cache({'state': 'fake_state'})
                 assert node.get_state() == 'fake_state'
+                for fc_port in node.get_fc_ports():
+                    fc_port.get_state()
         assert nodes._force_fetching_from_cache
+        assert fc_ports._force_fetching_from_cache
     assert not nodes._force_fetching_from_cache
+    assert not fc_ports._force_fetching_from_cache
 
 def test_eth_port_component(infinibox):
     _basic_check_for_component(infinibox, EthPort, Node)
