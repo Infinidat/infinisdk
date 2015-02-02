@@ -28,6 +28,7 @@ class Link(InfiniBoxObject):
               type='infinisdk.infinibox.network_space:NetworkSpace', creation_parameter=True),
         Field('remote_link_id', type=int),
         Field('remote_host', type=str, creation_parameter=True),
+        Field('link_state', type=str),
     ]
 
     def delete(self, force_if_remote_error=False):
