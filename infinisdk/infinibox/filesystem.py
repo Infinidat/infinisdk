@@ -12,6 +12,7 @@
 ### are strictly forbidden unless prior written permission is obtained from Infinidat Ltd.
 ###!
 from capacity import GB
+from ..core.q import Q
 from ..core import Field, CapacityType, MillisecondsDatetimeType
 from ..core.api.special_values import Autogenerate
 from ..core.bindings import RelatedObjectBinding
@@ -45,9 +46,7 @@ class Filesystem(BaseDataEntity):
         return self.system.exports.create(filesystem=self, **kwargs)
 
     def get_exports(self):
-        # TODO: FIXME: INFINIBOX-11698, please revert when fixed
-        return [e for e in self.system.exports.get_all() if e.get_filesystem() == self]
-        #return self.system.exports.find(self.system.objects.exports.fields.filesystem_id == self.id)
+        return self.system.exports.find(Q.filesystem_id == self.id)
 
     def move_pool(self, target_pool, with_capacity=True):
         raise NotImplementedError("Not implemented in infinibox 2.0.0.0")
