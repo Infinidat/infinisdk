@@ -18,12 +18,12 @@ from sentinels import NOTHING
 from ..core.api import APITarget
 from ..core.config import config, get_ini_option
 from ..core.exceptions import VersionNotSupported, CacheMiss
+from ..core.utils import deprecated
 from .host_cluster import HostCluster
-
 from .components import InfiniBoxSystemComponents
+from .capacities import InfiniBoxSystemCapacity
 from .events import EmailRule, Events
 from .host import Host
-from infinisdk.core.utils import deprecated
 from .pool import Pool
 from .user import User
 from .volume import Volume
@@ -51,6 +51,7 @@ class InfiniBox(APITarget):
         super(InfiniBox, self)._initialize()
         self.current_user = _CurrentUserProxy(self)
         self.compat = Compatability(self)
+        self.capacities = InfiniBoxSystemCapacity(self)
 
     def check_version(self):
         if not self.compat.can_run_on_system():

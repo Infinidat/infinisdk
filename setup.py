@@ -6,7 +6,7 @@ with open(os.path.join(os.path.dirname(__file__), "infinisdk", "__version__.py")
     exec(version_file.read()) # pylint: disable=W0122
 
 _INSTALL_REQUIRES = [
-    "api_object_schema>=1.5.0",
+    "api_object_schema>=1.5.1",
     "arrow",
     "capacity",
     "colorama",
