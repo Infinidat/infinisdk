@@ -26,12 +26,20 @@ def test_replica_get_local_entity_more_than_one(replica, volume, method_name):
 
 
 @new_to_version('2.0')
+@pytest.mark.parametrize('force_params', [True, False])
 @pytest.mark.parametrize('retain_staging_area', [True, False])
-def test_replica_deletion(replica, retain_staging_area):
-    kw = {}
+def test_replica_deletion(replica, retain_staging_area, force_params):
+    kwargs = {}
+    if force_params:
+        kwargs.update(force_on_target=True, force_if_remote_error=True,
+                      force_if_no_remote_credentials=True)
     if retain_staging_area:
-        kw['retain_staging_area'] = True
-    replica.delete(**kw)
+        kwargs.update(retain_staging_area=True)
+    volume = replica.get_local_volume()
+    assert not volume.get_children()
+    replica.delete(**kwargs)
+    if retain_staging_area:
+        assert volume.get_children()
 
 
 @new_to_version('2.0')
