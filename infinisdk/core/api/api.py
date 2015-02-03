@@ -210,6 +210,8 @@ class API(object):
 
             _logger.debug("{0} <-- {1} {2}", hostname, http_method.upper(), api_request.url)
             if data is not None:
+                if data != api_request.data:
+                    sent_json_object = json.loads(api_request.data)
                 self._log_sent_data(hostname, data, sent_json_object)
 
             prepared = self._session.prepare_request(api_request)
@@ -217,7 +219,7 @@ class API(object):
 
             elapsed = get_timedelta_total_seconds(response.elapsed)
             _logger.debug("{0} --> {1} {2} (took {3:.04f}s)", hostname, response.status_code, response.reason, elapsed)
-            returned = Response(http_method, full_url, data, response)
+            returned = Response(api_request.method, api_request.url, data, response)
             _logger.debug("{0} --> {1}", hostname, returned.get_json())
             if response.status_code != httplib.SERVICE_UNAVAILABLE:
                 if specified_address is None: # need to remember our next API target

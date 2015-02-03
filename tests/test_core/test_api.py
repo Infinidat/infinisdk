@@ -113,6 +113,7 @@ def test_unapproved_context(infinibox):
             p.delete()
 
         assert exception.value.status_code == httplib.FORBIDDEN
+        assert exception.value.response.url.query_dict['approved'] == 'false'
     p.delete()
 
 
