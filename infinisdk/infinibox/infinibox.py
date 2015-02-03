@@ -125,7 +125,7 @@ class InfiniBox(APITarget):
         return None
 
     def is_mock(self):
-        return "mock" in self.get_name()
+        return "mock" in self.get_system_info("name")
 
     def get_system_info(self, field_name):
         return self.components.system_component.get_field(field_name,
