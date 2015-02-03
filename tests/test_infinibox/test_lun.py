@@ -1,4 +1,5 @@
 import pytest
+from infinisdk._compat import xrange
 from infinisdk.core.exceptions import CacheMiss
 
 
@@ -12,6 +13,17 @@ def test_unmap_clustered_lun(infinibox, host, cluster, volume):
     lu.unmap()
 
     assert not volume.get_logical_units()
+
+def test_unmap_cluster_with_two_hosts(infinibox, cluster, volume):
+    for _ in xrange(2):
+        host = infinibox.hosts.create()
+        cluster.add_host(host)
+    cluster.map_volume(volume)
+    volume.get_lun(cluster)
+    assert volume.is_mapped()
+    cluster.unmap_volume(volume=volume)
+    assert not volume.is_mapped()
+
 
 def test_unmap_lun_twice(infinibox, volume, logical_unit):
     logical_unit.unmap()
@@ -41,12 +53,11 @@ def test_no_luns_mapped(infinibox, host, cluster):
     vol = infinibox.volumes.create(pool=pool)
     assert (not host.is_volume_mapped(vol))
 
-
-def test_mapping_object(infinibox, host, cluster, volume):
-    for mapping_obj in [host, cluster]:
-        lu = mapping_obj.map_volume(volume)
-        assert lu.mapping_object == lu.get_mapping_object() == mapping_obj
-        lu.unmap()
+def test_mapping_object(infinibox, mapping_object, volume):
+    lu = mapping_object.map_volume(volume)
+    assert volume.get_lun(mapping_object) == lu
+    assert lu.mapping_object == lu.get_mapping_object() == mapping_object
+    lu.unmap()
 
 def test_map_volume_to_cluster(infinibox, host, cluster, volume):
     assert (not volume.is_mapped())
