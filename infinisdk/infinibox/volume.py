@@ -71,6 +71,8 @@ class Volume(BaseDataEntity):
         Field("depth", type=int, is_sortable=True,is_filterable=True),
         Field("mapped", type=bool, is_sortable=True,is_filterable=True),
         Field("has_children", type=bool),
+        Field('rmr_source', type=bool, add_getter=False),
+        Field('rmr_target', type=bool, add_getter=False),
     ]
 
     @deprecated(message="Use volume.is_master instead")
@@ -125,6 +127,14 @@ class Volume(BaseDataEntity):
 
     def is_mapped(self):
         return self.get_field("mapped")
+
+    def is_rmr_source(self, **kwargs):
+        """Returns True if this volume is a source for replication"""
+        return self.get_field('rmr_source', **kwargs)
+
+    def is_rmr_target(self, **kwargs):
+        """Returns True if this volume is a target for replication"""
+        return self.get_field('rmr_target', **kwargs)
 
     def unmap(self):
         """Unmaps a volume from its hosts

@@ -90,6 +90,32 @@ def test_volume_get_replica_single(volume, replica):
 
 
 @new_to_version('2.0')
+def test_is_rmr_source(volume, replica):
+    volume.refresh()
+    assert not volume.is_rmr_target()
+    assert volume.is_rmr_source()
+
+
+@new_to_version('2.0')
+def test_regtulard_volume_is_not_rmr_source_target(volume):
+    assert not volume.is_rmr_source()
+    assert not volume.is_rmr_target()
+
+
+@new_to_version('2.0')
+def test_is_rmr_target(volume, replica, secondary_volume):
+    secondary_volume.refresh()
+    assert secondary_volume.is_rmr_target()
+    assert not secondary_volume.is_rmr_source()
+
+
+@pytest.fixture
+def secondary_volume(replica, secondary_infinibox):
+    [returned] = secondary_infinibox.volumes
+    return returned
+
+
+@new_to_version('2.0')
 def test_volume_get_replica_too_many(volume, replica, infinibox, secondary_infinibox):
     remote_pool = secondary_infinibox.pools.create()
     remote_volume = secondary_infinibox.volumes.create(pool=remote_pool)
