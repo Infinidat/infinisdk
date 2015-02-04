@@ -89,6 +89,13 @@ class Volume(BaseDataEntity):
         return res.get_result()
 
     def get_lun(self, mapping_object):
+        """Given either a host or a host cluster object, returns the single LU object mapped to this volume.
+
+        An exception is raised if multiple matching LUs are found
+
+        :param mapping_object: Either a host cluster or a host object to be checked
+        :returns: None if no lu is found for this entity
+        """
         def is_mapping_object_lu(lu_data):
             lu_mapping_id = lu_data['host_cluster_id'] if lu_data[
                 'clustered'] else lu_data['host_id']

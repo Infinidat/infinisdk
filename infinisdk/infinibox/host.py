@@ -27,7 +27,7 @@ class HostBinder(TypeBinder):
     """
 
     def get_host_id_by_initiator_address(self, address):
-        """:return: an id of a host object defined on a system having the specified FC address configured, None if none exists
+        """:returns: an id of a host object defined on a system having the specified FC address configured, None if none exists
         """
         try:
             res = self.system.api.get("hosts/host_id_by_initiator_address/{0}".format(address), check_version=False)
@@ -38,7 +38,7 @@ class HostBinder(TypeBinder):
             return None
 
     def get_host_by_initiator_address(self, address):
-        """:return: a host object defined on a system having the specified FC address configured, None if none exists
+        """:returns: a host object defined on a system having the specified FC address configured, None if none exists
         """
         host_id = self.get_host_id_by_initiator_address(address)
         if host_id is not None:
@@ -46,7 +46,7 @@ class HostBinder(TypeBinder):
         return None
 
     def has_registered_initiator_address(self, address):
-        """:return: whether or not there exists a host object on the system with the specified FC address configured
+        """:returns: whether or not there exists a host object on the system with the specified FC address configured
         """
         return self.get_host_id_by_initiator_address(address) is not None
 
