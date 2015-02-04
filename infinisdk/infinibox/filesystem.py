@@ -42,6 +42,10 @@ class Filesystem(BaseDataEntity):
         Field("write_protected", type=bool, mutable=True, creation_parameter=True, optional=True),
     ]
 
+    @classmethod
+    def is_supported(cls, system):
+        return system.compat.has_nas()
+
     def add_export(self, **kwargs):
         return self.system.exports.create(filesystem=self, **kwargs)
 

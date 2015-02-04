@@ -31,3 +31,12 @@ class Compatability(object):
 
     def has_npiv(self):
         return self._has_feature("fc/soft_targets")
+
+    def has_replication(self):
+        return int(self.get_version_major()) >= 2
+
+    def has_nas(self):
+        return int(self.get_version_major()) >= 2
+
+    def has_network_configuration(self):
+        return int(self.get_version_major()) >= 2

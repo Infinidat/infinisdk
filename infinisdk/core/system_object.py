@@ -98,6 +98,10 @@ class SystemObject(with_metaclass(FieldsMeta)):
         return (self.system, type(self).__name__, self.id)
 
     @classmethod
+    def is_supported(cls, system):
+        return True
+
+    @classmethod
     def construct(cls, system, data):
         """
         Template method to enable customizing the object instantiation process.

@@ -39,6 +39,9 @@ class TypeBinder(object):
         """
         return [f for f in self.fields if f.mutable]
 
+    def is_supported(self):
+        return self.object_type.is_supported(self.system)
+
     def find(self, *predicates, **kw):
         """Queries objects according to predicates. Can receive arguments in two possible forms:
 

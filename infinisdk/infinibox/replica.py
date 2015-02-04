@@ -77,6 +77,10 @@ class Replica(InfiniBoxObject):
 
     ]
 
+    @classmethod
+    def is_supported(cls, system):
+        return system.compat.has_replication()
+
     def get_local_entity(self):
         """Returns the local entity used for replication, assuming there is only one
         """

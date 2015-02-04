@@ -32,6 +32,10 @@ class NetworkSpace(InfiniBoxObject):
     ]
 
     @classmethod
+    def is_supported(cls, system):
+        return system.compat.has_network_configuration()
+
+    @classmethod
     def get_type_name(cls):
         return 'network_space'
 

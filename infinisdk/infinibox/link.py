@@ -31,6 +31,10 @@ class Link(InfiniBoxObject):
         Field('link_state', type=str),
     ]
 
+    @classmethod
+    def is_supported(cls, system):
+        return system.compat.has_replication()
+
     def delete(self, force_if_remote_error=False):
         """Deletes this link
 

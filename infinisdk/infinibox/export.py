@@ -11,7 +11,7 @@
 ### Redistribution and use in source or binary forms, with or without modification,
 ### are strictly forbidden unless prior written permission is obtained from Infinidat Ltd.
 ###!
-from ..core import Field, SystemObject
+from ..core import Field
 from ..core.api.special_values import Autogenerate
 from .system_object import InfiniBoxObject
 from ..core.bindings import RelatedObjectBinding
@@ -24,3 +24,6 @@ class Export(InfiniBoxObject):
         Field("filesystem", api_name = "filesystem_id", creation_parameter = True, cached=True, type=int, binding=RelatedObjectBinding()),
     ]
 
+    @classmethod
+    def is_supported(cls, system):
+        return system.compat.has_nas()
