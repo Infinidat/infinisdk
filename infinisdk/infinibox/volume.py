@@ -15,7 +15,7 @@ from capacity import GB
 from ..core.type_binder import TypeBinder
 from ..core import Field, CapacityType, MillisecondsDatetimeType
 from storage_interfaces.scsi.abstracts import ScsiVolume
-from ..core.exceptions import InfiniSDKException
+from ..core.exceptions import InfiniSDKException, ObjectNotFound, TooManyObjectsFound
 from ..core.api.special_values import Autogenerate
 from ..core.bindings import RelatedObjectBinding
 from ..core.utils import deprecated
@@ -114,6 +114,14 @@ class Volume(BaseDataEntity):
         # make into a query once INFINIBOX-14572 is resolved
         return [replica for replica in self.system.replicas
                 if replica.has_local_entity(self)]
+
+    def get_replica(self):
+        returned = self.get_replicas()
+        if len(returned) > 1:
+            raise TooManyObjectsFound()
+        elif len(returned) == 0:
+            raise ObjectNotFound()
+        return returned[0]
 
     def is_mapped(self):
         return self.get_field("mapped")

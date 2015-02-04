@@ -1,7 +1,7 @@
 import pytest
 
 from ..conftest import new_to_version
-from infinisdk.core.exceptions import TooManyObjectsFound
+from infinisdk.core.exceptions import TooManyObjectsFound, ObjectNotFound
 
 
 @new_to_version('2.0')
@@ -82,6 +82,27 @@ def test_replica_has_local_entity(infinibox, replica, volume):
 @new_to_version('2.0')
 def test_volume_get_replicas(replica, volume):
     assert volume.get_replicas() == [replica]
+
+
+@new_to_version('2.0')
+def test_volume_get_replica_single(volume, replica):
+    assert volume.get_replica() == replica
+
+
+@new_to_version('2.0')
+def test_volume_get_replica_too_many(volume, replica, infinibox, secondary_infinibox):
+    remote_pool = secondary_infinibox.pools.create()
+    remote_volume = secondary_infinibox.volumes.create(pool=remote_pool)
+    replica2 = replica.system.replicas.replicate_volume_existing_target(
+        volume, link=replica.get_link(), remote_volume=remote_volume)
+    with pytest.raises(TooManyObjectsFound):
+        volume.get_replica()
+
+
+@new_to_version('2.0')
+def test_volume_get_replica_no_replicas(volume):
+    with pytest.raises(ObjectNotFound):
+        volume.get_replica()
 
 
 @new_to_version('2.0')
