@@ -81,6 +81,21 @@ class ComputedIDBinding(InfiniSDKBinding):
         raise NotImplementedError() # pragma: no cover
 
 
+class NotExistsSupportBinding(InfiniSDKBinding):
+    # Prior to 2.0 not all services have all the fields. For now, return None if missing.
+    # TODO: Check that system version <= 1.7
+    def __init__(self, value_for_non_exists=None):
+        super(NotExistsSupportBinding, self).__init__()
+        self._value_for_non_exists = value_for_non_exists
+        pass
+
+    def get_value_from_api_object(self, system, objtype, obj, api_obj):
+        try:
+            return super(NotExistsSupportBinding, self).get_value_from_api_object(system, objtype, obj, api_obj)
+        except KeyError:
+            return self._value_for_non_exists
+
+
 class InfiniBoxComponentBinder(TypeBinder):
 
     _force_fetching_from_cache = False
@@ -350,9 +365,12 @@ class FcPort(InfiniBoxSystemComponent):
         Field("role", cached=True),
         Field("soft_target_addresses", type=list, cached=True),
         Field("switch_vendor", cached=True),
+        Field("enabled", type=bool, binding=NotExistsSupportBinding(True)),
     ]
 
     def is_link_up(self):
+        if not self.get_enabled():
+            return False
         if self.get_state() != 'OK':
             return False
         return self.get_link_state().lower() in ("link up", "up")
@@ -393,15 +411,6 @@ class Drive(InfiniBoxSystemComponent):
 
     def is_active(self):
         return self.get_state() == 'ACTIVE'
-
-class NotExistsSupportBinding(InfiniSDKBinding):
-    # Prior to 2.0 not all services have all the fields. For now, return None if missing.
-    # TODO: Check that system version <= 1.7
-    def get_value_from_api_object(self, system, objtype, obj, api_obj):
-        try:
-            return super(NotExistsSupportBinding, self).get_value_from_api_object(system, objtype, obj, api_obj)
-        except KeyError:
-            return None
 
 @InfiniBoxSystemComponents.install_component_type
 class Service(InfiniBoxSystemComponent):
