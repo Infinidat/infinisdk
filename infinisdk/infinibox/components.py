@@ -348,7 +348,7 @@ class FcPort(InfiniBoxSystemComponent):
         Field("state", cached=False),
         Field("link_state", cached=False),
         Field("role", cached=True),
-        Field("soft_target_addresses", cached=True),
+        Field("soft_target_addresses", type=list, cached=True),
         Field("switch_vendor", cached=True),
     ]
 
