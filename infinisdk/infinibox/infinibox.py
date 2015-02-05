@@ -12,6 +12,7 @@
 ### are strictly forbidden unless prior written permission is obtained from Infinidat Ltd.
 ###!
 import itertools
+import weakref
 
 from sentinels import NOTHING
 
@@ -52,6 +53,7 @@ class InfiniBox(APITarget):
         self.current_user = _CurrentUserProxy(self)
         self.compat = Compatability(self)
         self.capacities = InfiniBoxSystemCapacity(self)
+        self._related_systems = []
 
     def check_version(self):
         if not self.compat.can_run_on_system():
@@ -163,6 +165,39 @@ class InfiniBox(APITarget):
         if self.compat.get_version_major() < '2':
             return self.get_system_info('revision')
         return self.get_system_info('release')['system']['revision']
+
+    def iter_related_systems(self):
+        """
+        Iterate the list of systems related to the current system
+        """
+        dead_system_objects = []
+        for ref in self._related_systems:
+            system = ref()
+            if system:
+                yield system
+            else:
+                dead_system_objects.append(ref)
+
+        for dead in dead_system_objects:
+            self._related_systems.remove(dead)
+
+    def register_related_system(self, system):
+        """
+        Registers another system as related system to the current one
+        """
+        self._related_systems.append(weakref.ref(system))
+
+    def unregister_related_system(self, system):
+        """
+        Unregisters another system from appearing the the current system's related systems
+        """
+        system_ref = None
+        for ref in self._related_systems:
+            if ref() == system:
+                system_ref = ref
+
+        if system_ref is not None:
+            self._related_systems.remove(system_ref)
 
     def _after_login(self):
         self.components.system_component.refresh()
