@@ -1,5 +1,6 @@
 import pytest
 
+from infinisdk._compat import httplib
 from infinisdk.core.exceptions import APICommandFailed
 from infinisdk.infinibox.filesystem import Filesystem
 from infinisdk.infinibox.pool import Pool
@@ -33,18 +34,18 @@ def test_export_deletion(filesystem):
 
 
 @new_to_version('2.0')
-def test_filesystem_children_deletion(filesystem):
+def test_filesystem_children_deletion_without_approval(filesystem):
     snap = filesystem.create_snapshot()
     clone = snap.create_clone()
-    with pytest.raises(APICommandFailed) as caught:
-        filesystem.delete()
-    with pytest.raises(APICommandFailed) as caught:
-        snap.delete()
-    clone.delete()
-    with pytest.raises(APICommandFailed) as caught:
-        filesystem.delete()
-    snap.delete()
+    with filesystem.system.api.get_unapproved_context():
+        with pytest.raises(APICommandFailed) as caught:
+            filesystem.delete()
+    assert caught.value.status_code == httplib.FORBIDDEN
+
     filesystem.delete()
+    assert not filesystem.is_in_system()
+    assert not snap.is_in_system()
+    assert not clone.is_in_system()
 
 
 @new_to_version('2.0')
