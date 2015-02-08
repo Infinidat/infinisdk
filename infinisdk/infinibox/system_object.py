@@ -140,13 +140,14 @@ class InfiniBoxLURelatedObject(InfiniBoxObject):
         """
         if volume:
             if lun is not None:
-                raise InfiniSDKException(
-                    'unmap_volume does not support volume & lun together')
-            lun = volume.get_lun(self)
-        elif lun is None:
-            raise InfiniSDKException(
-                'unmap_volume does must get or volume or lun')
+                raise InfiniSDKException('unmap_volume does not support volume & lun together')
+            [lun] = self.get_luns()[volume]
+        elif lun:
+            lun = self.get_luns()[int(lun)]
+        else:
+            raise InfiniSDKException('unmap_volume does must get or volume or lun')
+        assert self == lun.get_mapping_object()
         self.refresh('luns')
-        LogicalUnit._unmap(self, int(lun))
+        lun.unmap()
         if volume:
             volume.refresh('mapped')
