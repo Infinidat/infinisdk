@@ -11,6 +11,7 @@
 ### Redistribution and use in source or binary forms, with or without modification,
 ### are strictly forbidden unless prior written permission is obtained from Infinidat Ltd.
 ###!
+from capacity import Capacity
 import gossip
 from collections import namedtuple
 from ..core.exceptions import InvalidOperationException
@@ -40,6 +41,11 @@ class BaseDataEntity(InfiniBoxObject):
         """Returns whether or not this entity is a clone
         """
         return self.get_type() == self.ENTITY_TYPES.Clone
+
+    def resize(self, delta):
+        """Resize the entity by the given delta"""
+        assert isinstance(delta, Capacity), "Delta must be an instance of Capacity"
+        return self.update_field('size', self.get_size() + delta)
 
     def _create_child(self, name):
         self.refresh('has_children')

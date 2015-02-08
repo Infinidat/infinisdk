@@ -41,6 +41,17 @@ def test_is_master(data_entity):
     assert data_entity.is_master()
 
 
+def test_resize(data_entity):
+    delta = 2 * GB
+    initial_size = data_entity.get_size()
+    data_entity.resize(delta)
+    assert data_entity.get_size() == initial_size + delta
+    data_entity.resize(delta)
+    assert data_entity.get_size() == initial_size + delta * 2
+    with pytest.raises(APICommandFailed):
+        data_entity.resize(-delta)
+
+
 def test_get_all(data_entity):
     data_entity_binder = data_entity.get_collection()
     orig_entities = list(data_entity_binder.get_all())
