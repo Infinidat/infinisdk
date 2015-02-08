@@ -38,8 +38,6 @@ def _install_hooks():
     gossip.define('infinidat.sdk.data_restore_failure', tags=['infinibox', 'volume', 'filesystem'])
 
     gossip.define('infinidat.sdk.pre_creation_data_validation', tags=['infinibox', 'volume', 'filesystem'])
-    gossip.define('infinidat.sdk.pre_snapshot_creation', tags=['infinibox', 'volume', 'filesystem'])
-    gossip.define('infinidat.sdk.pre_clone_creation', tags=['infinibox', 'volume', 'filesystem'])
 
     gossip.define('infinidat.sdk.pre_fields_update', tags=['infinibox'])
 

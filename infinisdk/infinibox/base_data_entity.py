@@ -59,8 +59,6 @@ class BaseDataEntity(InfiniBoxObject):
     def create_clone(self, name=None):
         """Creates a clone from this entity, if supported by the system
         """
-        hook_tags = self._get_tags_for_object_operations(self.system)
-        gossip.trigger_with_tags('infinidat.sdk.pre_clone_creation', {'source': self}, tags=hook_tags)
         if self.is_snapshot():
             return self._create_child(name)
         raise InvalidOperationException('Cannot create clone for volume/clone')
@@ -68,8 +66,6 @@ class BaseDataEntity(InfiniBoxObject):
     def create_snapshot(self, name=None):
         """Creates a snapshot from this entity, if supported by the system
         """
-        hook_tags = self._get_tags_for_object_operations(self.system)
-        gossip.trigger_with_tags('infinidat.sdk.pre_snapshot_creation', {'source': self}, tags=hook_tags)
         if self.is_snapshot():
             raise InvalidOperationException(
                 'Cannot create snapshot for snapshot')
