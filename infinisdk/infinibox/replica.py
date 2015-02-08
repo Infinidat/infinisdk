@@ -43,12 +43,12 @@ class ReplicaBinder(TypeBinder):
                 'remote_base_action': 'CREATE',
             }], entity_type='VOLUME')
 
-    def replicate_volume_existing_target(self, volume, link, remote_volume):
+    def replicate_volume_existing_target(self, volume, link, remote_volume=None):
         return self.create(
             link=link,
             entity_pairs=[{
                 'local_entity_id': volume.id,
-                'remote_entity_id': remote_volume.id,
+                'remote_entity_id': remote_volume.id if remote_volume else None,
                 'remote_base_action': 'NO_BASE_DATA',
             }], entity_type='VOLUME')
 
@@ -150,17 +150,5 @@ class Replica(InfiniBoxObject):
         """Get the corresponsing replica object in the remote machine. For this to work, the SDK user should
         call the register_related_system method of the Infinibox object when a link to a remote system is consructed
         for the first time"""
-        link = self.get_link()
-        remote_address = link.get_remote_host()
-
-        def get_linked_machine():
-            for related_system in self.get_system().iter_related_systems():
-                for network_space in related_system.network_spaces.get_all():
-                    for ip in network_space.get_ips():
-                        if ip.ip_address == remote_address:
-                            return related_system
-
-            raise Exception("Could not find a related machine with IP address {0}".format(remote_address))
-
-        linked_system = get_linked_machine()
+        linked_system = self.get_link().get_linked_system()
         return linked_system.replicas.get_by_id_lazy(self.get_remote_replica_id())
