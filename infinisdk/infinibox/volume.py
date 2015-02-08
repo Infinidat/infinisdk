@@ -12,9 +12,9 @@
 ### are strictly forbidden unless prior written permission is obtained from Infinidat Ltd.
 ###!
 from capacity import GB
+from storage_interfaces.scsi.abstracts import ScsiVolume
 from ..core.type_binder import TypeBinder
 from ..core import Field, CapacityType, MillisecondsDatetimeType
-from storage_interfaces.scsi.abstracts import ScsiVolume
 from ..core.exceptions import InfiniSDKException, ObjectNotFound, TooManyObjectsFound
 from ..core.api.special_values import Autogenerate
 from ..core.bindings import RelatedObjectBinding
