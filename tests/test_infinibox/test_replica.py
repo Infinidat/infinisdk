@@ -1,6 +1,6 @@
 import pytest
 
-from ..conftest import new_to_version
+from ..conftest import new_to_version, secondary_infinibox as secondary_infinibox_fx
 from infinisdk.core.exceptions import TooManyObjectsFound, ObjectNotFound
 
 
@@ -109,6 +109,15 @@ def test_is_rmr_target(volume, replica, secondary_volume):
     assert not secondary_volume.is_rmr_source()
 
 
+@new_to_version('2.0')
+def test_remote_replica(request, replica, secondary_volume, secondary_infinibox):
+    third_system = secondary_infinibox_fx(request)
+    replica.system.register_related_system(third_system)
+    remote_replica = replica.get_remote_replica()
+    assert remote_replica.get_system().get_name() == secondary_infinibox.get_name()
+    assert remote_replica.get_local_entity().get_id() == secondary_volume.get_id()
+
+
 @pytest.fixture
 def secondary_volume(replica, secondary_infinibox):
     [returned] = secondary_infinibox.volumes
@@ -142,6 +151,8 @@ def test_replica_suspend_resume(replica):
 
 @pytest.fixture
 def replica(infinibox, secondary_infinibox, link, replica_creation_kwargs):
+    infinibox.register_related_system(secondary_infinibox)
+    secondary_infinibox.register_related_system(infinibox)
     return infinibox.replicas.create(
         link=link, **replica_creation_kwargs)
 
