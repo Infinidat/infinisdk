@@ -113,7 +113,7 @@ Here is a code snippet to unmap all volumes in the system that contain 'to remov
 
 		>>> volume.update_name('this is a volume to remove')
 
-		>>> for mapping_object in itertools.chain(system.clusters, system.hosts):
+		>>> for mapping_object in itertools.chain(system.host_clusters, system.hosts):
 		...     for lun in mapping_object.get_luns():
 		...         if 'to remove' in lun.volume.get_name():
 		...             print("Unmapping", lun.volume)
@@ -140,7 +140,7 @@ Manipulating clusters is done with the :class:`.Cluster` class:
 
 .. code-block:: python
 
-		>>> cluster = system.clusters.create()
+		>>> cluster = system.host_clusters.create()
 		>>> cluster.add_host(host)
 
 		>>> lu = cluster.map_volume(volume)
