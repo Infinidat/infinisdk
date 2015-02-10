@@ -1,7 +1,7 @@
 import pytest
 
 from ..conftest import new_to_version, secondary_infinibox as secondary_infinibox_fx
-from infinisdk.core.exceptions import TooManyObjectsFound, ObjectNotFound
+from infinisdk.core.exceptions import TooManyObjectsFound, ObjectNotFound, InfiniSDKException
 
 
 @new_to_version('2.0')
@@ -116,7 +116,23 @@ def test_remote_replica(request, replica, secondary_volume, secondary_infinibox)
     remote_replica = replica.get_remote_replica()
     assert remote_replica.get_system().get_name() == secondary_infinibox.get_name()
     assert remote_replica.get_local_entity().get_id() == secondary_volume.get_id()
+    assert remote_replica.is_target()
+    assert remote_replica.get_state() is None
+    assert not remote_replica.is_suspended()
 
+
+@new_to_version('2.0')
+def test_remote_replica_without_remote_system(replica, secondary_infinibox):
+    remote_replica = replica.get_remote_replica()
+    replica.system._related_systems.pop()
+    remote_replica.system._related_systems.pop()
+    with pytest.raises(InfiniSDKException):
+        replica.get_remote_replica()
+    with pytest.raises(InfiniSDKException):
+        remote_replica.get_remote_replica()
+    assert not replica.is_suspended()
+    with pytest.raises(InfiniSDKException):
+        remote_replica.is_suspended()
 
 @pytest.fixture
 def secondary_volume(replica, secondary_infinibox):

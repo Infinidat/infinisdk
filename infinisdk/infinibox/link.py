@@ -14,6 +14,7 @@
 from ..core.api.special_values import Autogenerate
 from ..core import Field
 from ..core.bindings import RelatedObjectBinding
+from ..core.exceptions import InfiniSDKException
 from .system_object import InfiniBoxObject
 
 
@@ -22,7 +23,7 @@ class Link(InfiniBoxObject):
     FIELDS = [
 
         Field('id', type=int, is_identity=True, is_filterable=True, is_sortable=True),
-        Field('name', creation_parameter=True, mutable=True),
+        Field('name', creation_parameter=True, mutable=True, default=Autogenerate("link_{uuid}")),
         Field('local_replication_network_space', api_name='local_replication_network_space_id',
               binding=RelatedObjectBinding('network_spaces'),
               type='infinisdk.infinibox.network_space:NetworkSpace', creation_parameter=True),
@@ -56,4 +57,4 @@ class Link(InfiniBoxObject):
                     if ip.ip_address == remote_host:
                         return related_system
 
-        raise Exception("Could not find a related machine with IP address {0}".format(remote_host))
+        raise InfiniSDKException("Could not find a related machine with IP address {0}".format(remote_host))
