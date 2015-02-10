@@ -13,17 +13,26 @@
 ###!
 from .._compat import string_types
 from capacity import Capacity
+from .utils import deprecated
 
 
-def make_getter(field):
+def make_backwards_compatible_getter(field):
+    getter_func = _make_getter(field, "get_{0}")
+    return deprecated(getter_func, "Use is_{0} instead".format(field.name))
+
+def _make_getter(field, name_template):
     def getter(self, **kwargs):
         return self.get_field(field.name, **kwargs)
 
-    getter.__name__ = "get_{0}".format(field.name)
+    getter.__name__ = name_template.format(field.name)
     getter.__doc__ = """Obtains the value of the {0.name!r} field
 
     :rtype: {1} """.format(field, _format_type_doc(field.type._type))
     return getter
+
+def make_getter(field):
+    name_template = "is_{0}" if field.type._type is bool else "get_{0}"
+    return _make_getter(field, name_template)
 
 def make_updater(field):
     def updater(self, value, **kwargs):

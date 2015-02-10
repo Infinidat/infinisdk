@@ -369,7 +369,7 @@ class FcPort(InfiniBoxSystemComponent):
     ]
 
     def is_link_up(self):
-        if not self.get_enabled():
+        if not self.is_enabled():
             return False
         if self.get_state() != 'OK':
             return False
