@@ -91,17 +91,6 @@ infinibox.links
 .. autoclass:: Link
    :members:
 
-
-infinibox.cluster
-~~~~~~~~~~~~~~~~~
-
-.. automodule:: infinisdk.infinibox.infinibox_cluster
-
-.. autoclass:: InfiniboxCluster
-   :members:
-
-.. note:: not to be confused with ``infinibox.clusters``
-
 infinibox.events
 ~~~~~~~~~~~~~~~~
 
