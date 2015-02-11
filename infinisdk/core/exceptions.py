@@ -25,6 +25,9 @@ class CacheMiss(InfiniSDKException):
 class APICommandException(InfiniSDKException):
     pass
 
+class CannotGetReplicaState(InfiniSDKException):
+    pass
+
 class SystemNotFoundException(APICommandException):
     def __init__(self, msg, sys_address=None):
         super(SystemNotFoundException, self).__init__(msg)

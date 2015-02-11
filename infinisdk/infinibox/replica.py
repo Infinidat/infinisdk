@@ -15,7 +15,7 @@ from ..core.api.special_values import Autogenerate
 from ..core.type_binder import TypeBinder
 from ..core import Field
 from ..core.bindings import RelatedObjectBinding
-from ..core.exceptions import TooManyObjectsFound, InfiniSDKException
+from ..core.exceptions import TooManyObjectsFound, CannotGetReplicaState
 from .system_object import InfiniBoxObject
 
 
@@ -109,41 +109,43 @@ class Replica(InfiniBoxObject):
         self.system.api.post(self.get_this_url_path().add_path('resume'))
         self.refresh('state')
 
-    def _get_src_replica_state(self, *args, **kwargs):
-        try:
-            src_replica = self if self.is_source(*args, **kwargs) else self.get_remote_replica()
-        except InfiniSDKException:
-            raise InfiniSDKException('Cannot check replica state without replica source object')
-        return src_replica.get_state(*args, **kwargs)
+    def _validate_can_check_state(self):
+        if self.is_target():
+            raise CannotGetReplicaState('Replica state cannot be checked on target replica')
 
     def is_suspended(self, *args, **kwargs):
-        """Returns whether or not the source replica is in suspended state
+        """Returns whether or not this replica is in suspended state
         """
-        return self._get_src_replica_state(*args, **kwargs).lower() == 'suspended'
+        self._validate_can_check_state()
+        return self.get_state(*args, **kwargs).lower() == 'suspended'
 
     def is_idle(self, *args, **kwargs):
-        """Returns whether or not the source replica is in idle state
+        """Returns whether or not this replica is in idle state
         """
-        return self._get_src_replica_state(*args, **kwargs).lower() == 'idle'
+        self._validate_can_check_state()
+        return self.get_state(*args, **kwargs).lower() == 'idle'
 
     def is_auto_suspended(self, *args, **kwargs):
-        """Returns whether or not the source replica is in auto_suspended state
+        """Returns whether or not this replica is in auto_suspended state
         """
-        return self._get_src_replica_state(*args, **kwargs).lower() == 'auto_suspended'
+        self._validate_can_check_state()
+        return self.get_state(*args, **kwargs).lower() == 'auto_suspended'
 
     def is_initiating(self, *args, **kwargs):
-        """Returns whether or not the source replica is in initiating state
+        """Returns whether or not this replica is in initiating state
         """
-        return self._get_src_replica_state(*args, **kwargs).lower() == 'initiating'
+        self._validate_can_check_state()
+        return self.get_state(*args, **kwargs).lower() == 'initiating'
 
     def is_replicating(self, *args, **kwargs):
-        """Returns whether or not the source replica is in replicating state
+        """Returns whether or not this replica is in replicating state
         """
-        return self._get_src_replica_state(*args, **kwargs).lower() == 'replicating'
+        self._validate_can_check_state()
+        return self.get_state(*args, **kwargs).lower() == 'replicating'
 
     def is_active(self, *args, **kwargs):
-        self._get_src_replica_state(*args, **kwargs) # Ensuring state recieved as requested
-        return not (self.is_suspended(from_cache=True) or self.is_auto_suspended(from_cache=True))
+        self._validate_can_check_state()
+        return self.get_state(*args, **kwargs).lower() in ['idle', 'initiating', 'replicating']
 
     def change_role(self, retain_staging_area=False):
         self.system.api.post(self.get_this_url_path()
