@@ -40,7 +40,7 @@ def test_class_deprecation(capture, decorator):
     class Bla(object):
 
         @deprecated('reason')
-        @decorator
+        @classmethod
         def func(self, a, b):
             assert isinstance(self, Bla)
             return a + b
