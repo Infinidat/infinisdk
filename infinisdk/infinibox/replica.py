@@ -24,7 +24,7 @@ class ReplicaBinder(TypeBinder):
     """Implements *system.replicas*
     """
 
-    def replicate_volume(self, volume, link, remote_pool=None, remote_volume=None):
+    def replicate_volume(self, volume, link, remote_pool=None, remote_volume=None, **kw):
         """Replicates a volume, creating its remote replica on the specified pool
 
         :param remote_pool: if omitted, ``remote_volume`` must be specified. Otherwise, means creating target volume
@@ -32,25 +32,25 @@ class ReplicaBinder(TypeBinder):
         """
         if remote_volume is None:
             assert remote_pool is not None
-            return self.replicate_volume_create_target(volume, link, remote_pool=remote_pool)
-        return self.replicate_volume_existing_target(volume, link, remote_volume=remote_volume)
+            return self.replicate_volume_create_target(volume, link, remote_pool=remote_pool, **kw)
+        return self.replicate_volume_existing_target(volume, link, remote_volume=remote_volume, **kw)
 
-    def replicate_volume_create_target(self, volume, link, remote_pool):
+    def replicate_volume_create_target(self, volume, link, remote_pool, **kw):
         return self.create(
             link=link, remote_pool_id=remote_pool.id,
             entity_pairs=[{
                 'local_entity_id': volume.id,
                 'remote_base_action': 'CREATE',
-            }], entity_type='VOLUME')
+            }], entity_type='VOLUME', **kw)
 
-    def replicate_volume_existing_target(self, volume, link, remote_volume=None):
+    def replicate_volume_existing_target(self, volume, link, remote_volume=None, **kw):
         return self.create(
             link=link,
             entity_pairs=[{
                 'local_entity_id': volume.id,
                 'remote_entity_id': remote_volume.id if remote_volume else None,
                 'remote_base_action': 'NO_BASE_DATA',
-            }], entity_type='VOLUME')
+            }], entity_type='VOLUME', **kw)
 
 
 class Replica(InfiniBoxObject):
