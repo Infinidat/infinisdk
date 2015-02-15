@@ -85,4 +85,7 @@ class Event(SystemObject):
     def keys(self):
         return self._cache.keys()
 
+    def get_event_data_dict(self):
+        return dict((value['name'], value['value']) for value in self.get_field('data', from_cache=True))
+
 collections.Mapping.register(Event)
