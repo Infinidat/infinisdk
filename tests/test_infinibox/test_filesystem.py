@@ -9,7 +9,7 @@ from ..conftest import new_to_version
 
 
 @new_to_version('2.0')
-def test_exporting(infinibox, filesystem):
+def test_filesystem_exporting(infinibox, filesystem):
     assert not filesystem.get_exports()
     export = filesystem.add_export()
     assert filesystem.get_exports()[0] == export
@@ -21,7 +21,7 @@ def test_exporting(infinibox, filesystem):
 
 
 @new_to_version('2.0')
-def test_export_deletion(filesystem):
+def test_filesystem_with_exports_deletion(filesystem):
     filesystem.add_export()
     filesystem.add_export()
     with pytest.raises(APICommandFailed) as caught:
