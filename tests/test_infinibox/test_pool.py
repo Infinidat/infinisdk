@@ -83,3 +83,10 @@ def test_pool_capacity_fields_types(pool):
             assert field.type.type == Capacity
             assert field.type.api_type == int
             assert isinstance(pool.get_field(field_name), Capacity)
+
+def test_lock_pool(pool):
+    assert not(pool.is_limited() or pool.is_locked())
+    pool.lock()
+    assert pool.is_locked()
+    pool.unlock()
+    assert not pool.is_locked()

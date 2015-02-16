@@ -46,6 +46,7 @@ class Pool(InfiniBoxObject):
         Field("created_at", type=MillisecondsDatetimeType, is_sortable=True, is_filterable=True),
         Field("updated_at", type=MillisecondsDatetimeType, is_sortable=True, is_filterable=True),
         Field("ssd_enabled", type=bool, mutable=True, creation_parameter=True, is_filterable=True, is_sortable=True, optional=True),
+        Field("state", cached=False),
     ]
 
     def get_volumes(self, **kwargs):
@@ -65,3 +66,15 @@ class Pool(InfiniBoxObject):
 
     def discard_owner(self, user):
         self.system.api.delete(self._get_pool_owners_url(user.id), data={})
+
+    def is_locked(self, *args, **kwargs):
+        return self.get_state(*args, **kwargs) == 'LOCKED'
+
+    def is_limited(self, *args, **kwargs):
+        return self.get_state(*args, **kwargs) == 'LIMITED'
+
+    def lock(self):
+         self.system.api.post(self.get_this_url_path().add_path('lock'))
+
+    def unlock(self):
+         self.system.api.post(self.get_this_url_path().add_path('unlock'))
