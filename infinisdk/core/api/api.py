@@ -63,21 +63,25 @@ class API(object):
         super(API, self).__init__()
         self._preprocessors = []
         self.system = target
+        self._auth = auth
         self._use_ssl = use_ssl
         self._ssl_cert = ssl_cert
         self._default_request_timeout = None
         self._interactive = False
         self._auto_retry_predicates = {}
-        self._session = requests.Session()
-        assert self._session.cert is None
-        self._session.cert = ssl_cert
-        if not ssl_cert:
-            self._session.verify = False
-        self._session.auth = auth
-        self._session.headers["content-type"] = "application/json"
+        self.reinitialize_session()
         self._urls = [self._url_from_address(address, use_ssl) for address in target.get_api_addresses()]
         self._active_url = None
         self._checked_version = False
+
+    def reinitialize_session(self):
+        self._session = requests.Session()
+        assert self._session.cert is None
+        self._session.cert = self._ssl_cert
+        if not self._ssl_cert:
+            self._session.verify = False
+        self._session.auth = self._auth
+        self._session.headers["content-type"] = "application/json"
 
     @property
     def urls(self):
