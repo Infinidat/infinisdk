@@ -119,15 +119,6 @@ Updating LDAP Configuration Prioritiy Order
        system.ldap_configs.set_order([ldap_config, ldap_config2, ...])
 
 
-Binding an LDAP Group to a Local Group
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. code-block:: python
-
-       >>> group = ldap_config.create_local_group(name='group', role='PoolAdmin', dn='users')
-
-The returned object adheres to the same interface as regular user objects mentioned above.
-
 Deleting LDAP Configurations
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

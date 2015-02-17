@@ -16,6 +16,7 @@ from urlobject import URLObject as URL
 from .._compat import iteritems
 from ..core.type_binder import TypeBinder
 from ..core import Field, SystemObject
+from ..core.utils import deprecated
 from .user import User
 
 
@@ -74,6 +75,7 @@ class LDAPConfig(SystemObject):
         """
         self.system.api.post('config/ldap/{0}/test'.format(self.id), data={})
 
+    @deprecated("Use create_group instead")
     def create_local_group(self, name, role, dn):
         returned = self.system.api.post('users', data={
             'type': 'Ldap',
