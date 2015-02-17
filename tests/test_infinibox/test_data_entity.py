@@ -105,7 +105,7 @@ def test_clones_and_snapshots(infinibox, data_entity):
     assert (not data_entity.has_children())
 
 
-@pytest.mark.parametrize('current_time', [1406113997.675789, 1406114887.452333, time.time()])
+@pytest.mark.parametrize('current_time', [1406113997.675789, 1406114887.452333])
 def test_created_at_field_type_conversion(current_time):
     def _rounded_to_millsecs(arrow_timestamp):
         return arrow.get(int(arrow_timestamp.float_timestamp * 1000) / 1000.0)

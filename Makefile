@@ -7,7 +7,7 @@ docs: env
 	.env/bin/python setup.py build_sphinx -a -E
 
 test: env
-	.env/bin/py.test tests
+	.env/bin/py.test tests -n 4
 
 coverage: env
 	.env/bin/pip install pytest-cov
