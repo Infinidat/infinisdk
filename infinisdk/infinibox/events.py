@@ -18,17 +18,13 @@ from ..core.api.special_values import Autogenerate
 
 class Events(EventsBase):
 
-    def create_custom_event(self,
-                            level='INFO',
-                            description='custom event',
-                            visibility='INFINIDAT',
-                            data=None):
-
+    def create_custom_event(self, level='INFO', description='custom event', visibility='CUSTOMER', data=None):
         _data = {"data": data or [],
                  "level": level,
                  "description_template": description,
                  "visibility":visibility}
-        return self.system.api.post("events/custom", data=_data).get_result()
+        object_data = self.system.api.post("events/custom", data=_data).get_result()
+        return self.object_type(self.system, object_data)
 
     def get_levels(self):
         sorted_levels = sorted(self._get_events_types()['levels'], key=lambda d: d['value'])
