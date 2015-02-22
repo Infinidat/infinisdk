@@ -51,6 +51,8 @@ class APICommandFailed(APICommandException):
         self.response = response
         self.status_code = self.response.response.status_code
         json = response.get_json()
+        error = response.get_error()
+        self.error_code = error.get('code') if error else None
         if json is None:
             message = "[{0}]".format(response.response.content)
         else:
