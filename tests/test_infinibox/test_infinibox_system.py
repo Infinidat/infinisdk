@@ -1,9 +1,11 @@
 import pytest
 from capacity import Capacity
 from logbook import Logger
+from sentinels import NOTHING
 
 from infinisdk._compat import iteritems, string_types
 from infinisdk.infinibox import InfiniBox
+from infinisdk.infinibox.system_object import InfiniBoxObject
 from infinisdk.core.exceptions import SystemNotFoundException, APITransportFailure
 from ..conftest import disable_api_context, enabling_infinisdk_internal, new_to_version
 from infinibox_sysdefs.defs import latest as defs
@@ -84,11 +86,15 @@ def test_get_collections_names(infinibox):
     assert 'volumes' in collections_names
 
 def test_single_metadata_creation_on_all_infinibox_objects(infinibox, volume):
-    ignore_types = ['volumes', 'filesystems', 'exports', 'network_spaces', 'users', 'emailrules', 'network_interfaces', 'links', 'replicas', 'ldap_configs']
+    def should_ignore_type(obj_type):
+        if not issubclass(obj_type, InfiniBoxObject):
+            return True
+        for field in obj_type.fields:
+            if field.creation_parameter and field.generate_default() is NOTHING:
+                return True
+        return False
 
-    type_classes = [obj_type for obj_type in infinibox.OBJECT_TYPES
-                    if obj_type.get_plural_name() not in ignore_types]
-
+    type_classes = [obj_type for obj_type in infinibox.OBJECT_TYPES if not should_ignore_type(obj_type)]
     _validate_single_metadata_support(volume)
 
     for type_class in type_classes:
