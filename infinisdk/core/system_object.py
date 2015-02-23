@@ -367,10 +367,15 @@ class SystemObject(with_metaclass(FieldsMeta)):
         """
         Deletes this object.
         """
+        with self._get_delete_context():
+            self.system.api.delete(self.get_this_url_path())
+
+    @contextmanager
+    def _get_delete_context(self):
         hook_tags = self._get_tags_for_object_operations(self.system)
         gossip.trigger_with_tags('infinidat.sdk.pre_object_deletion', {'obj': self}, tags=hook_tags)
         with _possible_api_failure_context(hook_tags):
-            self.system.api.delete(self.get_this_url_path())
+            yield
         gossip.trigger_with_tags('infinidat.sdk.post_object_deletion', {'obj': self}, tags=hook_tags)
 
     @cached_method

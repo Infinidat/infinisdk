@@ -44,7 +44,8 @@ class Link(InfiniBoxObject):
         url = self.get_this_url_path()
         if force_if_remote_error:
             url = url.add_query_param('force_if_remote_error', 'true')
-        self.system.api.delete(url)
+        with self._get_delete_context():
+            self.system.api.delete(url)
 
     def get_linked_system(self):
         """Get the corresponsing system object at the remote and of the link. For this to work, the SDK user should
