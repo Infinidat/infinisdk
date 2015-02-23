@@ -37,6 +37,11 @@ class NetworkInterface(InfiniBoxObject):
     def get_type_name(cls):
         return 'network_interface'
 
+    def get_network_spaces(self):
+        return [network_space
+                for network_space in self.system.network_spaces
+                if self in network_space.get_interfaces()]
+
     def add_port(self, port):
         url = self.get_this_url_path().add_path("ports")
         data = self.fields.ports.binding.get_api_value_from_value(None, None, None, [port])[0]
