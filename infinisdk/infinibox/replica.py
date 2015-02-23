@@ -177,7 +177,8 @@ class Replica(InfiniBoxObject):
         if force_if_no_remote_credentials:
             path = path.add_query_param('force_if_no_remote_credentials', 'true')
 
-        self.system.api.delete(path)
+        with self._get_delete_context():
+            self.system.api.delete(path)
 
     def get_remote_replica(self):
         """Get the corresponsing replica object in the remote machine. For this to work, the SDK user should
