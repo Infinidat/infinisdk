@@ -1,5 +1,6 @@
-from capacity import Capacity
+import pytest
 from infinisdk._compat import xrange
+from capacity import Capacity, TB
 from infinisdk.infinibox.volume import Volume
 from infinisdk.infinibox.pool import Pool
 from infinisdk.infinibox.scsi_serial import SCSISerial
@@ -54,22 +55,21 @@ def test_create_many(infinibox, pool):
         assert vol.get_name() == '{0}_{1}'.format(name, index)
 
 
-def test_move_volume(infinibox, volume):
-    # TODO: support with_capacity parameter (TESTINF-3058)
-    with_capacity = False
-    oldpool = volume.get_pool()
+@pytest.mark.parametrize('with_capacity', [True, False])
+def test_move_volume(infinibox, with_capacity):
+    oldpool = infinibox.pools.create(virtual_capacity=10*TB, physical_capacity=10*TB)
+    volume = infinibox.volumes.create(pool=oldpool, size=TB)
     old_virt_capacity = oldpool.get_virtual_capacity()
-    newpool = infinibox.pools.create()
+    newpool = infinibox.pools.create(virtual_capacity=10*TB, physical_capacity=10*TB)
     new_virt_capacity = newpool.get_virtual_capacity()
     assert newpool != oldpool
     volume.move_pool(newpool, with_capacity=with_capacity)
     assert volume.get_pool() == newpool
     assert volume not in oldpool.get_volumes()
     assert volume in newpool.get_volumes()
-    vol_size = volume.get_size()
     if with_capacity:
-        assert oldpool.get_virtual_capacity() == old_virt_capacity - vol_size
-        assert newpool.get_virtual_capacity() == new_virt_capacity + vol_size
+        assert oldpool.get_virtual_capacity(from_cache=False) < old_virt_capacity
+        assert newpool.get_virtual_capacity(from_cache=False) > new_virt_capacity
     else:
-        assert oldpool.get_virtual_capacity() == old_virt_capacity
-        assert newpool.get_virtual_capacity() == new_virt_capacity
+        assert oldpool.get_virtual_capacity(from_cache=False) == old_virt_capacity
+        assert newpool.get_virtual_capacity(from_cache=False) == new_virt_capacity
