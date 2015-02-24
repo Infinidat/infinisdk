@@ -54,12 +54,18 @@ def test_creation_hook(hooks, forge, izbox):
     izbox.objects.filesystems.create(name="test_fs", quota=GB)
 
 def test_creation_hook_failure(hooks, forge, izbox):
+    failure_hook_kwargs = {}
+
     hooks.pre_object_creation_hook(
         system=Is(izbox),
         data=HasKeyValue("name", "test_fs"),
         cls=izbox.objects.filesystems.object_type
     )
-    hooks.object_operation_failure_hook()
+    hooks.object_operation_failure_hook(exception=IsA(APICommandFailed)).\
+        and_call_with_args(failure_hook_kwargs.update)
+
     forge.replay()
-    with pytest.raises(APICommandFailed):
+    with pytest.raises(APICommandFailed) as caught:
         izbox.objects.filesystems.create(name="test_fs", quota=OMIT)
+
+    assert caught.value is failure_hook_kwargs['exception']

@@ -398,6 +398,6 @@ class SystemObject(with_metaclass(FieldsMeta)):
 def _possible_api_failure_context(tags):
     try:
         yield
-    except APICommandFailed:
-        gossip.trigger_with_tags('infinidat.sdk.object_operation_failure', tags=tags)
+    except APICommandFailed as e:
+        gossip.trigger_with_tags('infinidat.sdk.object_operation_failure', {'exception': e}, tags=tags)
         raise
