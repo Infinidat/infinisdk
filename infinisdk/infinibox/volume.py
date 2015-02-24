@@ -58,7 +58,8 @@ class Volume(BaseDataEntity):
         Field("tree_allocated", type=CapacityType),
         Field("pool", type='infinisdk.infinibox.pool:Pool', api_name="pool_id", creation_parameter=True, is_filterable=True, is_sortable=True,
               binding=RelatedObjectBinding()),
-
+        Field("cg", type='infinisdk.infinibox.cons_group:ConsGroup', api_name="cg_id", is_filterable=True, is_sortable=True,
+              binding=RelatedObjectBinding('cons_groups', None)),
         Field("type", cached=True, is_filterable=True, is_sortable=True),
         Field("parent", type='infinisdk.infinibox.volume:Volume', cached=True, api_name="parent_id",
                 binding=RelatedObjectBinding('volumes'), is_filterable=True),

@@ -27,6 +27,10 @@ class Compatability(object):
     def get_version_major(self):
         return self.system.get_version().partition('.')[0]
 
+    def _get_version_as_float(self):
+        float_digit_list = self.system.get_version().split('.')[:2]
+        return float(".".join(float_digit_list))
+
     def _init_fetatures(self):
         resp = self.system.api.get("_features", assert_success=False)
         if resp.response.status_code == httplib.NOT_FOUND:
@@ -65,3 +69,6 @@ class Compatability(object):
 
     def get_metadata_version(self):
         return self._get_feature_version('metadata', 1)
+
+    def has_consistency_groups(self):
+        return self._get_version_as_float() >= 2.2
