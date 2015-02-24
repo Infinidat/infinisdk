@@ -29,6 +29,15 @@ def test_disable_enable_network_space_ip(infinibox, network_space):
 
 
 @new_to_version('2.0')
+def test_network_space_get_links_no_links(infinibox, network_space):
+    assert list(network_space.get_links()) == []
+
+@new_to_version('2.0')
+def test_network_space_get_links_with_links(infinibox, link):
+    [ns] = infinibox.network_spaces
+    assert [link] == list(ns.get_links())
+
+@new_to_version('2.0')
 def test_update_interface_list_of_network_space(infinibox, network_space):
     node_1 = infinibox.components.nodes.get(index=1)
     origin_interfaces = network_space.get_interfaces()

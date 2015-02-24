@@ -57,3 +57,6 @@ class NetworkSpace(InfiniBoxObject):
     def enable_ip_address(self, ip_address):
         self.system.api.post(self.get_this_url_path().add_path('ips').add_path(ip_address).add_path('enable'))
         self.refresh('ips')
+
+    def get_links(self):
+        return self.system.links.find(local_replication_network_space_id=self.id)
