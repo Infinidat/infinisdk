@@ -22,7 +22,7 @@ from infi.pyutils.lazy import cached_method
 from urlobject import URLObject as URL
 
 from .exceptions import APICommandFailed, APITransportFailure
-from .._compat import with_metaclass, iteritems, httplib
+from .._compat import with_metaclass, iteritems, httplib, reraise
 from .exceptions import MissingFields, CacheMiss
 from api_object_schema import FieldsMeta as FieldsMetaBase
 from .field import Field
@@ -403,4 +403,4 @@ def _possible_api_failure_context(tags):
     except APICommandFailed as e:
         exc_type, exc_value, exc_tb = sys.exc_info()
         gossip.trigger_with_tags('infinidat.sdk.object_operation_failure', {'exception': e}, tags=tags)
-        raise exc_type, exc_value, exc_tb # workaround for simple 'raise' not working
+        reraise(exc_type, exc_value, exc_tb)
