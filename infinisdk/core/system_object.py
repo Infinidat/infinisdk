@@ -14,6 +14,7 @@
 import itertools
 import gossip
 import functools
+import sys
 from contextlib import contextmanager
 from sentinels import NOTHING
 from infi.pyutils.lazy import cached_method
@@ -399,5 +400,6 @@ def _possible_api_failure_context(tags):
     try:
         yield
     except APICommandFailed as e:
+        exc_type, exc_value, exc_tb = sys.exc_info()
         gossip.trigger_with_tags('infinidat.sdk.object_operation_failure', {'exception': e}, tags=tags)
-        raise
+        raise exc_type, exc_value, exc_tb # workaround for simple 'raise' not working
