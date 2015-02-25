@@ -74,7 +74,9 @@ MillisecondsDatetimeType = TypeInfo(type=arrow.Arrow,
 class MillisecondsDeltaTranslator(ValueTranslator):
 
     def _to_api(self, value):
-        return int(value.float_timestamp * 1000.0)
+        # for python 2.6 compatibility...
+        total_seconds = (value.microseconds + (value.seconds + value.days * 24 * 3600) * 10**6) / 10**6
+        return int(total_seconds * 1000.0)
 
     def _from_api(self, value):
         return timedelta(seconds=int(value), microseconds = int((value - int(value)) * 1000))
