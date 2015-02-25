@@ -12,6 +12,7 @@
 ### are strictly forbidden unless prior written permission is obtained from Infinidat Ltd.
 ###!
 import arrow
+from datetime import timedelta
 import munch
 from capacity import byte, Capacity
 from infi.dtypes.wwn import WWN
@@ -65,8 +66,22 @@ class MillisecondsDatetimeTranslator(ValueTranslator):
     def _from_api(self, value):
         return arrow.get(value / 1000.0)
 
+
 MillisecondsDatetimeType = TypeInfo(type=arrow.Arrow,
                                     api_type=int, translator=MillisecondsDatetimeTranslator())
+
+
+class MillisecondsDeltaTranslator(ValueTranslator):
+
+    def _to_api(self, value):
+        return int(value.total_seconds() * 1000.0)
+
+    def _from_api(self, value):
+        return timedelta(seconds=int(value), microseconds = int((value - int(value)) * 1000))
+
+
+MillisecondsDeltaType = TypeInfo(type=arrow.Arrow,
+                                  api_type=int, translator=MillisecondsDeltaTranslator())
 
 
 WWNType = TypeInfo(type=WWN, api_type=str)

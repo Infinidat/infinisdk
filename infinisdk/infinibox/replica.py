@@ -11,11 +11,13 @@
 ### Redistribution and use in source or binary forms, with or without modification,
 ### are strictly forbidden unless prior written permission is obtained from Infinidat Ltd.
 ### !
+from datetime import timedelta
 from ..core.api.special_values import Autogenerate
 from ..core.type_binder import TypeBinder
 from ..core import Field
 from ..core.bindings import RelatedObjectBinding
 from ..core.exceptions import TooManyObjectsFound, CannotGetReplicaState
+from ..core.translators_and_types import MillisecondsDeltaType
 from .system_object import InfiniBoxObject
 
 
@@ -72,8 +74,8 @@ class Replica(InfiniBoxObject):
         Field('remote_replica_id', type=int),
         Field('role', type=str),
         Field('state', type=str),
-        Field('sync_interval', type=int,
-              creation_parameter=True, default=30000),
+        Field('sync_interval', api_name='sync_interval', type=MillisecondsDeltaType,
+              creation_parameter=True, default=timedelta(seconds=30)),
 
     ]
 
