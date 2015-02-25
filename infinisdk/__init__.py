@@ -29,9 +29,9 @@ def _install_hooks():
             gossip.define(full_hook_name, tags=obj_type_name)
     gossip.define('infinidat.sdk.object_operation_failure', tags=obj_type_name)
 
-    gossip.define("infinidat.sdk.begin_fork",  tags=['infinibox', 'volume', 'filesystem', 'pseudo_volume'])
-    gossip.define("infinidat.sdk.cancel_fork", tags=['infinibox', 'volume', 'filesystem', 'pseudo_volume'])
-    gossip.define("infinidat.sdk.finish_fork", tags=['infinibox', 'volume', 'filesystem', 'pseudo_volume'])
+    gossip.define("infinidat.sdk.begin_fork",  tags=['infinibox', 'volume', 'filesystem'])
+    gossip.define("infinidat.sdk.cancel_fork", tags=['infinibox', 'volume', 'filesystem'])
+    gossip.define("infinidat.sdk.finish_fork", tags=['infinibox', 'volume', 'filesystem'])
 
     gossip.define('infinidat.sdk.pre_data_restore', tags=['infinibox', 'volume', 'filesystem'])
     gossip.define('infinidat.sdk.post_data_restore', tags=['infinibox', 'volume', 'filesystem'])
