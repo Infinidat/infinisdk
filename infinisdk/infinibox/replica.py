@@ -75,6 +75,7 @@ class Replica(InfiniBoxObject):
         Field('role', type=str),
         Field('state', type=str),
         Field('sync_interval', api_name='sync_interval', type=MillisecondsDeltaType,
+              mutable=True,
               creation_parameter=True, default=timedelta(seconds=30)),
 
     ]
