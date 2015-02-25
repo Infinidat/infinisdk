@@ -147,10 +147,9 @@ class Replica(InfiniBoxObject):
         self._validate_can_check_state()
         return self.get_state(*args, **kwargs).lower() in ['idle', 'initiating', 'replicating']
 
-    def change_role(self, retain_staging_area=False):
+    def change_role(self):
         self.system.api.post(self.get_this_url_path()
-                                 .add_path('change_role')
-                                 .add_query_param('retain_staging_area', 'true' if retain_staging_area else 'false'))
+                                 .add_path('change_role'))
         self.refresh()
 
     def is_source(self):
