@@ -63,12 +63,11 @@ def test_replicate_volume_shortcut(infinibox, secondary_infinibox, link, create_
 
 
 @new_to_version('2.0')
-@pytest.mark.parametrize('retain_staging_area', [True, False])
-def test_replica_change_role(replica, retain_staging_area):
+def test_replica_change_role(replica):
     replica.suspend()
     assert replica.is_source()
     assert not replica.is_target()
-    replica.change_role(retain_staging_area=retain_staging_area)
+    replica.change_role()
     assert not replica.is_source()
     assert replica.is_target()
 
