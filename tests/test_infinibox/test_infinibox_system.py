@@ -31,9 +31,9 @@ def test_api_transport_error(infinibox):
     assert 'get' in transport_repr
 
 
-
 def test_get_api_auth(infinibox):
     assert infinibox.get_api_auth() == ('infinidat', '123456')
+
 
 def test_get_api_timeout(infinibox):
     assert infinibox.get_api_timeout() == 30
@@ -42,8 +42,10 @@ def test_get_api_timeout(infinibox):
     assert infinibox.api.get_request_default_timeout() == new_timeout
     assert infinibox.get_api_timeout() == new_timeout
 
+
 def test_get_simulator(infinibox, infinibox_simulator):
     assert infinibox.get_simulator() is infinibox_simulator
+
 
 def test_multiple_metadata_creation(infinibox, volume):
     metadata_d = {'some_key':  'some_value',
@@ -68,6 +70,7 @@ def test_multiple_metadata_creation(infinibox, volume):
     volume.clear_metadata()
     assert len(volume.get_all_metadata()) == 0
 
+
 def _validate_single_metadata_support(obj):
     _logger.debug("Validating {0}'s metadata support", type(obj).__name__)
     key, value = 'some_key', 'some_value'
@@ -80,10 +83,12 @@ def _validate_single_metadata_support(obj):
     obj.unset_metadata(key)
     assert len(obj.get_all_metadata()) == 0
 
+
 def test_get_collections_names(infinibox):
     collections_names = infinibox.get_collections_names()
     assert len(collections_names) == len(infinibox.OBJECT_TYPES)
     assert 'volumes' in collections_names
+
 
 def test_single_metadata_creation_on_all_infinibox_objects(infinibox, volume):
     def should_ignore_type(obj_type):
@@ -94,12 +99,14 @@ def test_single_metadata_creation_on_all_infinibox_objects(infinibox, volume):
                 return True
         return False
 
-    type_classes = [obj_type for obj_type in infinibox.OBJECT_TYPES if not should_ignore_type(obj_type)]
+    type_classes = [
+        obj_type for obj_type in infinibox.OBJECT_TYPES if not should_ignore_type(obj_type)]
     _validate_single_metadata_support(volume)
 
     for type_class in type_classes:
         obj = type_class.create(infinibox)
         _validate_single_metadata_support(obj)
+
 
 def test_infinibox_attributes(infinibox):
     assert isinstance(repr(infinibox), string_types)
@@ -108,15 +115,18 @@ def test_infinibox_attributes(infinibox):
     assert isinstance(infinibox.get_version(), string_types)
     assert isinstance(infinibox.get_revision(), string_types)
 
+
 def test_infinibox_system_type(infinibox):
     assert infinibox.is_simulator()
     assert not infinibox.is_mock()
+
 
 def test_get_name(infinibox):
     simulator_host_name = infinibox.get_simulator().get_hostname()
     with disable_api_context(infinibox):
         assert infinibox.get_name() == simulator_host_name
-    infinibox.components.system_component.update_field_cache({'name': 'fake_name'})
+    infinibox.components.system_component.update_field_cache(
+        {'name': 'fake_name'})
     assert infinibox.get_name() == 'fake_name'
     infinibox.components.system_component.refresh()
     assert infinibox.get_name().startswith('simulator-')
@@ -130,14 +140,18 @@ def test_get_field_raw_value(volume, from_cache, invalidate_cache):
     assert isinstance(volume.get_size(from_cache=from_cache), Capacity)
     if invalidate_cache:
         volume.refresh('size')
-    assert isinstance(volume.get_size(from_cache=from_cache, raw_value=False), Capacity)
+    assert isinstance(
+        volume.get_size(from_cache=from_cache, raw_value=False), Capacity)
     if invalidate_cache:
         volume.refresh('size')
-    assert isinstance(volume.get_size(from_cache=from_cache, raw_value=True), int)
+    assert isinstance(
+        volume.get_size(from_cache=from_cache, raw_value=True), int)
+
 
 @new_to_version('2.0')
 def test_current_user_proxy(infinibox):
     assert isinstance(infinibox.current_user.get_owned_pools(), list)
+
 
 def test_current_user_roles(infinibox):
     infinidat_roles = infinibox.current_user.get_roles()
