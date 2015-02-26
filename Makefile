@@ -25,7 +25,7 @@ env: .env/.up-to-date
 
 .develop_deps:
 	virtualenv .env
-	.env/bin/pip install --pre -i http://pypi01.infinidat.com/simple -e ../ecosystem -e ../infinibox_sysdefs -e ../infinisim -e ../infinisdk_internal
+	.env/bin/pip install --pre -i http://pypi01.infinidat.com/simple -e ../ecosystem -e ../infinibox_sysdefs -e ../infinisim
 
 develop_env: .develop_deps env
 

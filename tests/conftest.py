@@ -13,8 +13,6 @@ from infinisdk.core import extensions
 from infinisdk.core.config import config
 from infinisdk.infinibox import InfiniBox
 from infinisdk.izbox import IZBox
-from infinisdk_internal import disable as disable_infinisdk_internal
-from infinisdk_internal import enable as enable_infinisdk_internal
 from infinisim.infinibox import Infinibox as InfiniboxSimulator
 from izsim import Simulator as IZBoxSimulator
 
@@ -25,7 +23,11 @@ new_to_version = lambda version: pytest.mark.required_version(from_version=versi
 def setup_logging(request):
     handler = logbook.compat.LoggingHandler()
     handler.push_application()
-    request.addfinalizer(handler.pop_application)
+
+    _blacklisted = set(['infinisdk.core.api.api', 'infinisim.core.simulator'])
+
+    logbook.NullHandler(filter=lambda r, h: r.channel in _blacklisted).push_application()
+
 
 @pytest.fixture(scope="session", autouse=True)
 def freeze_timeline(request):
@@ -115,41 +117,17 @@ def infinibox_simulator(request):
 
 @pytest.fixture
 def cluster(request, infinibox):
-    returned = infinibox.host_clusters.create()
-    request.addfinalizer(_get_purge_callback(returned))
-    return returned
+    return infinibox.host_clusters.create()
 
 @pytest.fixture
-def host(request, infinibox):
-    returned = infinibox.hosts.create()
-    request.addfinalizer(_get_purge_callback(returned))
-    return returned
+def host(infinibox):
+    return infinibox.hosts.create()
 
-
-def _get_purge_callback(obj):
-    def cleanup():
-        with enabling_infinisdk_internal():
-            obj.purge()
-    return cleanup
-
-@contextmanager
-def enabling_infinisdk_internal():
-    assert not extensions.active
-    enable_infinisdk_internal()
-    try:
-        yield
-    finally:
-        disable_infinisdk_internal()
-        assert not extensions.active
 
 @contextmanager
 def no_op_context(*args):
     yield
 
-@pytest.fixture
-def infinisdk_internal(request):
-    enable_infinisdk_internal()
-    request.addfinalizer(disable_infinisdk_internal)
 
 @pytest.fixture(params=["host", "cluster"])
 def mapping_object_type(request, infinibox):
@@ -277,7 +255,7 @@ def backup_config(request):
     request.addfinalizer(config.restore)
 
 @pytest.fixture
-def link(infinibox, secondary_infinibox, infinisdk_internal, mocked_ecosystem):
+def link(infinibox, secondary_infinibox, mocked_ecosystem):
     infinibox.login()  # to get the system name properly
     secondary_infinibox.login()
 
@@ -285,14 +263,24 @@ def link(infinibox, secondary_infinibox, infinisdk_internal, mocked_ecosystem):
         mocked_ecosystem.mocks.infinilab_client.get_mocked_infinilab().add_system(
             s.get_simulator())
 
-    network_space = infinibox.networking.ensure_default_network_space('rmr')
-    remote_network_space = secondary_infinibox.networking.ensure_default_network_space(
-        'rmr')
-    return infinibox.links.create(
+    network_space = create_rmr_network_space(infinibox)
+    remote_network_space = create_rmr_network_space(secondary_infinibox)
+    returned = infinibox.links.create(
         name='link',
         local_replication_network_space=network_space,
         remote_host=remote_network_space.get_ips()[0].ip_address)
+    return returned
 
+def create_rmr_network_space(system):
+    returned = system.network_spaces.create(
+        name='rmr', interfaces=[i.id for i in system.network_interfaces],
+        network_config={
+            'default_gateway': '1.1.1.1',
+            'netmask': '255.0.0.0',
+            'network': '1.0.0.0',})
+    assert not system.get_simulator().networking._allocated
+    returned.add_ip_address(str(system.get_simulator().networking.allocate_ip_address('rmr')))
+    return returned
 
 @pytest.fixture
 def mocked_ecosystem(request):

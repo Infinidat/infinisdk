@@ -4,20 +4,16 @@ from contextlib import contextmanager
 
 from infinisdk._compat import ExitStack
 
-import infinisdk_internal
+from tests.conftest import create_rmr_network_space
 from ecosystem.mocks import MockedContext
 from infinisdk.infinibox import InfiniBox
 from infinisim.infinibox import Infinibox as Simulator
 
 _AUTH = ('infinidat', '123456')
 
-_mocked_context = MockedContext(isolated_env=True)
-
-
 @contextmanager
 def _system():
     simulator = Simulator()
-    _mocked_context.mocks.infinilab_client.get_mocked_infinilab().add_system(simulator)
 
     simulator.activate()
     try:
@@ -25,28 +21,18 @@ def _system():
         system.login()
         yield system
     finally:
-        simulator.activate()
-
-@contextmanager
-def _infinisdk_internal_context():
-    infinisdk_internal.enable()
-    try:
-        yield
-    finally:
-        infinisdk_internal.disable()
+        simulator.deactivate()
 
 @contextmanager
 def doctest_context():
 
     with ExitStack() as stack:
 
-        stack.enter_context(_mocked_context)
         primary = stack.enter_context(_system())
         secondary = stack.enter_context(_system())
-        stack.enter_context(_infinisdk_internal_context())
 
-        primary_ns = primary.networking.ensure_default_network_space('rmr')
-        secondary_ns = secondary.networking.ensure_default_network_space('rmr')
+        primary_ns = create_rmr_network_space(primary)
+        secondary_ns = create_rmr_network_space(secondary)
 
         link = primary.links.create(
             name='link',
@@ -57,7 +43,7 @@ def doctest_context():
         yield {
             'link': link,
             'primary': primary,
-            'primary_ip': primary.get_simulator().networking.allocate_ip_address('rmr'),
+            'primary_ip': primary_ns.get_ips()[0],
             'secondary': secondary,
-            'secondary_ip': secondary.get_simulator().networking.allocate_ip_address('rmr'),
+            'secondary_ip': secondary_ns.get_ips()[0],
         }

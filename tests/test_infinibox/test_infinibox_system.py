@@ -1,14 +1,17 @@
-import pytest
 from capacity import Capacity
 from logbook import Logger
 from sentinels import NOTHING
+from waiting import wait
 
+import pytest
+
+from ..conftest import disable_api_context, new_to_version
+from infinibox_sysdefs.defs import latest as defs
 from infinisdk._compat import iteritems, string_types
+from infinisdk.core.exceptions import (APITransportFailure,
+                                       SystemNotFoundException)
 from infinisdk.infinibox import InfiniBox
 from infinisdk.infinibox.system_object import InfiniBoxObject
-from infinisdk.core.exceptions import SystemNotFoundException, APITransportFailure
-from ..conftest import disable_api_context, enabling_infinisdk_internal, new_to_version
-from infinibox_sysdefs.defs import latest as defs
 
 _logger = Logger(__name__)
 
@@ -21,8 +24,8 @@ def test_non_exist_system():
 
 
 def test_api_transport_error(infinibox):
-    with enabling_infinisdk_internal():
-        infinibox.op.shutdown()
+    infinibox.api.post('system/operational_state/shutdown')
+    wait(infinibox.components.system_component.is_down)
     url = infinibox.components.system_component.get_this_url_path()
     with pytest.raises(APITransportFailure) as e:
         infinibox.api.get(url)

@@ -1,4 +1,3 @@
-infinisdk_internal>=20.0
 izsim>=19
 pytest
 pytest-xdist
