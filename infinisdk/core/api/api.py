@@ -199,6 +199,10 @@ class API(object):
                 sent_json_object = data
                 data = json.dumps(data)
 
+        url_params = kwargs.pop('params', None)
+        if url_params is not None:
+            url_params = translate_special_values(url_params)
+
         specified_address = kwargs.pop("address", None)
         urls = self._get_possible_urls(specified_address)
 
@@ -207,8 +211,9 @@ class API(object):
 
             if http_method != "get" and not self._interactive and not path.startswith("/api/internal/"):
                 full_url = self._with_approved(full_url)
+
             hostname = full_url.hostname
-            api_request = requests.Request(http_method, full_url, data=data)
+            api_request = requests.Request(http_method, full_url, data=data, params=url_params)
             for preprocessor in self._preprocessors:
                 preprocessor(api_request)
 
@@ -223,7 +228,7 @@ class API(object):
 
             elapsed = get_timedelta_total_seconds(response.elapsed)
             _logger.debug("{0} --> {1} {2} (took {3:.04f}s)", hostname, response.status_code, response.reason, elapsed)
-            returned = Response(api_request.method, api_request.url, data, response)
+            returned = Response(response, data)
             _logger.debug("{0} --> {1}", hostname, returned.get_json())
             if response.status_code != httplib.SERVICE_UNAVAILABLE:
                 if specified_address is None: # need to remember our next API target
@@ -334,13 +339,13 @@ class Response(object):
     """
     System API request response
     """
-    def __init__(self, method, url, data, resp):
+    def __init__(self, resp, data):
         super(Response, self).__init__()
-        self.method = method
+        self.method = resp.request.method
         #: Response object as returned from ``requests``
         self.response = resp
         #: URLObject of the final location the response was obtained from
-        self.url = url
+        self.url = URL(resp.request.url)
         #: Data sent to on
         self.sent_data = data
 

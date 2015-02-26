@@ -22,6 +22,17 @@ def test_error_response(izbox):
     assert exception_response.get_error() is None
 
 
+def test_url_params(izbox):
+    autogenerate = Autogenerate('param_{ordinal}')
+    params = {'a': 'b', 'c': 2, 'd': OMIT, 'e1': autogenerate, 'e2': autogenerate, 'f': True}
+    expected = {'a': 'b', 'c': '2', 'e1': 'param_1', 'e2': 'param_2', 'f': 'True'}
+    with pytest.raises(APICommandFailed) as e:
+        izbox.api.post("/api/izsim/echo_post", params=params)
+    received = e.value.response.url.query_dict
+    received.pop('approved', None)
+    assert expected == received
+
+
 @pytest.mark.parametrize('should_failed', [True, False])
 def test_auto_retry(system, should_failed):
     url = "/api/rest/system"
