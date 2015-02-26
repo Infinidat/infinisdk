@@ -10,6 +10,11 @@ def test_replica_creation(replica):
 
 
 @new_to_version('2.0')
+def test_replica_get_fields(replica):
+    replica.get_fields()
+
+
+@new_to_version('2.0')
 @pytest.mark.parametrize('method_name', ['get_local_volume', 'get_local_entity'])
 def test_replica_get_local_entity(replica, volume, method_name):
     method = getattr(replica, method_name)

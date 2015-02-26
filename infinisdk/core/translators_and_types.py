@@ -82,7 +82,7 @@ class MillisecondsDeltaTranslator(ValueTranslator):
         return timedelta(seconds=int(value), microseconds = int((value - int(value)) * 1000))
 
 
-MillisecondsDeltaType = TypeInfo(type=arrow.Arrow,
+MillisecondsDeltaType = TypeInfo(type=timedelta,
                                   api_type=int, translator=MillisecondsDeltaTranslator())
 
 
