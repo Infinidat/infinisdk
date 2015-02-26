@@ -52,6 +52,3 @@ class Filesystem(BaseDataEntity):
 
     def get_exports(self):
         return self.system.exports.find(Q.filesystem_id == self.id)
-
-    def move_pool(self, target_pool, with_capacity=True):
-        raise NotImplementedError("Not implemented in infinibox 2.0.0.0")
