@@ -31,6 +31,7 @@ class Filesystem(BaseDataEntity):
             is_sortable=True, default=Autogenerate("fs_{uuid}")),
         Field("size", creation_parameter=True, mutable=True,
               is_filterable=True, is_sortable=True, default=GB, type=CapacityType),
+        Field("tree_allocated", type=CapacityType, is_sortable=True, is_filterable=True),
         Field("pool", type='infinisdk.infinibox.pool:Pool', api_name="pool_id", creation_parameter=True, is_filterable=True, is_sortable=True,
               binding=RelatedObjectBinding()),
         Field("type", cached=True, is_filterable=True, is_sortable=True),
