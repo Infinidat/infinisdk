@@ -53,6 +53,7 @@ class Volume(BaseDataEntity):
             is_sortable=True, default=Autogenerate("vol_{uuid}")),
         Field("size", creation_parameter=True, mutable=True,
               is_filterable=True, is_sortable=True, default=GB, type=CapacityType),
+        Field("used_size", api_name="used", type=CapacityType),
         Field("allocated", type=CapacityType, is_sortable=True, is_filterable=True),
         Field("tree_allocated", type=CapacityType, is_sortable=True, is_filterable=True),
         Field("pool", type='infinisdk.infinibox.pool:Pool', api_name="pool_id", creation_parameter=True, is_filterable=True, is_sortable=True,
