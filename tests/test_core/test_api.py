@@ -23,9 +23,8 @@ def test_error_response(izbox):
 
 
 def test_url_params(izbox):
-    autogenerate = Autogenerate('param_{ordinal}')
-    params = {'a': 'b', 'c': 2, 'd': OMIT, 'e1': autogenerate, 'e2': autogenerate, 'f': True}
-    expected = {'a': 'b', 'c': '2', 'e1': 'param_1', 'e2': 'param_2', 'f': 'True'}
+    params = {'a': 'b', 'c': 2, 'd': OMIT, 'e': Autogenerate('param_{ordinal}'), 'f': True}
+    expected = {'a': 'b', 'c': '2', 'e': 'param_1', 'f': 'True'}
     with pytest.raises(APICommandFailed) as e:
         izbox.api.post("/api/izsim/echo_post", params=params)
     received = e.value.response.url.query_dict
