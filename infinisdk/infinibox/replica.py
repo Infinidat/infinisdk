@@ -136,11 +136,11 @@ class Replica(InfiniBoxObject):
         self._validate_can_check_state()
         return self.get_state(*args, **kwargs).lower() == 'auto_suspended'
 
-    def is_initiating(self, *args, **kwargs):
+    def is_initial_replication(self, *args, **kwargs):
         """Returns whether or not this replica is in initiating state
         """
         self._validate_can_check_state()
-        return self.get_state(*args, **kwargs).lower() == 'initiating'
+        return 'initial' in self.get_state(*args, **kwargs).lower()
 
     def is_replicating(self, *args, **kwargs):
         """Returns whether or not this replica is in replicating state
