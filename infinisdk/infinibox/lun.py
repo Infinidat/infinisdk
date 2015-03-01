@@ -14,6 +14,7 @@
 from .._compat import itervalues, string_types
 from ..core.exceptions import APICommandFailed
 import requests
+from sentinels import NOTHING
 
 
 class LogicalUnit(object):
@@ -27,6 +28,7 @@ class LogicalUnit(object):
         self.volume_id = volume_id
         self.host_id = host_id
         self.additional_data = kwargs
+        self.mapping_object = self.get_host() or self.get_cluster()
 
     @property
     def volume(self):
@@ -47,13 +49,7 @@ class LogicalUnit(object):
         return self.system.host_clusters.get_by_id_lazy(self.host_cluster_id)
 
     def get_mapping_object(self):
-        returned = self.get_cluster()
-        if returned is None:
-            returned = self.get_host()
-
-        return returned
-
-    mapping_object = property(get_mapping_object)
+        return self.mapping_object
 
     def is_clustered(self):
         return self.get_cluster() is not None
@@ -95,19 +91,23 @@ class LogicalUnit(object):
         return self.get_lun()
 
     def __repr__(self):
-        return "<LUN {0}>".format(self.get_lun())
+        return "<LUN {0}: {1}->{2}>".format(self.get_lun(), self.get_mapping_object(), self.get_volume())
 
     def __eq__(self, other):
         return type(other) == type(self) and other.id == self.id
 
+    def get_unique_key(self):
+        return (self.system, self.host_cluster_id, self.host_id, self.volume_id, self.lun)
+
+    def __hash__(self):
+        return hash(self.get_unique_key())
+
 
 class LogicalUnitContainer(object):
     def __init__(self, system):
-        self.luns = {}
+        self.luns = set()
         self._system = system
-        self._rel_classes = (system.volumes.object_type,
-                             system.hosts.object_type,
-                             system.host_clusters.object_type)
+
 
     @classmethod
     def from_logical_units(cls, system, logical_units):
@@ -128,17 +128,46 @@ class LogicalUnitContainer(object):
         return dict((int(lun), lun.volume) for lun in self)
 
     def add_logical_unit(self, lu):
-        self.luns[lu.get_lun()] = lu
+        self.luns.add(lu)
+
+    def get_lus_for_mapping_object(self, mapping_object):
+        lus = []
+        for lu in iter(self):
+            if lu.get_mapping_object() == mapping_object:
+                lus.append(lu)
+        return lus
+
+    def get_lus_for_volume(self, volume):
+        lus = []
+        for lu in iter(self):
+            if lu.get_volume() == volume:
+                lus.append(lu)
+        return lus
+
+    def get_lus_for_lun(self, lun):
+        lus = []
+        for lu in iter(self):
+            if lu.get_lun() == lun:
+                lus.append(lu)
+        return lus
 
     def __getitem__(self, item):
-        if isinstance(item, self._rel_classes):
-            item_getter_name = "get_{0}".format(item.get_type_name())
-            item_getter = getattr(LogicalUnit, item_getter_name)
-            lus = [lu for lu in itervalues(self.luns) if item_getter(lu)==item]
-            if not lus:
-                raise KeyError('{0} has no logical units'.format(item))
-            return self.from_logical_units(self._system, lus)
-        return self.luns[item]
+        if hasattr(item, 'get_type_name'):
+            if item.get_type_name() == 'volume':
+                getter = self.get_lus_for_volume
+            else:
+                getter = self.get_lus_for_mapping_object
+            items = getter(item)
+        elif isinstance(item, LogicalUnit):
+            items = [item] if item in self else []
+        else:
+            items = self.get_lus_for_lun(item)
+
+        if len(items) == 0:
+            raise KeyError('{0} has no logical units'.format(item))
+        if len(items) > 1:
+            raise ValueError('{0} have too many logical units'.format(item))
+        return items[0]
 
     def get(self, item, default=None):
         try:
@@ -150,11 +179,10 @@ class LogicalUnitContainer(object):
         return len(self.luns)
 
     def __iter__(self):
-        for lu in itervalues(self.luns):
-            yield lu
+        return iter(self.luns)
 
     def __contains__(self, item):
-        return item in itervalues(self.luns)
+        return item in self.luns
 
     def __repr__(self):
-        return "[{0}]".format(", ".join(map(str, self)))
+        return "<LogicalUnitsContainer: [{0}]>".format(", ".join(map(str, self)))

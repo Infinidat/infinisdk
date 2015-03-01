@@ -1,4 +1,5 @@
 from capacity import Capacity
+from infinisdk._compat import xrange
 from infinisdk.infinibox.volume import Volume
 from infinisdk.infinibox.pool import Pool
 from infinisdk.infinibox.scsi_serial import SCSISerial
@@ -11,10 +12,22 @@ def test_unmapping(infinibox, mapped_volume):
     assert not mapped_volume.is_mapped()
     assert not mapped_volume.get_logical_units()
 
+
 def test_write_protection(volume):
     assert not volume.is_write_protected()
     volume.update_write_protected(True)
     assert volume.is_write_protected()
+
+
+def test_unmap_volume_which_mapped_to_multiple_hosts(infinibox, volume):
+    assert not volume.is_mapped()
+    host_count = 3
+    for _ in xrange(host_count):
+        host = infinibox.hosts.create()
+        host.map_volume(volume)
+    assert len(volume.get_logical_units()) == host_count
+    volume.unmap()
+    assert not volume.is_mapped()
 
 
 def test_serial(infinibox, volume):

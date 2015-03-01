@@ -5,13 +5,13 @@ from infinisdk.core.exceptions import CacheMiss
 
 def test_unmap_clustered_lun(infinibox, host, cluster, volume):
     cluster.add_host(host)
-    lun = cluster.map_volume(volume).lun
+    vol_lu = cluster.map_volume(volume)
 
     logical_units = volume.get_logical_units()
-    [lu] = logical_units
-    assert lu.lun == lun
-    lu.unmap()
+    assert len(logical_units) == 2
+    assert set(lu.get_lun() for lu in logical_units) == set([vol_lu.lun])
 
+    vol_lu.unmap()
     assert not volume.get_logical_units()
 
 def test_unmap_cluster_with_two_hosts(infinibox, cluster, volume):
@@ -146,10 +146,10 @@ def test_multiple_luns_mapping_objects(infinibox, host, cluster, volume1, volume
     assert len(cluster_lus) == 1
 
     host_lu = list(host_lus)[0]
-    assert list(host_lus[volume1])[0] == host_lu
+    assert host_lus[volume1] == host_lu
 
     cluster_lu = list(cluster_lus)[0]
-    assert list(cluster_lus[volume2])[0] == cluster_lu
+    assert cluster_lus[volume2] == cluster_lu
 
     with pytest.raises(KeyError):
         cluster_lus[volume1]

@@ -90,11 +90,11 @@ Iterating over available mappings of a host is fairly simple:
 		>>> lu = host.map_volume(volume, lun=5)
 
 		>>> host.get_luns()
-		[<LUN 5>]
+		<LogicalUnitsContainer: [<LUN 5: <Host id=1008>-><Volume id=1007>>]>
 
 		>>> for lun in host.get_luns():
 		...     print("{0} is mapped to {1}".format(lun, lun.volume))
-		<LUN 5> is mapped to <Volume id=1007>
+		<LUN 5: <Host id=1008>-><Volume id=1007>> is mapped to <Volume id=1007>
 
 There is also a shortcut to iterate over all mappings in the entire system:
 
@@ -102,7 +102,7 @@ There is also a shortcut to iterate over all mappings in the entire system:
 
 		>>> for lun in system.luns:
 		...     print("{0} belongs to {1} and is mapped to {2}".format(lun, lun.mapping_object, lun.volume))
-		<LUN 5> belongs to <Host id=1008> and is mapped to <Volume id=1007>
+		<LUN 5: <Host id=1008>-><Volume id=1007>> belongs to <Host id=1008> and is mapped to <Volume id=1007>
 
 
 Here is a code snippet to unmap all volumes in the system that contain 'to remove' in their names:
@@ -149,7 +149,7 @@ Manipulating clusters is done with the :class:`.Cluster` class:
 		>>> [host_lu] = host.get_luns()
 
 		>>> host_lu
-		<LUN 11>
+		<LUN 11: <HostCluster id=1011>-><Volume id=1007>>
 		
 		>>> host_lu.is_clustered()
 		True

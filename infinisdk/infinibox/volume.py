@@ -128,7 +128,7 @@ class Volume(BaseDataEntity):
     def unmap(self):
         """Unmaps a volume from its hosts
         """
-        for lun in self.get_logical_units().luns.values():
+        for lun in self.get_logical_units():
             lun.unmap()
         self.refresh('mapped')
 
