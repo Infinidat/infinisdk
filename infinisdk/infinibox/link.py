@@ -30,7 +30,7 @@ class Link(InfiniBoxObject):
         Field('remote_link_id', type=int),
         Field('remote_host', type=str, creation_parameter=True),
         Field('remote_system_name', type=str),
-        Field('remote_system_serial', type=int),
+        Field('remote_system_serial_number', type=int),
         Field('link_state', type=str),
     ]
 

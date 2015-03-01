@@ -22,8 +22,8 @@ def test_link_remote_system_name(link, secondary_infinibox):
 
 
 @new_to_version('2.0')
-def test_link_remote_system_serial(link, secondary_infinibox):
-    assert link.get_remote_system_serial() == secondary_infinibox.get_serial()
+def test_link_remote_system_serial_number(link, secondary_infinibox):
+    assert link.get_remote_system_serial_number() == secondary_infinibox.get_serial()
 
 
 @new_to_version('2.0')
