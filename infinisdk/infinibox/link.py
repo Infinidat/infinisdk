@@ -29,6 +29,8 @@ class Link(InfiniBoxObject):
               type='infinisdk.infinibox.network_space:NetworkSpace', creation_parameter=True),
         Field('remote_link_id', type=int),
         Field('remote_host', type=str, creation_parameter=True),
+        Field('remote_system_name', type=str),
+        Field('remote_system_serial', type=int),
         Field('link_state', type=str),
     ]
 
