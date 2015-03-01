@@ -11,8 +11,9 @@ def test_replica_creation(replica):
 
 @new_to_version('2.0')
 def test_replica_get_fields(replica):
-    replica.get_fields()
-
+    fields = replica.get_fields()
+    for field in replica.FIELDS:
+        assert field.name in fields
 
 @new_to_version('2.0')
 @pytest.mark.parametrize('method_name', ['get_local_volume', 'get_local_entity'])

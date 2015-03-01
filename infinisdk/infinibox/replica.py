@@ -73,6 +73,8 @@ class Replica(InfiniBoxObject):
               creation_parameter=True, optional=True),
         Field('remote_replica_id', type=int),
         Field('role', type=str),
+        Field('progress', type=int),
+        Field('last_synchronized', type=int),
         Field('state', type=str),
         Field('sync_interval', api_name='sync_interval', type=MillisecondsDeltaType,
               mutable=True,
