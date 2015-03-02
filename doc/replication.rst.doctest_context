@@ -5,7 +5,7 @@ from contextlib import contextmanager
 from infinisdk._compat import ExitStack
 
 from tests.conftest import create_rmr_network_space
-from ecosystem.mocks import MockedContext
+from ecosystem import SimulationContext
 from infinisdk.infinibox import InfiniBox
 from infinisim.infinibox import Infinibox as Simulator
 

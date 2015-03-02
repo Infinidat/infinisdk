@@ -8,7 +8,7 @@ from munch import Munch
 
 import pytest
 
-from ecosystem.mocks import MockedContext
+from ecosystem import SimulationContext
 from infinisdk.core import extensions
 from infinisdk.core.config import config
 from infinisdk.infinibox import InfiniBox
@@ -284,7 +284,7 @@ def create_rmr_network_space(system):
 
 @pytest.fixture
 def mocked_ecosystem(request):
-    context = MockedContext(isolated_env=True)
+    context = SimulationContext(isolated_env=True)
     context.enter_mocked_context()
     request.addfinalizer(context.exit_mocked_context)
     return context
