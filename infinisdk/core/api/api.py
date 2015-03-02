@@ -20,7 +20,7 @@ from contextlib import contextmanager
 
 import requests
 from requests.exceptions import RequestException
-from requests.packages.urllib3.exceptions import ProtocolError
+
 from logbook import Logger
 from sentinels import NOTHING
 from urlobject import URLObject as URL
@@ -33,6 +33,17 @@ from ..config import config
 from ..exceptions import (APICommandFailed, APITransportFailure,
                           CommandNotApproved, SystemNotFoundException)
 from .special_values import translate_special_values
+
+
+_RETRY_REQUESTS_EXCEPTION_TYPES = [RequestException, socket.error]
+try:
+    from requests.packages.urllib3.exceptions import ProtocolError
+    _RETRY_REQUESTS_EXCEPTION_TYPES.append(ProtocolError)
+except ImportError:
+    # compatibility with RPM versions of requests 1.x
+    pass
+_RETRY_REQUESTS_EXCEPTION_TYPES = tuple(_RETRY_REQUESTS_EXCEPTION_TYPES)
+
 
 _logger = Logger(__name__)
 
@@ -268,7 +279,7 @@ class API(object):
             with auto_retries_context:
                 try:
                     returned = self._request(http_method, path, **kwargs)
-                except (RequestException, ProtocolError, socket.error) as e:
+                except _RETRY_REQUESTS_EXCEPTION_TYPES as e:
                     request_kwargs = dict(url=path, method=http_method, **kwargs)
                     _logger.debug('Exception while sending API command to {0}: {1}', self.system, e)
                     if 'gaierror' in str(e):
