@@ -113,9 +113,8 @@ class Volume(BaseDataEntity):
         return LogicalUnitContainer.from_dict_list(self.system, self._get_luns_data_from_url())
 
     def get_replicas(self):
-        # make into a query once INFINIBOX-14572 is resolved
-        return [replica for replica in self.system.replicas
-                if replica.has_local_entity(self)]
+        pairs = self.system.api.get(self.get_this_url_path().add_path('replication_pairs')).response.json()['result']
+        return [self.system.replicas.get_by_id_lazy(pair['replica_id']) for pair in pairs]
 
     def get_replica(self):
         returned = self.get_replicas()
