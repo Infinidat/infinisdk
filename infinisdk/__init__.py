@@ -50,6 +50,8 @@ def _install_hooks():
     gossip.define('infinidat.sdk.post_node_phase_out', tags=['infinibox', 'node1', 'node2', 'node3'])
     gossip.define('infinidat.sdk.node_phase_out_failure', tags=['infinibox', 'node1', 'node2', 'node3'])
 
+    gossip.define('infinidat.sdk.replica_snapshot_created', tags=['infinibox'])
+
     gossip.get_or_create_group('infinidat.sdk').set_strict()
 
 _install_hooks()
