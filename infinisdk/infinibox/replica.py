@@ -11,7 +11,11 @@
 ### Redistribution and use in source or binary forms, with or without modification,
 ### are strictly forbidden unless prior written permission is obtained from Infinidat Ltd.
 ### !
+from contextlib import contextmanager
 from datetime import timedelta
+
+import gossip
+
 from ..core.api.special_values import Autogenerate
 from ..core.type_binder import TypeBinder
 from ..core import Field
@@ -171,6 +175,8 @@ class Replica(InfiniBoxObject):
         return False
 
     def delete(self, retain_staging_area=False, force_if_remote_error=False, force_on_target=False, force_if_no_remote_credentials=False):
+        returned = set()
+
         path = self.get_this_url_path()
         if retain_staging_area:
             path = path.add_query_param('retain_staging_area', 'true')
@@ -181,8 +187,34 @@ class Replica(InfiniBoxObject):
         if force_if_no_remote_credentials:
             path = path.add_query_param('force_if_no_remote_credentials', 'true')
 
-        with self._get_delete_context():
-            self.system.api.delete(path)
+        if retain_staging_area:
+            old_snaps = set(self.get_local_volume().get_children())
+
+        with self._detecting_new_snapshots_context(retain_staging_area, returned):
+            with self._get_delete_context():
+                self.system.api.delete(path)
+
+        return returned
+
+    @contextmanager
+    def _detecting_new_snapshots_context(self, retain_staging_area, result_set):
+        if not retain_staging_area:
+            yield
+            return
+
+        entities = [self.get_local_volume()]
+        remote_replica = self.get_remote_replica()
+        if remote_replica is not None:
+            entities.append(remote_replica.get_local_volume())
+
+        old_snaps = set(child for entity in entities for child in entity.get_children())
+        yield
+        new_snaps = set(child for entity in entities for child in entity.get_children()) - old_snaps
+
+        for snap in new_snaps:
+            gossip.trigger_with_tags('infinidat.sdk.replica_snapshot_created', {'snapshot': snap}, tags=['infinibox'])
+
+        result_set.update(new_snaps)
 
     def get_remote_replica(self):
         """Get the corresponsing replica object in the remote machine. For this to work, the SDK user should
