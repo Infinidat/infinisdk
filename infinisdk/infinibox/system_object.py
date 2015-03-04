@@ -11,7 +11,7 @@
 ### Redistribution and use in source or binary forms, with or without modification,
 ### are strictly forbidden unless prior written permission is obtained from Infinidat Ltd.
 ###!
-import requests
+from .._compat import requests
 from sentinels import NOTHING
 
 from ..core.system_object import SystemObject, DONT_CARE

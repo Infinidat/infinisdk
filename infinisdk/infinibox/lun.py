@@ -11,9 +11,8 @@
 ### Redistribution and use in source or binary forms, with or without modification,
 ### are strictly forbidden unless prior written permission is obtained from Infinidat Ltd.
 ###!
-from .._compat import itervalues, string_types
+from .._compat import itervalues, string_types, requests
 from ..core.exceptions import APICommandFailed
-import requests
 from sentinels import NOTHING
 
 

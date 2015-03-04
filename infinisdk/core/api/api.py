@@ -18,9 +18,6 @@ import sys
 import socket
 from contextlib import contextmanager
 
-import requests
-from requests.exceptions import RequestException
-
 from logbook import Logger
 from sentinels import NOTHING
 from urlobject import URLObject as URL
@@ -28,22 +25,14 @@ from urlobject import URLObject as URL
 import colorama
 
 from ... import _compat
-from ..._compat import get_timedelta_total_seconds, httplib, iteritems
+from ..._compat import get_timedelta_total_seconds, httplib, iteritems, requests, RequestException, ProtocolError
 from ..config import config
 from ..exceptions import (APICommandFailed, APITransportFailure,
                           CommandNotApproved, SystemNotFoundException)
 from .special_values import translate_special_values
 
 
-_RETRY_REQUESTS_EXCEPTION_TYPES = [RequestException, socket.error]
-try:
-    from requests.packages.urllib3.exceptions import ProtocolError
-    _RETRY_REQUESTS_EXCEPTION_TYPES.append(ProtocolError)
-except ImportError:
-    # compatibility with RPM versions of requests 1.x
-    pass
-_RETRY_REQUESTS_EXCEPTION_TYPES = tuple(_RETRY_REQUESTS_EXCEPTION_TYPES)
-
+_RETRY_REQUESTS_EXCEPTION_TYPES = (RequestException, socket.error, ProtocolError)
 
 _logger = Logger(__name__)
 

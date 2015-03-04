@@ -11,7 +11,7 @@
 ### Redistribution and use in source or binary forms, with or without modification,
 ### are strictly forbidden unless prior written permission is obtained from Infinidat Ltd.
 ###!
-import requests
+from .._compat import requests
 
 from ..core import Field, MillisecondsDatetimeType
 from ..core.type_binder import TypeBinder

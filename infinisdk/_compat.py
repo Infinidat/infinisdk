@@ -127,3 +127,13 @@ else:
         if value.__traceback__ is not tb:
             raise value.with_traceback(tb)
         raise value
+
+try:
+    import infi_requests as requests
+except ImportError:
+    import requests
+    from requests.exceptions import RequestException
+    from requests.packages.urllib3.exceptions import ProtocolError
+else:
+    from infi_requests.exceptions import RequestException
+    from infi_requests.packages.urllib3.exceptions import ProtocolError
