@@ -25,7 +25,7 @@ _INSTALL_REQUIRES = [
     "URLObject",
 ]
 
-if sys.version_info > (3, 0):
+if sys.version_info < (3, 0):
     _INSTALL_REQUIRES.append('contextlib2')
 
 setup(name="infinisdk",
