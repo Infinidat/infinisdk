@@ -60,7 +60,13 @@ class BaseDataEntity(InfiniBoxObject):
             gossip.trigger_with_tags(_CANCEL_FORK_HOOK, {'obj': self}, tags=hook_tags)
             raise
         gossip.trigger_with_tags(_FINISH_FORK_HOOK, {'obj': self, 'child': child}, tags=hook_tags)
+        self._handle_possible_replication_snapshot(child)
         return child
+
+    def _handle_possible_replication_snapshot(self, snapshot):
+        fields = snapshot.get_fields(from_cache=True, raw_value=True)
+        if 'rmr_snapshot_guid' in fields:
+            gossip.trigger_with_tags('infinidat.sdk.replica_snapshot_created', {'snapshot': snapshot}, tags=['infinibox'])
 
     def create_clone(self, name=None):
         """Creates a clone from this entity, if supported by the system
