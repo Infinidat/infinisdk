@@ -214,7 +214,7 @@ def test_data_restore(data_entity):
     assert callbacks == []
     data_entity.restore(snapshot)
     last_event = data_entity.system.events.get_last_event()
-    assert last_event['code'] == "{0}_RESTORE".format(data_entity.get_type_name().upper())
+    assert last_event['code'] == "{0}_RESTORED".format(data_entity.get_type_name().upper())
     args = (data_entity.id, snapshot.id)
     expected += ['pre_restore_{0}_from_{1}'.format(*args), 'post_restore_{0}_from_{1}'.format(*args)]
     assert callbacks == expected
