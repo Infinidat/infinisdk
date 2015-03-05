@@ -7,8 +7,8 @@ from infinisdk.infinibox import InfiniBox
 def doctest_context():
     simulator = Simulator()
     for i in range(3):
-        simulator.events.add_event(code='VOLUME_CREATE')
-        simulator.events.add_event(code='VOLUME_DELETE')
+        simulator.events.add_user_event(code='VOLUME_CREATED')
+        simulator.events.add_user_event(code='VOLUME_DELETED')
     simulator.activate()
     try:
         yield {

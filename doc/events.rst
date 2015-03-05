@@ -7,12 +7,12 @@ InfiniSDK represents system events through the *system.events* collection, which
 
 		>>> for event in system.events:
 		...     print(event, ":", event.get_code())
-		<Event id=1000> : VOLUME_CREATE
-		<Event id=1001> : VOLUME_DELETE
-		<Event id=1002> : VOLUME_CREATE
-		<Event id=1003> : VOLUME_DELETE
-		<Event id=1004> : VOLUME_CREATE
-		<Event id=1005> : VOLUME_DELETE
+		<Event id=1000> : VOLUME_CREATED
+		<Event id=1001> : VOLUME_DELETED
+		<Event id=1002> : VOLUME_CREATED
+		<Event id=1003> : VOLUME_DELETED
+		<Event id=1004> : VOLUME_CREATED
+		<Event id=1005> : VOLUME_DELETED
 		
 
 Sorting is determined by the system by default, but we can easily change that. For instance, we can order the events by descending id:
@@ -32,7 +32,7 @@ We can also combine this with filtering. The following example filters by specif
 
 .. code-block:: python
 
-		>>> for event in system.events.find(code='VOLUME_CREATE').sort(-system.events.fields.id):
+		>>> for event in system.events.find(code='VOLUME_CREATED').sort(-system.events.fields.id):
 		...     print(event)
 		<Event id=1004>
 		<Event id=1002>
