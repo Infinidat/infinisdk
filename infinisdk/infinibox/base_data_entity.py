@@ -65,7 +65,7 @@ class BaseDataEntity(InfiniBoxObject):
 
     def _handle_possible_replication_snapshot(self, snapshot):
         fields = snapshot.get_fields(from_cache=True, raw_value=True)
-        if 'rmr_snapshot_guid' in fields:
+        if fields.get('rmr_snapshot_guid', None) is not None:
             gossip.trigger_with_tags('infinidat.sdk.replica_snapshot_created', {'snapshot': snapshot}, tags=['infinibox'])
 
     def create_clone(self, name=None):
