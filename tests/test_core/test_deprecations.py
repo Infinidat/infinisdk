@@ -2,7 +2,7 @@ import pytest
 import logbook
 
 from infinisdk.core.utils import deprecated
-from infinisdk.core.utils.deprecation import forget_deprecation_locations
+from infinisdk.core.utils.deprecation import forget_deprecation_locations, get_no_deprecations_context
 
 
 def test_deprecated_func_called(capture):
@@ -28,6 +28,18 @@ def test_deprecation_with_message(capture):
     [record] = capture.records
     assert "use something else instead" in record.message
     assert "func is deprecated" in record.message
+
+
+def test_no_deprecations(capture):
+
+    @deprecated('msg')
+    def func(a, b):
+        return a + b
+
+    with get_no_deprecations_context():
+        assert func(1, 2) == 3
+    assert not capture.records
+
 
 
 def _no_decorator(func):

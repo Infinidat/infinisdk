@@ -11,11 +11,33 @@
 ### Redistribution and use in source or binary forms, with or without modification,
 ### are strictly forbidden unless prior written permission is obtained from Infinidat Ltd.
 ###!
+from contextlib import contextmanager
 import functools
 import sys
+import threading
 from logbook import Logger
 
+
 from ..._compat import string_types
+
+class _Local(threading.local):
+    enabled = True
+
+_local = _Local()
+
+
+@contextmanager
+def get_no_deprecations_context():
+    """Disables deprecation messages temporarily
+    """
+    prev_enabled = _local.enabled
+    _local.enabled = False
+    try:
+        yield
+    finally:
+        _local.enabled = prev_enabled
+
+
 
 _deprecation_logger = Logger("deprecation")
 _deprecation_locations = set()
@@ -45,13 +67,14 @@ class _DeprecatedFunction(object):
 
     def __call__(self, *args, **kwargs):
         func = self._get_underlying_func()
-        caller_location = _get_caller_location()
-        if caller_location not in _deprecation_locations:
-            warning = "{0} is deprecated.".format(self._get_func_str())
-            if self._message is not None:
-                warning += " {0}".format(self._message)
-            _deprecation_logger.warning(warning, frame_correction=+1)
-            _deprecation_locations.add(caller_location)
+        if _local.enabled:
+            caller_location = _get_caller_location()
+            if caller_location not in _deprecation_locations:
+                warning = "{0} is deprecated.".format(self._get_func_str())
+                if self._message is not None:
+                    warning += " {0}".format(self._message)
+                _deprecation_logger.warning(warning, frame_correction=+1)
+                _deprecation_locations.add(caller_location)
         if self._obj is not None:
             return func(self._obj, *args, **kwargs)
         elif self._objtype is not None:
