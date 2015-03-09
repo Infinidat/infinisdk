@@ -68,7 +68,6 @@ class Replica(InfiniBoxObject):
         Field('id', type=int, is_identity=True),
         Field('link', api_name='link_id', binding=RelatedObjectBinding(
             'links'), type='infinisdk.infinibox.link:Link', creation_parameter=True),
-        Field('name', creation_parameter=True, mutable=True, is_filterable=True,
               default=Autogenerate("replica_{uuid}")),
         Field('entity_pairs', type=list, creation_parameter=True),
         Field('entity_type', type=str,
