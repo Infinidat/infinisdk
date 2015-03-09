@@ -331,8 +331,10 @@ class EthPort(InfiniBoxSystemComponent):
         Field("index", api_name="id", type=int, cached=True),
         Field("node", api_name="node_index", type=int, cached=True, binding=RelatedComponentBinding()),
         Field("role", cached=True),
+        Field("name", cached=True),
         Field("system_interface_port_number", type=int),
         Field("state", cached=False),
+        Field("link_state", cached=False),
         Field("ip_v4_addr"),
         Field("ip_v4_broadcast"),
         Field("ip_v4_netmask"),
@@ -343,6 +345,12 @@ class EthPort(InfiniBoxSystemComponent):
     @classmethod
     def get_type_name(cls):
         return "eth_port"
+
+    def is_link_up(self):
+        if self.get_state() != 'OK':
+            return False
+        return self.get_link_state().lower() in ("link up", "up")
+
 
 class FcPorts(InfiniBoxComponentBinder):
     def get_online_target_addresses(self):
