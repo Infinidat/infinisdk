@@ -24,7 +24,7 @@ class Export(InfiniBoxObject):
         Field("export_path", creation_parameter=True, default=Autogenerate("/{prefix}export_{uuid}")),
         Field("inner_path", creation_parameter=True, optional=True),
         Field("filesystem", api_name = "filesystem_id", creation_parameter = True, cached=True, type=int, binding=RelatedObjectBinding()),
-        Field("enabled", type=bool, mutable=True),
+        Field("enabled", type=bool, mutable=True, creation_parameter=True, optional=True),
         Field("make_all_users_anonymous", creation_parameter=True, optional=True),
         Field("anonymous_gid", type=int, creation_parameter=True, optional=True),
         Field("anonymous_uid", type=int, creation_parameter=True, optional=True),
