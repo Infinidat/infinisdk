@@ -334,7 +334,7 @@ class EthPort(InfiniBoxSystemComponent):
         Field("name", cached=True),
         Field("system_interface_port_number", type=int),
         Field("state", cached=False),
-        Field("link_state", cached=False),
+        Field("link_state", cached=False, binding=NotExistsSupportBinding()),
         Field("ip_v4_addr"),
         Field("ip_v4_broadcast"),
         Field("ip_v4_netmask"),
