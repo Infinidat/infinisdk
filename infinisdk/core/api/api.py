@@ -73,6 +73,7 @@ class API(object):
         self._urls = [self._url_from_address(address, use_ssl) for address in target.get_api_addresses()]
         self._active_url = None
         self._checked_version = False
+        self._no_reponse_logs = False
 
     def reinitialize_session(self):
         self._session = requests.Session()
@@ -229,7 +230,8 @@ class API(object):
             elapsed = get_timedelta_total_seconds(response.elapsed)
             _logger.debug("{0} --> {1} {2} (took {3:.04f}s)", hostname, response.status_code, response.reason, elapsed)
             returned = Response(response, data)
-            _logger.debug("{0} --> {1}", hostname, returned.get_json())
+            resp_data = "..." if self._no_reponse_logs else returned.get_json()
+            _logger.debug("{0} --> {1}", hostname, resp_data)
             if response.status_code != httplib.SERVICE_UNAVAILABLE:
                 if specified_address is None: # need to remember our next API target
                     self._active_url = url
@@ -246,6 +248,15 @@ class API(object):
         except Exception:
             pass
         _logger.debug("{0} <-- DATA: {1}" , hostname, data)
+
+    @contextmanager
+    def no_response_logs_context(self):
+        prev = self._no_reponse_logs
+        self._no_reponse_logs = True
+        try:
+            yield
+        finally:
+            self._no_reponse_logs = prev
 
     def add_auto_retry(self, retry_predicate, max_retries=1):
         assert retry_predicate not in self._auto_retry_predicates
