@@ -365,6 +365,13 @@ class SystemObject(with_metaclass(FieldsMeta)):
                 {'obj': self, 'data': update_dict, 'response_dict': response_dict}, tags=hook_tags)
         return res
 
+    def safe_delete(self, *args, **kwargs):
+        try:
+            self.delete(*args, **kwargs)
+        except APICommandFailed as e:
+            if e.status_code != httplib.NOT_FOUND:
+                raise
+
     def delete(self):
         """
         Deletes this object.
