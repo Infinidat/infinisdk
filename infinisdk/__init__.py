@@ -52,6 +52,9 @@ def _install_hooks():
 
     gossip.define('infinidat.sdk.replica_snapshot_created', tags=['infinibox'])
 
+    gossip.define('infinidat.sdk.before_api_request')
+    gossip.define('infinidat.sdk.after_api_request')
+
     gossip.get_or_create_group('infinidat.sdk').set_strict()
 
 _install_hooks()

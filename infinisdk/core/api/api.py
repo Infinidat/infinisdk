@@ -18,6 +18,7 @@ import sys
 import socket
 from contextlib import contextmanager
 
+import gossip
 from logbook import Logger
 from sentinels import NOTHING
 from urlobject import URLObject as URL
@@ -218,6 +219,7 @@ class API(object):
             for preprocessor in self._preprocessors:
                 preprocessor(api_request)
 
+
             _logger.debug("{0} <-- {1} {2}", hostname, http_method.upper(), api_request.url)
             if data is not None:
                 if data != api_request.data:
@@ -225,7 +227,9 @@ class API(object):
                 self._log_sent_data(hostname, data, sent_json_object)
 
             prepared = self._session.prepare_request(api_request)
+            gossip.trigger('infinidat.sdk.before_api_request', request=prepared)
             response = self._session.send(prepared, **kwargs)
+            gossip.trigger('infinidat.sdk.after_api_request', request=prepared, response=response)
 
             elapsed = get_timedelta_total_seconds(response.elapsed)
             _logger.debug("{0} --> {1} {2} (took {3:.04f}s)", hostname, response.status_code, response.reason, elapsed)
