@@ -212,9 +212,18 @@ def test_data_restore(data_entity):
 
     snapshot = data_entity.create_snapshot('some_snapshot_to_restore_from')
     assert callbacks == []
+
     data_entity.restore(snapshot)
-    last_event = data_entity.system.events.get_last_event()
-    assert "{0}_RESTORE".format(data_entity.get_type_name().upper()) in last_event['code'] # Either VOLUME_RESTORE/FILESYSTEM_RESTORE for older versions, or VOLUME_RESTORED/FILESYSTEM_RESTORED for 2.0
+
+    last_events = data_entity.system.events.get_events()
+    found_restore_event = False
+    for last_event in last_events:
+        if "{0}_RESTORE".format(data_entity.get_type_name().upper()) in last_event['code']:
+            # Either VOLUME_RESTORE/FILESYSTEM_RESTORE for older versions, or VOLUME_RESTORED/FILESYSTEM_RESTORED for 2.0
+            found_restore_event = True
+            break
+    assert found_restore_event
+
     args = (data_entity.id, snapshot.id)
     expected += ['pre_restore_{0}_from_{1}'.format(*args), 'post_restore_{0}_from_{1}'.format(*args)]
     assert callbacks == expected
