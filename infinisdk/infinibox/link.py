@@ -14,8 +14,9 @@
 from ..core.api.special_values import Autogenerate
 from ..core import Field
 from ..core.bindings import RelatedObjectBinding
-from ..core.exceptions import InfiniSDKException
+from ..core.exceptions import InfiniSDKException, UnknownSystem
 from .system_object import InfiniBoxObject
+
 
 
 class Link(InfiniBoxObject):
@@ -60,4 +61,4 @@ class Link(InfiniBoxObject):
                     if ip.ip_address == remote_host:
                         return related_system
 
-        raise InfiniSDKException("Could not find a related machine with IP address {0}".format(remote_host))
+        raise UnknownSystem("Could not find a related machine with IP address {0}".format(remote_host))

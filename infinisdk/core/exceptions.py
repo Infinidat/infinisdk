@@ -16,6 +16,9 @@ from munch import munchify
 class InfiniSDKException(Exception):
     pass
 
+class UnknownSystem(InfiniSDKException):
+    pass
+
 class InvalidOperationException(InfiniSDKException):
     pass
 
