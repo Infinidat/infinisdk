@@ -64,7 +64,7 @@ else:
     import functools
     import http.client as httplib
 
-    string_types = (str,)
+    string_types = (str,bytes)
 
     import builtins
 
