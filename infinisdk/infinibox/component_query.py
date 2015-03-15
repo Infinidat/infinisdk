@@ -24,7 +24,7 @@ class InfiniBoxComponentQuery(object):
         self.predicates = predicates
         self.kw = kw
         self.sort_criteria = tuple()
-        self._force_fetch = False
+        self._force_fetch = bool(kw) or bool(predicates)
 
     def force_fetching_objects(self):
         self._force_fetch = True
@@ -51,10 +51,14 @@ class InfiniBoxComponentQuery(object):
 
         return sorted(fetched_items, cmp=_sort_cmp_items)
 
-    def __iter__(self):
-        self._fetch()
+    def _get_binder(self):
+        if self.object_type.get_type_name() == 'infiniboxsystemcomponent':
+            return self.system.components.enclosures
+        return self.system.components[self.object_type]
 
-        for item in self._get_items():
+    def __iter__(self):
+        with self._get_binder().fetch_tree_once_context(force_fetch=self._force_fetch):
+            for item in self._get_items():
                 yield item
 
     def __len__(self):
@@ -81,41 +85,6 @@ class InfiniBoxComponentQuery(object):
             if item.get_field(k) != v:
                 return False
         return True
-
-    def _fetch(self):
-        if self.object_type in [self.system.components.nodes.object_type,
-                                self.system.components.services.object_type,
-                                self.system.components.fc_ports.object_type,
-                                self.system.components.eth_ports.object_type,
-                                self.system.components.local_drives.object_type,
-                                ]:
-            self._fetch_nodes()
-        elif self.object_type is self.system.components.service_clusters.object_type:
-            self._fetch_service_clusters()
-        else:
-            self._fetch_all()
-
-    def _fetch_all(self):
-        components = self.system.components
-        if not self._force_fetch and not components.should_fetch_all():
-            return
-        components.get_rack_1().refresh()
-        components.mark_fetched_all()
-
-    def _fetch_nodes(self):
-        components = self.system.components
-        if not self._force_fetch and not components.should_fetch_nodes():
-            return
-        rack_1 = components.get_rack_1()
-        rack_1.refresh_without_enclosures()
-        components.mark_fetched_nodes()
-
-    def _fetch_service_clusters(self):
-        service_cluster_type = self.system.components.service_clusters.object_type
-        url = service_cluster_type.get_url_path(self.system)
-        clusters_data = self.system.api.get(url).get_result()
-        for cluster_data in clusters_data:
-            service_cluster_type.construct(self.system, cluster_data, None)
 
     def page(self, page_index):
         raise NotImplementedError()  # pragma: no cover

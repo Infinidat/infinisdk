@@ -40,6 +40,7 @@ class InfiniBoxSystemComponents(SystemComponentsBinder):
         self.cache_component(self._rack_1)
         self._fetched_nodes = False
         self._fetched_others = False
+        self._fetched_service_clusters = False
         self._deps_by_compoents_tree = defaultdict(set)
 
     def get_depended_components_type(self, component_type):
@@ -54,12 +55,19 @@ class InfiniBoxSystemComponents(SystemComponentsBinder):
     def should_fetch_all(self):
         return not self._fetched_others
 
+    def should_fetch_service_clusters(self):
+        return not self._fetched_service_clusters
+
+
     def mark_fetched_nodes(self):
         self._fetched_nodes = True
 
     def mark_fetched_all(self):
         self._fetched_others = True
         self._fetched_nodes = True
+
+    def mark_fetched_service_clusters(self):
+        self._fetched_service_clusters = True
 
     def get_rack_1(self):
         return self._rack_1
@@ -131,11 +139,39 @@ class InfiniBoxComponentBinder(TypeBinder):
     def fetch_once_context(self):
         return self.fetch_tree_once_context()
 
-    def fetch_tree_once_context(self):
+    def fetch_tree_once_context(self, force_fetch=True):
         if not self.should_force_fetching_from_cache():
-            list(self.get_all().force_fetching_objects())
+            self._fetch_tree(force_fetch)
         return self._force_fetching_tree_from_cache_context()
 
+    def _fetch_tree(self, force_fetch):
+        components = self.system.components
+        if self.object_type in [
+                components.nodes.object_type,
+                components.services.object_type,
+                components.fc_ports.object_type,
+                components.eth_ports.object_type,
+                components.local_drives.object_type,
+                ]:
+            if force_fetch or components.should_fetch_nodes():
+                rack_1 = components.get_rack_1()
+                rack_1.refresh_without_enclosures()
+        elif self.object_type is components.service_clusters.object_type:
+            if force_fetch or components.should_fetch_service_clusters():
+                self._fetch_service_clusters()
+        else:
+            if force_fetch or components.should_fetch_all():
+                rack_1 = components.get_rack_1()
+                rack_1.refresh()
+
+    def _fetch_service_clusters(self):
+        components = self.system.components
+        service_cluster_type = components.service_clusters.object_type
+        url = service_cluster_type.get_url_path(self.system)
+        clusters_data = self.system.api.get(url).get_result()
+        components.mark_fetched_service_clusters()
+        for cluster_data in clusters_data:
+            service_cluster_type.construct(self.system, cluster_data, None)
 
 
 class InfiniBoxSystemComponent(SystemObject):
@@ -223,10 +259,14 @@ class Rack(InfiniBoxSystemComponent):
 
     def refresh_without_enclosures(self):
         url = self.get_this_url_path().add_query_param('fields','enclosures_number,rack,nodes')
+        self.system.components.mark_fetched_nodes()
         data = self.system.api.get(url).get_result()
         data['enclosures'] = []
         self.construct(self.system, data, self.get_parent_id())
-        self.system.components.mark_fetched_nodes()
+
+    def refresh(self):
+        self.system.components.mark_fetched_all()
+        super(Rack, self).refresh()
 
 
 @InfiniBoxSystemComponents.install_component_type
