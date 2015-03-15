@@ -158,6 +158,7 @@ class Replica(InfiniBoxObject):
         self.system.api.post(self.get_this_url_path()
                                  .add_path('change_role'))
         self.refresh()
+        gossip.trigger_with_tags('infinidat.sdk.replica_after_change_role', {'replica': self}, tags=['infinibox'])
 
     def is_source(self):
         return self.get_role().lower() == 'source'
