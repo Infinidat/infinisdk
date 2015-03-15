@@ -17,6 +17,7 @@ from ..core import Field, CapacityType, MillisecondsDatetimeType
 from ..core.api.special_values import Autogenerate
 from .system_object import InfiniBoxObject
 
+
 class PoolBinder(TypeBinder):
     """Implements *system.pools*
     """
@@ -29,7 +30,6 @@ class PoolBinder(TypeBinder):
                 for pool_info in resp.get_result()]
 
 
-
 class Pool(InfiniBoxObject):
 
     BINDER_CLASS = PoolBinder
@@ -39,10 +39,10 @@ class Pool(InfiniBoxObject):
         Field("name", creation_parameter=True, mutable=True, is_filterable=True, is_sortable=True, default=Autogenerate("pool_{uuid}")),
         Field("virtual_capacity",  creation_parameter=True, mutable=True, default=TB, type=CapacityType, is_filterable=True, is_sortable=True),
         Field("physical_capacity", creation_parameter=True, mutable=True, default=TB, type=CapacityType, is_filterable=True, is_sortable=True),
-        Field("allocated_physical_capacity", api_name="allocated_physical_space", type=CapacityType, is_sortable=True, is_filterable=True),
-        Field("free_physical_capacity", api_name="free_physical_space", type=CapacityType, is_sortable=True, is_filterable=True),
-        Field("free_virtual_capacity", api_name="free_virtual_space", type=CapacityType, is_sortable=True, is_filterable=True),
-        Field("reserved_capacity", type=CapacityType, is_sortable=True, is_filterable=True),
+        Field("allocated_physical_capacity", api_name="allocated_physical_space", type=CapacityType),
+        Field("free_physical_capacity", api_name="free_physical_space", type=CapacityType),
+        Field("free_virtual_capacity", api_name="free_virtual_space", type=CapacityType),
+        Field("reserved_capacity", type=CapacityType),
         Field("created_at", type=MillisecondsDatetimeType, is_sortable=True, is_filterable=True),
         Field("updated_at", type=MillisecondsDatetimeType, is_sortable=True, is_filterable=True),
         Field("ssd_enabled", type=bool, mutable=True, creation_parameter=True, is_filterable=True, is_sortable=True, optional=True),
