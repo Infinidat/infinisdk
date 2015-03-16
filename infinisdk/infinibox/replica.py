@@ -221,3 +221,13 @@ class Replica(InfiniBoxObject):
         for the first time"""
         linked_system = self.get_link().get_linked_system()
         return linked_system.replicas.get_by_id_lazy(self.get_remote_replica_id())
+
+    def get_remote_entity_pairs(self):
+        """Returns the entity_pairs configuration as held by the remote replica
+
+        .. note:: this uses the remote command execution API to run the command over the inter-system
+          link
+        """
+        return self.system.api.get('remote/{0}/api/rest/replicas/{1}/entity_pairs'.format(
+            self.get_link().id,
+            self.get_remote_replica_id(from_cache=True))).get_result()

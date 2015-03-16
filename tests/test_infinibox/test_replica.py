@@ -24,6 +24,14 @@ def test_replica_sync_interval(replica):
 
 
 @new_to_version('2.0')
+def test_get_remote_entity_pairs(replica, remote_replica):
+    local = replica.get_field('entity_pairs')
+    remote = remote_replica.get_field('entity_pairs')
+    assert local != remote
+    assert remote == replica.get_remote_entity_pairs()
+
+
+@new_to_version('2.0')
 def test_replica_get_fields(replica):
     fields = replica.get_fields()
     for field in replica.FIELDS:
@@ -194,6 +202,12 @@ def replica(infinibox, secondary_infinibox, link, replica_creation_kwargs):
     secondary_infinibox.register_related_system(infinibox)
     return infinibox.replicas.create(
         link=link, **replica_creation_kwargs)
+
+
+@pytest.fixture
+def remote_replica(replica, secondary_infinibox):
+    [returned] = secondary_infinibox.replicas
+    return returned
 
 
 @pytest.fixture

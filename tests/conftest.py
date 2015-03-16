@@ -293,4 +293,5 @@ def mocked_ecosystem(request):
 @pytest.fixture
 def secondary_infinibox(request):
     returned = infinibox(request=request, infinibox_simulator=infinibox_simulator(request=request))
+    unused = returned.get_simulator().hosts.create('unused_host') # make sure ids are not aligned
     return returned
