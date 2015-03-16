@@ -1,12 +1,26 @@
-import pytest
+from datetime import timedelta
 
-from ..conftest import new_to_version, secondary_infinibox as secondary_infinibox_fx
-from infinisdk.core.exceptions import TooManyObjectsFound, ObjectNotFound, InfiniSDKException, CannotGetReplicaState
+import pytest
+from infinisdk.core.exceptions import (CannotGetReplicaState,
+                                       InfiniSDKException, ObjectNotFound,
+                                       TooManyObjectsFound)
+
+from ..conftest import secondary_infinibox as secondary_infinibox_fx
+from ..conftest import new_to_version
+
+SECOND = SECONDS = timedelta(seconds=1)
 
 
 @new_to_version('2.0')
 def test_replica_creation(replica):
     pass
+
+
+@new_to_version('2.0')
+def test_replica_sync_interval(replica):
+    interval = 30 * SECONDS
+    replica.update_sync_interval(interval)
+    assert interval == replica.get_sync_interval()
 
 
 @new_to_version('2.0')

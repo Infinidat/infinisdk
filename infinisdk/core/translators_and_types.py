@@ -79,6 +79,7 @@ class MillisecondsDeltaTranslator(ValueTranslator):
         return int(total_seconds * 1000.0)
 
     def _from_api(self, value):
+        value /= 1000.0
         return timedelta(seconds=int(value), microseconds = int((value - int(value)) * 1000))
 
 
