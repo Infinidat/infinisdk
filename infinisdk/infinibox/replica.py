@@ -16,7 +16,7 @@ from datetime import timedelta
 
 import gossip
 
-from ..core.api.special_values import Autogenerate
+from ..core.api.special_values import Autogenerate, OMIT
 from ..core.type_binder import TypeBinder
 from ..core import Field
 from ..core.bindings import RelatedObjectBinding
@@ -154,9 +154,10 @@ class Replica(InfiniBoxObject):
         self._validate_can_check_state()
         return self.get_state(*args, **kwargs).lower() in ['idle', 'initiating', 'replicating']
 
-    def change_role(self):
+    def change_role(self, entity_pairs=OMIT):
+        data = {'entity_pairs': entity_pairs} if entity_pairs is not OMIT else None
         self.system.api.post(self.get_this_url_path()
-                                 .add_path('change_role'))
+                                 .add_path('change_role'), data=data)
         self.refresh()
         gossip.trigger_with_tags('infinidat.sdk.replica_after_change_role', {'replica': self}, tags=['infinibox'])
 
