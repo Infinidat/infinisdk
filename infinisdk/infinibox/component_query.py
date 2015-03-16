@@ -43,8 +43,9 @@ class InfiniBoxComponentQuery(object):
             else:
                 return 0
 
-        fetched_items = [item for item in itervalues(self.system.components._components_by_id)
-                         if self.passed_filtering(item)]
+        with self._get_binder().fetch_tree_once_context(force_fetch=self._force_fetch):
+            fetched_items = [item for item in itervalues(self.system.components._components_by_id)
+                             if self.passed_filtering(item)]
 
         if not self.sort_criteria:
             return fetched_items
@@ -57,9 +58,8 @@ class InfiniBoxComponentQuery(object):
         return self.system.components[self.object_type]
 
     def __iter__(self):
-        with self._get_binder().fetch_tree_once_context(force_fetch=self._force_fetch):
-            for item in self._get_items():
-                yield item
+        for item in self._get_items():
+            yield item
 
     def __len__(self):
         return len([item for item in self])
