@@ -455,8 +455,9 @@ class Drive(InfiniBoxSystemComponent):
 
     def get_paths(self, from_cache=False):
         node_access_flags = self.get_field('nodes_access', from_cache=from_cache)
-        return [self.system.components.nodes.get(index=i)
-                for i, can_access_node in enumerate(node_access_flags,1) if can_access_node]
+        return [node
+                for node, can_access_node in zip(self.system.components.nodes, node_access_flags)
+                if can_access_node]
 
     def is_active(self):
         return self.get_state() == 'ACTIVE'
