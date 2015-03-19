@@ -229,6 +229,6 @@ class Replica(InfiniBoxObject):
         .. note:: this uses the remote command execution API to run the command over the inter-system
           link
         """
-        return self.system.api.get('remote/{0}/api/rest/replicas/{1}/entity_pairs'.format(
+        return self.system.api.get('remote/{0}/api/rest/replicas/{1}'.format(
             self.get_link().id,
-            self.get_remote_replica_id(from_cache=True))).get_result()
+            self.get_remote_replica_id(from_cache=True))).get_result()['entity_pairs']
