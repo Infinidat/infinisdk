@@ -1,3 +1,5 @@
+import packaging.version
+
 from .._compat import httplib
 from ..core.config import config
 
@@ -11,6 +13,12 @@ class Compatability(object):
         system_version = self.system.get_version()
         supported_versions = config.root.infinibox.compatible_versions
         return any(version_compatibility.matches(system_version) for version_compatibility in supported_versions)
+
+    def _normalize_version_string(self, version):
+        return packaging.version.parse(version)
+
+    def _get_parsed_version(self):
+        return self._normalize_version_string(self.system.get_version())
 
     def get_version_major(self):
         return self.system.get_version().partition('.')[0]
@@ -36,7 +44,7 @@ class Compatability(object):
         return int(self.get_version_major()) >= 2
 
     def has_nas(self):
-        return int(self.get_version_major()) >= 2
+        return self._get_parsed_version() >= self._normalize_version_string("2.2")
 
     def has_network_configuration(self):
         return int(self.get_version_major()) >= 2
