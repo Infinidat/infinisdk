@@ -26,6 +26,7 @@ from ..core.bindings import InfiniSDKBinding, ListOfRelatedComponentBinding, Rel
 
 from collections import defaultdict
 from contextlib import contextmanager
+from pact import Pact
 from urlobject import URLObject as URL
 
 
@@ -478,13 +479,16 @@ class Service(InfiniBoxSystemComponent):
             raise NotImplementedError("This service ({0}) doesn't support CLM".format(self.get_name()))
 
     def start(self):
-        self.get_service_cluster().start(node=self.get_parent())
+        return self.get_service_cluster().start(node=self.get_parent())
 
     def stop(self):
-        self.get_service_cluster().stop(node=self.get_parent())
+        return self.get_service_cluster().stop(node=self.get_parent())
 
     def is_active(self):
         return self.get_state() == 'ACTIVE'
+
+    def is_inactive(self):
+        return self.get_state() == 'INACTIVE'
 
     def is_master(self):
         return self.get_role() == 'MASTER'
@@ -525,15 +529,32 @@ class ServiceCluster(InfiniBoxSystemComponent):
                 for service_info in self.get_field('node_states')]
 
     def start(self, node=None):
-        data = {'node_id': node.get_index()} if node else {}
+        if node:
+            data = {'node_id': node.get_index()}
+            obj = node.get_service(self.get_name())
+        else:
+            data = {}
+            obj = self
+        pact = Pact('Starting {0}'.format(obj)).until(obj.is_active)
         self.system.api.post(self.get_this_url_path().add_path('start'), data=data)
+        return pact
 
     def stop(self, node=None):
-        data = {'node_id': node.get_index()} if node else {}
+        if node:
+            data = {'node_id': node.get_index()}
+            obj = node.get_service(self.get_name())
+        else:
+            data = {}
+            obj = self
+        pact = Pact('Stopping {0}'.format(obj)).until(obj.is_inactive)
         self.system.api.post(self.get_this_url_path().add_path('stop'), data=data)
+        return pact
 
     def is_active(self):
         return self.get_state() == 'ACTIVE'
+
+    def is_inactive(self):
+        return self.get_state() == 'INACTIVE'
 
 @InfiniBoxSystemComponents.install_component_type
 class System(InfiniBoxSystemComponent):
