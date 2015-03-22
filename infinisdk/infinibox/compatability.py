@@ -37,6 +37,10 @@ class Compatability(object):
             self._init_fetatures()
         return feature_key in self._features
 
+    def set_feature_as_supported(self, feature_key):
+        if not self._has_feature(feature_key):
+            self._features.add(feature_key)
+
     def has_npiv(self):
         return self._has_feature("fc/soft_targets")
 
@@ -44,7 +48,7 @@ class Compatability(object):
         return int(self.get_version_major()) >= 2
 
     def has_nas(self):
-        return self._get_parsed_version() >= self._normalize_version_string("2.2")
+        return self._has_feature('nas')
 
     def has_network_configuration(self):
         return int(self.get_version_major()) >= 2

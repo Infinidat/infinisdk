@@ -96,6 +96,8 @@ def infinibox(request, infinibox_simulator):
     infinibox = InfiniBox(infinibox_simulator, auth=(user.get_username(), user.get_password()))
     required_version_kwargs = getattr(request.function, 'required_version', _DEFAULT_REQUIRED_VERSION).kwargs
     validate_unittest_compatability_with_infinibox_version(infinibox, **required_version_kwargs)
+    if int(infinibox.compat.get_version_major()) >= 2:
+        infinibox.compat.set_feature_as_supported('nas')
     return infinibox
 
 
