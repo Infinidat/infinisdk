@@ -14,11 +14,11 @@ class Compatability(object):
         supported_versions = config.root.infinibox.compatible_versions
         return any(version_compatibility.matches(system_version) for version_compatibility in supported_versions)
 
-    def _normalize_version_string(self, version):
+    def normalize_version_string(self, version):
         return packaging.version.parse(version)
 
-    def _get_parsed_version(self):
-        return self._normalize_version_string(self.system.get_version())
+    def get_parsed_system_version(self):
+        return self.normalize_version_string(self.system.get_version())
 
     def get_version_major(self):
         return self.system.get_version().partition('.')[0]
