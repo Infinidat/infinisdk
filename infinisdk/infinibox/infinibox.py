@@ -203,7 +203,7 @@ class InfiniBox(APITarget):
 
     def _after_login(self):
         self.components.system_component.refresh()
-        gossip.trigger("after_login", system=self)
+        gossip.trigger('infinidat.sdk.after_login', system=self)
 
     def login(self):
         """
