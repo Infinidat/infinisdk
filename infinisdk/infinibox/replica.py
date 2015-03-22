@@ -187,9 +187,6 @@ class Replica(InfiniBoxObject):
         if force_if_no_remote_credentials:
             path = path.add_query_param('force_if_no_remote_credentials', 'true')
 
-        if retain_staging_area:
-            old_snaps = set(self.get_local_volume().get_children())
-
         with self._detecting_new_snapshots_context(retain_staging_area, returned):
             with self._get_delete_context():
                 self.system.api.delete(path)

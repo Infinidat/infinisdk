@@ -74,7 +74,7 @@ class Pool(InfiniBoxObject):
         return self.get_state(*args, **kwargs) == 'LIMITED'
 
     def lock(self):
-         self.system.api.post(self.get_this_url_path().add_path('lock'))
+        self.system.api.post(self.get_this_url_path().add_path('lock'))
 
     def unlock(self):
-         self.system.api.post(self.get_this_url_path().add_path('unlock'))
+        self.system.api.post(self.get_this_url_path().add_path('unlock'))
