@@ -57,6 +57,8 @@ def _install_hooks():
     gossip.define(_SDK_HOOK('before_api_request'))
     gossip.define(_SDK_HOOK('after_api_request'))
 
+    gossip.define(_SDK_HOOK('after_login'))
+
     gossip.get_or_create_group('infinidat.sdk').set_strict()
 
 _install_hooks()

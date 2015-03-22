@@ -12,6 +12,7 @@
 ### are strictly forbidden unless prior written permission is obtained from Infinidat Ltd.
 ###!
 import itertools
+import gossip
 import weakref
 
 from sentinels import NOTHING
@@ -202,6 +203,7 @@ class InfiniBox(APITarget):
 
     def _after_login(self):
         self.components.system_component.refresh()
+        gossip.trigger("after_login", system=self)
 
     def login(self):
         """
