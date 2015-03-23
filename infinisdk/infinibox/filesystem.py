@@ -47,6 +47,7 @@ class Filesystem(BaseDataEntity):
         Field("depth", cached=True, type=int, is_sortable=True, is_filterable=True),
         Field("mapped", type=bool, is_sortable=True, is_filterable=True),
         Field("has_children", type=bool),
+        Field("root_mode", creation_parameter=True, optional=True),
     ]
 
     @classmethod
