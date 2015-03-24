@@ -81,6 +81,8 @@ def test_get_owned_pools(infinibox, user):
     pool.discard_owner(user)
     assert user.get_owned_pools() == []
 
+
+@new_to_version('2.0')
 def test_set_users(infinibox):
     user1 = infinibox.users.create(name='user1')
     user2 = infinibox.users.create(name='user2')
