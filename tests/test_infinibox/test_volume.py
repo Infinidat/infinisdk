@@ -1,4 +1,5 @@
 import pytest
+from ..conftest import new_to_version
 from infinisdk._compat import xrange
 from capacity import Capacity, TB
 from infinisdk.infinibox.volume import Volume
@@ -57,6 +58,8 @@ def test_create_many(infinibox, pool):
 
 @pytest.mark.parametrize('with_capacity', [True, False])
 def test_move_volume(infinibox, with_capacity):
+    if with_capacity and int(infinibox.compat.get_version_major()) < 2:
+        pytest.skip('infinisim does not support with_capacity for this version')
     oldpool = infinibox.pools.create(virtual_capacity=10*TB, physical_capacity=10*TB)
     volume = infinibox.volumes.create(pool=oldpool, size=TB)
     old_virt_capacity = oldpool.get_virtual_capacity()
