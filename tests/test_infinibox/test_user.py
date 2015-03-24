@@ -3,7 +3,7 @@ import pytest
 import re
 from infinibox_sysdefs import latest as defs
 from ecosystem.mocks.mock_mailboxer import get_simulated_mail_server
-from ..conftest import new_to_version
+from ..conftest import new_to_version, user as user_fx
 
 
 def test_name(infinibox, user):
@@ -80,6 +80,21 @@ def test_get_owned_pools(infinibox, user):
 
     pool.discard_owner(user)
     assert user.get_owned_pools() == []
+
+def test_set_users(infinibox):
+    user1 = infinibox.users.create(name='user1')
+    user2 = infinibox.users.create(name='user2')
+    assert user1.get_owned_pools() == []
+    assert user2.get_owned_pools() == []
+
+    pool = infinibox.pools.create()
+    for owners in [[], [user1], [user2], [user1, user2]]:
+        pool.set_owners(owners)
+        assert pool.get_owners(from_cache=False) == owners
+        for owner in owners:
+            pools = owner.get_owned_pools()
+            assert len(pools) == 1
+            assert pools[0] == pool
 
 
 def _get_token_from_mail(simulator, mail_address):

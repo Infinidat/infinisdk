@@ -62,15 +62,15 @@ You can set a user's role using :func:`.User.update_role`:
        >>> print(user.get_role())
        POOL_ADMIN
 
-Adding Pools to a User
-~~~~~~~~~~~~~~~~~~~~~~
+Setting Pool Owners
+~~~~~~~~~~~~~~~~~~~
 
-To set a pool that will be administered by a user, simply call :func:`.Pool.add_owner`:
+To set a pool that will be administered by a user, simply call :func:`.Pool.set_owners`:
 
 .. code-block:: python
 
        >>> pool = system.pools.create()
-       >>> pool.add_owner(user)
+       >>> pool.set_owners([user])
 
 LDAP Integration
 ----------------
