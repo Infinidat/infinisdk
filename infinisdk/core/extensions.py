@@ -87,6 +87,7 @@ class Method(Attachment):
 
     def __get__(self, obj, objclass):
         method = _BoundMethod(self._func, obj)
+        method.__name__ = self._name
         method.__self__ = method.im_self = obj
         method.im_class = objclass
         method.im_func = self._func
@@ -98,10 +99,6 @@ class _BoundMethod(functools.partial):
     @property
     def __doc__(self):
         return self.func.__doc__
-
-    @property
-    def __name__(self):
-        return self.func.__name__
 
     def __repr__(self):
         return '<Bound method {0.im_class.__name__}.{0.__name__} of {0.args[0]!r}>'.format(self)

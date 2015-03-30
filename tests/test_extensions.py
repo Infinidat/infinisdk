@@ -137,8 +137,8 @@ def test_extension_repr(request, infinibox_new_method, bound, infinibox):
 @pytest.fixture
 def infinibox_new_method(infinibox, bound):
 
-    @extensions.add_method(InfiniBox)
-    def some_new_method(a, b, c):
+    @extensions.add_method(InfiniBox, name='some_new_method')
+    def new_method(a, b, c):
         'new method doc'
 
     if bound:
