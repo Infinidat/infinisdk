@@ -119,3 +119,34 @@ def test_extending_hierarchy(request, infinibox):
         pass
 
     request.addfinalizer(method1.__extension_deactivate__)
+
+
+def test_extension_doc_and_name(request, infinibox_new_method):
+    assert infinibox_new_method.__doc__ == 'new method doc'
+    assert infinibox_new_method.__name__ == 'some_new_method'
+
+def test_extension_repr(request, infinibox_new_method, bound, infinibox):
+    repr_string = repr(infinibox_new_method)
+
+    if bound:
+        assert repr(infinibox) in repr_string
+
+    assert 'InfiniBox.some_new_method' in repr_string
+
+
+@pytest.fixture
+def infinibox_new_method(infinibox, bound):
+
+    @extensions.add_method(InfiniBox)
+    def some_new_method(a, b, c):
+        'new method doc'
+
+    if bound:
+        return infinibox.some_new_method
+    else:
+        return InfiniBox.some_new_method
+
+
+@pytest.fixture(params=[True, False])
+def bound(request):
+    return request.param
