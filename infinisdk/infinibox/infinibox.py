@@ -13,9 +13,12 @@
 ###!
 import itertools
 import gossip
+import requests
 import weakref
 
 from sentinels import NOTHING
+
+from infi.pyutils.lazy import cached_method
 
 from ..core.api import APITarget
 from ..core.config import config, get_ini_option
@@ -116,8 +119,10 @@ class InfiniBox(APITarget):
     def get_state(self):
         return self.components.system_component.get_state()
 
+    @cached_method
     def is_simulator(self):
-        return "simulator" in self.get_system_info("name")
+        resp = self.api.post('/api/infinisim/echo', data='data', raw_response=True)
+        return resp.response.status_code == requests.codes.ok
 
     def get_simulator(self):
         if lookup_simulator_by_address is None:
