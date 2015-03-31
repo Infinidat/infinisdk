@@ -223,7 +223,7 @@ class InfiniBoxSystemComponent(SystemObject):
         self.construct(self.system, data, self.get_parent_id())
 
     @classmethod
-    def construct(cls, system, data, parent_id):
+    def construct(cls, system, data, parent_id, allow_partial_fields=False):
         data['parent_id'] = parent_id
         component_id = cls.fields.id.binding.get_value_from_api_object(system, cls, None, data)
         returned = system.components.try_get_component_by_id(component_id)
@@ -237,7 +237,11 @@ class InfiniBoxSystemComponent(SystemObject):
             returned.update_field_cache(data)
         for field in cls.fields:
             if isinstance(field.binding, ListOfRelatedComponentBinding):
-                field.binding.get_value_from_api_object(system, cls, returned, data)
+                try:
+                    field.binding.get_value_from_api_object(system, cls, returned, data)
+                except KeyError:
+                    if not allow_partial_fields:
+                        raise
         return returned
 
 
@@ -280,8 +284,17 @@ class Enclosure(InfiniBoxSystemComponent):
 
 
 class Nodes(InfiniBoxComponentBinder):
+
     def get_by_wwpn(self, wwpn):
         return self.system.components.fc_ports.get(wwpn=wwpn).get_node()
+
+    def refresh_fields(self, field_names):
+        assert isinstance(field_names, (list, tuple)), "field_names must be either a list or a tuple"
+        field_names_str = ",".join(set(field_names).union(['id']))
+        url = self.object_type.get_url_path(self.system).set_query_param('fields', field_names_str)
+        data = self.system.api.get(url).get_result()
+        parent_id = self.system.components.get_rack_1().get_id()
+        return [self.object_type.construct(self.system, obj_data, parent_id, True) for obj_data in data]
 
 
 @InfiniBoxSystemComponents.install_component_type
