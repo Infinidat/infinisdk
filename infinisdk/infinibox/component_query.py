@@ -51,7 +51,7 @@ class InfiniBoxComponentQuery(object):
                                  if self.passed_filtering(item)]
 
             if self.sort_criteria:
-                 returned.sort(cmp=_sort_cmp_items)
+                 returned = sorted(returned, cmp=_sort_cmp_items)
             self._fetched_items = returned
         return returned
 
