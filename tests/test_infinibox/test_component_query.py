@@ -1,4 +1,5 @@
 import pytest
+import logbook
 import random
 from infinisdk import Q
 from infinisdk.core.config import config
@@ -100,3 +101,14 @@ def test_rack_refresh(infinibox):
 
     rack_1.refresh()
     assert comp_with_nodes_no < len(components._components_by_id)
+
+@pytest.mark.parametrize('operation', [
+    lambda infinibox: list(infinibox.components.nodes.find(state='fakeone')),
+    lambda infinibox: infinibox.components.nodes.safe_get(state='fakeone')
+])
+def test_len_caching_on_empty_lists(infinibox, operation):
+    with logbook.TestHandler() as handler:
+        result = operation(infinibox)
+        assert not result
+
+    [r] = [record for record in handler.records if '<-- GET http://' in record.message]

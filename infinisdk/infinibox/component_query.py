@@ -25,32 +25,35 @@ class InfiniBoxComponentQuery(object):
         self.kw = kw
         self.sort_criteria = tuple()
         self._force_fetch = bool(kw) or bool(predicates)
+        self._fetched_items = None
 
     def force_fetching_objects(self):
         self._force_fetch = True
         return self
 
     def _get_items(self):
-        def _sort_cmp_items(x, y):
-            for criteria in self.sort_criteria:
-                sign_func = operator.neg if criteria.prefix == '-' else operator.pos
-                sort_field_name = criteria.field.name
-                x_val = x.get_field(sort_field_name)
-                y_val = y.get_field(sort_field_name)
-                res = cmp(x_val, y_val)
-                if res != 0:
-                    return sign_func(res)
-            else:
-                return 0
+        returned = self._fetched_items
+        if returned is None:
+            def _sort_cmp_items(x, y):
+                for criteria in self.sort_criteria:
+                    sign_func = operator.neg if criteria.prefix == '-' else operator.pos
+                    sort_field_name = criteria.field.name
+                    x_val = x.get_field(sort_field_name)
+                    y_val = y.get_field(sort_field_name)
+                    res = cmp(x_val, y_val)
+                    if res != 0:
+                        return sign_func(res)
+                else:
+                    return 0
 
-        with self._get_binder().fetch_tree_once_context(force_fetch=self._force_fetch):
-            fetched_items = [item for item in itervalues(self.system.components._components_by_id)
-                             if self.passed_filtering(item)]
+            with self._get_binder().fetch_tree_once_context(force_fetch=self._force_fetch):
+                returned = [item for item in itervalues(self.system.components._components_by_id)
+                                 if self.passed_filtering(item)]
 
-        if not self.sort_criteria:
-            return fetched_items
-
-        return sorted(fetched_items, cmp=_sort_cmp_items)
+            if self.sort_criteria:
+                 returned.sort(cmp=_sort_cmp_items)
+            self._fetched_items = returned
+        return returned
 
     def _get_binder(self):
         if self.object_type.get_type_name() == 'infiniboxsystemcomponent':
