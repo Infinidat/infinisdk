@@ -2,10 +2,14 @@ import pytest
 import logbook
 
 
-def test_len_caching_on_empty_lists(infinibox):
+@pytest.mark.parametrize('operation', [
+    lambda infinibox: list(infinibox.volumes.find(name='nonexistent')),
+    lambda infinibox: infinibox.volumes.safe_get(name='nonexistent'),
+])
+def test_len_caching_on_empty_lists(infinibox, operation):
     with logbook.TestHandler() as handler:
-        volumes = list(infinibox.volumes.find(name='nonexistent'))
-    assert not volumes
+        result = operation(infinibox)
+        assert not result
 
     [r] = [record for record in handler.records if '<-- GET http://' in record.message]
 
