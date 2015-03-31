@@ -31,7 +31,8 @@ class ObjectQuery(object):
         self._total_num_objects = None
 
     def __iter__(self):
-        self._fetch()
+        if self._total_num_objects is None:
+            self._fetch()
         if self._requested_page is not None:
             start = (self._requested_page - 1) * self._requested_page_size
             end = start + self._requested_page_size
@@ -46,10 +47,16 @@ class ObjectQuery(object):
                     raise
 
     def __len__(self):
-        self._fetch()
+        if self._total_num_objects is None:
+            self._fetch()
         if self._requested_page is None:
             return self._total_num_objects
         return self._get_requested_page_size()
+
+    def __nonzero__(self):
+        return len(self) != 0
+
+    __bool__ = __nonzero__
 
     def _get_requested_page_size(self):
         if self._total_num_objects >= self._requested_page * self._requested_page_size:

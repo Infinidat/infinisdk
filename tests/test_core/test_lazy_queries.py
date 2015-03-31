@@ -1,4 +1,13 @@
 import pytest
+import logbook
+
+
+def test_len_caching_on_empty_lists(infinibox):
+    with logbook.TestHandler() as handler:
+        volumes = list(infinibox.volumes.find(name='nonexistent'))
+    assert not volumes
+
+    [r] = [record for record in handler.records if '<-- GET http://' in record.message]
 
 
 def test_lazy_query_out_of_bounds_with_first_checking_length(result, page_size):
