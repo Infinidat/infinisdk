@@ -121,7 +121,7 @@ class InfiniBox(APITarget):
 
     @cached_method
     def is_simulator(self):
-        resp = self.api.post('/api/infinisim/echo', data='data', raw_response=True)
+        resp = self.api.post('/api/infinisim/echo', data='data', assert_success=False)
         return resp.response.status_code == requests.codes.ok
 
     def get_simulator(self):
