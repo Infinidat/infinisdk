@@ -20,6 +20,7 @@ def test_multiple_related(infinibox):
     secondary = MockedSystem('secondary-system')
     third = MockedSystem('third-system')
     infinibox.register_related_system(secondary)
+    infinibox.register_related_system(secondary)
     infinibox.register_related_system(third)
     _assert_expected_systems(infinibox, [secondary, third])
     infinibox.unregister_related_system(secondary)

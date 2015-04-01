@@ -187,6 +187,10 @@ class InfiniBox(APITarget):
         """
         Registers another system as related system to the current one
         """
+        for registered_system in self.iter_related_systems():
+            if system is registered_system:
+                return
+
         self._related_systems.append(weakref.ref(system))
 
     def unregister_related_system(self, system):
