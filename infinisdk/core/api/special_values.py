@@ -61,18 +61,23 @@ class Autogenerate(SpecialValue):
     def get_prefix(cls):
         return cls._prefix
 
+
 class RawValue(SpecialValue):
     def __init__(self, value):
         super(RawValue, self).__init__()
         self._value = value
+
     def generate(self):
         return self._value
-    def __str__(self):
+
+    def __repr__(self):
         return "<RawValue {}>".format(self._value)
+
 
 class _LazyUUIDFactory(object):
     def __str__(self):
         return str(uuid1()).lower().replace("-", "")
+
 
 _LAZY_UUID_FACTORY = _LazyUUIDFactory()
 
