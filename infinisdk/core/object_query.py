@@ -163,3 +163,12 @@ class ObjectQuery(object):
         """
         self._requested_page_size = page_size
         return self
+
+    def to_list(self):
+        """Returns the entire set of objects as a Python list
+
+        .. caution:: Queries are lazy by default to avoid heavy API calls and repetitive page
+          requests. Using ``to_list`` will forcibly iterate and fetch all objects, which might
+          be a very big collection. This can cause issues like slowness and memory exhaustion
+        """
+        return list(self)
