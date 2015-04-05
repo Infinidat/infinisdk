@@ -27,6 +27,10 @@ class InfiniBoxObject(SystemObject):
     def _get_result(self, api_response):
         return api_response.get_json()['result']
 
+    @classmethod
+    def is_supported(cls, system):
+        return True
+
     def set_metadata(self, key, value):
         """Sets metadata key in the system associated with this object
         """
