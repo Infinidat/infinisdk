@@ -18,7 +18,7 @@ from ..core import Field, CapacityType, MillisecondsDatetimeType
 from ..core.exceptions import InfiniSDKException, ObjectNotFound, TooManyObjectsFound
 from ..core.api.special_values import Autogenerate
 from ..core.bindings import RelatedObjectBinding
-from ..core.utils import deprecated
+from ..core.utils import deprecated, DONT_CARE
 from .base_data_entity import BaseDataEntity
 from .lun import LogicalUnit, LogicalUnitContainer
 from .scsi_serial import SCSISerial
@@ -123,6 +123,11 @@ class Volume(BaseDataEntity):
         elif len(returned) == 0:
             raise ObjectNotFound()
         return returned[0]
+
+    def is_replicated(self, from_cache=DONT_CARE):
+        """Returns True if this volume is a part of a replica, whether as source or as target
+        """
+        return any(self.get_fields(['rmr_source', 'rmr_target'], from_cache=from_cache).values())
 
     def unmap(self):
         """Unmaps a volume from its hosts

@@ -129,6 +129,15 @@ def test_is_rmr_source(volume, replica):
 
 
 @new_to_version('2.0')
+def test_is_replicated(volume, replica):
+    volume.refresh()
+    assert volume.is_replicated()
+    replica.delete()
+    volume.refresh()
+    assert not volume.is_replicated()
+
+
+@new_to_version('2.0')
 def test_regtulard_volume_is_not_rmr_source_target(volume):
     assert not volume.is_rmr_source()
     assert not volume.is_rmr_target()
