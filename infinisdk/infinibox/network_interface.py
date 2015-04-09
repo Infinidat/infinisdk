@@ -61,4 +61,4 @@ class NetworkInterface(InfiniBoxObject):
 
     def is_enabled(self):
         # FIXME: Need to be changed after INFINIBOX-12968 will be resolved
-        return self.get_state() == 'OK'
+        return self.get_state() in ['OK', 'ENABLED']
