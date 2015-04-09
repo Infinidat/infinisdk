@@ -303,5 +303,5 @@ def secondary_infinibox(request):
 def type_binder(request, infinibox):
     object_type = request.param
     if not object_type.is_supported(infinibox):
-        pytest.skip_test('not supported')
+        pytest.skip('not supported')
     return infinibox.objects[request.param]
