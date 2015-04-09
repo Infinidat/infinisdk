@@ -304,4 +304,8 @@ def type_binder(request, infinibox):
     object_type = request.param
     if not object_type.is_supported(infinibox):
         pytest.skip('not supported')
+    # Workaround: LdapConfig exist on the Infinibox for 1.5/1.7 but not on infinisim
+    elif object_type.get_type_name() == 'ldapconfig' and \
+        infinibox.compat.get_version_major() == '1':
+        pytest.skip('not supported by infinisim')
     return infinibox.objects[request.param]
