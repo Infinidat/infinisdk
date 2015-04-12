@@ -62,6 +62,7 @@ class Host(InfiniBoxLURelatedObject):
         Field("luns", type=list, add_getter=False, add_updater=False),
         Field("ports", type=list, add_getter=False, add_updater=False),
         Field("cluster", api_name="host_cluster_id", type='infinisdk.infinibox.host_cluster:HostCluster', is_filterable=True, binding=RelatedObjectBinding('host_clusters')),
+        Field("host_type", creation_parameter=True, optional=True, mutable=True),
         Field("created_at", type=MillisecondsDatetimeType, is_sortable=True, is_filterable=True),
         Field("updated_at", type=MillisecondsDatetimeType, is_sortable=True, is_filterable=True),
     ]
