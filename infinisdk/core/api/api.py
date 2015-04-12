@@ -262,17 +262,19 @@ class API(object):
         finally:
             self._no_reponse_logs = prev
 
-    def add_auto_retry(self, retry_predicate, max_retries=1):
+    def add_auto_retry(self, retry_predicate, max_retries=1, sleep_seconds=None):
+        if sleep_seconds is None: # backwards compatibility
+            sleep_seconds = config.root.defaults.retry_sleep_seconds
         assert retry_predicate not in self._auto_retry_predicates
         _logger.debug("Add auto-retry predicate {0} for {1} retries", retry_predicate, max_retries)
-        self._auto_retry_predicates[retry_predicate] = max_retries
+        self._auto_retry_predicates[retry_predicate] = (max_retries, sleep_seconds)
 
     def remove_auto_retry(self, retry_predicate):
         _logger.debug("Remove auto-retry predicate {0}", retry_predicate)
         del self._auto_retry_predicates[retry_predicate]
 
     def _get_auto_retries_context(self):
-        return _AutoRetryContext(self._auto_retry_predicates, config.root.defaults.retry_sleep_seconds)
+        return _AutoRetryContext(self._auto_retry_predicates)
 
     def request(self, http_method, path, assert_success=True, **kwargs):
         """Sends HTTP API request to the remote system
@@ -417,32 +419,32 @@ class Response(object):
 
 
 class _AutoRetryContext(object):
-    def __init__(self, global_retries_dict, retry_sleep_seconds):
+    def __init__(self, global_retries_dict):
         self._retries_dict = None
         self._global_retries_dict = global_retries_dict
-        self._retry_sleep_seconds = retry_sleep_seconds
 
     def _should_retry_request(self, exc):
         if self._retries_dict is None:
-            self._retries_dict = self._global_retries_dict.copy()
+            self._retries_dict = dict((k, v[0]) for k, v in self._global_retries_dict.items())
         for retry_predicate, retries_left in iteritems(self._retries_dict):
             if retries_left < 1:
-                return False
+                return None
             if retry_predicate(exc):
-                max_retries = self._global_retries_dict[retry_predicate]
+                max_retries, retry_sleep_seconds = self._global_retries_dict[retry_predicate]
                 retried_count = max_retries - retries_left + 1
                 _logger.debug("Auto retry API ({0} of {1}) by {2}: {3}",
                         retried_count, max_retries, retry_predicate, exc)
                 self._retries_dict[retry_predicate] -= 1
-                return True
-        return False
+                return retry_sleep_seconds
+        return None
 
     def __enter__(self):
         pass
 
     def __exit__(self, exc_type, exc_value, traceback):
-        if self._should_retry_request(exc_value):
-            flux.current_timeline.sleep(self._retry_sleep_seconds)
+        sleep_seconds = self._should_retry_request(exc_value)
+        if sleep_seconds is not None:
+            flux.current_timeline.sleep(sleep_seconds)
             return True
         return None
 
