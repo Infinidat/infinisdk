@@ -161,11 +161,11 @@ class Replica(InfiniBoxObject):
         self.refresh()
         gossip.trigger_with_tags('infinidat.sdk.replica_after_change_role', {'replica': self}, tags=['infinibox'])
 
-    def is_source(self):
-        return self.get_role().lower() == 'source'
+    def is_source(self, *args, **kwargs):
+        return self.get_role(*args, **kwargs).lower() == 'source'
 
-    def is_target(self):
-        return not self.is_source()
+    def is_target(self, *args, **kwargs):
+        return not self.is_source(*args, **kwargs)
 
     def has_local_entity(self, entity):
         pairs = self.get_field('entity_pairs', from_cache=True)
