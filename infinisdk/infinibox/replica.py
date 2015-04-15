@@ -213,12 +213,12 @@ class Replica(InfiniBoxObject):
 
         result_set.update(new_snaps)
 
-    def get_remote_replica(self):
+    def get_remote_replica(self, from_cache=False):
         """Get the corresponsing replica object in the remote machine. For this to work, the SDK user should
         call the register_related_system method of the Infinibox object when a link to a remote system is consructed
         for the first time"""
-        linked_system = self.get_link().get_linked_system()
-        return linked_system.replicas.get_by_id_lazy(self.get_remote_replica_id())
+        linked_system = self.get_link(from_cache=from_cache).get_linked_system()
+        return linked_system.replicas.get_by_id_lazy(self.get_remote_replica_id(from_cache=from_cache))
 
     def get_remote_entity_pairs(self):
         """Returns the entity_pairs configuration as held by the remote replica
