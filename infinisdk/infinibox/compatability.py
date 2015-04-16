@@ -1,4 +1,5 @@
 import packaging.version
+from sentinels import NOTHING
 
 from .._compat import httplib
 from ..core.config import config
@@ -30,16 +31,19 @@ class Compatability(object):
         else:
             resp.assert_success()
             features_list = resp.get_result()
-        self._features = set(feature_info['name'] for feature_info in features_list)
+        self._features = dict((feature_info['name'], feature_info['version']) for feature_info in features_list)
 
-    def _has_feature(self, feature_key):
+    def _get_feature_version(self, feature_key, default_version=NOTHING):
         if self._features is None:
             self._init_fetatures()
-        return feature_key in self._features
+        return self._features.get(feature_key, default_version)
 
-    def set_feature_as_supported(self, feature_key):
+    def _has_feature(self, feature_key):
+        return self._get_feature_version(feature_key, NOTHING) is not NOTHING
+
+    def set_feature_as_supported(self, feature_key, version=0):
         if not self._has_feature(feature_key):
-            self._features.add(feature_key)
+            self._features[feature_key] = version
 
     def has_npiv(self):
         return self._has_feature("fc/soft_targets")
