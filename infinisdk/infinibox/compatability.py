@@ -56,3 +56,6 @@ class Compatability(object):
 
     def has_network_configuration(self):
         return int(self.get_version_major()) >= 2
+
+    def get_metadata_version(self):
+        return self._get_feature_version('metadata', 1)

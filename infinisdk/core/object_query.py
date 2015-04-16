@@ -13,18 +13,17 @@
 ###!
 from numbers import Number
 from .._compat import xrange
-from .utils import add_comma_separated_query_param
 from .field import Field
 
 _DEFAULT_SYSTEM_PAGE_SIZE = 50
 _DEFAULT_PAGE_SIZE = 1000
 
-class ObjectQuery(object):
-    def __init__(self, system, url, object_type):
-        super(ObjectQuery, self).__init__()
+
+class LazyQuery(object):
+    def __init__(self, system, url):
+        super(LazyQuery, self).__init__()
         self.system = system
         self.query = url
-        self.object_type = object_type
         self._requested_page = None
         self._requested_page_size = None
         self._fetched = {}
@@ -63,14 +62,15 @@ class ObjectQuery(object):
             return self._requested_page_size
         return self._total_num_objects % self._requested_page_size
 
+    def _translate_item_if_needed(self, item_index):
+        pass
+
     def __getitem__(self, index):
         if isinstance(index, Number) and index < 0:
             raise NotImplementedError("Negative indices not supported yet")
 
         self._fetch(index)
-
-        if isinstance(self._fetched.get(index), dict):
-            self._fetched[index] = self.object_type.construct(self.system, self._fetched[index])
+        self._translate_item_if_needed(index)
         try:
             return self._fetched[index]
         except LookupError:
@@ -112,6 +112,43 @@ class ObjectQuery(object):
     def __repr__(self):
         return "<Query {0}>".format(self.query)
 
+    def page(self, page_index):
+        """
+        Requests a specific pagination page
+        """
+        assert page_index != 0, "Page cannot be zero based"
+        self._requested_page = page_index
+        return self
+
+    def page_size(self, page_size):
+        """
+        Sets the page size of the query
+        """
+        self._requested_page_size = page_size
+        return self
+
+    def to_list(self):
+        """Returns the entire set of objects as a Python list
+
+        .. caution:: Queries are lazy by default to avoid heavy API calls and repetitive page
+          requests. Using ``to_list`` will forcibly iterate and fetch all objects, which might
+          be a very big collection. This can cause issues like slowness and memory exhaustion
+        """
+        return list(self)
+
+
+class ObjectQuery(LazyQuery):
+
+    def __init__(self, system, url, object_type):
+        self.object_type = object_type
+        super(ObjectQuery, self).__init__(system, url)
+
+    def _translate_item_if_needed(self, item_index):
+        received_item = self._fetched.get(item_index)
+        if isinstance(received_item, dict):
+            self._fetched[item_index] = self.object_type.construct(self.system, received_item)
+
+
     ### Modifiers
 
     def sort(self, *criteria):
@@ -148,27 +185,3 @@ class ObjectQuery(object):
                 requested_fields.insert(0, field.api_name)
         self.query = self.query.set_query_param("fields", ",".join(requested_fields))
         return self
-
-    def page(self, page_index):
-        """
-        Requests a specific pagination page
-        """
-        assert page_index != 0, "Page cannot be zero based"
-        self._requested_page = page_index
-        return self
-
-    def page_size(self, page_size):
-        """
-        Sets the page size of the query
-        """
-        self._requested_page_size = page_size
-        return self
-
-    def to_list(self):
-        """Returns the entire set of objects as a Python list
-
-        .. caution:: Queries are lazy by default to avoid heavy API calls and repetitive page
-          requests. Using ``to_list`` will forcibly iterate and fetch all objects, which might
-          be a very big collection. This can cause issues like slowness and memory exhaustion
-        """
-        return list(self)

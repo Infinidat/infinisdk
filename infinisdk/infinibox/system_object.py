@@ -15,6 +15,7 @@ from .._compat import requests
 from sentinels import NOTHING
 
 from ..core.system_object import SystemObject, DONT_CARE
+from ..core.object_query import LazyQuery
 from ..core.exceptions import APICommandFailed, InfiniSDKException, CacheMiss
 from .lun import LogicalUnit, LogicalUnitContainer
 
@@ -24,8 +25,10 @@ class InfiniBoxObject(SystemObject):
     def _get_metadata_uri(self):
         return "metadata/{0}".format(self.id)
 
-    def _get_result(self, api_response):
-        return api_response.get_json()['result']
+    def _get_metadata_translated_result(self, metadata_items):
+        if self.system.compat.get_metadata_version() >= 2:
+            return dict((item['key'], item['value']) for item in metadata_items)
+        return metadata_items
 
     @classmethod
     def is_supported(cls, system):
@@ -39,7 +42,7 @@ class InfiniBoxObject(SystemObject):
     def set_metadata_from_dict(self, data_dict):
         """Sets multiple metadata keys/values in the system associated with this object
         """
-        return self._get_result(self.system.api.post(self._get_metadata_uri(), data=data_dict))
+        return self.system.api.post(self._get_metadata_uri(), data=data_dict)
 
     def get_metadata_value(self, key, default=NOTHING):
         """Gets a metadata value, optionally specifying a default
@@ -49,16 +52,23 @@ class InfiniBoxObject(SystemObject):
         """
         metadata_url = '{0}/{1}'.format(self._get_metadata_uri(), key)
         try:
-            return self._get_result(self.system.api.get(metadata_url))
+            result = self.system.api.get(metadata_url).get_result()
         except APICommandFailed as caught:
             if caught.status_code != requests.codes.not_found or default is NOTHING:
                 raise
             return default
+        if self.system.compat.get_metadata_version() < 2:
+            return result
+        return result['value']
 
     def get_all_metadata(self):
         """:returns: Dictionary of all keys and values associated as metadata for this object
         """
-        return self._get_result(self.system.api.get(self._get_metadata_uri()))
+        url = self._get_metadata_uri()
+        if self.system.compat.get_metadata_version() < 2:
+            return self.system.api.get(url).get_result()
+        query = LazyQuery(self.system, url)
+        return dict((item['key'], item['value']) for item in query)
 
     def unset_metadata(self, key):
         """Deletes a metadata key for this object
