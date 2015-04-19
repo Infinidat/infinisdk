@@ -13,6 +13,7 @@ from infinisdk.core import extensions
 from infinisdk.core.config import config
 from infinisdk.infinibox import InfiniBox
 from infinisdk.izbox import IZBox
+from infinisdk._compat import xrange
 from infinisim.infinibox import Infinibox as InfiniboxSimulator
 from izsim import Simulator as IZBoxSimulator
 
