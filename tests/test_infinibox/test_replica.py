@@ -69,6 +69,12 @@ def test_replica_deletion(replica, retain_staging_area, force_params):
     if retain_staging_area:
         assert volume.get_children()
 
+@new_to_version('2.0')
+@pytest.mark.parametrize('retain_staging_area', [True, False])
+def test_replica_deletion_remote_first(replica, retain_staging_area):
+    replica.get_remote_replica().delete(force_on_target=True)
+    assert replica.is_in_system()
+    replica.delete(retain_staging_area=retain_staging_area)
 
 @new_to_version('2.0')
 @pytest.mark.parametrize('create_remote_volume', [True, False])

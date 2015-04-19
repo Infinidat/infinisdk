@@ -13,6 +13,7 @@
 ### !
 from contextlib import contextmanager
 from datetime import timedelta
+import requests
 
 import gossip
 
@@ -20,7 +21,7 @@ from ..core.api.special_values import Autogenerate, OMIT
 from ..core.type_binder import TypeBinder
 from ..core import Field
 from ..core.bindings import RelatedObjectBinding
-from ..core.exceptions import TooManyObjectsFound, CannotGetReplicaState
+from ..core.exceptions import TooManyObjectsFound, CannotGetReplicaState, APICommandFailed
 from ..core.translators_and_types import MillisecondsDeltaType
 from .system_object import InfiniBoxObject
 
@@ -202,7 +203,12 @@ class Replica(InfiniBoxObject):
         entities = [self.get_local_volume()]
         remote_replica = self.get_remote_replica()
         if remote_replica is not None:
-            entities.append(remote_replica.get_local_volume())
+            try:
+                entities.append(remote_replica.get_local_volume())
+            except APICommandFailed as e:
+                if e.response.status_code != requests.codes.not_found:
+                    raise
+                entities = []
 
         old_snaps = set(child for entity in entities for child in entity.get_children())
         yield
