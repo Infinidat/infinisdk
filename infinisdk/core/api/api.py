@@ -366,6 +366,10 @@ class Response(object):
         #: Data sent to on
         self.sent_data = data
 
+    @property
+    def status_code(self):
+        return self.response.status_code
+
     def get_json(self):
         """
         :returns: The JSON object returned from the system, or None if no json could be decoded
