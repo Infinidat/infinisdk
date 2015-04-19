@@ -229,7 +229,7 @@ def create_network_space(infinibox, **kwargs):
     if not kwargs.get('network_config'):
         kwargs['network_config'] = {'netmask': 19, 'network': '127.0.0.1', 'default_gateway': '127.0.0.1'}
     if not kwargs.get('interfaces'):
-        kwargs['interfaces'] = [create_network_interface(infinibox)]
+        kwargs['interfaces'] = [create_network_interface(infinibox, node_id=index) for index in xrange(1,4)]
     return infinibox.network_spaces.create(**kwargs)
 
 
@@ -240,7 +240,9 @@ def network_interface(infinibox):
 
 @pytest.fixture
 def network_space(infinibox, network_interface):
-    return create_network_space(infinibox, interfaces=[network_interface])
+    interfaces = [create_network_interface(infinibox, node_id=index) for index in xrange(1,4) if index != network_interface.get_node().id]
+    interfaces.append(network_interface)
+    return create_network_space(infinibox, interfaces=interfaces)
 
 @contextmanager
 def disable_api_context(system):
@@ -274,8 +276,7 @@ def link(infinibox, secondary_infinibox, mocked_ecosystem):
     return returned
 
 def create_rmr_network_space(system):
-    returned = system.network_spaces.create(
-        name='rmr', interfaces=[i.id for i in system.network_interfaces],
+    returned = create_network_space(infinibox=system, name='rmr',
         network_config={
             'default_gateway': '1.1.1.1',
             'netmask': '255.0.0.0',

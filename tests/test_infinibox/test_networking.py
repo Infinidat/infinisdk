@@ -32,16 +32,21 @@ def test_disable_enable_network_space_ip(infinibox, network_space):
 def test_network_space_get_links_no_links(infinibox, network_space):
     assert list(network_space.get_links()) == []
 
+
 @new_to_version('2.0')
 def test_network_space_get_links_with_links(infinibox, link):
     [ns] = infinibox.network_spaces
     assert [link] == list(ns.get_links())
 
+
 @new_to_version('2.0')
-def test_update_interface_list_of_network_space(infinibox, network_space):
-    node_1 = infinibox.components.nodes.get(index=1)
+def test_update_interface_list_of_network_space(infinibox):
+    def create_interfaces(port_name):
+        return [infinibox.network_interfaces.create(node_id=index, name=port_name, type='PORT')
+                for index in xrange(1,4)]
+    network_space = create_network_space(infinibox, interfaces=create_interfaces('eth-data1'))
     origin_interfaces = network_space.get_interfaces()
-    new_interfaces = [infinibox.network_interfaces.create(node=node_1) for _ in xrange(3)]
+    new_interfaces = create_interfaces('eth-data2')
     assert set(origin_interfaces) & set(new_interfaces) == set()
     network_space.update_interfaces(new_interfaces)
     assert network_space.get_interfaces() == new_interfaces
@@ -65,6 +70,7 @@ def test_network_configuration_type(infinibox, network_config_type):
 def test_create_network_space_with_no_service(infinibox, service_value):
     network_space = create_network_space(infinibox, service=service_value)
     assert network_space.get_service() is None
+
 
 @new_to_version('2.0')
 def test_setting_service_to_special_value(infinibox):
