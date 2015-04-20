@@ -1,5 +1,5 @@
 import pytest
-from infinisdk._compat import iteritems
+from infinisdk._compat import iteritems, cmp, sorted
 from infinisdk.core.exceptions import APICommandFailed
 
 
@@ -44,3 +44,18 @@ def test_metadata_creation(infinibox, volume):
 
     volume.clear_metadata()
     assert len(volume.get_all_metadata()) == 0
+
+
+def test_get_all_metadata(infinibox, volume, pool):
+    def _metadata_cmp(d_1, d_2):
+        return cmp(d_1['object_id'], d_2['object_id']) or cmp(d_1['key'], d_2['key'])
+    pool.set_metadata_from_dict({'b': 'c', 'd': 'd'})
+    volume.set_metadata_from_dict({'a': 'a', 'b': 'b'})
+    expected = [
+        {'object_id': pool.id, 'key': 'b', 'value': 'c'},
+        {'object_id': pool.id, 'key': 'd', 'value': 'd'},
+        {'object_id': volume.id, 'key': 'a', 'value': 'a'},
+        {'object_id': volume.id, 'key': 'b', 'value': 'b'},
+        ]
+    actual = list(infinibox.get_all_metadata())
+    assert sorted(expected, cmp=_metadata_cmp) == sorted(actual, cmp=_metadata_cmp)

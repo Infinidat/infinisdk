@@ -39,11 +39,21 @@ You can provide defaults to be retrieved if metadata doesn't exist:
 Getting All Metadata Keys
 -------------------------
 
+Getting all metadata keys of specific object:
+
 .. code-block:: python
 
 		>>> for key, value in volume.get_all_metadata().items():
 		...     print("Found key:", key, "with value:", value)
 		Found key: metadata_key with value: value!
+
+You can also get all metadata keys for all the object in the system:
+
+.. code-block:: python
+
+		>>> for object_metadata_item in volume.system.get_all_metadata():
+		...     print("Found key: {key} with value: {value} for object id {object_id}".format(**object_metadata_item))
+		Found key: metadata_key with value: value! for object id 1007
 
 
 Deleting (Unsetting) Metadata

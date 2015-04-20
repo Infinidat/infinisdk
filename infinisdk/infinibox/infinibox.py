@@ -17,8 +17,10 @@ import weakref
 
 from sentinels import NOTHING
 
+from .._compat import iteritems
 from ..core.api import APITarget
 from ..core.config import config, get_ini_option
+from ..core.object_query import LazyQuery
 from ..core.exceptions import VersionNotSupported, CacheMiss
 from ..core.utils import deprecated
 from .host_cluster import HostCluster
@@ -217,6 +219,22 @@ class InfiniBox(APITarget):
         res = self.api.post("users/login", data={"username": username, "password": password})
         self._after_login()
         return res
+
+    def _get_v1_metadata_generator(self):
+        system_metadata = self.api.get('metadata').get_result()
+        for object_id, object_dict in iteritems(system_metadata):
+            for key, value in iteritems(object_dict):
+                yield {'object_id': int(object_id), 'key': key, 'value': value}
+
+    def _get_v2_metadata_generator(self):
+        for metadata_item in LazyQuery(self, 'metadata'):
+            metadata_item.pop('id', None)
+            yield metadata_item
+
+    def get_all_metadata(self):
+        if self.compat.get_metadata_version() < 2:
+            return self._get_v1_metadata_generator()
+        return self._get_v2_metadata_generator()
 
 
 class _CurrentUserProxy(object):
