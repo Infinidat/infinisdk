@@ -371,7 +371,7 @@ class LocalDrive(InfiniBoxSystemComponent):
         return this_url
 
     def is_active(self):
-        return self.get_state() == 'ACTIVE'
+        return self.get_state() == 'OK'
 
     def is_ssd(self):
         return self.get_type() == 'SSD'
