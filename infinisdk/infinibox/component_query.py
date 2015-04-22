@@ -24,8 +24,9 @@ class InfiniBoxComponentQuery(object):
         self.predicates = predicates
         self.kw = kw
         self.sort_criteria = tuple()
-        self._force_fetch = bool(kw) or bool(predicates)
         self._fetched_items = None
+        self._force_fetch = bool(self.predicates) or \
+            any(self.object_type.fields.get_or_fabricate(field_name).cached != True for field_name in self.kw)
 
     def force_fetching_objects(self):
         self._force_fetch = True
