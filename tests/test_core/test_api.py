@@ -70,7 +70,7 @@ def test_autogenerate_fields(izbox):
         prefix, obj, ordinal, time, timestamp, uuid = name.split("-")
         assert prefix == Autogenerate.get_prefix()
         assert (int(ordinal) - 1) == index
-        assert (int(timestamp) // 1000) == int(float(time))
+        assert abs((float(timestamp) / 1000.0) - float(time)) < 0.01
         assert uuid
         assert len(set(uuid)) > 1
 
