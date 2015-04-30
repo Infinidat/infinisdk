@@ -26,8 +26,11 @@ from ..core.bindings import InfiniSDKBinding, ListOfRelatedComponentBinding, Rel
 
 from collections import defaultdict
 from contextlib import contextmanager
+from logbook import Logger
 from pact import Pact
 from urlobject import URLObject as URL
+
+_logger = Logger(__name__)
 
 
 class InfiniBoxSystemComponents(SystemComponentsBinder):
@@ -121,11 +124,15 @@ class InfiniBoxComponentBinder(TypeBinder):
     @contextmanager
     def force_fetching_from_cache_context(self):
         prev = self._force_fetching_from_cache
+        if not prev:
+            _logger.debug('Entering Force fetching from cache of {0}', self)
         self._force_fetching_from_cache = True
         try:
             yield
         finally:
             self._force_fetching_from_cache = prev
+            if not prev:
+                _logger.debug('Exiting Force fetching from cache of {0}', self)
 
     @contextmanager
     def _force_fetching_tree_from_cache_context(self):
