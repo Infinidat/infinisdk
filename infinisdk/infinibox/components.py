@@ -124,15 +124,11 @@ class InfiniBoxComponentBinder(TypeBinder):
     @contextmanager
     def force_fetching_from_cache_context(self):
         prev = self._force_fetching_from_cache
-        if not prev:
-            _logger.debug('Entering Force fetching from cache of {0}', self)
         self._force_fetching_from_cache = True
         try:
             yield
         finally:
             self._force_fetching_from_cache = prev
-            if not prev:
-                _logger.debug('Exiting Force fetching from cache of {0}', self)
 
     @contextmanager
     def _force_fetching_tree_from_cache_context(self):
@@ -147,10 +143,16 @@ class InfiniBoxComponentBinder(TypeBinder):
     def fetch_once_context(self):
         return self.fetch_tree_once_context()
 
+    @contextmanager
     def fetch_tree_once_context(self, force_fetch=True):
         if not self.should_force_fetching_from_cache():
+            _logger.debug('Entering tree once of {0}', self)
             self._fetch_tree(force_fetch)
-        return self._force_fetching_tree_from_cache_context()
+        with self._force_fetching_tree_from_cache_context():
+            yield
+        if not self.should_force_fetching_from_cache():
+            _logger.debug('Exiting tree once of {0}', self)
+
 
     def _fetch_tree(self, force_fetch):
         components = self.system.components
