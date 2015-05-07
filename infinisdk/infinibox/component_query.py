@@ -47,7 +47,7 @@ class InfiniBoxComponentQuery(object):
                 else:
                     return 0
 
-            with self._get_binder().fetch_tree_once_context(force_fetch=self._force_fetch):
+            with self._get_binder().fetch_tree_once_context(force_fetch=self._force_fetch, with_logging=False):
                 returned = [item for item in itervalues(self.system.components._components_by_id)
                                  if self.passed_filtering(item)]
 
