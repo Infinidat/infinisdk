@@ -12,7 +12,7 @@ def doctest_context():
     simulator = Simulator()
     simulator.activate()
     system = InfiniBox(simulator, auth=('infinidat', '123456'))
-    for user in list(system.users):
+    for user in system.users.to_list():
         if user.id > 0:
             user.delete()
     for ldap_config in system.ldap_configs:

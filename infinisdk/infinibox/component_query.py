@@ -68,6 +68,9 @@ class InfiniBoxComponentQuery(object):
     def __len__(self):
         return len([item for item in self])
 
+    def to_list(self):
+        return list(self)
+
     def __getitem__(self, index):
         if isinstance(index, Number) and index < 0:
             raise NotImplementedError("Negative indices not supported yet")

@@ -13,7 +13,7 @@ Getting all users in a system
 
 .. code-block:: python
 
-	>>> users = list(system.users)
+	>>> users = system.users.to_list()
 
 Getting a user by name
 

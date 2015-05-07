@@ -13,6 +13,8 @@
 ###!
 import random
 from .exceptions import ObjectNotFound, TooManyObjectsFound
+from .utils import deprecated
+
 
 class TypeBinder(object):
     """
@@ -133,6 +135,7 @@ class TypeBinder(object):
     def __iter__(self):
         return iter(self.find())
 
+    @deprecated(message="Use to_list/count instead")
     def __len__(self):
         return len(self.find())
 
@@ -143,5 +146,5 @@ class TypeBinder(object):
           requests. Using ``to_list`` will forcibly iterate and fetch all objects, which might
           be a very big collection. This can cause issues like slowness and memory exhaustion
         """
-        return list(self)
+        return self.get_all().to_list()
 
