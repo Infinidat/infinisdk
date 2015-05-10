@@ -12,7 +12,7 @@
 ### are strictly forbidden unless prior written permission is obtained from Infinidat Ltd.
 ###!
 
-from .._compat import ExitStack
+from .._compat import ExitStack, zip
 from ..core.field import Field
 from ..core.utils import deprecated
 from ..core.system_component import SystemComponentsBinder
@@ -29,7 +29,6 @@ from contextlib import contextmanager
 from logbook import Logger
 from pact import Pact
 from urlobject import URLObject as URL
-from itertools import izip
 
 _logger = Logger(__name__)
 
@@ -482,7 +481,7 @@ class Drive(InfiniBoxSystemComponent):
     def get_paths(self, from_cache=False):
         node_access_flags = self.get_field('nodes_access', from_cache=from_cache)
         return [node
-                for node, can_access_node in izip(self.system.components.nodes, node_access_flags)
+                for node, can_access_node in zip(self.system.components.nodes, node_access_flags)
                 if can_access_node]
 
     def is_active(self):
