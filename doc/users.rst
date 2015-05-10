@@ -19,7 +19,7 @@ Getting a user by name
 
 .. code-block:: python
 
-	>>> user = system.users.get(username='someuser')
+	>>> user = system.users.get(name='someuser')
 	>>> print(user.get_name())
 	someuser
 
@@ -31,7 +31,7 @@ Use ``infinibox.users.create`` to create new users:
 
 .. code-block:: python
 
-       >>> user = system.users.create(username='testuser', password='testpassword')
+       >>> user = system.users.create(name='testuser', password='testpassword')
 
 Deleting users is done like any other InfiniSDK object, using :func:`.User.delete`:
 
@@ -46,7 +46,7 @@ You can modify users configured on the system using any of the :class:`.User` cl
 
 .. code-block:: python
 
-       >>> user = system.users.create(username='testuser', password='testpassword')
+       >>> user = system.users.create(name='testuser', password='testpassword')
        >>> user.update_password('12345678')
        >>> user.update_name('testuser2')
 

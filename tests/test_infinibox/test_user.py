@@ -1,16 +1,15 @@
-import flux
 import pytest
 import re
 from infinibox_sysdefs import latest as defs
 from ecosystem.mocks.mock_mailboxer import get_simulated_mail_server
 from infinisdk.core import object_query
-from ..conftest import new_to_version, user as user_fx
+from ..conftest import new_to_version
 
 
-def test_name(infinibox, user):
+def test_name(infinibox, user, user_name_field):
     curr_name = user.get_name()
     new_name = 'other_user_name'
-    user.update_name(new_name)
+    user.update_field(user_name_field, new_name)
 
     assert curr_name.startswith('user_')
     assert curr_name != new_name

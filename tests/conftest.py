@@ -146,6 +146,13 @@ def mapping_object(host, cluster, mapping_object_type):
 def user(infinibox):
     return infinibox.users.create()
 
+@pytest.fixture
+def user_name_field(infinibox):
+    # InfiniSim workaround: There were a bug in user's name that was fix in v2.0 but wasn't backported...
+    if int(infinibox.compat.get_version_major()) >= 2:
+        return 'name'
+    return 'username'
+
 
 def create_volume(infinibox, **kwargs):
     if not kwargs.get('pool_id') and not kwargs.get('pool'):

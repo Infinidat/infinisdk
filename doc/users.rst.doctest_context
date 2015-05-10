@@ -9,7 +9,7 @@ from infinisim.infinibox import Infinibox as Simulator
 
 @contextmanager
 def doctest_context():
-    simulator = Simulator()
+    simulator = Simulator(True)
     simulator.activate()
     system = InfiniBox(simulator, auth=('infinidat', '123456'))
     for user in system.users.to_list():
@@ -17,7 +17,7 @@ def doctest_context():
             user.delete()
     for ldap_config in system.ldap_configs:
         ldap_config.delete()
-    system.users.create(username='someuser', password='12345678')
+    system.users.create(name='someuser', password='12345678')
     try:
         yield {
             "system": system,

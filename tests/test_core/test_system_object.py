@@ -148,10 +148,10 @@ def test__equality(system):
     diff_type1 = SampleDerivedObject(system1, {"id": 100})
     assert NotImplemented == diff_type1.__eq__(diff_type2)
 
-def test_get_fields_without_field_names(system):
-    user = system.users.choose()
+def test_get_fields_without_field_names(izbox):
+    user = izbox.users.choose()
     fields = user.get_fields()
-    # For both infinibox & izbox, "username" is the API name for "name" field
+    # "username" is the API name for "name" field
     assert "name" in fields
     assert "username" not in fields
 
@@ -159,11 +159,11 @@ def test_object_creation_missing_fields():
     with pytest.raises(MissingFields):
         SampleDerivedObject.create(FakeSystem())
 
-def test_update_field_updates_its_cache(system, user):
+def test_update_field_updates_its_cache(system, user, user_name_field):
     new_name = "testing_update_field_caching"
-    assert user.get_field("name", from_cache=True) != new_name
-    user.update_name(new_name)
-    assert user.get_field("name", from_cache=True) == new_name
+    assert user.get_field(user_name_field, from_cache=True) != new_name
+    user.update_field(user_name_field, new_name)
+    assert user.get_field(user_name_field, from_cache=True) == new_name
 
 
 @pytest.fixture(params=[SampleBaseObject, SampleDerivedObject])
