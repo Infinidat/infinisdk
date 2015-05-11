@@ -17,7 +17,10 @@ from ..core import Field, CapacityType, MillisecondsDatetimeType
 from ..core.api.special_values import Autogenerate
 from .system_object import InfiniBoxObject
 from ..core.bindings import ListOfRelatedObjectIDsBinding
+from ..core.object_query import ObjectQuery
 from ..core.utils import deprecated
+
+from urlobject import URLObject
 
 
 class PoolBinder(TypeBinder):
@@ -27,9 +30,7 @@ class PoolBinder(TypeBinder):
     def get_administered_pools(self):
         """Returns the pools that can be managed by the current user
         """
-        resp = self.system.api.get('/api/rest/pools/administered_pools')
-        return [Pool(self.system, pool_info)
-                for pool_info in resp.get_result()]
+        return ObjectQuery(self.system, URLObject('/api/rest/pools/administered_pools'), Pool)
 
 
 class Pool(InfiniBoxObject):

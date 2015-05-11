@@ -3,6 +3,7 @@ import pytest
 import re
 from infinibox_sysdefs import latest as defs
 from ecosystem.mocks.mock_mailboxer import get_simulated_mail_server
+from infinisdk.core import object_query
 from ..conftest import new_to_version, user as user_fx
 
 
@@ -18,14 +19,26 @@ def test_name(infinibox, user):
 
 @new_to_version('2.0')
 def test_get_administered_pools_no_pool(infinibox, user):
-    assert infinibox.pools.get_administered_pools() == []
+    assert infinibox.pools.get_administered_pools().to_list() == []
+
+
+@new_to_version('2.0')
+def test_get_administered_pools_multiple_pages(infinibox, user, forge):
+    num_pools = 5
+    for i in range(num_pools):
+        pool = infinibox.pools.create()
+        pool.add_owner(user)
+    page_size = num_pools - 1
+    infinibox.get_simulator().api.set_default_page_size(page_size)
+    forge.replace_with(object_query, '_DEFAULT_SYSTEM_PAGE_SIZE', page_size)
+    assert len(list(infinibox.pools.get_administered_pools())) == num_pools
 
 
 @new_to_version('2.0')
 def test_get_administered_pools_with_pools(infinibox, user):
     pool = infinibox.pools.create()
     pool.add_owner(user)
-    assert infinibox.pools.get_administered_pools() == [pool]
+    assert infinibox.pools.get_administered_pools().to_list() == [pool]
 
 
 def test_creation_deletion(infinibox, user):

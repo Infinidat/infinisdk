@@ -153,7 +153,7 @@ def test_get_field_raw_value(volume, from_cache, invalidate_cache):
 
 @new_to_version('2.0')
 def test_current_user_proxy(infinibox):
-    assert isinstance(infinibox.current_user.get_owned_pools(), list)
+    assert isinstance(infinibox.current_user.get_owned_pools().to_list(), list)
 
 
 def test_current_user_roles(infinibox):
