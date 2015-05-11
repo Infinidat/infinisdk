@@ -3,7 +3,6 @@ import re
 import pytest
 
 from ..conftest import no_op_context
-from infinisdk.core.version_compatibility import All
 
 from infinisdk import InfiniBox
 from infinisdk.core.config import config
@@ -64,16 +63,6 @@ def incompatible_system(infinibox_simulator):
     user = infinibox_simulator.auth.get_current_user()
     auth = (user.get_username(), user.get_password())
     return InfiniBox(infinibox_simulator.get_floating_addresses()[0], auth=auth)
-
-
-def test_all_subversions_compatible(version_string, major_minor):
-    major, minor = major_minor
-    assert All(major, minor).matches(version_string)
-
-
-def test_all_subversions_incompatible(version_string, major_minor):
-    major, minor = major_minor
-    assert not All(major, minor + 1).matches(version_string)
 
 
 @pytest.fixture(params=[(1, 5), (1, 6), (2, 0)])

@@ -14,9 +14,9 @@
 import os
 
 from .._compat import ConfigParser
-from .version_compatibility import All
 
 import confetti
+from packaging.specifiers import SpecifierSet
 
 config = confetti.Config(dict(
 
@@ -45,7 +45,7 @@ config = confetti.Config(dict(
     infinibox=dict(
 
         compatible_versions = [
-            All(1, 5),
+            SpecifierSet(">=1.5"),
         ],
 
         defaults=dict(

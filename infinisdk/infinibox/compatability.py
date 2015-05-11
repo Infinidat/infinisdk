@@ -1,6 +1,8 @@
 import packaging.version
 from sentinels import NOTHING
 
+from packaging.version import parse as parse_version
+
 from .._compat import httplib
 from ..core.config import config
 
@@ -11,9 +13,10 @@ class Compatability(object):
         self._features = None
 
     def can_run_on_system(self):
-        system_version = self.system.get_version()
+        version_string = self.system.get_version().split('-', 1)[0]
+        system_version = self.normalize_version_string(version_string)
         supported_versions = config.root.infinibox.compatible_versions
-        return any(version_compatibility.matches(system_version) for version_compatibility in supported_versions)
+        return any(v.contains(system_version) for v in supported_versions)
 
     def normalize_version_string(self, version):
         return packaging.version.parse(version)
