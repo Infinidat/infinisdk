@@ -45,6 +45,13 @@ def test_get_api_timeout(infinibox):
     assert infinibox.api.get_request_default_timeout() == new_timeout
     assert infinibox.get_api_timeout() == new_timeout
 
+def test_change_request_default_timeout_context(infinibox):
+    orig_timeout = infinibox.api.get_request_default_timeout()
+    some_timeout = 100
+    assert orig_timeout != some_timeout
+    with infinibox.api.change_request_default_timeout_context(some_timeout):
+        assert infinibox.api.get_request_default_timeout() == some_timeout
+    assert infinibox.api.get_request_default_timeout() == orig_timeout
 
 def test_get_simulator(infinibox, infinibox_simulator):
     assert infinibox.get_simulator() is infinibox_simulator

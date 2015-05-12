@@ -120,8 +120,9 @@ class API(object):
         self._interactive = True
 
     @contextmanager
-    def change_request_default_timeout(self):
+    def change_request_default_timeout_context(self, timeout):
         prev = self.get_request_default_timeout()
+        self.set_request_default_timeout(timeout)
         try:
             yield
         finally:
