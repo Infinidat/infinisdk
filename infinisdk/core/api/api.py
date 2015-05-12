@@ -119,6 +119,14 @@ class API(object):
         """Causes an interactive prompt whenever a command requires approval from the user"""
         self._interactive = True
 
+    @contextmanager
+    def change_request_default_timeout(self):
+        prev = self.get_request_default_timeout()
+        try:
+            yield
+        finally:
+            self.set_request_default_timeout(prev)
+
     def get_request_default_timeout(self):
         return self._default_request_timeout
 
