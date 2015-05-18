@@ -13,8 +13,9 @@
 ###!
 from ..core import Field, SystemObject
 from ..core.api.special_values import Autogenerate
-from ..core.exceptions import CommandNotApproved
 from ..core.utils import deprecated
+
+from sentinels import NOTHING
 
 
 class User(SystemObject):
@@ -26,6 +27,15 @@ class User(SystemObject):
         Field("name", creation_parameter=True, mutable=True, is_filterable=True, is_sortable=True, default=Autogenerate("user_{timestamp}")),
         Field("password", creation_parameter=True, add_getter=False, mutable=True, default="12345678"),
     ]
+
+    @classmethod
+    def create(cls, system, **fields):
+        username = fields.pop('username', NOTHING)
+        if username is not NOTHING:
+            if 'name' in fields:
+                raise ValueError("Multiple colliding arguments: username and name")
+            fields['name'] = username
+        return super(User, cls).create(system, **fields)
 
     @deprecated(message='Use User.get_owned_pools or Pool.get_administered_pools instead')
     def get_pools(self):

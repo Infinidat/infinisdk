@@ -6,6 +6,19 @@ from infinisdk.core import object_query
 from ..conftest import new_to_version
 
 
+def test_user_creation_with_name_or_username(infinibox):
+    orig_users_count = infinibox.users.count()
+    user_a = infinibox.users.create(name='a')
+    assert user_a.get_name() == 'a'
+    user_a = infinibox.users.create(username='b')
+    assert user_a.get_name() == 'b'
+    with pytest.raises(ValueError):
+        infinibox.users.create(username='c', name='d')
+    some_user = infinibox.users.create()
+    assert some_user.get_name().startswith('user_')
+    assert orig_users_count + 3 == infinibox.users.count()
+
+
 def test_name(infinibox, user, user_name_field):
     curr_name = user.get_name()
     new_name = 'other_user_name'
