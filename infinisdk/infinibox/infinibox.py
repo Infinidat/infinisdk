@@ -16,6 +16,7 @@ import gossip
 import weakref
 
 from sentinels import NOTHING
+from urlobject import URLObject as URL
 
 from .._compat import iteritems
 from ..core.api import APITarget
@@ -227,7 +228,7 @@ class InfiniBox(APITarget):
                 yield {'object_id': int(object_id), 'key': key, 'value': value}
 
     def _get_v2_metadata_generator(self):
-        for metadata_item in LazyQuery(self, 'metadata'):
+        for metadata_item in LazyQuery(self, URL('metadata')):
             metadata_item.pop('id', None)
             yield metadata_item
 
