@@ -3,6 +3,8 @@ from infinisdk._compat import iteritems, cmp, sorted
 from infinisdk.core import object_query
 from infinisdk.core.exceptions import APICommandFailed
 
+from ..conftest import new_to_version
+
 
 def test_get_nonexisting_metadata(volume):
     with pytest.raises(APICommandFailed):
@@ -14,7 +16,7 @@ def test_get_nonexisting_metadata_default(volume):
     value = object()
     assert volume.get_metadata_value('key', value) is value
 
-
+@new_to_version('2.0')
 def test_metadata_paging(infinibox, volume, forge):
     page_size = 3
     infinibox.get_simulator().api.set_default_page_size(page_size)
