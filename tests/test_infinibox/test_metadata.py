@@ -1,5 +1,6 @@
 import pytest
 from infinisdk._compat import iteritems, cmp, sorted
+from infinisdk.core import object_query
 from infinisdk.core.exceptions import APICommandFailed
 
 
@@ -12,6 +13,16 @@ def test_get_nonexisting_metadata_default(volume):
     assert volume.get_metadata_value('key', 2) == 2
     value = object()
     assert volume.get_metadata_value('key', value) is value
+
+
+def test_metadata_paging(infinibox, volume, forge):
+    page_size = 3
+    infinibox.get_simulator().api.set_default_page_size(page_size)
+    forge.replace_with(object_query, '_DEFAULT_SYSTEM_PAGE_SIZE', page_size)
+    for i in range(page_size * 2):
+        volume.set_metadata_from_dict({'key{0}'.format(i): 'value{0}'.format(i)})
+
+    assert len(list(infinibox.get_all_metadata())) == page_size * 2
 
 
 def test_multiple_metadata_creation(volume):
