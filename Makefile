@@ -19,13 +19,13 @@ env: .env/.up-to-date
 	virtualenv .env
 	.env/bin/pip install --pre -U -e .
 	.env/bin/pip install Sphinx alabaster
-	.env/bin/pip install -i http://pypi01.infinidat.com/simple --pre -U -r test_requirements.txt
-	.env/bin/pip install -i http://pypi01.infinidat.com/simple --pre -U infinisim
+	.env/bin/pip install -i https://pypi.infinidat.com/simple --pre -U -r test_requirements.txt
+	.env/bin/pip install -i https://pypi.infinidat.com/simple --pre -U infinisim
 	touch .env/.up-to-date
 
 .develop_deps:
 	virtualenv .env
-	.env/bin/pip install --pre -i http://pypi01.infinidat.com/simple -e ../ecosystem -e ../infinibox_sysdefs -e ../infinisim
+	.env/bin/pip install --pre -i https://pypi.infinidat.com/simple -e ../ecosystem -e ../infinibox_sysdefs -e ../infinisim
 
 develop_env: .develop_deps env
 
