@@ -1,6 +1,6 @@
 from infinisdk._compat import xrange, iteritems
 from infinisdk.core import CapacityType
-from capacity import TB, KiB, Capacity
+from capacity import TB, GB, KiB, Capacity
 from ..conftest import create_volume, create_pool, create_filesystem
 
 
@@ -90,3 +90,17 @@ def test_lock_pool(pool):
     assert pool.is_locked()
     pool.unlock()
     assert not pool.is_locked()
+
+def test_pool_thresholds(infinibox):
+    pool = infinibox.pools.create(virtual_capacity=TB, physical_capacity=TB)
+    assert pool.get_allocated_physical_capacity() == 0
+    assert not pool.is_over_critical_threshold()
+    assert not pool.is_over_warning_threshold()
+
+    infinibox.volumes.create(pool=pool, provisioning='THICK', size=850*GB)
+    assert pool.is_over_critical_threshold()
+    assert not pool.is_over_warning_threshold()
+
+    infinibox.volumes.create(pool=pool, provisioning='THICK', size=100*GB)
+    assert pool.is_over_critical_threshold()
+    assert pool.is_over_warning_threshold()

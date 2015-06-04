@@ -88,3 +88,14 @@ class Pool(InfiniBoxObject):
 
     def unlock(self):
         self.system.api.post(self.get_this_url_path().add_path('unlock'))
+
+    def _is_over_threshold(self, threshold):
+        return (self.get_allocated_physical_capacity() * 100) >= (self.get_physical_capacity() * threshold)
+
+    def is_over_warning_threshold(self):
+        critical_threshold = self.get_field('physical_capacity_critical')
+        return self._is_over_threshold(critical_threshold)
+
+    def is_over_critical_threshold(self):
+        warning_threshold = self.get_field('physical_capacity_warning')
+        return self._is_over_threshold(warning_threshold)

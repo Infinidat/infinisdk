@@ -77,6 +77,13 @@ class Volume(BaseDataEntity):
         Field('rmr_target', type=bool),
     ]
 
+    @classmethod
+    def create(cls, system, **fields):
+        pool = fields.get('pool')
+        if pool:
+            pool.refresh('allocated_physical_capacity', 'free_physical_capacity', 'free_virtual_capacity', 'reserved_capacity')
+        return super(Volume, cls).create(system, **fields)
+
     @deprecated(message="Use volume.is_master instead")
     def is_master_volume(self):
         return self.is_master()
