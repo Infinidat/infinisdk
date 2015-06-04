@@ -94,13 +94,13 @@ def test_lock_pool(pool):
 def test_pool_thresholds(infinibox):
     pool = infinibox.pools.create(virtual_capacity=TB, physical_capacity=TB)
     assert pool.get_allocated_physical_capacity() == 0
-    assert not pool.is_over_critical_threshold()
     assert not pool.is_over_warning_threshold()
+    assert not pool.is_over_critical_threshold()
 
     infinibox.volumes.create(pool=pool, provisioning='THICK', size=850*GB)
-    assert pool.is_over_critical_threshold()
-    assert not pool.is_over_warning_threshold()
+    assert pool.is_over_warning_threshold()
+    assert not pool.is_over_critical_threshold()
 
     infinibox.volumes.create(pool=pool, provisioning='THICK', size=100*GB)
-    assert pool.is_over_critical_threshold()
     assert pool.is_over_warning_threshold()
+    assert pool.is_over_critical_threshold()
