@@ -16,7 +16,7 @@ from storage_interfaces.scsi.abstracts import ScsiVolume
 from ..core.type_binder import TypeBinder
 from ..core import Field, CapacityType, MillisecondsDatetimeType
 from ..core.exceptions import InfiniSDKException, ObjectNotFound, TooManyObjectsFound
-from ..core.api.special_values import Autogenerate
+from ..core.api.special_values import Autogenerate, SpecialValue
 from ..core.bindings import RelatedObjectBinding
 from ..core.utils import deprecated, DONT_CARE
 from .base_data_entity import BaseDataEntity
@@ -80,7 +80,7 @@ class Volume(BaseDataEntity):
     @classmethod
     def create(cls, system, **fields):
         pool = fields.get('pool')
-        if pool:
+        if pool and not isinstance(pool, SpecialValue):
             pool.refresh('allocated_physical_capacity', 'free_physical_capacity', 'free_virtual_capacity', 'reserved_capacity')
         return super(Volume, cls).create(system, **fields)
 
