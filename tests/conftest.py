@@ -3,30 +3,27 @@ from contextlib import contextmanager
 import flux
 import logbook.compat
 from forge import Forge
-from packaging.version import parse as parse_version
 from munch import Munch
 
 import pytest
-
 from ecosystem import SimulationContext
+from infinisdk._compat import xrange
 from infinisdk.core import extensions
 from infinisdk.core.config import config
 from infinisdk.infinibox import InfiniBox
 from infinisdk.izbox import IZBox
-from infinisdk._compat import xrange
 from infinisim.infinibox import Infinibox as InfiniboxSimulator
 from izsim import Simulator as IZBoxSimulator
+from packaging.version import parse as parse_version
 
 new_to_version = lambda version: pytest.mark.required_version(from_version=version)
 
 
 @pytest.fixture(scope="session", autouse=True)
 def setup_logging(request):
-    handler = logbook.compat.LoggingHandler()
-    handler.push_application()
+    logbook.compat.redirect_logging()
 
     _blacklisted = set(['infinisdk.core.api.api', 'infinisim.core.simulator'])
-
     logbook.NullHandler(filter=lambda r, h: r.channel in _blacklisted).push_application()
 
 
