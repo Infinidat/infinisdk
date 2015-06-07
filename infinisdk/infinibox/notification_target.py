@@ -38,18 +38,31 @@ class NotificationTarget(SystemObject):
         Field('from_address', mutable=True),
         Field('username', mutable=True),
         Field('password', mutable=True),
+
+        #### SNMP ####
+        Field('version', type=str, mutable=True),
+        Field('auth_protocol', mutable=True),
+        Field('auth_type', mutable=True),
+        Field('community', mutable=True),
+        Field('engine', mutable=True),
+        Field('private_key', mutable=True),
+        Field('private_protocol', mutable=True),
+
     ]
 
     @classmethod
     def get_plural_name(cls):
         return 'notification_targets'
 
-    def test(self, recipients):
+    def test(self, recipients=None):
         """Tests the SMTP gateway, by sending a test email to one or several recipients
 
-        :param recipients: Either a single email or a list of emails to send to
+        :param recipients: Either a single email or a list of emails to send to (only for SMTP)
         """
-        if not isinstance(recipients, list):
-            recipients = [recipients]
-        return self.system.api.post('notifications/targets/{0}/test'.format(self.id),
-                                    data={'recipients': recipients})
+        data = {}
+        if recipients is not None:
+            if not isinstance(recipients, list):
+                recipients = [recipients]
+            data['recipients'] = recipients
+        return self.system.api.post('notifications/targets/{0}/test'.format(self.id), data=data)
+

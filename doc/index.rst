@@ -24,6 +24,7 @@ Contents:
    mappings
    snapshots
    users
+   system_configuration
    replication
    metadata
    events
