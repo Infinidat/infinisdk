@@ -47,7 +47,7 @@ class LDAPConfig(SystemObject):
     ]
 
     @classmethod
-    def get_plural_name(self):
+    def get_plural_name(cls):
         return 'ldap_configs'
 
     def create_group(self, name, dn, role):
