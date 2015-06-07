@@ -123,6 +123,13 @@ infinibox.components
 .. autoclass:: Node
    :members:
 
+.. autoclass:: Enclosure
+   :members:
+
+.. autoclass:: Drive
+   :members:
+
+
 Base Objects
 ~~~~~~~~~~~~
 

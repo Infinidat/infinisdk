@@ -13,6 +13,31 @@ Nodes
 		>>> print('System has {0} nodes'.format(len(system.components.nodes)))
 		System has 3 nodes
 
+Drives
+------
+
+InfiniSDK provides several ways of querying the system's drive information, ``system.components.enclosures`` and ``system.components.drives``. The first is intended for traversing the actual topology of the system through the :class:`.Enclosure` component, while the second is an aggregate of all drives in the system (:class:`.Drive` objects):
+
+.. code-block:: python
+       
+       >>> for enclosure in system.components.enclosures:
+       ...     for drive in enclosure.get_drives():
+       ...         pass # <- do something with drive here
+
+       >>> for drive in system.components.drives:
+       ...     pass # <- do something with drive here
+
+You can also query drives by their attributes, for instance by state:
+
+.. code-block:: python
+       
+       >>> from infinisdk import Q
+       >>> for drive in system.components.drives.find(Q.state != 'ACTIVE'):
+       ...     print('Drive', drive, 'is not in ACTIVE!!!')
+
+
+
+
 FC Ports
 --------
 
