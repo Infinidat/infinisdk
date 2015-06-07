@@ -115,6 +115,14 @@ infinibox.ldap_configs
 .. autoclass:: LDAPConfig
    :members:
 
+infinibox.notification_targets
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: infinisdk.infinibox.notification_target
+
+.. autoclass:: NotificationTarget
+   :members:
+
 infinibox.components
 ~~~~~~~~~~~~~~~~~~~~
 
@@ -122,6 +130,13 @@ infinibox.components
 
 .. autoclass:: Node
    :members:
+
+.. autoclass:: Enclosure
+   :members:
+
+.. autoclass:: Drive
+   :members:
+
 
 Base Objects
 ~~~~~~~~~~~~
