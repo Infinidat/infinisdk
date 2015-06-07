@@ -32,6 +32,33 @@ def test_snmp_test(infinibox, snmp_target):
     snmp_target.test()
 
 
+def test_rsyslog_define(infinibox, rsyslog_target):
+    pass
+
+
+def test_rsyslog_modify(infinibox, rsyslog_target):
+    pass
+
+
+def test_rsyslog_query(infinibox, rsyslog_target):
+    assert rsyslog_target in list(
+        infinibox.notification_targets.find(protocol='SYSLOG'))
+
+
+def test_rsyslog_remove(infinibox, rsyslog_target):
+    rsyslog_target.delete()
+    assert not rsyslog_target.is_in_system()
+
+
+def test_rsyslog_rename(infinibox, rsyslog_target):
+    rsyslog_target.update_name('new_name')
+    assert rsyslog_target.get_name() == 'new_name'
+
+
+def test_rsyslog_test(infinibox, rsyslog_target):
+    rsyslog_target.test()
+
+
 @pytest.mark.parametrize('recipients', [
     'user@gmail.com',  # we support single recipients
     ['user@gmail.com', 'bla@domain.com'],  # as well as multiples
@@ -52,3 +79,10 @@ def snmp_target(infinibox):
         username='user', password='password',
         private_protocol='AES',
         version='SNMPv3', engine='engine', auth_type='AuthPriv', auth_protocol='MD5')
+
+
+@pytest.fixture
+def rsyslog_target(infinibox):
+    return infinibox.notification_targets.create(
+        host='hostname',
+        name='syslog_target', protocol='SYSLOG', transport='TCP', facility='local0')

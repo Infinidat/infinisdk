@@ -48,6 +48,9 @@ class NotificationTarget(SystemObject):
         Field('private_key', mutable=True),
         Field('private_protocol', mutable=True),
 
+        #### Syslog ####
+        Field('transport', mutable=True),
+        Field('facility', mutable=True),
     ]
 
     @classmethod

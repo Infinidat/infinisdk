@@ -72,4 +72,44 @@ Deleting SNMP targets:
        
        >>> snmp_target.delete()
 
+RSyslog Configuration
+---------------------
+
+Creating RSyslog target:
+
+.. code-block:: python
+       
+       >>> rsyslog_target = system.notification_targets.create(
+       ...    host='hostname',
+       ...    name='syslog_target', protocol='SYSLOG', transport='TCP', facility='local0')
+
+Querying RSyslog targets:
+
+.. code-block:: python
+       
+       >>> for rsyslog_target in system.notification_targets.find(protocol='SYSLOG'):
+       ...     pass
+
+Modifying RSyslog targets:
+
+.. code-block:: python
+       
+       >>> rsyslog_target.update_name('some_target')
+       >>> rsyslog_target.update_host('hostname')
+       >>> rsyslog_target.update_transport('UDP')
+       >>> rsyslog_target.update_facility('local1')
+
+Testing RSyslog targets:
+
+.. code-block:: python
+       
+       >>> resp = rsyslog_target.test()
+
+Deleting RSyslog targets:
+
+.. code-block:: python
+       
+       >>> rsyslog_target.delete()
+
+
 .. seealso:: :class:`.NotificationTarget`
