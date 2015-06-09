@@ -1,14 +1,16 @@
 import pytest
-from infinisdk.core.exceptions import APICommandFailed
+from ..conftest import new_to_version
 from infinisdk.infinibox.cons_group import ConsGroup
 from api_object_schema.utils import loose_isinstance
 
 
+@new_to_version('2.2')
 def test_create_cg(infinibox, pool):
     cg = infinibox.cons_groups.create(pool=pool)
     assert cg.is_in_system()
 
 
+@new_to_version('2.2')
 @pytest.mark.parametrize('field', ConsGroup.FIELDS)
 def test_get_cg_fields(cg, field):
     field_value = cg.get_field(field.name)
@@ -18,6 +20,7 @@ def test_get_cg_fields(cg, field):
         assert loose_isinstance(field_value, field.type.type)
 
 
+@new_to_version('2.2')
 def test_get_members(cg, volume, filesystem):
     assert len(cg.get_members()) == 0
     assert cg.get_members_count() == 0
