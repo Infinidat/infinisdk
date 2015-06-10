@@ -1,3 +1,4 @@
+import pytest
 from infinisdk._compat import xrange, iteritems
 from infinisdk.core import CapacityType
 from capacity import TB, KiB, Capacity
@@ -25,6 +26,13 @@ def test_creation(infinibox, pool):
 
     pool.delete()
     assert (not pool.is_in_system())
+
+
+@pytest.mark.parametrize('max_extend_value', [0, -1, GB])
+def test_max_extend_type(pool, max_extend_value):
+    pool.update_max_extend(max_extend_value)
+    should_be_capacity = max_extend_value not in (0, -1)
+    assert isinstance(pool.get_max_extend(), Capacity) == should_be_capacity
 
 
 def test_get_name(infinibox, pool):
