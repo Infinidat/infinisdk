@@ -100,6 +100,7 @@ html_theme = 'alabaster'
 html_theme_options = {
     "logo": "infinidat-logo-small.png",
     "github_button": False,
+    "font_family": "sans-serif",
 }
 html_sidebars = {
    '**': [
