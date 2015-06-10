@@ -1,5 +1,5 @@
-Manipulating Snapshots and Clones
-=================================
+Snapshots and Clones
+====================
 
 Creating Snapshots and Clones
 -----------------------------

@@ -15,8 +15,10 @@ if __name__ == "__main__":
 
     check_call('python setup.py sdist', shell=True)
     check_call('make doc', shell=True)
-    shutil.move('./dist/infinisdk-{0}.tar.gz'.format(version), tmpdir)
-    check_call('tar czvf {} ./html'.format(os.path.join(tmpdir, 'infinisdk-docs-{0}.tar.gz'.format(version))), cwd='./build/sphinx', shell=True)
-    for filename in os.listdir(tmpdir):
-        check_call('scp {} root@repo.infinidat.com:{}'.format(os.path.join(tmpdir, filename), _REMOTE_ARCHIVES_LOCATION), shell=True)
-        check_call('ssh root@repo.infinidat.com chown app_repo:users {}/{}'.format(_REMOTE_ARCHIVES_LOCATION, filename), shell=True)
+    sdist_file = os.path.join(tmpdir, 'infinsdk-{0}-python-sdist.tar.gz'.format(version))
+    docs_file = os.path.join(tmpdir, 'infinisdk-{0}-python-docs.tar.gz'.format(version))
+    shutil.move('./dist/infinisdk-{0}.tar.gz'.format(version), sdist_file)
+    check_call('tar czvf {} ./html'.format(docs_file), cwd='./build/sphinx', shell=True)
+    for filename in (sdist_file, docs_file):
+        check_call('curl -v -1 -T {0} --ftp-pasv -u app_repo:app_repo -Q "TYPE I" -Q "cwd main-unstable" "ftp://repo-v2.lab.il.infinidat.com/"'.format(filename),
+                   shell=True)

@@ -1,5 +1,5 @@
-Getting Started with InfiniSDK
-==============================
+Getting Started
+===============
 
 Installation
 ------------
