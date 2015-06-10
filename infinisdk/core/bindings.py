@@ -25,6 +25,24 @@ class InfiniSDKBinding(ObjectAPIBinding):
             return value
         return super(InfiniSDKBinding, self).get_api_value_from_value(system, objtype, obj, value)
 
+
+class InfiniSDKBindingWithSpecialFlags(InfiniSDKBinding):
+
+    def __init__(self, special_flags):
+        self._special_flags = special_flags
+        super(InfiniSDKBindingWithSpecialFlags, self).__init__()
+
+    def get_api_value_from_value(self, system, objtype, obj, value):
+        if value in self._special_flags:
+            return value
+        return super(InfiniSDKBindingWithSpecialFlags, self).get_api_value_from_value(system, objtype, obj, value)
+
+    def get_value_from_api_value(self, system, objtype, obj, value):
+        if value in self._special_flags:
+            return value
+        return super(InfiniSDKBindingWithSpecialFlags, self).get_value_from_api_value(system, objtype, obj, value)
+
+
 class RelatedObjectBinding(InfiniSDKBinding):
 
     def __init__(self, collection_name=None, value_for_none=0):
