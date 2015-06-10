@@ -43,7 +43,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'InfiniSDK'
-copyright = u'2015, Infinidat'
+copyright = u'2014, 2015, Infinidat'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
