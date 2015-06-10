@@ -16,7 +16,7 @@ from ..core.type_binder import TypeBinder
 from ..core import Field, CapacityType, MillisecondsDatetimeType
 from ..core.api.special_values import Autogenerate
 from .system_object import InfiniBoxObject
-from ..core.bindings import ListOfRelatedObjectIDsBinding
+from ..core.bindings import ListOfRelatedObjectIDsBinding, InfiniSDKBindingWithSpecialFlags
 from ..core.object_query import ObjectQuery
 from ..core.utils import deprecated
 
@@ -50,6 +50,7 @@ class Pool(InfiniBoxObject):
         Field("created_at", type=MillisecondsDatetimeType, is_sortable=True, is_filterable=True),
         Field("updated_at", type=MillisecondsDatetimeType, is_sortable=True, is_filterable=True),
         Field("ssd_enabled", type=bool, mutable=True, creation_parameter=True, is_filterable=True, is_sortable=True, optional=True),
+        Field("max_extend", type=CapacityType, mutable=True, binding=InfiniSDKBindingWithSpecialFlags([0, -1])),
         Field("state", cached=False),
     ]
 
