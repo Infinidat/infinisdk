@@ -49,19 +49,31 @@ class BaseDataEntity(InfiniBoxObject):
 
     def _create_child(self, name):
         self.refresh('has_children')
-        hook_tags = self._get_tags_for_object_operations(self.system)
-        gossip.trigger_with_tags(_BEGIN_FORK_HOOK, {'obj': self}, tags=hook_tags)
+        self.trigger_begin_fork()
         if not name:
             name = self.fields.name.generate_default().generate()
         data = {'name': name, 'parent_id': self.get_id()}
         try:
-            child = self._create(self.system, self.get_url_path(self.system), data=data, tags=hook_tags)
+            child = self._create(self.system, self.get_url_path(self.system), data=data, tags=self._get_tags_for_object_operations(self.system))
         except Exception:
-            gossip.trigger_with_tags(_CANCEL_FORK_HOOK, {'obj': self}, tags=hook_tags)
+            self.trigger_cancel_fork()
             raise
-        gossip.trigger_with_tags(_FINISH_FORK_HOOK, {'obj': self, 'child': child}, tags=hook_tags)
+        self.trigger_finish_fork(child)
         self._handle_possible_replication_snapshot(child)
         return child
+
+    def trigger_begin_fork(self):
+        hook_tags = self._get_tags_for_object_operations(self.system)
+        gossip.trigger_with_tags(_BEGIN_FORK_HOOK, {'obj': self}, tags=hook_tags)
+
+
+    def trigger_cancel_fork(self):
+        hook_tags = self._get_tags_for_object_operations(self.system)
+        gossip.trigger_with_tags(_CANCEL_FORK_HOOK, {'obj': self}, tags=hook_tags)
+
+    def trigger_finish_fork(self, child):
+        hook_tags = self._get_tags_for_object_operations(self.system)
+        gossip.trigger_with_tags(_FINISH_FORK_HOOK, {'obj': self, 'child': child}, tags=hook_tags)
 
     def _handle_possible_replication_snapshot(self, snapshot):
         fields = snapshot.get_fields(from_cache=True, raw_value=True)

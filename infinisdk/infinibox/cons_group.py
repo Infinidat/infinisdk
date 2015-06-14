@@ -32,14 +32,25 @@ class ConsGroup(InfiniBoxObject):
         return 'cons_group'
 
     def create_snapgroup(self, name=None, prefix=None, suffix=None):
-        # TODO: call fork hooks for all the members...
         self.refresh('members_count')
         if not name:
             name = self.fields.name.generate_default().generate()
         if not prefix and not suffix:
             suffix = _CG_SUFFIX.generate()
         data = {'snap_prefix': prefix, 'parent_id': self.get_id(), 'snap_suffix': suffix, 'name': name}
-        child = self._create(self.system, self.get_url_path(self.system), data=data, tags=None)
+        members = self.get_members()
+        for member in members:
+            member.trigger_begin_fork()
+        try:
+            child = self._create(self.system, self.get_url_path(self.system), data=data, tags=None)
+        except Exception:
+            for member in members:
+                member.trigger_cancel_fork()
+            raise
+        child_members = dict((s.get_parent_id(from_cache=True), child) for s in child.get_members())
+        for member in members:
+            snap = child_members[member.id]
+            member.trigger_finish_fork(snap)
         return child
 
     def delete(self, delete_members=None):
