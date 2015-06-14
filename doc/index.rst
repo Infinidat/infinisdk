@@ -30,6 +30,7 @@ Contents:
    events
    components
    extending
+   cookbook
    faq
    api
    advanced_usage
