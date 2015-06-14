@@ -30,34 +30,64 @@ class ReplicaBinder(TypeBinder):
 
     """Implements *system.replicas*
     """
-
-    def replicate_volume(self, volume, link, remote_pool=None, remote_volume=None, **kw):
-        """Replicates a volume, creating its remote replica on the specified pool
-
-        :param remote_pool: if omitted, ``remote_volume`` must be specified. Otherwise, means creating target volume
-        :param remote_volume: if omitted, ``remote_pool`` must be specified. Otherwise, means creating based on existing volume on target
+    def replicate_volume(self, volume, remote_volume=None, **kw):
+        """Convenience wrapper around :func:`.replicate_entity`
         """
-        if remote_volume is None:
+        return self.replicate_entity(entity=volume, remote_entity=remote_volume, **kw)
+
+    def replicate_cons_group(self, cg, remote_cg=None, **kw):
+        """Convenience wrapper around :func:`.replicate_entity`
+        """
+        return self.replicate_entity(entity=cg, remote_entity=remote_cg, **kw)
+
+
+    def replicate_entity(self, entity, link, remote_pool=None, remote_entity=None, **kw):
+        """Replicates a entity or CG, creating its remote replica on the specified pool
+
+        :param remote_pool: if omitted, ``remote_entity`` must be specified. Otherwise, means creating target entity
+        :param remote_entity: if omitted, ``remote_pool`` must be specified. Otherwise, means creating based on existing entity on target
+        """
+        if remote_entity is None:
             assert remote_pool is not None
-            return self.replicate_volume_create_target(volume, link, remote_pool=remote_pool, **kw)
-        return self.replicate_volume_existing_target(volume, link, remote_volume=remote_volume, **kw)
+            return self.replicate_entity_create_target(entity, link, remote_pool=remote_pool, **kw)
+        return self.replicate_entity_existing_target(entity, link, remote_entity=remote_entity, **kw)
 
-    def replicate_volume_create_target(self, volume, link, remote_pool, **kw):
-        return self.create(
-            link=link, remote_pool_id=remote_pool.id,
-            entity_pairs=[{
-                'local_entity_id': volume.id,
-                'remote_base_action': 'CREATE',
-            }], entity_type='VOLUME', **kw)
+    def replicate_entity_create_target(self, entity, link, remote_pool, **kw):
+        return self._replicate(entity, link, base_action='CREATE', remote_pool_id=remote_pool.id, **kw)
 
-    def replicate_volume_existing_target(self, volume, link, remote_volume=None, **kw):
-        return self.create(
-            link=link,
-            entity_pairs=[{
-                'local_entity_id': volume.id,
-                'remote_entity_id': remote_volume.id if remote_volume else None,
-                'remote_base_action': 'NO_BASE_DATA',
-            }], entity_type='VOLUME', **kw)
+    def replicate_entity_existing_target(self, entity, link, remote_entity=None, **kw):
+        return self._replicate(entity, link, remote_entity=remote_entity, base_action='NO_BASE_DATA', **kw)
+
+    def _replicate(self, entity, link, base_action, remote_entity=None, **kw):
+
+        kw['link'] = link
+        kw['entity_pairs'] = []
+        entity_pairs = []
+        if isinstance(entity, entity.system.cons_groups.object_type):
+            kw['entity_type'] = 'CONSISTENCY_GROUP'
+            kw['local_cg_id'] = entity.id
+            for local_volume in entity.get_members():
+                if remote_entity is not None:
+                    raise NotImplementedError() # pragma: no cover
+                entity_pairs.append((local_volume, None))
+        else:
+            kw['entity_type'] = 'VOLUME'
+            entity_pairs.append((entity, remote_entity))
+
+
+        for local, remote in entity_pairs:
+            kw['entity_pairs'].append({
+                'local_entity_id': local.id,
+                'remote_entity_id': remote.id if remote else None,
+                'remote_base_action': base_action,
+            })
+
+        return self.create(**kw)
+
+    def _get_entity_type_string(self, entity):
+        if isinstance(entity, entity.system.cons_groups.object_type):
+            return 'CONSISTENCY_GROUP'
+        return 'VOLUME'
 
 
 class Replica(InfiniBoxObject):
@@ -82,7 +112,6 @@ class Replica(InfiniBoxObject):
         Field('sync_interval', api_name='sync_interval', type=MillisecondsDeltaType,
               mutable=True,
               creation_parameter=True, default=timedelta(seconds=30)),
-
     ]
 
     @classmethod
@@ -95,11 +124,12 @@ class Replica(InfiniBoxObject):
         return self.system.cons_groups
 
     def get_local_entity(self):
-        """Returns the local entity used for replication, assuming there is only one
+        """Returns the local entity used for replication, be it a volume or a consistency group.
         """
+        if self.is_consistency_group():
+            return self.system.cons_groups.get_by_id_lazy(self.get_field('local_cg_id', from_cache=True))
+
         pairs = self.get_entity_pairs(from_cache=True)
-        if self.get_field('entity_type', from_cache=True).lower() != 'volume':
-            raise NotImplementedError()  # pragma: no cover
         if len(pairs) > 1:
             raise TooManyObjectsFound()
         [pair] = pairs
@@ -119,7 +149,22 @@ class Replica(InfiniBoxObject):
     def get_local_volume(self):
         """Returns the local volume, assuming there is exactly one
         """
+        if self.is_consistency_group():
+            raise NotImplementedError('get_local_volume() is not supported on a consistency group replication') # pragma: no cover
+
         return self.get_local_entity()
+
+    def get_local_volumes(self):
+        """Returns all local volumes, whether as part of a consistency group or a single volume
+        """
+        if self.is_consistency_group():
+            return self.get_local_entity().get_members()
+        return [self.get_local_entity()]
+
+    def is_consistency_group(self):
+        """Returns whether this replica is configured with a consistency group as a local entity
+        """
+        return self.get_field('entity_type', from_cache=True).lower() == 'consistency_group'
 
     def suspend(self):
         """Suspends this replica

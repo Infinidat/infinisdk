@@ -195,8 +195,8 @@ def secondary_volume(replica, secondary_infinibox):
 def test_volume_get_replica_too_many(volume, replica, infinibox, secondary_infinibox):
     remote_pool = secondary_infinibox.pools.create()
     remote_volume = secondary_infinibox.volumes.create(pool=remote_pool)
-    replica2 = replica.system.replicas.replicate_volume_existing_target(
-        volume, link=replica.get_link(), remote_volume=remote_volume)
+    replica2 = replica.system.replicas.replicate_entity_existing_target(
+        volume, link=replica.get_link(), remote_entity=remote_volume)
     with pytest.raises(TooManyObjectsFound):
         volume.get_replica()
 
