@@ -15,6 +15,14 @@ def test_unmapping(infinibox, mapped_volume):
     assert not mapped_volume.get_logical_units()
 
 
+def test_has_children(infinibox, volume):
+    assert not volume.has_children()
+    s = volume.create_snapshot()
+    assert volume.has_children()
+
+    assert not hasattr(volume, 'is_has_children')
+
+
 def test_write_protection(volume):
     assert not volume.is_write_protected()
     volume.update_write_protected(True)

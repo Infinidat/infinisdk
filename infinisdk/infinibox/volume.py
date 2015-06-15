@@ -73,7 +73,7 @@ class Volume(BaseDataEntity):
               , is_filterable=True, is_sortable=True),
         Field("depth", cached=True, type=int, is_sortable=True, is_filterable=True),
         Field("mapped", type=bool, is_sortable=True, is_filterable=True),
-        Field("has_children", type=bool),
+        Field("has_children", type=bool, add_getter=False),
         Field('rmr_source', type=bool),
         Field('rmr_target', type=bool),
     ]

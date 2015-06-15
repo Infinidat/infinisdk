@@ -46,7 +46,7 @@ class Filesystem(BaseDataEntity):
         Field("write_protected", type=bool, mutable=True, creation_parameter=True, optional=True, is_filterable=True, is_sortable=True),
         Field("depth", cached=True, type=int, is_sortable=True, is_filterable=True),
         Field("mapped", type=bool, is_sortable=True, is_filterable=True),
-        Field("has_children", type=bool),
+        Field("has_children", type=bool, add_getter=False),
         Field("root_mode", creation_parameter=True, optional=True),
     ]
 
