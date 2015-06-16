@@ -47,7 +47,7 @@ class ConsGroup(InfiniBoxObject):
             for member in members:
                 member.trigger_cancel_fork()
             raise
-        child_members = dict((s.get_parent_id(from_cache=True), child) for s in child.get_members())
+        child_members = dict((s.get_parent(from_cache=True).id, child) for s in child.get_members())
         for member in members:
             snap = child_members[member.id]
             member.trigger_finish_fork(snap)
