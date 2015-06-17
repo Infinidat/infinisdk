@@ -1,4 +1,3 @@
-from collections import namedtuple
 from ..core import Field, MillisecondsDatetimeType
 from ..core.bindings import RelatedObjectBinding
 from ..core.api.special_values import Autogenerate
@@ -39,7 +38,7 @@ class ConsGroup(InfiniBoxObject):
         return self.get_type() == 'SNAP'
 
     def get_children(self):
-        return self.find(self.system, parent=self).to_list()
+        return self.find(self.system, parent=self)
 
     def create_snapgroup(self, name=None, prefix=None, suffix=None):
         self.refresh('members_count')
