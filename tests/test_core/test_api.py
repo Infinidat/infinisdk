@@ -4,6 +4,8 @@ from infinisdk.core.exceptions import APICommandFailed, ObjectNotFound
 from infinisdk._compat import httplib
 from ..conftest import no_op_context
 
+from urlobject import URLObject as URL
+
 
 def test_data_none(infinibox):
     resp = infinibox.api.post('/api/infinisim/echo', data=None)
@@ -30,11 +32,11 @@ def test_error_response(izbox):
 def test_url_params(izbox):
     params = {'a': 'b', 'c': 2, 'd': OMIT, 'e': Autogenerate('param_{ordinal}'), 'f': True}
     expected = {'a': 'b', 'c': '2', 'e': 'param_1', 'f': 'True'}
-    with pytest.raises(APICommandFailed) as e:
-        izbox.api.post("/api/izsim/echo_post", params=params)
-    received = e.value.response.url.query_dict
-    received.pop('approved', None)
-    assert expected == received
+    resp = izbox.api.post("/api/izsim/echo_post", params=params)
+    url = URL(resp.response.request.url)
+    encoded = url.query_dict
+    encoded.pop('approved', None)
+    assert expected == encoded
 
 
 @pytest.mark.parametrize('should_failed', [True, False])

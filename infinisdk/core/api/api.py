@@ -83,7 +83,6 @@ class API(object):
         if not self._ssl_cert:
             self._session.verify = False
         self._session.auth = self._auth
-        self._session.headers["content-type"] = "application/json"
 
     @property
     def urls(self):
@@ -202,7 +201,9 @@ class API(object):
         raw_data = kwargs.pop("raw_data", False)
         data = kwargs.pop("data", NOTHING)
         sent_json_object = None
+        headers = {}
         if data is not NOTHING:
+            headers['Content-type'] = 'application/json'
             if raw_data:
                 sent_json_object = data
             else:
@@ -224,7 +225,7 @@ class API(object):
                 full_url = self._with_approved(full_url)
 
             hostname = full_url.hostname
-            api_request = requests.Request(http_method, full_url, data=data if data is not NOTHING else None, params=url_params)
+            api_request = requests.Request(http_method, full_url, data=data if data is not NOTHING else None, params=url_params, headers=headers)
             for preprocessor in self._preprocessors:
                 preprocessor(api_request)
 
