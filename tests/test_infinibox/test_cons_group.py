@@ -8,6 +8,8 @@ from api_object_schema.utils import loose_isinstance
 def test_create_cg(infinibox, pool):
     cg = infinibox.cons_groups.create(pool=pool)
     assert cg.is_in_system()
+    assert cg.is_master()
+    assert not cg.is_snapgroup()
 
 
 @new_to_version('2.2')

@@ -1,3 +1,4 @@
+from collections import namedtuple
 from ..core import Field, MillisecondsDatetimeType
 from ..core.bindings import RelatedObjectBinding
 from ..core.api.special_values import Autogenerate
@@ -30,6 +31,12 @@ class ConsGroup(InfiniBoxObject):
     @classmethod
     def get_type_name(cls):
         return 'cons_group'
+
+    def is_master(self):
+        return self.get_type() == 'MASTER'
+
+    def is_snapgroup(self):
+        return self.get_type() == 'SNAP'
 
     def get_children(self):
         return self.find(self.system, parent=self).to_list()
