@@ -200,9 +200,9 @@ class API(object):
         returned = None
         kwargs.setdefault("timeout", self._default_request_timeout)
         raw_data = kwargs.pop("raw_data", False)
-        data = kwargs.pop("data", None)
+        data = kwargs.pop("data", NOTHING)
         sent_json_object = None
-        if data is not None:
+        if data is not NOTHING:
             if raw_data:
                 sent_json_object = data
             else:
@@ -224,13 +224,13 @@ class API(object):
                 full_url = self._with_approved(full_url)
 
             hostname = full_url.hostname
-            api_request = requests.Request(http_method, full_url, data=data, params=url_params)
+            api_request = requests.Request(http_method, full_url, data=data if data is not NOTHING else None, params=url_params)
             for preprocessor in self._preprocessors:
                 preprocessor(api_request)
 
 
             _logger.debug("{0} <-- {1} {2}", hostname, http_method.upper(), api_request.url)
-            if data is not None:
+            if data is not NOTHING:
                 if data != api_request.data:
                     sent_json_object = json.loads(api_request.data)
                 self._log_sent_data(hostname, data, sent_json_object)
@@ -426,7 +426,7 @@ class Response(object):
         try:
             self.response.raise_for_status()
         except requests.exceptions.HTTPError as e:
-            if self.sent_data and 'password' in self.sent_data:
+            if self.sent_data is not NOTHING  and self.sent_data and 'password' in self.sent_data:
                 self.sent_data = '<HIDDEN>'
             raise APICommandFailed(self)
 

@@ -5,6 +5,11 @@ from infinisdk._compat import httplib
 from ..conftest import no_op_context
 
 
+def test_data_none(infinibox):
+    resp = infinibox.api.post('/api/infinisim/echo', data=None)
+    assert resp.get_result() is None
+
+
 def test_omit_fields(izbox):
     resp = izbox.api.post("/api/izsim/echo_post", data={"a": "b"})
     assert resp.get_result() == {'a': 'b'}
