@@ -56,7 +56,7 @@ class ConsGroup(InfiniBoxObject):
     def delete(self, delete_members=None):
         path = self.get_this_url_path()
         if delete_members is not None:
-            path = path.add_query_param('delete_members', 'true')
+            path = path.add_query_param('delete_members', str(delete_members).lower())
         with self._get_delete_context():
             self.system.api.delete(path)
 
