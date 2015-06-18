@@ -40,6 +40,8 @@ class ConsGroup(InfiniBoxObject):
     def get_children(self):
         return self.find(self.system, parent=self)
 
+    get_snapgroups = get_children
+
     def create_snapgroup(self, name=None, prefix=None, suffix=None):
         self.refresh('members_count')
         if not name:
