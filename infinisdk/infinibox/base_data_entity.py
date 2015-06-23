@@ -104,9 +104,9 @@ class BaseDataEntity(InfiniBoxObject):
         try:
             self.system.api.post(restore_url, data=snapshot_id)
         except Exception as e:
-            self.trigger_data_restore_failure(source, e)
+            self.trigger_data_restore_failure(snapshot, e)
             raise
-        self.trigger_after_restore()
+        self.trigger_after_restore(snapshot)
 
     def trigger_before_restore(self, source):
         hook_tags = self._get_tags_for_object_operations(self.system)
