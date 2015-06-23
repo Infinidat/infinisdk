@@ -94,7 +94,10 @@ class ConsGroup(InfiniBoxObject):
         self.refresh('members_count')
 
     def restore(self, snap_group):
-        raise NotImplementedError()
+        """Restores this consistency group from the specified sg
+        """
+        self.system.api.post(self.get_this_url_path().add_path('restore'),
+                             data={'source_id': snap_group.id})
 
     def move_pool(self, target_pool, with_capacity=False):
         """Moves this entity to a new pool, optionally along with its needed capacity
