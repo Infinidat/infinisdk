@@ -35,7 +35,7 @@ class Export(InfiniBoxObject):
         Field("pref_write", creation_parameter=True, optional=True, type=CapacityType, mutable=True),
         Field("max_read", creation_parameter=True, optional=True, type=CapacityType, mutable=True),
         Field("max_write", creation_parameter=True, optional=True, type=CapacityType, mutable=True),
-        Field("permissions", type=MunchListType, creation_parameter=True, optional=True),
+        Field("permissions", type=MunchListType, creation_parameter=True, optional=True, mutable=True),
         Field("created_at", type=MillisecondsDatetimeType, is_sortable=True, is_filterable=True),
         Field("updated_at", type=MillisecondsDatetimeType, is_sortable=True, is_filterable=True),
     ]
