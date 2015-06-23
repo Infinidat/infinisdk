@@ -99,15 +99,26 @@ class BaseDataEntity(InfiniBoxObject):
         """Restores this entity from a given snapshot object
         """
         snapshot_id = snapshot.id
-        hook_tags = self._get_tags_for_object_operations(self.system)
         restore_url = self.get_this_url_path().add_path('restore')
-        gossip.trigger_with_tags('infinidat.sdk.pre_data_restore', {'source': snapshot, 'target': self}, tags=hook_tags)
+        self.trigger_before_restore(snapshot)
         try:
             self.system.api.post(restore_url, data=snapshot_id)
-        except APICommandFailed as e:
-            gossip.trigger_with_tags('infinidat.sdk.data_restore_failure', {'source': snapshot, 'target': self, 'exc': e}, tags=hook_tags)
+        except Exception as e:
+            self.trigger_data_restore_failure(source, e)
             raise
-        gossip.trigger_with_tags('infinidat.sdk.post_data_restore', {'source': snapshot, 'target': self}, tags=hook_tags)
+        self.trigger_after_restore()
+
+    def trigger_before_restore(self, source):
+        hook_tags = self._get_tags_for_object_operations(self.system)
+        gossip.trigger_with_tags('infinidat.sdk.pre_data_restore', {'source': source, 'target': self}, tags=hook_tags)
+
+    def trigger_data_restore_failure(self, source, e):
+        hook_tags = self._get_tags_for_object_operations(self.system)
+        gossip.trigger_with_tags('infinidat.sdk.data_restore_failure', {'source': source, 'target': self, 'exc': e}, tags=hook_tags)
+
+    def trigger_after_restore(self, source):
+        hook_tags = self._get_tags_for_object_operations(self.system)
+        gossip.trigger_with_tags('infinidat.sdk.post_data_restore', {'source': source, 'target': self}, tags=hook_tags)
 
     def get_snapshots(self):
         """Retrieves all snapshot children of this entity

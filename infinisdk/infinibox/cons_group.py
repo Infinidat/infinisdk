@@ -96,8 +96,20 @@ class ConsGroup(InfiniBoxObject):
     def restore(self, snap_group):
         """Restores this consistency group from the specified sg
         """
-        self.system.api.post(self.get_this_url_path().add_path('restore'),
-                             data={'source_id': snap_group.id})
+        sg_members_by_parent_id = dict((s.get_field('parent_id', from_cache=True), s) for s in snap_group.get_members())
+        members_by_id = dict((m.id, m) for m in self.get_members() if m.id in sg_members_by_parent_id)
+        for parent_id, snap in sg_members_by_parent_id.items():
+            members_by_id[parent_id].trigger_before_restore(snap)
+        try:
+            self.system.api.post(self.get_this_url_path().add_path('restore'),
+                                 data={'source_id': snap_group.id})
+        except Exception as e:
+            for parent_id, snap in sg_members_by_parent_id.items():
+                members_by_id[parent_id].trigger_data_restore_failure(snap, e)
+            raise
+        for parent_id, snap in sg_members_by_parent_id.items():
+            members_by_id[parent_id].trigger_after_restore(snap)
+
 
     def move_pool(self, target_pool, with_capacity=False):
         """Moves this entity to a new pool, optionally along with its needed capacity
