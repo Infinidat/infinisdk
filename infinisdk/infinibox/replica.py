@@ -21,7 +21,7 @@ from ..core.api.special_values import Autogenerate, OMIT
 from ..core.type_binder import TypeBinder
 from ..core import Field
 from ..core.bindings import RelatedObjectBinding
-from ..core.exceptions import TooManyObjectsFound, CannotGetReplicaState, APICommandFailed
+from ..core.exceptions import TooManyObjectsFound, CannotGetReplicaState, APICommandFailed, InfiniSDKRuntimeException
 from ..core.translators_and_types import MillisecondsDeltaType
 from .system_object import InfiniBoxObject
 
@@ -89,6 +89,11 @@ class Replica(InfiniBoxObject):
     def is_supported(cls, system):
         return system.compat.has_replication()
 
+    def _get_entity_collection(self):
+        if self.get_entity_type(from_cache=True) == 'VOLUME':
+            return self.system.volumes
+        return self.system.cons_groups
+
     def get_local_entity(self):
         """Returns the local entity used for replication, assuming there is only one
         """
@@ -99,6 +104,17 @@ class Replica(InfiniBoxObject):
             raise TooManyObjectsFound()
         [pair] = pairs
         return self.system.volumes.get_by_id_lazy(pair['local_entity_id'])
+
+    def expose_last_consistent_snapshot(self):
+        resp = self.system.api.post(self.get_this_url_path().add_path('expose_last_consistent_snapshot'))
+        collection = self._get_entity_collection()
+        snapshot_guid = resp.get_result()['_snapshot_guid']
+        assert snapshot_guid
+        for snap in self.get_local_entity().get_children():
+            if snap.get_field('rmr_snapshot_guid', from_cache=True) == snapshot_guid:
+                gossip.trigger_with_tags('infinidat.sdk.replica_snapshot_created', {'snapshot': snap}, tags=['infinibox'])
+                return snap
+        raise InfiniSDKRuntimeException('No snapshot with guid {0} was found', snapshot_guid)
 
     def get_local_volume(self):
         """Returns the local volume, assuming there is exactly one
