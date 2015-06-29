@@ -90,10 +90,12 @@ class CapacityUnavailable(APICommandException):
     pass
 
 class ObjectNotFound(InfiniSDKException):
-    pass
+    """Thrown when using .get(), when no results are found but the code expects a single object
+    """
 
 class TooManyObjectsFound(InfiniSDKException):
-    pass
+    """Thrown when using .get(), when more than one result is found but the code expects a single object
+    """
 
 class MissingFields(InfiniSDKException):
     pass
