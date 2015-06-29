@@ -33,6 +33,18 @@ class Events(EventsBase):
     def get_levels_name_to_number_mapping(self):
         return dict((level_info['name'], level_info['value']) for level_info in self._get_events_types()['levels'])
 
+    def _get_anti_flooding_path(self):
+        return "config/mgmt/events.flooding_detector.enabled"
+
+    def is_anti_flooding_enabled(self):
+        return self.system.api.get(self._get_anti_flooding_path()).get_result()
+
+    def disable_anti_flooding(self):
+        self.system.api.put(self._get_anti_flooding_path(), data=False)
+
+    def enable_anti_flooding(self):
+        self.system.api.put(self._get_anti_flooding_path(), data=True)
+
 
 class EmailRule(SystemObject):
 
