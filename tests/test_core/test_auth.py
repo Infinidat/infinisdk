@@ -13,10 +13,10 @@ def test_set_auth(infinibox, params):
     _assert_unauthorized(infinibox)
 
 
-def test_auth_context(infinibox):
+def test_get_auth_context(infinibox):
     _assert_authorized(infinibox)
 
-    with infinibox.api.auth_context("other_username", "other_password"):
+    with infinibox.api.get_auth_context("other_username", "other_password"):
         _assert_unauthorized(infinibox)
 
     _assert_authorized(infinibox)

@@ -30,6 +30,7 @@ from ..._compat import get_timedelta_total_seconds, httplib, iteritems, requests
 from ..config import config
 from ..exceptions import (APICommandFailed, APITransportFailure,
                           CommandNotApproved, SystemNotFoundException)
+from ..utils import deprecated
 from .special_values import translate_special_values
 
 
@@ -160,11 +161,11 @@ class API(object):
         return self._session.auth
 
     @contextmanager
-    def auth_context(self, username, password):
+    def get_auth_context(self, username, password):
         """
         Changes the API authentication information for the duration of the context:
 
-        >>> with system.api.auth_context('username', 'password'):
+        >>> with system.api.get_auth_context('username', 'password'):
         ...     ... # execute operations as 'username'
         """
         auth = (username, password)
@@ -174,6 +175,10 @@ class API(object):
             yield
         finally:
             self.set_auth(*prev)
+
+    @deprecated(message="Use get_auth_context instead")
+    def auth_context(self, *args, **kwargs):
+        return self.get_auth_context(*args, **kwargs)
 
     get = _get_request_delegate("get")
     put = _get_request_delegate("put")

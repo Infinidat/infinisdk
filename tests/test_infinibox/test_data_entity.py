@@ -174,11 +174,11 @@ def test_object_creation_hooks_for_child_entities(data_entity):
     assert l == ['pre_a_snap', 'post_a_snap', 'pre_a_clone', 'post_a_clone']
     assert fork_callbacks == [_BEGIN_FORK_HOOK, _FINISH_FORK_HOOK]*2
 
-    with data_entity.system.api.auth_context(username, password):
+    with data_entity.system.api.get_auth_context(username, password):
         with pytest.raises(APICommandFailed):
             data_entity.create_snapshot('failed_snap')
 
-    with data_entity.system.api.auth_context(username, password):
+    with data_entity.system.api.get_auth_context(username, password):
         with pytest.raises(APICommandFailed):
             snapshot.create_clone('failed_clone')
 
@@ -228,7 +228,7 @@ def test_data_restore(data_entity):
     expected += ['pre_restore_{0}_from_{1}'.format(*args), 'post_restore_{0}_from_{1}'.format(*args)]
     assert callbacks == expected
 
-    with data_entity.system.api.auth_context(username, password):
+    with data_entity.system.api.get_auth_context(username, password):
         with pytest.raises(APICommandFailed):
             data_entity.restore(snapshot)
     expected += ['pre_restore_{0}_from_{1}'.format(*args), 'restore_failure_{0}_from_{1}'.format(*args)]

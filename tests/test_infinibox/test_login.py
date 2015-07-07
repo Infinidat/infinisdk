@@ -25,7 +25,7 @@ def test_passwords_are_not_logged(infinibox):
 
 
 def test_invalid_login(infinibox):
-    with infinibox.api.auth_context('a', 'b'):
+    with infinibox.api.get_auth_context('a', 'b'):
         with pytest.raises(APICommandFailed) as caught:
             infinibox.login()
 
