@@ -1,3 +1,4 @@
+import logbook
 import pytest
 from infinisdk.core.api import Autogenerate, OMIT
 from infinisdk.core.exceptions import APICommandFailed, ObjectNotFound
@@ -10,6 +11,24 @@ from urlobject import URLObject as URL
 def test_data_none(infinibox):
     resp = infinibox.api.post('/api/infinisim/echo', data=None)
     assert resp.get_result() is None
+
+@pytest.fixture
+def capture(request):
+    handler = logbook.TestHandler(level=logbook.DEBUG)
+    handler.push_application()
+
+    @request.addfinalizer
+    def pop():
+        handler.pop_application()
+    return handler
+
+def test_no_response_bal(infinibox, capture):
+    with infinibox.api.get_no_response_logs_context():
+        infinibox.api.get('system')
+    assert len(capture.records) == 3
+    assert '<-- GET' in capture.records[0].message  # Request log message
+    assert '--> 200 OK' in capture.records[1].message  # Response status log message
+    assert capture.records[2].message.endswith('...')  # Response data log message
 
 
 def test_omit_fields(izbox):

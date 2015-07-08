@@ -269,13 +269,17 @@ class API(object):
         _logger.debug("{0} <-- DATA: {1}" , hostname, data)
 
     @contextmanager
-    def no_response_logs_context(self):
+    def get_no_response_logs_context(self):
         prev = self._no_reponse_logs
         self._no_reponse_logs = True
         try:
             yield
         finally:
             self._no_reponse_logs = prev
+
+    @deprecated(message="Use get_no_response_logs_context instead")
+    def no_response_logs_context(self):
+        return self.get_no_response_logs_context()
 
     def add_auto_retry(self, retry_predicate, max_retries=1, sleep_seconds=None):
         if sleep_seconds is None: # backwards compatibility
