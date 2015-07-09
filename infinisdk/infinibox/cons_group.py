@@ -43,6 +43,9 @@ class ConsGroup(InfiniBoxObject):
     def get_children(self):
         return self.find(self.system, parent=self)
 
+    def get_replicas(self):
+        return self.system.replicas.find(local_cg_id=self.id)
+
     get_snapgroups = get_children
 
     def create_snapgroup(self, name=None, prefix=None, suffix=None):
