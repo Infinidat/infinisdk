@@ -154,6 +154,15 @@ class Replica(InfiniBoxObject):
 
         return self.get_local_entity()
 
+    def get_local_cg(self):
+        """Returns the local cg, assuming this is a consistency group replica
+        """
+        if not self.is_consistency_group():
+            raise NotImplementedError('get_local_volume() is not supported on a consistency group replication') # pragma: no cover
+
+        return self.get_local_entity()
+
+
     def get_local_volumes(self):
         """Returns all local volumes, whether as part of a consistency group or a single volume
         """
