@@ -181,6 +181,14 @@ class Replica(InfiniBoxObject):
         self.system.api.post(self.get_this_url_path().add_path('suspend'))
         self.refresh('state')
 
+    def sync(self):
+        """Starts a sync job
+        """
+        returned = self.system.api.post(self.get_this_url_path().add_path('sync'), headers={'X-INFINIDAT-RAW-RESPONSE': 'true'})
+        import pudb
+        pudb.set_trace()
+        return returned
+
     def resume(self):
         """Resumes this replica
         """

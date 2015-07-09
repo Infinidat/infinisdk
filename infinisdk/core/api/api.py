@@ -207,7 +207,12 @@ class API(object):
         raw_data = kwargs.pop("raw_data", False)
         data = kwargs.pop("data", NOTHING)
         sent_json_object = None
-        headers = {}
+        headers = kwargs.pop('headers', None)
+        if headers is None:
+            headers = {}
+        else:
+            headers = headers.copy()
+
         if data is not NOTHING:
             headers['Content-type'] = 'application/json'
             if raw_data:
