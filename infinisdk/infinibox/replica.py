@@ -136,15 +136,11 @@ class Replica(InfiniBoxObject):
         return self.system.volumes.get_by_id_lazy(pair['local_entity_id'])
 
     def expose_last_consistent_snapshot(self):
-        resp = self.system.api.post(self.get_this_url_path().add_path('expose_last_consistent_snapshot'))
-        collection = self._get_entity_collection()
-        snapshot_guid = resp.get_result()['_snapshot_guid']
-        assert snapshot_guid
-        for snap in self.get_local_entity().get_children():
-            if snap.get_field('rmr_snapshot_guid', from_cache=True) == snapshot_guid:
-                gossip.trigger_with_tags('infinidat.sdk.replica_snapshot_created', {'snapshot': snap}, tags=['infinibox'])
-                return snap
-        raise InfiniSDKRuntimeException('No snapshot with guid {0} was found', snapshot_guid)
+        resp = self.system.api.post(self.get_this_url_path().add_path('expose_last_consistent_snapshot')).get_result()
+        snapshot_id = resp.get('_local_reclaimed_sg_id') or resp.get('_local_reclaimed_snapshot_id')
+        if snapshot_id is None:
+            return None
+        return self._get_entity_collection().get_by_id_lazy(snapshot_id)
 
     def get_local_volume(self):
         """Returns the local volume, assuming there is exactly one
@@ -162,8 +158,13 @@ class Replica(InfiniBoxObject):
 
         return self.get_local_entity()
 
+    def get_local_cg_id(self):
+        if not self.is_consistency_group():
+            return None
+        return self.get_local_entity().id
 
-    def get_local_volumes(self):
+
+    def get_local_data_entities(self):
         """Returns all local volumes, whether as part of a consistency group or a single volume
         """
         if self.is_consistency_group():
@@ -185,9 +186,7 @@ class Replica(InfiniBoxObject):
         """Starts a sync job
         """
         returned = self.system.api.post(self.get_this_url_path().add_path('sync'), headers={'X-INFINIDAT-RAW-RESPONSE': 'true'})
-        import pudb
-        pudb.set_trace()
-        return returned
+        return returned.get_result()
 
     def resume(self):
         """Resumes this replica
