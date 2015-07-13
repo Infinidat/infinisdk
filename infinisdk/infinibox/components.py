@@ -314,6 +314,7 @@ class Node(InfiniBoxSystemComponent):
     FIELDS = [
         Field("index", api_name="id", type=int, cached=True),
         Field("name", cached=True),
+        Field("model", cached=True),
         Field("fc_ports", type=list, binding=ListOfRelatedComponentBinding()),
         Field("eth_ports", type=list, binding=ListOfRelatedComponentBinding()),
         Field("drives", type=list, binding=ListOfRelatedComponentBinding("local_drives")),
