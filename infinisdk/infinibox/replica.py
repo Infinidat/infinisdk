@@ -137,7 +137,10 @@ class Replica(InfiniBoxObject):
 
     def expose_last_consistent_snapshot(self):
         resp = self.system.api.post(self.get_this_url_path().add_path('expose_last_consistent_snapshot')).get_result()
-        snapshot_id = resp.get('_local_reclaimed_sg_id') or resp.get('_local_reclaimed_snapshot_id')
+        if self.is_consistency_group():
+            snapshot_id = resp['_local_reclaimed_sg_id']
+        else:
+            snapshot_id = resp['entity_pairs'][0]['_local_reclaimed_snapshot_id']
         if snapshot_id is None:
             return None
         return self._get_entity_collection().get_by_id_lazy(snapshot_id)
