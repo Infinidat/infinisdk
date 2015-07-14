@@ -15,7 +15,7 @@ _INSTALL_REQUIRES = [
     "gossip>=0.8.0",
     "infi.dtypes.wwn>=0.0.2",
     "infi.pyutils",
-    "logbook",
+    "logbook>=0.10.0",
     "munch",
     "pact>=1.0.0",
     "python-dateutil", #  required to work around https://github.com/crsmithdev/arrow/issues/120
