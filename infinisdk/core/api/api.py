@@ -76,6 +76,7 @@ class API(object):
         self._active_url = None
         self._checked_version = False
         self._no_reponse_logs = False
+        self._use_pretty_json = config.root.api.log.pretty_json
 
     def reinitialize_session(self):
         self._session = requests.Session()
@@ -250,7 +251,13 @@ class API(object):
             _logger.debug("{0} --> {1} {2} (took {3:.04f}s)", hostname, response.status_code, response.reason, elapsed)
             returned = Response(response, data)
             resp_data = "..." if self._no_reponse_logs else returned.get_json()
-            _logger.debug("{0} --> {1}", hostname, resp_data)
+            if self._use_pretty_json and returned.get_json() is not None:
+                logged_response_data = json.dumps(
+                    returned.get_json(),
+                    indent=4, separators=(',', ': '))
+            else:
+                logged_response_data = resp_data
+            _logger.debug("{0} --> {1}", hostname, logged_response_data)
             if response.status_code != httplib.SERVICE_UNAVAILABLE:
                 if specified_address is None: # need to remember our next API target
                     self._active_url = url

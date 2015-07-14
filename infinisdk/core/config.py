@@ -24,6 +24,12 @@ config = confetti.Config(dict(
 
     ini_file_path="~/.infinidat/infinisdk.ini",
 
+    api={
+        'log': {
+            'pretty_json': False,
+        }
+    },
+
     defaults=dict(
         system_api_port=80,
         retry_sleep_seconds=5,
@@ -61,6 +67,7 @@ config = confetti.Config(dict(
             "APPROVAL_REQUIRED_VOLUME_HAS_CHILDREN",
         )),
     ),
+
 ))
 
 _cached_ini_parser = None
