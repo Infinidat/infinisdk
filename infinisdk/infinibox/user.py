@@ -28,14 +28,6 @@ class User(SystemObject):
         Field("password", creation_parameter=True, add_getter=False, mutable=True, default="12345678"),
     ]
 
-    @classmethod
-    def create(cls, system, **fields):
-        username = fields.pop('username', NOTHING)
-        if username is not NOTHING:
-            if 'name' in fields:
-                raise ValueError("Multiple colliding arguments: username and name")
-            fields['name'] = username
-        return super(User, cls).create(system, **fields)
 
     @deprecated(message='Use User.get_owned_pools or Pool.get_administered_pools instead')
     def get_pools(self):
