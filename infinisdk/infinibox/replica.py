@@ -66,10 +66,10 @@ class ReplicaBinder(TypeBinder):
         if isinstance(entity, entity.system.cons_groups.object_type):
             kw['entity_type'] = 'CONSISTENCY_GROUP'
             kw['local_cg_id'] = entity.id
-            for local_volume in entity.get_members():
+            for member in entity.get_members():
                 if remote_entity is not None:
-                    raise NotImplementedError() # pragma: no cover
-                entity_pairs.append((local_volume, None))
+                    raise NotImplementedError("Replicating a non-empty CG to an existing CG is not supported in InfiniSDK at the moment") # pragma: no cover
+                entity_pairs.append((member, None))
         else:
             kw['entity_type'] = 'VOLUME'
             entity_pairs.append((entity, remote_entity))
