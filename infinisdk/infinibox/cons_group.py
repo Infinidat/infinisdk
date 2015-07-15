@@ -18,7 +18,7 @@ class ConsGroup(InfiniBoxObject):
         Field("pool", type='infinisdk.infinibox.pool:Pool', api_name="pool_id", creation_parameter=True,
             is_filterable=True, is_sortable=True, binding=RelatedObjectBinding()),
         Field("parent", type='infinisdk.infinibox.cons_group:ConsGroup', cached=True, api_name="parent_id",
-                binding=RelatedObjectBinding('cons_groups', value_for_none=None), is_filterable=True, is_sortable=True),
+                binding=RelatedObjectBinding('cons_groups', value_for_none=0), is_filterable=True, is_sortable=True),
         Field("replicated", api_name="is_replicated", type=bool, is_filterable=True, is_sortable=True),
         Field("members_count", type=int, is_filterable=True, is_sortable=True),
         Field("created_at", type=MillisecondsDatetimeType, is_sortable=True, is_filterable=True),
