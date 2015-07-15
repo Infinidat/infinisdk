@@ -1,3 +1,4 @@
+from collections import namedtuple
 from ..core import Field, MillisecondsDatetimeType
 from ..core.bindings import RelatedObjectBinding
 from ..core.api.special_values import Autogenerate
@@ -8,6 +9,7 @@ _CG_SUFFIX = Autogenerate('_{timestamp}')
 
 class ConsGroup(InfiniBoxObject):
     URL_PATH = 'cgs'
+    ENTITY_TYPES = namedtuple('VolumeTypes', ['Master', 'Snapshot'])('MASTER', 'SNAP')
 
     FIELDS = [
         Field("id", is_identity=True, type=int, cached=True),
@@ -32,10 +34,10 @@ class ConsGroup(InfiniBoxObject):
         return 'cons_group'
 
     def is_master(self):
-        return self.get_type() == 'MASTER'
+        return self.get_type() == self.ENTITY_TYPES.Master
 
     def is_snapgroup(self):
-        return self.get_type() == 'SNAP'
+        return self.get_type() == self.ENTITY_TYPES.Snapshot
 
     def get_children(self):
         return self.find(self.system, parent=self)
