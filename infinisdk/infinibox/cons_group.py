@@ -70,6 +70,8 @@ class ConsGroup(InfiniBoxObject):
             member.trigger_finish_fork(snap)
         return child
 
+    create_snapshot = create_snapgroup
+
     def delete(self, delete_members=None):
         path = self.get_this_url_path()
         if delete_members is not None:
