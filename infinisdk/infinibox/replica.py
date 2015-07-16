@@ -111,6 +111,7 @@ class Replica(InfiniBoxObject):
         Field('role', type=str),
         Field('progress', type=int),
         Field('last_synchronized', type=int),
+        Field('last_replicated_guid', api_name='_consistent_guid'),
         Field('state', type=str),
         Field('sync_interval', api_name='sync_interval', type=MillisecondsDeltaType,
               mutable=True,
