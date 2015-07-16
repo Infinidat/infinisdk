@@ -277,7 +277,7 @@ class Replica(InfiniBoxObject):
 
         with self._detecting_new_snapshots_context(retain_staging_area, returned):
             with self._get_delete_context():
-                self.system.api.delete(path)
+                resp = self.system.api.delete(path)
 
         return returned
 
@@ -287,11 +287,11 @@ class Replica(InfiniBoxObject):
             yield
             return
 
-        entities = [self.get_local_volume()]
+        entities = self.get_local_data_entities()
         remote_replica = self.get_remote_replica()
         if remote_replica is not None:
             try:
-                entities.append(remote_replica.get_local_volume())
+                entities.extend(remote_replica.get_local_data_entities())
             except APICommandFailed as e:
                 if e.response.status_code != requests.codes.not_found:
                     raise
