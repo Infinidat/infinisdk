@@ -29,7 +29,7 @@ class Export(InfiniBoxObject):
         Field("anonymous_gid", type=int, creation_parameter=True, optional=True),
         Field("anonymous_uid", type=int, creation_parameter=True, optional=True),
         Field("privileged_port", type=bool, creation_parameter=True, optional=True),
-        Field("transport_protocols", creation_parameter=True, optional=True),
+        Field("transport_protocols", creation_parameter=True, optional=True, mutable=True),
         Field("pref_readdir", creation_parameter=True, optional=True, type=CapacityType, mutable=True),
         Field("pref_read", creation_parameter=True, optional=True, type=CapacityType, mutable=True),
         Field("pref_write", creation_parameter=True, optional=True, type=CapacityType, mutable=True),
