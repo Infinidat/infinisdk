@@ -96,6 +96,20 @@ def test_name_doc():
     assert 'docstring here' in some_func.__doc__
 
 
+def test_doc_update():
+    @deprecated('some_message')
+    def some_func():
+        """docstring here"""
+        pass
+
+    some_func.__doc__ = 'new_docstring'
+
+    assert 'docstring here' not in some_func.__doc__
+    assert 'new_docstring' in some_func.__doc__
+    assert 'some_message' in some_func.__doc__
+
+
+
 def test_deprecatd_docstring():
 
     message = "Use something else instead"
