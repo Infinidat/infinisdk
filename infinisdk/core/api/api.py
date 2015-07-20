@@ -216,6 +216,8 @@ class API(object):
                 data = translate_special_values(data)
                 sent_json_object = data
                 data = json.dumps(data)
+        else:
+            assert raw_data is False, "Cannot handle raw_data with no data"
 
         url_params = kwargs.pop('params', None)
         if url_params is not None:
