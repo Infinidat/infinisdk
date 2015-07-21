@@ -150,7 +150,16 @@ class Replica(InfiniBoxObject):
             snapshot_id = resp['entity_pairs'][0]['_local_reclaimed_snapshot_id']
         if snapshot_id is None:
             return None
-        return self._get_entity_collection().get_by_id_lazy(snapshot_id)
+        returned = self._get_entity_collection().get_by_id_lazy(snapshot_id)
+
+        for entity_pair in resp['entity_pairs']:
+            snap = self.system.volumes.get_by_id_lazy(entity_pair['_local_reclaimed_snapshot_id'])
+            assert snap.id is not None
+            gossip.trigger_with_tags(
+                'infinidat.sdk.replica_snapshot_created', {'snapshot': snap}, tags=['infinibox'])
+
+        return returned
+
 
     def get_local_volume(self):
         """Returns the local volume, assuming there is exactly one
