@@ -1,5 +1,6 @@
 from collections import namedtuple
 from ..core import Field, MillisecondsDatetimeType
+from ..core.object_query import LazyQuery
 from ..core.bindings import RelatedObjectBinding
 from ..core.api.special_values import Autogenerate
 from .system_object import InfiniBoxObject
@@ -77,9 +78,9 @@ class ConsGroup(InfiniBoxObject):
         return self.get_this_url_path().add_path('members')
 
     def get_members(self):
-        members_info = self.system.api.get(self._get_members_url()).get_result()
+        members_query = LazyQuery(self.system, self._get_members_url())
         returned = []
-        for member_info in members_info:
+        for member_info in members_query:
             type_name = 'volume' if member_info['dataset_type'] == 'VOLUME' else 'filesystem'
             binder = self.system.objects.get_binder_by_type_name(type_name)
             returned.append(binder.object_type(self.system, member_info))
