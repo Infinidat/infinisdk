@@ -137,17 +137,17 @@ class LazyQuery(object):
         return list(self)
 
 
-class ObjectQuery(LazyQuery):
-
-    def __init__(self, system, url, object_type):
-        self.object_type = object_type
-        super(ObjectQuery, self).__init__(system, url)
+class PolymorphicQuery(LazyQuery):
+    def __init__(self, system, url, object_types, factory):
+        super(PolymorphicQuery, self).__init__(system, url)
+        assert isinstance(object_types, (list, tuple)), "object_types must be tuple or list"
+        self.object_types = object_types
+        self.factory = factory
 
     def _translate_item_if_needed(self, item_index):
         received_item = self._fetched.get(item_index)
         if isinstance(received_item, dict):
-            self._fetched[item_index] = self.object_type.construct(self.system, received_item)
-
+            self._fetched[item_index] = self.factory(self.system, received_item)
 
     ### Modifiers
 
@@ -168,20 +168,22 @@ class ObjectQuery(LazyQuery):
         Plucks the specified field names from the query. Can be specified multiple times
         """
         assert isinstance(field_names, (list, tuple)), "field_names must be either a list or a tuple"
-        requested_fields = [
-        ]
-        requested_fields = self.query.query_dict.get("fields", None)
-        if requested_fields is not None:
-            requested_fields = requested_fields.split(",")
-        else:
-            requested_fields = []
-        requested_fields.extend(
-            self.object_type.fields[field_name].api_name
-            for field_name in field_names
-            )
+        query_fields = self.query.query_dict.get("fields", None)
+        requested_fields = set([] if not query_fields else query_fields.split(","))
 
-        for field in self.object_type.fields.get_identity_fields():
-            if field.api_name not in requested_fields:
-                requested_fields.insert(0, field.api_name)
-        self.query = self.query.set_query_param("fields", ",".join(requested_fields))
+        for object_type in self.object_types:
+            for field_name in field_names:
+                requested_fields.add(object_type.fields[field_name].api_name)
+
+        for object_type in self.object_types:
+            for field in object_type.fields.get_identity_fields():
+                if field.api_name not in requested_fields:
+                    requested_fields.add(field.api_name)
+            self.query = self.query.set_query_param("fields", ",".join(requested_fields))
         return self
+
+
+class ObjectQuery(PolymorphicQuery):
+    def __init__(self, system, url, object_type):
+        super(ObjectQuery, self).__init__(system, url, (object_type, ), object_type.construct)
+        self.object_type = object_type

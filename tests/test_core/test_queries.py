@@ -99,9 +99,10 @@ def test_sorting_multiple(izbox, field):
 
 
 def test_only_fields(izbox, field):
-    # NOTE: uses api name!
-    assert_query_equals(
-        Filesystem.find(izbox).only_fields(["quota"]), "fields=id%2Cquota_in_bytes")
+    lazy_query = Filesystem.find(izbox).only_fields(["quota"])  # NOTE: uses api name!
+    assert str(lazy_query.query.path) == '/api/rest/filesystems'
+    assert list(lazy_query.query.query_dict) == ['fields']
+    assert set(['id', 'quota_in_bytes']) == set(lazy_query.query.query_dict['fields'].split(','))
 
 
 def test_pagination(izbox, field):
