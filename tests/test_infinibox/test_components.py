@@ -170,19 +170,20 @@ def test_services_enable_disable(infinibox):
     assert service.is_active()
     assert service_cluster.is_active()
 
-    service_cluster.stop(node)
+    service_cluster.stop(node).wait(timeout_seconds=100)
     assert not service.is_active()
-    assert service_cluster.is_active()
+    assert not service_cluster.is_inactive()
+    assert service_cluster.get_state() == 'DEGRADED'
 
-    service_cluster.start(node)
+    service_cluster.start(node).wait(timeout_seconds=100)
     assert service.is_active()
     assert service_cluster.is_active()
 
-    service_cluster.stop()
+    service_cluster.stop().wait(timeout_seconds=100)
     assert not service.is_active()
-    assert not service_cluster.is_active()
+    assert service_cluster.is_inactive()
 
-    service_cluster.start()
+    service_cluster.start().wait(timeout_seconds=100)
     assert service.is_active()
     assert service_cluster.is_active()
 
