@@ -1,5 +1,6 @@
 import pytest
 
+from capacity import Capacity
 from infi.dtypes.wwn import WWN
 from infinisdk._compat import string_types
 from infinisdk.core.config import config
@@ -82,6 +83,7 @@ def test_drive_component(infinibox):
     assert len(all_drives) == NO_OF_ENCLOSURES_DRIVES
     drive = infinibox.components.drives.choose()
     assert drive.get_parent() == drive.get_enclosure()
+    assert isinstance(drive.get_capacity(), Capacity)
 
 def test_enclosure_drive_paths(infinibox):
     drive = infinibox.components.drives.choose()

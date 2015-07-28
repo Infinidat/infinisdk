@@ -19,7 +19,7 @@ from ..core.system_component import SystemComponentsBinder
 from ..core.system_object import SystemObject
 from ..core.exceptions import ObjectNotFound
 from ..core.type_binder import TypeBinder
-from ..core.translators_and_types import WWNType
+from ..core.translators_and_types import WWNType, CapacityType
 from infi.pyutils.lazy import cached_method
 from .component_query import InfiniBoxComponentQuery
 from ..core.bindings import InfiniSDKBinding, ListOfRelatedComponentBinding, RelatedComponentBinding
@@ -476,6 +476,7 @@ class Drive(InfiniBoxSystemComponent):
         Field("enclosure_index", type=int, cached=True),
         Field("enclosure", api_name="enclosure_index", type=int, cached=True, binding=RelatedComponentBinding()),
         Field("serial_number"),
+        Field("capacity", api_name="bytes_capacity", type=CapacityType),
         Field("state", cached=False),
     ]
 
