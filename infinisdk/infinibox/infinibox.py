@@ -42,6 +42,7 @@ from .link import Link
 from .replica import Replica
 from .compatability import Compatability
 from .cons_group import ConsGroup
+from .initiator import Initiator
 
 try:
     from infinisim.core.context import lookup_simulator_by_address
@@ -52,7 +53,7 @@ except ImportError:
 class InfiniBox(APITarget):
     OBJECT_TYPES = [Volume, Pool, Host, HostCluster, User, EmailRule, Filesystem, Export,
                     NetworkSpace, NetworkInterface, Link, Replica, LDAPConfig,
-                    NotificationTarget, ConsGroup]
+                    NotificationTarget, ConsGroup, Initiator]
     SYSTEM_EVENTS_TYPE = Events
     SYSTEM_COMPONENTS_TYPE = InfiniBoxSystemComponents
 

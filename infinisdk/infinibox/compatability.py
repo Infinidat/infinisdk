@@ -85,3 +85,6 @@ class Compatability(object):
 
     def has_consistency_groups(self):
         return self._get_version_as_float() >= 2.2
+
+    def has_initiators(self):
+        return self._get_version_as_float() >= 2.2

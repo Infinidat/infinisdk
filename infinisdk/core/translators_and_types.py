@@ -88,3 +88,13 @@ MillisecondsDeltaType = TypeInfo(type=timedelta,
 
 
 WWNType = TypeInfo(type=WWN, api_type=str)
+
+
+class WWNListTranslator(ValueTranslator):
+    def _to_api(self, value):
+        return [str(wwpn) for wwpn in value]
+
+    def _from_api(self, value):
+        return [WWN(wwpn) for wwpn in value]
+
+WWNListType = TypeInfo(type=list, api_type=list, translator=WWNListTranslator())
