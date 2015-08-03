@@ -34,6 +34,11 @@ class LDAPConfigBinder(TypeBinder):
             cfg.id for cfg in configs
             ])
 
+    def reload(self):
+        self.system.api.post('config/ldap/reload')
+
+    flush_cache = reload
+
 
 class LDAPConfig(SystemObject):
 

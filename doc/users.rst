@@ -119,6 +119,22 @@ Updating LDAP Configuration Prioritiy Order
        system.ldap_configs.set_order([ldap_config, ldap_config2, ...])
 
 
+Reloading/Refreshing LDAP Cache
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: python
+
+       >>> system.ldap_configs.reload()
+
+Or:
+
+.. code-block:: python
+
+       >>> system.ldap_configs.flush_cache()
+
+
+
+
 Deleting LDAP Configurations
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
