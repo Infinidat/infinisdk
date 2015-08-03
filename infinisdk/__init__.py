@@ -42,15 +42,6 @@ def _install_hooks():
 
     gossip.define(_SDK_HOOK('pre_fields_update'), tags=['infinibox'])
 
-    gossip.define(_SDK_HOOK('pre_node_phase_in'), tags=['infinibox', 'node1', 'node2', 'node3'])
-    gossip.define(_SDK_HOOK('post_node_phase_in'), tags=['infinibox', 'node1', 'node2', 'node3'])
-    gossip.define(_SDK_HOOK('node_phase_in_failure'), tags=['infinibox', 'node1', 'node2', 'node3'])
-    gossip.define(_SDK_HOOK('node_phased_in'), tags=['infinibox', 'node1', 'node2', 'node3'])
-
-    gossip.define(_SDK_HOOK('pre_node_phase_out'), tags=['infinibox', 'node1', 'node2', 'node3'])
-    gossip.define(_SDK_HOOK('post_node_phase_out'), tags=['infinibox', 'node1', 'node2', 'node3'])
-    gossip.define(_SDK_HOOK('node_phase_out_failure'), tags=['infinibox', 'node1', 'node2', 'node3'])
-
     gossip.define(_SDK_HOOK('replica_snapshot_created'), tags=['infinibox'])
     gossip.define(_SDK_HOOK('replica_after_change_role'), tags=['infinibox'])
 
