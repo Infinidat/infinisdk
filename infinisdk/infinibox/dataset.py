@@ -23,7 +23,7 @@ _CANCEL_FORK_HOOK = "infinidat.sdk.cancel_fork"
 _FINISH_FORK_HOOK = "infinidat.sdk.finish_fork"
 
 
-class BaseDataEntity(InfiniBoxObject):
+class Dataset(InfiniBoxObject):
     PROVISIONING = namedtuple('Provisioning', ['Thick', 'Thin'])('THICK', 'THIN')
     ENTITY_TYPES = namedtuple('VolumeTypes', ['Master', 'Snapshot', 'Clone'])('MASTER', 'SNAP', 'CLONE')
 

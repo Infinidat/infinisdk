@@ -16,10 +16,10 @@ from ..core.q import Q
 from ..core import Field, CapacityType, MillisecondsDatetimeType
 from ..core.api.special_values import Autogenerate
 from ..core.bindings import RelatedObjectBinding
-from .base_data_entity import BaseDataEntity
+from .dataset import Dataset
 
 
-class Filesystem(BaseDataEntity):
+class Filesystem(Dataset):
 
     FIELDS = [
         Field("id", type=int, is_identity=True,

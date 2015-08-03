@@ -10,7 +10,7 @@ import pytest
 from infinisdk.core.translators_and_types import MillisecondsDatetimeTranslator
 from infinisdk.core.exceptions import (APICommandFailed,
                                        InvalidOperationException)
-from infinisdk.infinibox.base_data_entity import _BEGIN_FORK_HOOK, _FINISH_FORK_HOOK, _CANCEL_FORK_HOOK
+from infinisdk.infinibox.dataset import _BEGIN_FORK_HOOK, _FINISH_FORK_HOOK, _CANCEL_FORK_HOOK
 from ..conftest import create_pool
 
 

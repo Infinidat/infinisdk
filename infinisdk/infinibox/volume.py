@@ -19,7 +19,7 @@ from ..core.exceptions import InfiniSDKException, ObjectNotFound, TooManyObjects
 from ..core.api.special_values import Autogenerate, SpecialValue
 from ..core.bindings import RelatedObjectBinding
 from ..core.utils import deprecated, DONT_CARE
-from .base_data_entity import BaseDataEntity
+from .dataset import Dataset
 from .lun import LogicalUnit, LogicalUnitContainer
 from .scsi_serial import SCSISerial
 
@@ -42,7 +42,7 @@ class VolumesBinder(TypeBinder):
                 for i in range(1, count + 1)]
 
 
-class Volume(BaseDataEntity):
+class Volume(Dataset):
 
     BINDER_CLASS = VolumesBinder
 
