@@ -302,7 +302,7 @@ class Replica(InfiniBoxObject):
             yield
             return
 
-        entities = self.get_local_data_entities()
+        entities = list(self.get_local_data_entities())
         remote_replica = self.get_remote_replica()
         if remote_replica is not None:
             try:
