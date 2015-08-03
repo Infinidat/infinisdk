@@ -35,7 +35,7 @@ class Filesystem(Dataset):
         Field("pool", type='infinisdk.infinibox.pool:Pool', api_name="pool_id", creation_parameter=True, is_filterable=True, is_sortable=True,
               binding=RelatedObjectBinding()),
         Field("type", cached=True, is_filterable=True, is_sortable=True),
-        Field("parent", type='infinisdk.infinibox.filesystem:Filesystem', cached=True, api_name="parent_id", binding=RelatedObjectBinding('filesystems'), is_filterable=True),
+        Field("parent", type='infinisdk.infinibox.filesystem:Filesystem', cached=True, api_name="parent_id", binding=RelatedObjectBinding('filesystems', value_for_none=None), is_filterable=True),
         Field("provisioning", api_name="provtype", mutable=True, creation_parameter=True,
             is_filterable=True, is_sortable=True, default="THICK"),
         Field("created_at", cached=True, type=MillisecondsDatetimeType, is_sortable=True, is_filterable=True),
