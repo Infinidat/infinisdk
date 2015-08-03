@@ -195,6 +195,12 @@ class Replica(InfiniBoxObject):
         """
         return self.get_field('entity_type', from_cache=True).lower() == 'consistency_group'
 
+    def is_volume(self):
+        """Returns True if this replica replicates a single volume entity
+        """
+        return not self.is_consistency_group()
+
+
     def suspend(self):
         """Suspends this replica
         """
