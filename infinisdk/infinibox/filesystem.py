@@ -19,8 +19,6 @@ from ..core.bindings import RelatedObjectBinding
 from .base_data_entity import BaseDataEntity
 
 
-# TODO: use a common baseclass for volume and filesystem
-
 class Filesystem(BaseDataEntity):
 
     FIELDS = [
