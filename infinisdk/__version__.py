@@ -11,4 +11,4 @@
 ### Redistribution and use in source or binary forms, with or without modification,
 ### are strictly forbidden unless prior written permission is obtained from Infinidat Ltd.
 ###!
-__version__ = "2.0.0.b4"
+__version__ = "2.0.0"
