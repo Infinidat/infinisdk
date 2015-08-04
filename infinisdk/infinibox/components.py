@@ -16,7 +16,7 @@ from .._compat import ExitStack, zip
 from ..core.field import Field
 from ..core.utils import deprecated
 from ..core.system_component import SystemComponentsBinder
-from ..core.system_object import SystemObject
+from ..core.system_object import BaseSystemObject
 from ..core.exceptions import ObjectNotFound
 from ..core.type_binder import TypeBinder
 from ..core.translators_and_types import WWNType, CapacityType
@@ -186,7 +186,7 @@ class InfiniBoxComponentBinder(TypeBinder):
             service_cluster_type.construct(self.system, cluster_data, None)
 
 
-class InfiniBoxSystemComponent(SystemObject):
+class InfiniBoxSystemComponent(BaseSystemObject):
     BINDER_CLASS = InfiniBoxComponentBinder
     BASE_URL = URL("components")
     FIELDS = [
@@ -213,14 +213,6 @@ class InfiniBoxSystemComponent(SystemObject):
     def get_url_path(cls, system):
         # Currently there is no url, in infinibox, to get all instances of specific component
         raise NotImplementedError()  # pragma: no cover
-
-    @classmethod
-    def get_type_name(cls):
-        return cls.__name__.lower()
-
-    @classmethod
-    def get_plural_name(cls):
-        return "{0}s".format(cls.get_type_name())
 
     @classmethod
     def find(cls, system, *predicates, **kw):
