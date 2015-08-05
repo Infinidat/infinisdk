@@ -70,8 +70,6 @@ class ReplicaBinder(TypeBinder):
                 kw['remote_cg_id'] = remote_entity.id
 
             for member in entity.get_members():
-                if remote_entity is not None:
-                    raise NotImplementedError("Replicating a non-empty CG to an existing CG is not supported in InfiniSDK at the moment") # pragma: no cover
                 entity_pairs.append((member, None))
         else:
             kw['entity_type'] = 'VOLUME'
