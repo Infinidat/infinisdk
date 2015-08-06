@@ -13,18 +13,22 @@
 ###!
 from contextlib import contextmanager
 from datetime import timedelta
+
+import logbook
 import requests
 
 import gossip
 
-from ..core.api.special_values import Autogenerate, OMIT
-from ..core.type_binder import TypeBinder
 from ..core import Field
+from ..core.api.special_values import OMIT, Autogenerate
 from ..core.bindings import RelatedObjectBinding
-from ..core.exceptions import TooManyObjectsFound, CannotGetReplicaState, APICommandFailed, InfiniSDKRuntimeException
+from ..core.exceptions import (APICommandFailed, CannotGetReplicaState,
+                               InfiniSDKRuntimeException, TooManyObjectsFound)
 from ..core.translators_and_types import MillisecondsDeltaType
+from ..core.type_binder import TypeBinder
 from .system_object import InfiniBoxObject
 
+_logger = logbook.Logger(__name__)
 
 class ReplicaBinder(TypeBinder):
 
@@ -288,36 +292,33 @@ class Replica(InfiniBoxObject):
         if force_if_no_remote_credentials:
             path = path.add_query_param('force_if_no_remote_credentials', 'true')
 
-        with self._detecting_new_snapshots_context(retain_staging_area, returned):
-            with self._get_delete_context():
-                resp = self.system.api.delete(path)
-
-        return returned
-
-    @contextmanager
-    def _detecting_new_snapshots_context(self, retain_staging_area, result_set):
-        if not retain_staging_area:
-            yield
-            return
-
-        entities = list(self.get_local_data_entities())
         remote_replica = self.get_remote_replica()
-        if remote_replica is not None:
-            try:
-                entities.extend(remote_replica.get_local_data_entities())
-            except APICommandFailed as e:
-                if e.response.status_code != requests.codes.not_found:
-                    raise
-                entities = []
 
-        old_snaps = set(child for entity in entities for child in entity.get_children())
-        yield
-        new_snaps = set(child for entity in entities for child in entity.get_children()) - old_snaps
+        with self._get_delete_context():
+            resp = self.system.api.delete(path)
 
-        for snap in new_snaps:
-            gossip.trigger_with_tags('infinidat.sdk.replica_snapshot_created', {'snapshot': snap}, tags=['infinibox'])
+        return self._get_retained_snapshots(resp.get_result(), remote_replica)
 
-        result_set.update(new_snaps)
+    def _get_retained_snapshots(self, delete_result, remote_replica):
+        returned = set()
+
+        if 'entity_pairs' not in delete_result:
+            return returned
+
+        for returned_index, (replica, prefix) in enumerate([(self, 'local'), (remote_replica, 'remote')]):
+            if replica is None:
+                _logger.debug('Remote replica is None. Not collecting retained snapshots')
+                # remote replica can be missing
+                continue
+
+            reclaimed_id_field_name = '_{0}_reclaimed_snapshot_id'.format(prefix)
+            for entity_pair in delete_result['entity_pairs']:
+                snap_id = entity_pair[reclaimed_id_field_name]
+                if snap_id is not None:
+                    returned.add(replica.system.volumes.get_by_id_lazy(snap_id))
+                else:
+                    _logger.debug('No {0} last reclaimed snapshot id for {1}', prefix, entity_pair['local_entity_id'])
+        return returned
 
     def get_remote_replica(self, from_cache=False):
         """Get the corresponsing replica object in the remote machine. For this to work, the SDK user should
