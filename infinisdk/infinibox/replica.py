@@ -300,10 +300,11 @@ class Replica(InfiniBoxObject):
         return self._get_retained_snapshots(resp.get_result(), remote_replica)
 
     def _get_retained_snapshots(self, delete_result, remote_replica):
-        returned = set()
 
-        if 'entity_pairs' not in delete_result:
-            return returned
+        if not delete_result or 'entity_pairs' not in delete_result:
+            return None
+
+        returned = set()
 
         for returned_index, (replica, prefix) in enumerate([(self, 'local'), (remote_replica, 'remote')]):
             if replica is None:
