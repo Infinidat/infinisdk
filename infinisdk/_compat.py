@@ -84,7 +84,7 @@ else:
         return iter(d.values())
 
     def iterkeys(d):
-        return iter(d.key())
+        return iter(d.keys())
 
     def sorted(iterable, cmp=None, key=None, reverse=False):
         if cmp is not None:
