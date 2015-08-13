@@ -42,7 +42,7 @@ class Pool(InfiniBoxObject):
         Field("name", creation_parameter=True, mutable=True, is_filterable=True, is_sortable=True, default=Autogenerate("pool_{uuid}")),
         Field("virtual_capacity",  creation_parameter=True, mutable=True, default=TB, type=CapacityType, is_filterable=True, is_sortable=True),
         Field("physical_capacity", creation_parameter=True, mutable=True, default=TB, type=CapacityType, is_filterable=True, is_sortable=True),
-        Field("owners", mutable=True, type=list, binding=ListOfRelatedObjectIDsBinding('users')),
+        Field("owners", mutable=True, type=list, add_updater=False, binding=ListOfRelatedObjectIDsBinding('users')),
         Field("allocated_physical_capacity", api_name="allocated_physical_space", type=CapacityType),
         Field("free_physical_capacity", api_name="free_physical_space", type=CapacityType),
         Field("free_virtual_capacity", api_name="free_virtual_space", type=CapacityType),
@@ -75,8 +75,7 @@ class Pool(InfiniBoxObject):
         self.system.api.delete(self._get_pool_owners_url(user.id), data={})
 
     def set_owners(self, users):
-        url = self.get_this_url_path().add_path('owners')
-        self.system.api.put(url, data=[user.id for user in users])
+        self.update_field('owners', users)
 
     def is_locked(self, *args, **kwargs):
         return self.get_state(*args, **kwargs) == 'LOCKED'
