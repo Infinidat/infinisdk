@@ -27,7 +27,7 @@ from ..core.utils import deprecated
 from .host_cluster import HostCluster
 from .components import InfiniBoxSystemComponents
 from .capacities import InfiniBoxSystemCapacity
-from .events import EmailRule, Events
+from .events import Events
 from .host import Host
 from .pool import Pool
 from .user import User
@@ -51,7 +51,7 @@ except ImportError:
 
 
 class InfiniBox(APITarget):
-    OBJECT_TYPES = [Volume, Pool, Host, HostCluster, User, EmailRule, Filesystem, Export,
+    OBJECT_TYPES = [Volume, Pool, Host, HostCluster, User, Filesystem, Export,
                     NetworkSpace, NetworkInterface, Link, Replica, LDAPConfig,
                     NotificationTarget, ConsGroup, Initiator]
     SYSTEM_EVENTS_TYPE = Events
