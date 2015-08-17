@@ -13,6 +13,7 @@
 ###!
 from .._compat import requests
 from sentinels import NOTHING
+from urlobject import URLObject as URL
 
 from ..core.system_object import SystemObject, DONT_CARE
 from ..core.object_query import LazyQuery
@@ -23,7 +24,7 @@ from .lun import LogicalUnit, LogicalUnitContainer
 class InfiniBoxObject(SystemObject):
 
     def _get_metadata_uri(self):
-        return "metadata/{0}".format(self.id)
+        return URL("metadata/{0}".format(self.id))
 
     def _get_metadata_translated_result(self, metadata_items):
         if self.system.compat.get_metadata_version() >= 2:
@@ -50,7 +51,7 @@ class InfiniBoxObject(SystemObject):
         :param default: if specified, the value to retrieve if the metadata key doesn't exist.
            if not specified, and the key does not exist, the operation will raise an exception
         """
-        metadata_url = '{0}/{1}'.format(self._get_metadata_uri(), key)
+        metadata_url = self._get_metadata_uri().add_path(str(key))
         try:
             result = self.system.api.get(metadata_url).get_result()
         except APICommandFailed as caught:
@@ -73,7 +74,7 @@ class InfiniBoxObject(SystemObject):
     def unset_metadata(self, key):
         """Deletes a metadata key for this object
         """
-        return self.system.api.delete("{0}/{1}".format(self._get_metadata_uri(), key))
+        return self.system.api.delete(self._get_metadata_uri().add_path(str(key)))
 
     def clear_metadata(self):
         """Deletes all metadata keys for this object
