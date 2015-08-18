@@ -38,14 +38,6 @@ def test_create_custom_event_with_data(infinibox):
     assert event_from_list['code'] == 'CUSTOM_INFO_EVENT'
 
 
-def test_get_name(infinibox, rule):
-    assert rule.get_name().startswith('rule_')
-
-
-def test_get_all(infinibox, rule):
-    assert rule in infinibox.emailrules.get_all()
-
-
 @pytest.mark.parametrize('set_anti_flooding_on', [True, False])
 def test_set_anti_flooding_configuration(infinibox, set_anti_flooding_on):
     if set_anti_flooding_on:
@@ -53,10 +45,3 @@ def test_set_anti_flooding_configuration(infinibox, set_anti_flooding_on):
     else:
         infinibox.events.disable_anti_flooding()
     assert infinibox.events.is_anti_flooding_enabled() == set_anti_flooding_on
-
-
-@pytest.fixture
-def rule(request, infinibox):
-    returned = infinibox.emailrules.create()
-    request.addfinalizer(returned.delete)
-    return returned
