@@ -27,7 +27,7 @@ class NotificationRule(SystemObject):
         Field('event_code', type=str),
         Field('event_level', type=list),
         Field('target_parameters', type=dict),
-        Field('target', api_name='target_id', binding=RelatedObjectBinding('notification_target')),
+        Field('target', api_name='target_id', binding=RelatedObjectBinding('notification_targets')),
         Field('include_events', type=list),
         Field('exclude_events', type=list),
         Field('event_visibility', type=list),
