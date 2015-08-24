@@ -123,6 +123,14 @@ infinibox.notification_targets
 .. autoclass:: NotificationTarget
    :members:
 
+infinibox.cons_groups
+~~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: infinisdk.infinibox.cons_group
+
+.. autoclass:: ConsGroup
+   :members:
+
 infinibox.components
 ~~~~~~~~~~~~~~~~~~~~
 
