@@ -506,7 +506,7 @@ class Service(InfiniBoxSystemComponent):
         return self.get_state() == 'ACTIVE'
 
     def is_inactive(self):
-        return self.get_state() in ('INACTIVE', 'PROCESS_FINISHED')
+        return self.get_state() in ('INACTIVE', 'PROCESS_FINISHED', 'SHUTDOWN')  # Workaround for INFINIBOX-18309 & INFINIBOX-18308
 
     def is_master(self):
         return self.get_role() == 'MASTER'
