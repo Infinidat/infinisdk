@@ -35,6 +35,12 @@ class Link(InfiniBoxObject):
         Field('link_state', type=str),
     ]
 
+    def is_up(self):
+        return self.get_link_state().lower() == 'up'
+
+    def is_down(self):
+        return not self.is_active()
+
     @classmethod
     def is_supported(cls, system):
         return system.compat.has_replication()
