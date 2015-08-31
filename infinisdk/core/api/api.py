@@ -39,8 +39,8 @@ _RETRY_REQUESTS_EXCEPTION_TYPES = (RequestException, socket.error, ProtocolError
 _logger = Logger(__name__)
 
 def _get_request_delegate(http_method):
-    def returned(self, *args, **kwargs):
-        return self.request(http_method, *args, **kwargs)
+    def returned(self, path, **kwargs):
+        return self.request(http_method, path=path, **kwargs)
     returned.__name__ = http_method
     returned.__doc__ = "Shortcut for :func:`.request({0!r}) <API.request>`".format(http_method)
     return returned
