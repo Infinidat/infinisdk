@@ -39,7 +39,7 @@ class Link(InfiniBoxObject):
         return self.get_link_state().lower() == 'up'
 
     def is_down(self):
-        return not self.is_active()
+        return not self.is_up()
 
     @classmethod
     def is_supported(cls, system):
