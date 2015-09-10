@@ -7,7 +7,7 @@ with open(os.path.join(os.path.dirname(__file__), "infinisdk", "__version__.py")
 
 _INSTALL_REQUIRES = [
     "api_object_schema>=1.5.1",
-    "arrow==0.5.0",
+    "arrow>=0.6.0",
     "capacity",
     "colorama",
     "confetti>=2.1.0",
@@ -18,7 +18,6 @@ _INSTALL_REQUIRES = [
     "logbook>=0.10.0",
     "munch",
     "pact>=1.0.0",
-    "python-dateutil", #  required to work around https://github.com/crsmithdev/arrow/issues/120
     "requests>=2.4.0",
     "sentinels",
     "storage_interfaces",
