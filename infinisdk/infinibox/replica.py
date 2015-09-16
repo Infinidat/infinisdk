@@ -153,12 +153,8 @@ class Replica(InfiniBoxObject):
         if snapshot_id is None:
             return None
         returned = self._get_entity_collection().get_by_id_lazy(snapshot_id)
-
-        for entity_pair in resp['entity_pairs']:
-            snap = self.system.volumes.get_by_id_lazy(entity_pair['_local_reclaimed_snapshot_id'])
-            assert snap.id is not None
-            gossip.trigger_with_tags(
-                'infinidat.sdk.replica_snapshot_created', {'snapshot': snap}, tags=['infinibox'])
+        gossip.trigger_with_tags(
+                'infinidat.sdk.replica_snapshot_created', {'snapshot': returned}, tags=['infinibox'])
 
         return returned
 
@@ -297,7 +293,16 @@ class Replica(InfiniBoxObject):
         with self._get_delete_context():
             resp = self.system.api.delete(path)
 
-        return self._get_retained_snapshots(resp.get_result(), remote_replica)
+        reclaimed = self._get_retained_snapshots(resp.get_result(), remote_replica)
+        if retain_staging_area:
+            local, remote = self._get_deletion_result(resp.get_result(), remote_replica)
+        else:
+            local = remote = None
+        for snap in local, remote:
+            if snap is not None:
+                gossip.trigger_with_tags(
+                    'infinidat.sdk.replica_snapshot_created', {'snapshot': snap}, tags=['infinibox'])
+        return local, remote
 
     def _get_retained_snapshots(self, delete_result, remote_replica):
 
@@ -320,6 +325,33 @@ class Replica(InfiniBoxObject):
                 else:
                     _logger.debug('No {0} last reclaimed snapshot id for {1}', prefix, entity_pair['local_entity_id'])
         return returned
+
+    def _get_deletion_result(self, result, remote_replica):
+        if 'group' in result['entity_type'].lower():
+
+            return self._get_local_remote_snapshots(result, 'cons_groups', remote_replica, '_{0}_reclaimed_sg_id')
+
+        [entity_pair] = result.get('entity_pairs', [None])
+        if entity_pair is not None:
+            return self._get_local_remote_snapshots(entity_pair, 'volumes', remote_replica, '_{0}_reclaimed_snapshot_id')
+        return None
+
+    def _get_local_remote_snapshots(self, result, collection_name, remote_replica, field_name_template):
+        local_reclaimed_id = result.get(field_name_template.format('local'))
+        if local_reclaimed_id is None:
+            _logger.debug('Could not get local reclaimed id (missing {0} in {1})', field_name_template.format('local'), result)
+        remote_reclaimed_id = result.get(field_name_template.format('remote'))
+        if remote_reclaimed_id is None:
+            _logger.debug('Could not get remote reclaimed id (missing {0} in {1})', field_name_template.format('remote'), result)
+
+        local = remote = None
+
+        if local_reclaimed_id is not None:
+            local = getattr(self.system, collection_name).get_by_id_lazy(local_reclaimed_id)
+        if remote_replica is not None and remote_reclaimed_id is not None:
+            remote = getattr(remote_replica.system, collection_name).get_by_id_lazy(remote_reclaimed_id)
+        return local, remote
+
 
     def get_remote_replica(self, from_cache=False):
         """Get the corresponsing replica object in the remote machine. For this to work, the SDK user should
