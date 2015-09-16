@@ -10,6 +10,5 @@ Overview
 
 Licence
 =======
-
-Proprietary
+InfiniSDK is licensed under the BSD 3-clause software license. See ``LICENSE`` for more information
 
