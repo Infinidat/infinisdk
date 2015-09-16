@@ -36,7 +36,7 @@ setup(name="infinisdk",
           "Programming Language :: Python :: 3.3",
           ],
       description="Infinidat API SDK",
-      license="Proprietary",
+      license="BSD-3",
       author="Infinidat",
       author_email="info@infinidat.com",
       version=__version__, # pylint: disable=E0602
