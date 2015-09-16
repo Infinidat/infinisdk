@@ -1,0 +1,17 @@
+# -*- mode: python -*-
+from contextlib import contextmanager
+from infinisim.infinibox import Infinibox as Simulator
+from infinisdk import InfiniBox
+
+@contextmanager
+def doctest_context():
+    simulator = Simulator()
+    simulator.activate()
+    simulator.api.put('/api/rest/config/mgmt/system.model_long_name', data='01IB...AF')
+    system = InfiniBox(simulator, auth=('infinidat', '123456'))
+    try:
+        yield {
+            "system": system,
+        }
+    finally:
+        simulator.deactivate()

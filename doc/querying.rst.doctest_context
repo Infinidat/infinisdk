@@ -1,0 +1,22 @@
+# -*- mode: python -*-
+from contextlib import contextmanager
+
+from capacity import GiB, TiB
+
+from infinisdk import InfiniBox
+from infinisim.infinibox import Infinibox as Simulator
+
+
+@contextmanager
+def doctest_context():
+    simulator = Simulator()
+    pool = simulator.pools.create("pool", physical_capacity=TiB, virtual_capacity=TiB)
+    for i in range(5):
+        simulator.volumes.create(pool=pool, name="vol{0}".format(i), size=GiB)
+    simulator.activate()
+    try:
+        yield {
+            "system": InfiniBox(simulator, auth=('infinidat', '123456'))
+        }
+    finally:
+        simulator.deactivate()

@@ -1,0 +1,20 @@
+# -*- mode: python -*-
+from contextlib import contextmanager
+from infinisim.infinibox import Infinibox as Simulator
+from infinisdk import InfiniBox
+
+@contextmanager
+def doctest_context():
+    simulator = Simulator()
+    simulator.api._flask_config.update({
+        'DEBUG': True,
+        'PROPAGATE_EXCEPTIONS': True,
+        })
+    simulator.activate()
+    system = InfiniBox(simulator, auth=('admin', '123456'))
+    try:
+        yield {
+            "system": system,
+        }
+    finally:
+        simulator.deactivate()

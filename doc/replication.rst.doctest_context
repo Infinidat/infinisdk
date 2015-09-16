@@ -1,0 +1,49 @@
+# -*- mode: python -*-
+
+from contextlib import contextmanager
+
+from infinisdk._compat import ExitStack
+
+from tests.conftest import create_rmr_network_space
+from ecosystem import SimulationContext
+from infinisdk.infinibox import InfiniBox
+from infinisim.infinibox import Infinibox as Simulator
+
+_AUTH = ('infinidat', '123456')
+
+@contextmanager
+def _system():
+    simulator = Simulator()
+
+    simulator.activate()
+    try:
+        system = InfiniBox(simulator, auth=_AUTH)
+        system.login()
+        yield system
+    finally:
+        simulator.deactivate()
+
+@contextmanager
+def doctest_context():
+
+    with ExitStack() as stack:
+
+        primary = stack.enter_context(_system())
+        secondary = stack.enter_context(_system())
+
+        primary_ns = create_rmr_network_space(primary)
+        secondary_ns = create_rmr_network_space(secondary)
+
+        link = primary.links.create(
+            name='link',
+            local_replication_network_space_id=primary_ns.id,
+            remote_host=secondary_ns.get_ips()[0].ip_address,
+        )
+
+        yield {
+            'link': link,
+            'primary': primary,
+            'primary_ip': primary_ns.get_ips()[0],
+            'secondary': secondary,
+            'secondary_ip': secondary_ns.get_ips()[0],
+        }

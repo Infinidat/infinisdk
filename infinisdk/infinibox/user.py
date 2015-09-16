@@ -1,0 +1,45 @@
+from ..core import Field, SystemObject
+from ..core.api.special_values import Autogenerate
+from ..core.utils import deprecated
+
+from sentinels import NOTHING
+
+
+class User(SystemObject):
+
+    FIELDS = [
+        Field("id", type=int, is_identity=True, is_filterable=True, is_sortable=True),
+        Field("role", creation_parameter=True, mutable=True, is_filterable=True, is_sortable=True, default="PoolAdmin"), # For backwards compatability
+        Field("email", creation_parameter=True, mutable=True, default=Autogenerate("user_{timestamp}@infinidat.com")),
+        Field("name", creation_parameter=True, mutable=True, is_filterable=True, is_sortable=True, default=Autogenerate("user_{timestamp}")),
+        Field("password", creation_parameter=True, add_getter=False, mutable=True, default="12345678"),
+    ]
+
+    @classmethod
+    def create(cls, system, **fields):
+        username = fields.pop('username', NOTHING)
+        if username is not NOTHING:
+            if 'name' in fields:
+                raise ValueError("Multiple colliding arguments: username and name")
+            fields['name'] = username
+        return super(User, cls).create(system, **fields)
+
+    @deprecated(message='Use User.get_owned_pools or Pool.get_administered_pools instead')
+    def get_pools(self):
+        return self.get_owned_pools()
+
+    def get_owned_pools(self):
+        """Returns the pools that are owned by this user
+        """
+        pools_url = "{0}/pools".format(self.get_this_url_path())
+        resp = self.system.api.get(pools_url)
+        return [self.system.pools.get_by_id(pool_info['id'])
+                for pool_info in resp.get_result()]
+
+    def reset_password(self, token):
+        url = self.get_this_url_path().add_path('reset_password').add_path(token)
+        self.system.api.get(url)
+
+    def request_reset_password(self):
+        url = self.get_this_url_path().add_path('reset_password')
+        self.system.api.post(url)

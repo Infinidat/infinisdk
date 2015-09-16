@@ -1,0 +1,159 @@
+Working with Hosts, Clusters and Mappings
+=========================================
+
+InfiniSDK provides an easy interface to query and manipulate volume mappings to hosts. 
+
+Creating Hosts
+--------------
+
+Creating hosts is the same like creating any other management object through InfiniSDK. Hosts are represented by the :class:`.Host` class:
+
+.. code-block:: python
+
+		>>> host = system.hosts.create(name='production01')
+		>>> host
+		<Host id=1008>
+		>>> print(host.get_name())
+		production01
+
+Adding/Removing Ports
+---------------------
+
+Adding and removing FC ports can be done with :func:`infinisdk.infinibox.host.Host.add_fc_port` and :func:`infinisdk.infinibox.host.Host.remove_fc_port`:
+
+.. code-block:: python
+
+		>>> address = '00:01:02:03:04:05:06:07'
+		>>> host.add_fc_port(address)
+		>>> host.remove_fc_port(address)
+
+
+Querying Host by Defined FC Port
+--------------------------------
+
+You can quickly check if a system has a host :func:`system.hosts.get_host_id_by_initiator_address <infinisdk.infinibox.host.HostBinder.get_host_id_by_initiator_address>`, :func:`system.hosts.get_host_by_initiator_address <infinisdk.infinibox.host.HostBinder.get_host_by_initiator_address>` and :func:`system.hosts.has_registered_initiator_address <infinisdk.infinibox.host.HostBinder.has_registered_initiator_address>`:
+
+.. code-block:: python
+
+		>>> system.hosts.has_registered_initiator_address(address)
+		False
+		>>> host.add_fc_port(address)
+		>>> system.hosts.get_host_by_initiator_address(address) == host
+		True
+
+
+Mapping and Unmapping Volumes and Snapshots
+-------------------------------------------
+
+Given a volume object, we can easily map it to a host:
+
+.. code-block:: python
+
+		>>> lu = host.map_volume(volume)
+
+The :class:`returned lu object <.LogicalUnit>` represents the volume mapping to the specific host, and it can be used to retrieve information about the mapping:
+
+.. code-block:: python
+
+		>>> print(int(lu))
+		1
+
+Unmapping can be done in several ways. The easiest would be to call :meth:`.Host.unmap_volume`:
+
+.. code-block:: python
+		
+		>>> host.unmap_volume(volume)
+
+Which can also receive a specific LUN to unmap:
+
+.. code-block:: python
+
+		>>> lu = host.map_volume(volume, lun=2)
+
+		>>> host.unmap_volume(lun=2)
+
+The LUN can also be deleted directly through its accessor object:
+
+.. code-block:: python
+
+		>>> lu = host.map_volume(volume)
+		>>> lu.unmap()
+
+
+Querying Volume Mappings
+------------------------
+
+Iterating over available mappings of a host is fairly simple:
+
+.. code-block:: python
+
+		>>> lu = host.map_volume(volume, lun=5)
+
+		>>> host.get_luns()
+		<LogicalUnitsContainer: [<LUN 5: <Host id=1008>-><Volume id=1007>>]>
+
+		>>> for lun in host.get_luns():
+		...     print("{0} is mapped to {1}".format(lun, lun.volume))
+		<LUN 5: <Host id=1008>-><Volume id=1007>> is mapped to <Volume id=1007>
+
+There is also a shortcut to iterate over all mappings in the entire system:
+
+.. code-block:: python
+
+		>>> for lun in system.luns:
+		...     print("{0} belongs to {1} and is mapped to {2}".format(lun, lun.mapping_object, lun.volume))
+		<LUN 5: <Host id=1008>-><Volume id=1007>> belongs to <Host id=1008> and is mapped to <Volume id=1007>
+
+
+Here is a code snippet to unmap all volumes in the system that contain 'to remove' in their names:
+
+.. code-block:: python
+
+		>>> import itertools
+
+		>>> volume.update_name('this is a volume to remove')
+
+		>>> for mapping_object in itertools.chain(system.host_clusters, system.hosts):
+		...     for lun in mapping_object.get_luns():
+		...         if 'to remove' in lun.volume.get_name():
+		...             print("Unmapping", lun.volume)
+		...             lun.unmap()
+		Unmapping <Volume id=1007>
+
+
+Of course there is a much more convenient shortcut for unmapping a volume from all hosts, using the :meth:`.Volume.unmap` shortcut:
+
+.. code-block:: python
+
+		>>> lu = host.map_volume(volume)
+		>>> host.is_volume_mapped(volume)
+		True
+		>>> volume.unmap()
+		>>> host.refresh()
+		>>> host.is_volume_mapped(volume)
+		False
+
+Clusters and Hosts
+------------------
+
+Manipulating clusters is done with the :class:`.Cluster` class:
+
+.. code-block:: python
+
+		>>> cluster = system.host_clusters.create()
+		>>> cluster.add_host(host)
+
+		>>> lu = cluster.map_volume(volume)
+		
+		>>> host.refresh()
+		>>> [host_lu] = host.get_luns()
+
+		>>> host_lu
+		<LUN 11: <HostCluster id=1011>-><Volume id=1007>>
+		
+		>>> host_lu.is_clustered()
+		True
+
+.. seealso:: 
+    * :mod:`Host API documentation <infinisdk.infinibox.host>`
+    * :mod:`Cluster API documentation <infinisdk.infinibox.cluster>`
