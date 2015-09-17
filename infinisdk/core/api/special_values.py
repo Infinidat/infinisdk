@@ -13,7 +13,7 @@
 ###!
 import itertools
 import flux
-from uuid import uuid1
+from uuid import uuid4
 
 from api_object_schema.special_value import SpecialValue
 
@@ -30,7 +30,8 @@ class Autogenerate(SpecialValue):
     - ordinal: the number of times this template has been used already in this session
     - time: the current time, as a floating point number
     - timestamp: an integral value designating the current time (milliseconds)
-    - uuid: a unique identifier generated from uuid1
+    - uuid: a unique identifier generated from uuid4
+    - short_uuid: a short (hopefully) unique identifier
     - prefix: a prefix added to all generated values, will be added to template unless defined in the given template
     """
 
@@ -48,7 +49,7 @@ class Autogenerate(SpecialValue):
         if counter is None:
             counter = self._ORDINALS[self.template] = itertools.count(1)
         current_time = flux.current_timeline.time()
-        return self.template.format(time=current_time, timestamp=int(current_time * 1000), ordinal=next(counter), uuid=_LAZY_UUID_FACTORY, prefix=self._prefix)
+        return self.template.format(time=current_time, timestamp=int(current_time * 1000), ordinal=next(counter), uuid=_LAZY_UUID_FACTORY, short_uuid=_LAZY_SHORT_UUID_FACTORY, prefix=self._prefix)
 
     @classmethod
     def set_prefix(cls, prefix):
@@ -75,11 +76,22 @@ class RawValue(SpecialValue):
 
 
 class _LazyUUIDFactory(object):
+
+    def __init__(self, short=False):
+        super(_LazyUUIDFactory, self).__init__()
+        self._short = short
+
     def __str__(self):
-        return str(uuid1()).lower().replace("-", "")
+        returned = str(uuid4()).lower().replace("-", "")
+        if self._short:
+            returned = returned[:4]
+        return returned
 
 
 _LAZY_UUID_FACTORY = _LazyUUIDFactory()
+_LAZY_SHORT_UUID_FACTORY = _LazyUUIDFactory(short=True)
+
+
 
 def translate_special_values_dict(data_dict):
     for key, value in list(iteritems(data_dict)):
