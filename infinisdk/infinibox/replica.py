@@ -293,7 +293,6 @@ class Replica(InfiniBoxObject):
         with self._get_delete_context():
             resp = self.system.api.delete(path)
 
-        reclaimed = self._get_retained_snapshots(resp.get_result(), remote_replica)
         if retain_staging_area:
             local, remote = self._get_deletion_result(resp.get_result(), remote_replica)
         else:
@@ -304,31 +303,9 @@ class Replica(InfiniBoxObject):
                     'infinidat.sdk.replica_snapshot_created', {'snapshot': snap}, tags=['infinibox'])
         return local, remote
 
-    def _get_retained_snapshots(self, delete_result, remote_replica):
-
-        if not delete_result or 'entity_pairs' not in delete_result:
-            return None
-
-        returned = set()
-
-        for returned_index, (replica, prefix) in enumerate([(self, 'local'), (remote_replica, 'remote')]):
-            if replica is None:
-                _logger.debug('Remote replica is None. Not collecting retained snapshots')
-                # remote replica can be missing
-                continue
-
-            reclaimed_id_field_name = '_{0}_reclaimed_snapshot_id'.format(prefix)
-            for entity_pair in delete_result['entity_pairs']:
-                snap_id = entity_pair[reclaimed_id_field_name]
-                if snap_id is not None:
-                    returned.add(replica.system.volumes.get_by_id_lazy(snap_id))
-                else:
-                    _logger.debug('No {0} last reclaimed snapshot id for {1}', prefix, entity_pair['local_entity_id'])
-        return returned
-
     def _get_deletion_result(self, result, remote_replica):
         if not result or 'entity_type' not in result:
-            return None
+            return None, None
 
         if 'group' in result['entity_type'].lower():
 
@@ -337,7 +314,7 @@ class Replica(InfiniBoxObject):
         [entity_pair] = result.get('entity_pairs', [None])
         if entity_pair is not None:
             return self._get_local_remote_snapshots(entity_pair, 'volumes', remote_replica, '_{0}_reclaimed_snapshot_id')
-        return None
+        return None, None
 
     def _get_local_remote_snapshots(self, result, collection_name, remote_replica, field_name_template):
         local_reclaimed_id = result.get(field_name_template.format('local'))
