@@ -23,6 +23,7 @@ Contents:
    volumes
    mappings
    snapshots
+   cons_groups
    users
    system_configuration
    replication
