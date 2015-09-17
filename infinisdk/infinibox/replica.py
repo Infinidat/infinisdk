@@ -338,7 +338,17 @@ class Replica(InfiniBoxObject):
         call the register_related_system method of the Infinibox object when a link to a remote system is consructed
         for the first time"""
         linked_system = self.get_link(from_cache=from_cache).get_linked_system()
+        if linked_system is None:
+            return None
         return linked_system.replicas.get_by_id_lazy(self.get_remote_replica_id(from_cache=from_cache))
+
+    def get_remote_entity(self):
+        """Fetches the remote replicated entity if available
+        """
+        peer = self.get_remote_replica()
+        if peer is None:
+            return None
+        return peer.get_local_entity()
 
     def get_remote_entity_pairs(self):
         """Returns the entity_pairs configuration as held by the remote replica
