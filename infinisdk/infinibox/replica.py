@@ -327,6 +327,9 @@ class Replica(InfiniBoxObject):
         return returned
 
     def _get_deletion_result(self, result, remote_replica):
+        if not result or 'entity_type' not in result:
+            return None
+
         if 'group' in result['entity_type'].lower():
 
             return self._get_local_remote_snapshots(result, 'cons_groups', remote_replica, '_{0}_reclaimed_sg_id')
