@@ -191,7 +191,7 @@ class API(object):
         """
         Sends a request to the system API interface
 
-        :rtype: :class:`.Response`
+        :returns: :class:`.Response`
         """
         check_version = kwargs.pop("check_version", True)
         if check_version and not self._checked_version and config.root.check_version_compatibility:

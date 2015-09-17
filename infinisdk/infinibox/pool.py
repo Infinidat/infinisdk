@@ -75,6 +75,8 @@ class Pool(InfiniBoxObject):
         self.system.api.delete(self._get_pool_owners_url(user.id), data={})
 
     def set_owners(self, users):
+        """sets the owners of this pool, replacing previous owners
+        """
         self.update_field('owners', users)
 
     def is_locked(self, *args, **kwargs):

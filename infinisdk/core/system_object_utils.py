@@ -27,7 +27,8 @@ def _make_getter(field, name_template):
     getter.__name__ = name_template.format(field.name)
     getter.__doc__ = """Obtains the value of the {0.name!r} field
 
-    :rtype: {1} """.format(field, _format_type_doc(field.type._type))
+    :returns: {1}
+""".format(field, _format_type_doc(field.type._type))
     return getter
 
 def make_getter(field):
@@ -41,8 +42,8 @@ def make_updater(field):
     updater.__name__ = "update_{0}".format(field.name)
     updater.__doc__ = """Updates the value of the {0.name!r} field
 
-    :param value: The new {0.name} value to be set
-    :paramtype value: {1}""".format(field, _format_type_doc(field.type._type))
+    :param value: The new {0.name} value to be set (type: {1})
+""".format(field, _format_type_doc(field.type._type))
     return updater
 
 def _format_type_doc(_type):

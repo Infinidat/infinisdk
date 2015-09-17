@@ -49,7 +49,7 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
 
     FIELDS = []
     URL_PATH = None
-    #: specifies which :class:`infinisdk.core.type_binder.TypeBinder` subclass is to be used for this type
+    #: specifies which :class:`.TypeBinder` subclass is to be used for this type
     BINDER_CLASS = TypeBinder
 
     def __init__(self, system, initial_data):
@@ -114,7 +114,7 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
         This enables system components to be cached rather than re-fetched every time
         """
         return cls(system, data)
-    
+
     @classmethod
     def bind(cls, system):
         return cls.BINDER_CLASS(cls, system)
@@ -126,7 +126,7 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
     @classmethod
     def get_plural_name(cls):
         return "{0}s".format(cls.get_type_name())
-    
+
     @classmethod
     def get_url_path(cls, system):
         url_path = cls.URL_PATH
@@ -150,7 +150,7 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
 
         :param from_cache: Attempt to fetch the fields from the cache
         :param fetch_if_not_cached: pass as False to force only from cache
-        :rtype: a dictionary of field names to their values
+        :returns: a dictionary of field names to their values
         """
 
         from_cache = self._deduce_from_cache(field_names, from_cache)
@@ -275,7 +275,7 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
         gossip.trigger_with_tags('infinidat.sdk.post_object_update',
                 {'obj': self, 'data': update_dict, 'response_dict': response_dict}, tags=hook_tags)
         return res
-    
+
     @cached_method
     def get_this_url_path(self):
         return URL(self.get_url_path(self.system)).add_path(str(self.id))
@@ -291,8 +291,8 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
                 s += ', {0}={1}'.format(field.name, value)
 
         return "<{0} {1}>".format(type(self).__name__, s)
-    
-        
+
+
 class SystemObject(BaseSystemObject):
     """
     System object, that has query methods, creation and deletion
@@ -341,6 +341,9 @@ class SystemObject(BaseSystemObject):
 
     @classmethod
     def create(cls, system, **fields):
+        """
+        Creates a new object of this type
+        """
         gossip.trigger_with_tags('infinidat.sdk.pre_creation_data_validation', {'fields': fields, 'system': system, 'cls': cls})
         data = cls._get_data_for_post(system, fields)
         return cls._create(system, cls.get_url_path(system), data)

@@ -115,7 +115,7 @@ class InfiniBoxLURelatedObject(InfiniBoxObject):
         """
         Returns all LUNs mapped to this object
 
-        :rtype: A collection of :class:`.LogicalUnit` objects
+        :returns: A collection of :class:`.LogicalUnit` objects
         """
         luns_info = self.get_field('luns', *args, **kwargs)
         return LogicalUnitContainer.from_dict_list(self.system, luns_info)
@@ -138,7 +138,7 @@ class InfiniBoxLURelatedObject(InfiniBoxObject):
         """
         Maps a volume to this object, possibly specifying the logical unit number (LUN) to use
 
-        :rtype: a :class:`.LogicalUnit` object representing the added LUN
+        :returns: a :class:`.LogicalUnit` object representing the added LUN
         """
         post_data = {'volume_id': volume.get_id()}
         if lun is not None:

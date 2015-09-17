@@ -125,7 +125,7 @@ class APITarget(with_metaclass(abc.ABCMeta)):
 
     def _get_api_timeout(self):
         """
-        :rtype: number of seconds to wait for a command to return before raising a timeout
+        :returns: number of seconds to wait for a command to return before raising a timeout
         """
         raise NotImplementedError() # pragma: no cover
 

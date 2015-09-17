@@ -35,12 +35,12 @@ class ReplicaBinder(TypeBinder):
     """Implements *system.replicas*
     """
     def replicate_volume(self, volume, remote_volume=None, **kw):
-        """Convenience wrapper around :func:`.replicate_entity`
+        """Convenience wrapper around :func:`ReplicaBinder.replicate_entity`
         """
         return self.replicate_entity(entity=volume, remote_entity=remote_volume, **kw)
 
     def replicate_cons_group(self, cg, remote_cg=None, **kw):
-        """Convenience wrapper around :func:`.replicate_entity`
+        """Convenience wrapper around :func:`ReplicaBinder.replicate_entity`
         """
         return self.replicate_entity(entity=cg, remote_entity=remote_cg, **kw)
 

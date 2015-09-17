@@ -31,8 +31,9 @@ class VolumesBinder(TypeBinder):
         Creates multiple volumes with a single call. Parameters are just like ``volumes.create``, only with the
         addition of the ``count`` parameter
 
+        Returns: list of volumes
+
         :param count: number of volumes to create. Defaults to 1.
-        :rtype: list of volumes
         """
         name = kwargs.pop('name', None)
         if name is None:
@@ -43,10 +44,10 @@ class VolumesBinder(TypeBinder):
 
     def create_group_snapshot(self, volumes, snap_prefix=Autogenerate('{ordinal}'), snap_suffix=OMIT):
         """
-        Creates multiple snapshots with a single consistent point-in-time
+        Creates multiple snapshots with a single consistent point-in-time, returning the snapshots
+        in respective order to parent volumes
 
         :param volumes: list of volumes we should create a snapshot of
-        :rtype: list of snapshots, corresponding in order to the list of volumes provided
         """
         volumes = list(volumes)
         returned = []

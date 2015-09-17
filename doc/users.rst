@@ -65,7 +65,7 @@ You can set a user's role using :func:`.User.update_role`:
 Setting Pool Owners
 ~~~~~~~~~~~~~~~~~~~
 
-To set a pool that will be administered by a user, simply call :func:`.Pool.set_owners`:
+To set a pool that will be administered by a user, simply call :meth:`.Pool.set_owners`:
 
 .. code-block:: python
 
