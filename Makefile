@@ -4,7 +4,7 @@ default: test
 doc: docs
 
 docs: env
-	.env/bin/python setup.py build_sphinx -a -E
+	.env/bin/sphinx-build -a -E -W ./doc ./build/sphinx/html
 
 test: env
 	.env/bin/py.test tests -n 4
