@@ -16,7 +16,7 @@ from storage_interfaces.scsi.abstracts import ScsiVolume
 from ..core.type_binder import TypeBinder
 from ..core import Field, CapacityType, MillisecondsDatetimeType
 from ..core.exceptions import InfiniSDKException, ObjectNotFound, TooManyObjectsFound
-from ..core.api.special_values import Autogenerate, SpecialValue
+from ..core.api.special_values import Autogenerate, SpecialValue, OMIT
 from ..core.bindings import RelatedObjectBinding
 from ..core.utils import deprecated, DONT_CARE
 from .dataset import Dataset
@@ -40,6 +40,46 @@ class VolumesBinder(TypeBinder):
         count = kwargs.pop('count', 1)
         return [self.create(*args, name='{0}_{1}'.format(name, i), **kwargs)
                 for i in range(1, count + 1)]
+
+    def create_group_snapshot(self, volumes, snap_prefix=Autogenerate('{ordinal}'), snap_suffix=OMIT):
+        """
+        Creates multiple snapshots with a single consistent point-in-time
+
+        :param volumes: list of volumes we should create a snapshot of
+        :rtype: list of snapshots, corresponding in order to the list of volumes provided
+        """
+        volumes = list(volumes)
+        returned = []
+        for v in volumes:
+            v.trigger_begin_fork()
+        try:
+            resp = self.system.api.post('volumes/group_snapshot', data={
+                'snap_prefix': snap_prefix,
+                'snap_suffix': snap_suffix,
+                'entities': [
+                    {'id': v.id}
+                    for v in volumes
+                ]
+            })
+        except:
+            for v in volumes:
+                v.trigger_cancel_fork()
+            raise
+        else:
+            snaps_by_parent_id = {}
+            for entity in resp.get_result():
+                snaps_by_parent_id[entity['parent_id']] = self.object_type(self.system, entity)
+            for v in volumes:
+                snap = snaps_by_parent_id.get(v.id)
+                if snap is None:
+                    _logger.warning('No snapshot was created for {0} in group snapshot operation', v)
+                    v.trigger_cancel_fork()
+                else:
+                    v.trigger_finish_fork(snap)
+                returned.append(snap)
+
+        return returned
+
 
 
 class Volume(Dataset):

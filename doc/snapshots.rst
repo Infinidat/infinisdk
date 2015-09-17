@@ -15,6 +15,17 @@ Use the :meth:`.create_snapshot` and :meth:`.create_clone` methods:
 		>>> clone.id
 		1009
 
+Creating Group Snapshots
+------------------------
+
+You can create a group of snapshots (not to be confused with :ref:`Consistency Groups <cons_groups>`) using :meth:`.create_group_snapshot`:
+
+.. code-block:: python
+       
+       >>> v1, v2, v3 = volumes = [system.volumes.create(pool=pool) for i in range(3)]
+       >>> s1, s2, s3 = system.volumes.create_group_snapshot(volumes)
+       
+
 Querying Snapshots and Clones
 -----------------------------
 

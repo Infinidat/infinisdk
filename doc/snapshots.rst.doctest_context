@@ -18,6 +18,7 @@ def doctest_context():
             "current_time": arrow.get(flux.current_timeline.time()).replace(days=+15),
             "system": system,
             "volume": volume,
+            "pool": pool,
         }
     finally:
         simulator.deactivate()
