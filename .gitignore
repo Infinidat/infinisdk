@@ -7,6 +7,7 @@ flycheck-*
 dist
 .coverage
 .env
+.cache
 .DS_Store
 htmlcov
 TAGS
