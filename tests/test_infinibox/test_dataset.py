@@ -1,9 +1,8 @@
-import time
 import arrow
 from functools import partial
 
 import flux
-from capacity import GB
+from capacity import GB, Capacity
 
 import gossip
 import pytest
@@ -248,3 +247,9 @@ def test_get_children_snapshots_and_clones(data_entity):
 
     assert set(snap.get_snapshots()) == set()
     assert set(clone.get_clones()) == set()
+
+
+def test_get_capacity_field_with_null_value(data_entity):
+    assert isinstance(data_entity.get_size(), Capacity)
+    data_entity.update_field_cache({'size': None})
+    assert data_entity.get_size(from_cache=True) is None
