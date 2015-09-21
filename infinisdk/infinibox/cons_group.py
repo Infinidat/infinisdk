@@ -91,8 +91,19 @@ class ConsGroup(InfiniBoxObject):
         return PolymorphicQuery(self.system, self._get_members_url(), object_types, object_factory)
 
     def add_member(self, member, **kwargs):
+        """Adds a member data entity to this consistency group
+
+        :param remote_entity: Assuming this CG is currently being replicated, specifies the remote entity for
+           the member replication
+        """
         data = kwargs
         data['dataset_id'] = member.id
+        remote_entity = kwargs.pop('remote_entity', None)
+        if remote_entity is not None:
+            data['replication_pair_info'] = {
+                'remote_base_action': 'NO_BASE_DATA',
+                'remote_entity_id': remote_entity.id
+            }
         self.system.api.post(self._get_members_url(), data=data)
         self.refresh('members_count')
 
