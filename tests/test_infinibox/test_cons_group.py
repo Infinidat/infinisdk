@@ -23,19 +23,15 @@ def test_get_cg_fields(cg, field):
 
 
 @new_to_version('2.2')
-def test_get_members(cg, volume, filesystem):
+def test_get_members(cg, volume):
     assert len(cg.get_members()) == 0
     assert cg.get_members_count() == 0
     cg.add_member(volume)
-    cg.add_member(filesystem)
     members = cg.get_members()
-    assert len(members) == 2
-    assert filesystem in members
+    assert len(members) == 1
     assert volume in members
-    assert cg.get_members_count() == 2
+    assert cg.get_members_count() == 1
     cg.remove_member(volume)
-    assert len(cg.get_members()) == 1
-    cg.remove_member(filesystem)
     assert cg.get_members_count() == 0
     assert len(cg.get_members()) == 0
 
