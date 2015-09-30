@@ -120,6 +120,7 @@ class Replica(InfiniBoxObject):
               creation_parameter=True, default=timedelta(seconds=30)),
 
         Field('rpo', api_name='rpo_value', type=MillisecondsDeltaType, mutable=True),
+        Field('rpo_state'),
 
     ]
 
