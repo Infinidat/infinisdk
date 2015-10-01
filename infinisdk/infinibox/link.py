@@ -45,14 +45,17 @@ class Link(InfiniBoxObject):
     def is_supported(cls, system):
         return system.compat.has_replication()
 
-    def delete(self, force_if_remote_error=False):
+    def delete(self, force_if_remote_error=False, force_if_no_remote_credentials=False):
         """Deletes this link
 
         :param force_if_remote_error: forces deletion even if remote side caused an API error
+        :param force_if_no_remote_credentials: forces deletion even if no credentials to remote side
         """
         url = self.get_this_url_path()
         if force_if_remote_error:
             url = url.add_query_param('force_if_remote_error', 'true')
+        if force_if_no_remote_credentials:
+            url = url.add_query_param('force_if_no_remote_credentials', 'true')
         with self._get_delete_context():
             self.system.api.delete(url)
 
