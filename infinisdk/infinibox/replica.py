@@ -36,11 +36,15 @@ class ReplicaBinder(TypeBinder):
     """
     def replicate_volume(self, volume, remote_volume=None, **kw):
         """Convenience wrapper around :func:`ReplicaBinder.replicate_entity`
+
+        :seealso: :meth:`.replicate_entity`
         """
         return self.replicate_entity(entity=volume, remote_entity=remote_volume, **kw)
 
     def replicate_cons_group(self, cg, remote_cg=None, **kw):
         """Convenience wrapper around :func:`ReplicaBinder.replicate_entity`
+
+        :seealso: :meth:`.replicate_entity`
         """
         return self.replicate_entity(entity=cg, remote_entity=remote_cg, **kw)
 
@@ -50,6 +54,7 @@ class ReplicaBinder(TypeBinder):
 
         :param remote_pool: if omitted, ``remote_entity`` must be specified. Otherwise, means creating target entity
         :param remote_entity: if omitted, ``remote_pool`` must be specified. Otherwise, means creating based on existing entity on target
+        :param member_mappings: required if remote_entity is specified and is a consistency group. This parameter is a dictionary mapping local member entities to remote ones
         """
         if remote_entity is None:
             assert remote_pool is not None
