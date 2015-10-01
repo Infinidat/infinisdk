@@ -19,6 +19,9 @@ class InfiniSDKException(Exception):
 class InfiniSDKRuntimeException(InfiniSDKException):
     pass
 
+class InvalidUsageException(InfiniSDKException):
+    pass
+
 class UnknownSystem(InfiniSDKException):
     pass
 

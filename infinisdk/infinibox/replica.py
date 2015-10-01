@@ -22,7 +22,7 @@ import gossip
 from ..core import Field
 from ..core.api.special_values import OMIT, Autogenerate
 from ..core.bindings import RelatedObjectBinding
-from ..core.exceptions import (APICommandFailed, CannotGetReplicaState,
+from ..core.exceptions import (APICommandFailed, CannotGetReplicaState, InvalidUsageException,
                                InfiniSDKRuntimeException, TooManyObjectsFound)
 from ..core.translators_and_types import MillisecondsDeltaType
 from ..core.type_binder import TypeBinder
@@ -73,8 +73,15 @@ class ReplicaBinder(TypeBinder):
             if remote_entity is not None:
                 kw['remote_cg_id'] = remote_entity.id
 
+                if len(remote_entity.get_members()) > 0:
+                    member_mapping = kw.pop('member_mappings', None)
+                    if member_mapping is None:
+                        raise InvalidUsageException('Specifying non-empty remote CG requires passing a `member_mappings` argument, mapping local member entities to remote entities')
+            else:
+                member_mapping = {}
+
             for member in entity.get_members():
-                entity_pairs.append((member, None))
+                entity_pairs.append((member, member_mapping.get(member, None)))
         else:
             kw['entity_type'] = 'VOLUME'
             entity_pairs.append((entity, remote_entity))
