@@ -3,7 +3,7 @@ from datetime import timedelta
 import pytest
 from infinisdk.core.exceptions import (CannotGetReplicaState,
                                        InfiniSDKException, ObjectNotFound,
-                                       TooManyObjectsFound)
+                                       TooManyObjectsFound, UnknownSystem)
 
 from ..conftest import secondary_infinibox as secondary_infinibox_fx
 from ..conftest import new_to_version
@@ -67,6 +67,15 @@ def test_replica_deletion(replica, retain_staging_area, force_params):
     replica.delete(**kwargs)
     if retain_staging_area:
         assert volume.get_children()
+
+
+@new_to_version('2.2')
+def test_replica_deletion_unknown_system(replica, forge):
+    def raise_unknown_system():
+        raise UnknownSystem()
+    forge.replace_with(replica, 'get_remote_replica', raise_unknown_system)
+    replica.delete()
+    assert not replica.is_in_system()
 
 @new_to_version('2.0')
 @pytest.mark.parametrize('retain_staging_area', [True, False])

@@ -23,7 +23,7 @@ from ..core import Field
 from ..core.api.special_values import OMIT, Autogenerate
 from ..core.bindings import RelatedObjectBinding
 from ..core.exceptions import (APICommandFailed, CannotGetReplicaState, InvalidUsageException,
-                               InfiniSDKRuntimeException, TooManyObjectsFound)
+                               InfiniSDKRuntimeException, TooManyObjectsFound, UnknownSystem)
 from ..core.translators_and_types import MillisecondsDeltaType
 from ..core.type_binder import TypeBinder
 from .system_object import InfiniBoxObject
@@ -301,7 +301,10 @@ class Replica(InfiniBoxObject):
         if force_if_no_remote_credentials:
             path = path.add_query_param('force_if_no_remote_credentials', 'true')
 
-        remote_replica = self.get_remote_replica()
+        try:
+            remote_replica = self.get_remote_replica()
+        except UnknownSystem:
+            remote_replica = None
 
         with self._get_delete_context():
             resp = self.system.api.delete(path)
