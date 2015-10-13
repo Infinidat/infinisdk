@@ -496,9 +496,11 @@ class Service(InfiniBoxSystemComponent):
         except ObjectNotFound:
             raise NotImplementedError("This service ({0}) doesn't support CLM".format(self.get_name()))
 
+    @deprecated("Use Service.op.activate instead")
     def start(self):
         return self.get_service_cluster().start(node=self.get_parent())
 
+    @deprecated("Use Service.op.deactivate instead")
     def stop(self):
         return self.get_service_cluster().stop(node=self.get_parent())
 
@@ -546,6 +548,7 @@ class ServiceCluster(InfiniBoxSystemComponent):
         return [self.system.components.nodes.get(index=service_info['node_id']).get_service(self.get_name())
                 for service_info in self.get_field('node_states')]
 
+    @deprecated("Use ServiceCluster.op.activate instead")
     def start(self, node=None):
         if node:
             data = {'node_id': node.get_index()}
@@ -557,6 +560,7 @@ class ServiceCluster(InfiniBoxSystemComponent):
         self.system.api.post(self.get_this_url_path().add_path('start'), data=data)
         return pact
 
+    @deprecated("Use ServiceCluster.op.deactivate instead")
     def stop(self, node=None):
         if node:
             data = {'node_id': node.get_index()}

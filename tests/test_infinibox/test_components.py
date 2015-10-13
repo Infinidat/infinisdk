@@ -153,41 +153,6 @@ def test_service_cluster(infinibox):
     assert service in service_cluster.get_services()
     assert all(isinstance(service, Service) for service in service_cluster.get_services())
 
-@new_to_version('2.0')
-def test_enable_disble_unclustered_service(infinibox):
-    node = infinibox.components.nodes.choose()
-    mgmt_service = node.get_service('mgmt')
-    with pytest.raises(NotImplementedError):
-        mgmt_service.stop()
-    with pytest.raises(NotImplementedError):
-        mgmt_service.start()
-    with pytest.raises(NotImplementedError):
-        mgmt_service.get_service_cluster()
-
-@new_to_version('2.0')
-def test_services_enable_disable(infinibox):
-    service_cluster = infinibox.components.service_clusters.choose()
-    service = service_cluster.get_services()[-1]
-    node = service.get_node()
-    assert service.is_active()
-    assert service_cluster.is_active()
-
-    service_cluster.stop(node).wait(timeout_seconds=100)
-    assert not service.is_active()
-    assert not service_cluster.is_inactive()
-
-    service_cluster.start(node).wait(timeout_seconds=100)
-    assert service.is_active()
-    assert service_cluster.is_active()
-
-    service_cluster.stop().wait(timeout_seconds=100)
-    assert not service.is_active()
-    assert service_cluster.is_inactive()
-
-    service_cluster.start().wait(timeout_seconds=100)
-    assert service.is_active()
-    assert service_cluster.is_active()
-
 def test_local_drive_component(infinibox):
     _basic_check_for_component(infinibox, LocalDrive, Node)
     local_drive = infinibox.components.local_drives.choose()
