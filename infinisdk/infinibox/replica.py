@@ -198,7 +198,7 @@ class Replica(InfiniBoxObject):
         """Returns all local volumes, whether as part of a consistency group or a single volume
         """
         if self.is_consistency_group():
-            return self.get_local_entity().get_members()
+            return self.get_local_entity().get_members().to_list()
         return [self.get_local_entity()]
 
     def is_consistency_group(self):
