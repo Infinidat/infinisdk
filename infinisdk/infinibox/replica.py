@@ -61,50 +61,93 @@ class ReplicaBinder(TypeBinder):
             return self.replicate_entity_create_target(entity, link, remote_pool=remote_pool, **kw)
         return self.replicate_entity_existing_target(entity, link, remote_entity=remote_entity, **kw)
 
-    def replicate_entity_create_target(self, entity, link, remote_pool, **kw):
-        return self._replicate(entity, link, base_action='CREATE', remote_pool_id=remote_pool.id, **kw)
+    def replicate_entity_create_target(self, entity, link, remote_pool):
+        """Replicates a entity or CG, creating its remote replica on the specified pool
 
-    def replicate_entity_existing_target(self, entity, link, remote_entity=None, **kw):
-        return self._replicate(entity, link, remote_entity=remote_entity, base_action='NO_BASE_DATA', **kw)
+        :param remote_pool: Remote pool to use for entity creation on the remote side
+        """
+        return self.system.replicas.create(link=link, entity_pairs=self._build_entity_pairs_create_target(entity),
+                                           remote_pool_id=remote_pool.id,
+                                           **self._get_extra_replica_kwargs(entity))
 
-    def _replicate(self, entity, link, base_action, remote_entity=None, **kw):
+    def replicate_entity_existing_target(self, entity, link, remote_entity, member_mappings=None):
+        """Replicates a entity or CG, using a formatted/empty entity on the other side
 
-        kw['link'] = link
-        kw['entity_pairs'] = []
-        entity_pairs = []
+        :param remote_entity: Remote entity to use for replication
+        :param member_mappings: required if remote_entity is specified and is a consistency group. This parameter is a dictionary mapping local member entities to remote ones
+        """
+        return self.system.replicas.create(link=link, entity_pairs=self._build_entity_pairs_existing(entity, remote_entity, member_mappings, use_snapshots=False),
+                                           **self._get_extra_replica_kwargs(entity, remote_entity))
+
+    def replicate_entity_use_base(self, entity, link, local_snapshot, remote_snapshot, member_mappings=None):
+        """Replicates a entity or CG, using an existing remote entity and a base snapthot on both sides
+
+        :param local_snapshot: Local base snapshot to use
+        :param remote_snapshot: Remote base snapshot to use
+        :param member_mappings: required if remote_entity is specified and is a consistency group. This parameter is a dictionary mapping local member entities to tuples of (local_snapshot, remote_snapshot)
+        """
+        return self.system.replicas.create(link=link, entity_pairs=self._build_entity_pairs_existing(local_snapshot, remote_snapshot, member_mappings, use_snapshots=True),
+                                           **self._get_extra_replica_kwargs(entity, remote_entity=remote_snapshot.get_parent()))
+
+    def _get_extra_replica_kwargs(self, entity, remote_entity=None):
+        returned = {}
         if isinstance(entity, entity.system.cons_groups.object_type):
-            kw['entity_type'] = 'CONSISTENCY_GROUP'
-            kw['local_cg_id'] = entity.id
+            returned['entity_type'] = 'CONSISTENCY_GROUP'
+            returned['local_cg_id'] = self._parent_or_entity_id(entity)
             if remote_entity is not None:
-                kw['remote_cg_id'] = remote_entity.id
-
-                if len(remote_entity.get_members()) > 0:
-                    member_mapping = kw.pop('member_mappings', None)
-                    if member_mapping is None:
-                        raise InvalidUsageException('Specifying non-empty remote CG requires passing a `member_mappings` argument, mapping local member entities to remote entities')
-            else:
-                member_mapping = {}
-
-            for member in entity.get_members():
-                entity_pairs.append((member, member_mapping.get(member, None)))
+                remote_cg = remote_entity.get_parent(from_cache=True) or remote_entity
+                returned['remote_cg_id'] = self._parent_or_entity_id(remote_entity)
         else:
-            kw['entity_type'] = 'VOLUME'
-            entity_pairs.append((entity, remote_entity))
+            returned['entity_type'] = 'VOLUME'
+        return returned
 
+    def _parent_or_entity_id(self, entity):
+        parent = entity.get_parent(from_cache=True)
+        if parent is not None:
+            return parent.id
+        return entity.id
 
-        for local, remote in entity_pairs:
-            kw['entity_pairs'].append({
-                'local_entity_id': local.id,
-                'remote_entity_id': remote.id if remote else None,
-                'remote_base_action': base_action,
-            })
+    def _build_entity_pairs_create_target(self, entity):
+        returned = []
+        for sub_entity in self._get_sub_entities(entity):
+            returned.append({
+                'remote_base_action': 'CREATE',
+                'local_entity_id': sub_entity.id,
+                'remote_entity_id': None,
+                })
+        return returned
 
-        return self.create(**kw)
+    def _build_entity_pairs_existing(self, local_entity, remote_entity, member_mappings, use_snapshots):
+        returned = []
+        if not member_mappings:
+            if isinstance(local_entity, local_entity.system.cons_groups.object_type):
+                raise InvalidUsageException('Specifying non-empty remote CG requires passing a `member_mappings` argument, mapping local member entities to remote entities')
+            member_mappings = {local_entity: remote_entity}
 
-    def _get_entity_type_string(self, entity):
+        for sub_entity in self._get_sub_entities(local_entity):
+            remote_sub_entity = member_mappings[sub_entity]
+            if use_snapshots:
+                returned.append({
+                    'local_base_action': 'BASE',
+                    'remote_base_action': 'BASE',
+                    'local_entity_id': sub_entity.get_parent(from_cache=True).id,
+                    'remote_entity_id': remote_sub_entity.get_parent(from_cache=True).id,
+                    'local_base_entity_id': sub_entity.id,
+                    'remote_base_entity_id': remote_sub_entity.id,
+                })
+            else:
+                returned.append({
+                    'remote_base_action': 'NO_BASE_DATA',
+                    'local_entity_id': sub_entity.id,
+                    'remote_entity_id': member_mappings[sub_entity].id,
+                })
+
+        return returned
+
+    def _get_sub_entities(self, entity):
         if isinstance(entity, entity.system.cons_groups.object_type):
-            return 'CONSISTENCY_GROUP'
-        return 'VOLUME'
+            return entity.get_members().to_list()
+        return [entity]
 
 
 class Replica(InfiniBoxObject):
