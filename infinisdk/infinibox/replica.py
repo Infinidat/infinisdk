@@ -61,25 +61,25 @@ class ReplicaBinder(TypeBinder):
             return self.replicate_entity_create_target(entity, link, remote_pool=remote_pool, **kw)
         return self.replicate_entity_existing_target(entity, link, remote_entity=remote_entity, **kw)
 
-    def replicate_entity_create_target(self, entity, link, remote_pool):
+    def replicate_entity_create_target(self, entity, link, remote_pool, **kw):
         """Replicates a entity or CG, creating its remote replica on the specified pool
 
         :param remote_pool: Remote pool to use for entity creation on the remote side
         """
         return self.system.replicas.create(link=link, entity_pairs=self._build_entity_pairs_create_target(entity),
                                            remote_pool_id=remote_pool.id,
-                                           **self._get_extra_replica_kwargs(entity))
+                                           **self._get_extra_replica_kwargs(kw, entity))
 
-    def replicate_entity_existing_target(self, entity, link, remote_entity, member_mappings=None):
+    def replicate_entity_existing_target(self, entity, link, remote_entity, member_mappings=None, **kw):
         """Replicates a entity or CG, using a formatted/empty entity on the other side
 
         :param remote_entity: Remote entity to use for replication
         :param member_mappings: required if remote_entity is specified and is a consistency group. This parameter is a dictionary mapping local member entities to remote ones
         """
         return self.system.replicas.create(link=link, entity_pairs=self._build_entity_pairs_existing(entity, remote_entity, member_mappings, use_snapshots=False),
-                                           **self._get_extra_replica_kwargs(entity, remote_entity))
+                                           **self._get_extra_replica_kwargs(kw, entity, remote_entity))
 
-    def replicate_entity_use_base(self, entity, link, local_snapshot, remote_snapshot, member_mappings=None):
+    def replicate_entity_use_base(self, entity, link, local_snapshot, remote_snapshot, member_mappings=None, **kw):
         """Replicates a entity or CG, using an existing remote entity and a base snapthot on both sides
 
         :param local_snapshot: Local base snapshot to use
@@ -87,10 +87,13 @@ class ReplicaBinder(TypeBinder):
         :param member_mappings: required if remote_entity is specified and is a consistency group. This parameter is a dictionary mapping local member entities to tuples of (local_snapshot, remote_snapshot)
         """
         return self.system.replicas.create(link=link, entity_pairs=self._build_entity_pairs_existing(local_snapshot, remote_snapshot, member_mappings, use_snapshots=True),
-                                           **self._get_extra_replica_kwargs(entity, remote_entity=remote_snapshot.get_parent()))
+                                           **self._get_extra_replica_kwargs(kw, entity, remote_entity=remote_snapshot.get_parent()))
 
-    def _get_extra_replica_kwargs(self, entity, remote_entity=None):
-        returned = {}
+    def _get_extra_replica_kwargs(self, kw, entity, remote_entity=None):
+        returned = kw
+        assert 'entity_type' not in returned
+        assert 'local_cg_id' not in returned
+        assert 'remote_cg_id' not in returned
         if isinstance(entity, entity.system.cons_groups.object_type):
             returned['entity_type'] = 'CONSISTENCY_GROUP'
             returned['local_cg_id'] = self._parent_or_entity_id(entity)
