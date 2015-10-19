@@ -67,7 +67,7 @@ class ReplicaBinder(TypeBinder):
         :param remote_pool: Remote pool to use for entity creation on the remote side
         """
         return self.system.replicas.create(link=link, entity_pairs=self._build_entity_pairs_create_target(entity),
-                                           remote_pool_id=remote_pool.id,
+                                           remote_pool_id=remote_pool.id if remote_pool is not OMIT else OMIT,
                                            **self._get_extra_replica_kwargs(kw, entity))
 
     def replicate_entity_existing_target(self, entity, link, remote_entity, member_mappings=None, **kw):
