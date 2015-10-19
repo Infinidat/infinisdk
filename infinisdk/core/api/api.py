@@ -321,7 +321,8 @@ class API(object):
                 except _RETRY_REQUESTS_EXCEPTION_TYPES as e:
                     request_kwargs = dict(url=path, method=http_method, **kwargs)
                     _logger.debug('Exception while sending API command to {0}: {1}', self.system, e)
-                    if 'gaierror' in str(e):
+                    error_str = str(e)
+                    if 'gaierror' in error_str or 'nodename nor servname' in error_str:
                         hostname = URL(e.request.url).hostname
                         raise SystemNotFoundException("Cannot connect {0}".format(hostname), hostname)
                     raise APITransportFailure(request_kwargs, e)
