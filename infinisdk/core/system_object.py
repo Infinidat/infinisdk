@@ -332,9 +332,14 @@ class SystemObject(BaseSystemObject):
     def _create(cls, system, url, data, tags=None):
         hook_tags = tags or cls._get_tags_for_object_operations(system)
         gossip.trigger_with_tags('infinidat.sdk.pre_object_creation', {'data': data, 'system': system, 'cls': cls}, tags=hook_tags)
-        with _possible_api_failure_context(tags=hook_tags):
-            returned = system.api.post(url, data=data).get_result()
-        obj = cls(system, returned)
+        try:
+            with _possible_api_failure_context(tags=hook_tags):
+                returned = system.api.post(url, data=data).get_result()
+            obj = cls(system, returned)
+        except Exception as e:
+            gossip.trigger_with_tags('infinidat.sdk.object_creation_failure',
+                {'obj': obj, 'data': data, 'exception': e}, tags=hook_tags)
+            raise
         gossip.trigger_with_tags('infinidat.sdk.post_object_creation',
                 {'obj': obj, 'data': data, 'response_dict': returned}, tags=hook_tags)
         return obj
