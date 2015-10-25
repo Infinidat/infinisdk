@@ -338,7 +338,7 @@ class SystemObject(BaseSystemObject):
             obj = cls(system, returned)
         except Exception as e:
             gossip.trigger_with_tags('infinidat.sdk.object_creation_failure',
-                {'obj': obj, 'data': data, 'exception': e}, tags=hook_tags)
+                {'system': system, 'data': data, 'exception': e}, tags=hook_tags)
             raise
         gossip.trigger_with_tags('infinidat.sdk.post_object_creation',
                 {'obj': obj, 'data': data, 'response_dict': returned}, tags=hook_tags)
