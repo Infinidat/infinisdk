@@ -11,19 +11,17 @@
 ### Redistribution and use in source or binary forms, with or without modification,
 ### are strictly forbidden unless prior written permission is obtained from Infinidat Ltd.
 ###!
-from contextlib import contextmanager
+# pylint: disable=no-member
 from datetime import timedelta
 
 import logbook
-import requests
 
 import gossip
 
 from ..core import Field
-from ..core.api.special_values import OMIT, Autogenerate
+from ..core.api.special_values import OMIT
 from ..core.bindings import RelatedObjectBinding
-from ..core.exceptions import (APICommandFailed, CannotGetReplicaState, InvalidUsageException,
-                               InfiniSDKRuntimeException, TooManyObjectsFound, UnknownSystem)
+from ..core.exceptions import (CannotGetReplicaState, InvalidUsageException, TooManyObjectsFound, UnknownSystem)
 from ..core.translators_and_types import MillisecondsDeltaType
 from ..core.type_binder import TypeBinder
 from .system_object import InfiniBoxObject
@@ -109,7 +107,6 @@ class ReplicaBinder(TypeBinder):
             returned['entity_type'] = 'CONSISTENCY_GROUP'
             returned['local_cg_id'] = self._parent_or_entity_id(entity)
             if remote_entity is not None:
-                remote_cg = remote_entity.get_parent(from_cache=True) or remote_entity
                 returned['remote_cg_id'] = self._parent_or_entity_id(remote_entity)
         else:
             returned['entity_type'] = 'VOLUME'
@@ -346,8 +343,6 @@ class Replica(InfiniBoxObject):
         return False
 
     def delete(self, retain_staging_area=False, force_if_remote_error=False, force_on_target=False, force_if_no_remote_credentials=False):
-        returned = set()
-
         path = self.get_this_url_path()
         if retain_staging_area:
             path = path.add_query_param('retain_staging_area', 'true')
