@@ -18,7 +18,7 @@ import logbook
 
 import gossip
 
-from ..core import Field
+from ..core import Field, MillisecondsDatetimeType
 from ..core.api.special_values import OMIT
 from ..core.bindings import RelatedObjectBinding
 from ..core.exceptions import (CannotGetReplicaState, InvalidUsageException, TooManyObjectsFound, UnknownSystem)
@@ -178,6 +178,7 @@ class Replica(InfiniBoxObject):
         Field('remote_replica_id', type=int),
         Field('role', type=str),
         Field('progress', type=int),
+        Field('restore_point', type=MillisecondsDatetimeType),
         Field('last_synchronized', type=int),
         Field('last_replicated_guid', api_name='_consistent_guid'),
         Field('state', type=str),
