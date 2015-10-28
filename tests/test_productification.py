@@ -4,7 +4,8 @@ import os
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
 _PROJ_ROOT = os.path.join(_HERE, "..")
-_SRC_ROOT = os.path.abspath(os.path.join(_HERE, 'infinisdk')) + '/'
+_SRC_ROOT = os.path.abspath(os.path.join(_HERE, '..', 'infinisdk')) + '/'
+assert os.path.isdir(_SRC_ROOT)
 
 assert not _SRC_ROOT.endswith('//')
 
@@ -15,28 +16,6 @@ _FORBIDDEN_STRINGS = [
     "infinisdk2",
     "purge",  # has been moved to infinisdk_internal
 ]
-
-
-def test_copyright():
-    missing = []
-    for is_file, filename in _iter_checked_filenames():
-        if not is_file:
-            continue
-
-        if not filename.endswith(".py"):
-            continue
-
-        if not filename.startswith(_SRC_ROOT):
-            continue
-
-        with open(filename) as f:
-            source = f.read()
-
-        if 'Copyright' not in source:
-            missing.append(filename)
-    assert not missing, "Files are missing copyright notice:\n{0}".format(
-        "\n".join(sorted(missing)))
-
 
 def test_no_infinipy_string():
     errors = []
