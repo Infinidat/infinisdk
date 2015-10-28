@@ -1,28 +1,109 @@
-import glob
+#!/usr/bin/env python
+from __future__ import print_function
+import datetime
 import os
 import shutil
-from subprocess import check_call
-from tempfile import mkdtemp
+import subprocess
+import sys
+import tempfile
 
-_REMOTE_ARCHIVES_LOCATION = '/opt/infinidat/application-repository/data/archives/'
+import logbook
+import click
+from ecosystem.jira import client as jira_client
+
+_logger = logbook.Logger(__name__)
+
+
+@click.command()
+@click.option("-v", "--verbose", count=True)
+@click.option("-q", "--quiet", count=True)
+def main(verbose, quiet):
+    with logbook.NullHandler(), logbook.StreamHandler(sys.stderr, level=logbook.WARNING - verbose + quiet, bubble=False):
+        repo = Checkout()
+        repo.clone()
+        repo.fetch_ours()
+        repo.reshape()
+        repo.generate_changelog()
+        repo.commit()
+        repo.tag()
+        raw_input('Committed and tagged under {} [Press Enter to continue]'.format(repo.path))
+
+
+class Checkout(object):
+
+    def __init__(self):
+        super(Checkout, self).__init__()
+        self.path = os.path.join(tempfile.mkdtemp(), 'repo')
+
+    def clone(self):
+        self._execute('git clone https://github.com/Infinidat/infinisdk {}'.format(self.path), cwd='.')
+        _logger.info('Checked out to {}', self.path)
+
+    def fetch_ours(self):
+        self._execute('git fetch {}'.format(os.path.abspath('.')))
+        self._execute('git checkout FETCH_HEAD -- .')
+
+    def reshape(self):
+        shutil.rmtree(os.path.join(self.path, 'tests'))
+        shutil.rmtree(os.path.join(self.path, 'scripts'))
+
+    def generate_changelog(self):
+        version = self._get_released_version()
+        changelog_filename = os.path.join(self.path, 'CHANGELOG')
+        new_changelog_filename = changelog_filename + '.new'
+
+        last_released = self._get_last_released_tag()
+
+        _logger.debug('Last released version: {}', last_released)
+
+        with open(new_changelog_filename, 'w') as changelog:
+            title = 'Version {} (Released {:%Y-%m-%d})'.format(version, datetime.datetime.now())
+            print('{}\n{}\n'.format(title, '-' * len(title)), file=changelog)
+
+            for issue in jira_client.search('project = "INFRADEV" and component = "InfiniSDK" and resolution is not empty and fixVersion is not empty and "Release Notes Title" is not empty'):
+                if last_released is None or int(issue.fixVersion) > last_released:
+                    print('*', '#{}'.format(issue.key.split('-')
+                                            [1]), issue._data.fields.customfield_12507, file=changelog)  # pylint: disable=protected-access
+
+            print(file=changelog)
+
+            if os.path.exists(changelog_filename):
+                with open(changelog_filename) as old_changelog:
+                    for line in old_changelog:
+                        changelog.write(line)
+
+        os.rename(new_changelog_filename, changelog_filename)
+        _logger.info('New changelog written to {}', changelog_filename)
+
+    def _get_last_released_tag(self):
+        tags = subprocess.check_output('git tag', cwd=self.path, shell=True).splitlines()
+        sorted_tags = []
+        for tag in tags:
+            try:
+                sorted_tags.append(int(tag))
+            except ValueError:
+                continue
+            sorted_tags.append(tag)
+        sorted_tags.sort(reverse=True)
+        return sorted_tags[0] if sorted_tags else None
+
+    def _get_released_version(self):
+        output = subprocess.check_output('git describe --tags', shell=True).strip().split('-')[0]
+        return output
+
+    def commit(self):
+        self._execute('git add .')
+        self._execute('git commit -m "v{}"'.format(self._get_released_version()))
+
+    def tag(self):
+        self._execute('git tag {}'.format(self._get_released_version()))
+
+    def _execute(self, cmd, cwd=None):
+        if cwd is None:
+            cwd = self.path
+        _logger.debug('Running {}', cmd)
+        subprocess.check_call(cmd, shell=True, cwd=cwd)
+
 
 if __name__ == "__main__":
-    tmpdir = mkdtemp()
-
-    d = {}
-    with open('infinisdk/__version__.py') as f:
-        exec(f, d)
-    version = d['__version__']
-
-    check_call('rm -rf ./dist', shell=True)
-    check_call('python setup.py sdist', shell=True)
-    check_call('make doc', shell=True)
-    sdist_file = os.path.join(tmpdir, 'infinisdk-{0}-python-sdist.tar.gz'.format(version))
-    docs_file = os.path.join(tmpdir,  'infinisdk-{0}-python-docs.tar.gz'.format(version))
-    [built_sdist_filename] = glob.glob('./dist/infinisdk-*.tar.gz')
-    shutil.move(built_sdist_filename, sdist_file)
-    check_call('tar czvf {} ./html'.format(docs_file), cwd='./build/sphinx', shell=True)
-    for filename in (sdist_file, docs_file):
-        print 'Uploading', filename
-        check_call('curl -v -1 -T {0} --ftp-pasv -u app_repo:app_repo -Q "TYPE I" -Q "cwd main-unstable" "ftp://repo-v2.lab.il.infinidat.com/"'.format(filename),
-                   shell=True)
+    main()  # pylint: disable=no-value-for-parameter
