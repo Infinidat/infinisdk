@@ -179,6 +179,7 @@ class Replica(InfiniBoxObject):
         Field('role', type=str),
         Field('progress', type=int),
         Field('restore_point', type=MillisecondsDatetimeType),
+        Field('next_restore_point', api_name='cg_target_consistent_time', type=MillisecondsDatetimeType),
         Field('last_synchronized', type=int),
         Field('last_replicated_guid', api_name='_consistent_guid'),
         Field('state', type=str),
