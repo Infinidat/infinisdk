@@ -59,6 +59,12 @@ class APICommandFailed(APICommandException):
         self.reasons = self._parse_reasons(error)
         self.message = message
 
+    @classmethod
+    def raise_from_response(cls, response):
+        if response.get_error().get('is_remote', False):
+            cls = RemoteAPICommandFailed
+        raise cls(response)
+
     def _parse_reasons(self, error):
         returned = []
         for reason in error.get('reasons', []):
@@ -79,6 +85,10 @@ class APICommandFailed(APICommandException):
 
     def __str__(self):
         return repr(self)
+
+
+class RemoteAPICommandFailed(APICommandFailed):
+    pass
 
 
 class ErrorReason(object):

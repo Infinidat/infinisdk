@@ -387,6 +387,7 @@ class Response(object):
         self.url = URL(resp.request.url)
         #: Data sent to on
         self.sent_data = data
+        self._cached_json = NOTHING
 
     @property
     def status_code(self):
@@ -396,10 +397,14 @@ class Response(object):
         """
         :returns: The JSON object returned from the system, or None if no json could be decoded
         """
-        try:
-            return self.response.json()
-        except (ValueError, TypeError):
-            return None
+        returned = self._cached_json
+        if returned is NOTHING:
+            try:
+                returned = self.response.json()
+            except (ValueError, TypeError):
+                returned = None
+            self._cached_json = returned
+        return returned
 
     def _get_result(self):
         return self.get_json()["result"]
@@ -441,7 +446,7 @@ class Response(object):
         except requests.exceptions.HTTPError as e:
             if self.sent_data is not NOTHING  and self.sent_data and 'password' in self.sent_data:
                 self.sent_data = '<HIDDEN>'
-            raise APICommandFailed(self)
+            raise APICommandFailed.raise_from_response(self)
 
 
 class _AutoRetryContext(object):
