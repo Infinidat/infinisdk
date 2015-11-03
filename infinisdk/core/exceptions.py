@@ -68,7 +68,7 @@ class APICommandFailed(APICommandException):
 
     def _parse_reasons(self, error):
         returned = []
-        for reason in error.get('reasons', []):
+        for reason in (error.get('reasons') or []):
             returned.append(ErrorReason.from_dict(reason))
         return returned
 
