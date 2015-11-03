@@ -38,8 +38,8 @@ class APITransportFailure(APICommandException):
 
     def __repr__(self):
         return ("API Transport Failure\n\t"
-                "Request: {self.attrs.method} {self.attrs.url}\n\t"
-                "Error Description: {self.error_desc}".format(self=self))
+                "Request: {e.attrs.method} {e.attrs.url}\n\t"
+                "Error Description: {e.error_desc}".format(e=self))
 
     __str__ = __repr__
 
@@ -74,10 +74,10 @@ class APICommandFailed(APICommandException):
 
     def __repr__(self):
         returned = ("API Command Failed\n\t"
-                "Request: {self.response.method} {self.response.url}\n\t"
-                "Data: {self.response.sent_data}\n\t"
-                "Status: {self.status_code}\n\t"
-                "Message: {self.message}".format(self=self))
+                "Request: {e.response.method} {e.response.url}\n\t"
+                "Data: {e.response.sent_data}\n\t"
+                "Status: {e.status_code}\n\t"
+                "Message: {e.message}".format(e=self))
         if self.reasons:
             returned += "\n\tReasons:"
             for reason in self.reasons:
