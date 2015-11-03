@@ -56,17 +56,44 @@ class APICommandFailed(APICommandException):
             message = "[{0}]".format(response.response.content)
         else:
             message = (json.get("error") or {}).get("message", "?")
+        self.reasons = self._parse_reasons(error)
         self.message = message
 
+    def _parse_reasons(self, error):
+        returned = []
+        for reason in error.get('reasons', []):
+            returned.append(ErrorReason.from_dict(reason))
+        return returned
+
     def __repr__(self):
-        return ("API Command Failed\n\t"
+        returned = ("API Command Failed\n\t"
                 "Request: {self.response.method} {self.response.url}\n\t"
                 "Data: {self.response.sent_data}\n\t"
                 "Status: {self.status_code}\n\t"
                 "Message: {self.message}".format(self=self))
+        if self.reasons:
+            returned += "\n\tReasons:"
+            for reason in self.reasons:
+                returned += "\n\t\t{0}".format(reason)
+        return returned
 
     def __str__(self):
         return repr(self)
+
+
+class ErrorReason(object):
+
+    def __init__(self, message, affected_entities):
+        super(ErrorReason, self).__init__()
+        self.message = message
+        self.affected_entities = affected_entities
+
+    def __repr__(self):
+        return self.message
+
+    @classmethod
+    def from_dict(cls, d):
+        return cls(message=d['message'], affected_entities=d['affected_entities'])
 
 class CommandNotApproved(APICommandFailed):
     def __init__(self, response, reason):
