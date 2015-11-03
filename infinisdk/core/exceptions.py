@@ -56,7 +56,7 @@ class APICommandFailed(APICommandException):
             message = "[{0}]".format(response.response.content)
         else:
             message = (json.get("error") or {}).get("message", "?")
-        self.reasons = self._parse_reasons(error)
+        self.reasons = self._parse_reasons(error or {})
         self.message = message
 
     @classmethod
