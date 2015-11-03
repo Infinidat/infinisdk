@@ -61,7 +61,8 @@ class APICommandFailed(APICommandException):
 
     @classmethod
     def raise_from_response(cls, response):
-        if response.get_error().get('is_remote', False):
+        error = response.get_error() or {}
+        if error.get('is_remote', False):
             cls = RemoteAPICommandFailed
         raise cls(response)
 
