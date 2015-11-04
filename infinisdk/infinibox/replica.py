@@ -117,8 +117,8 @@ class ReplicaBinder(TypeBinder):
 
     def _build_entity_pairs_existing(self, local_entity, remote_entity, member_mappings, use_snapshots, take_snapshot=False):
         returned = []
-        if not member_mappings and len(local_entity.get_members()) > 0:
-            if isinstance(local_entity, local_entity.system.cons_groups.object_type):
+        if not member_mappings:
+            if isinstance(local_entity, local_entity.system.cons_groups.object_type) and len(local_entity.get_members()) > 0:
                 raise InvalidUsageException('Specifying non-empty remote CG requires passing a `member_mappings` argument, mapping local member entities to remote entities')
             member_mappings = {local_entity: remote_entity}
 
