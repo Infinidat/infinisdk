@@ -229,6 +229,9 @@ class InfiniBox(APITarget):
             return self._get_v1_metadata_generator()
         return self._get_v2_metadata_generator()
 
+    def is_active(self):
+        return self.components.system_component.is_active()
+
 
 class _CurrentUserProxy(object):
     def __init__(self, system):

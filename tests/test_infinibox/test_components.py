@@ -56,9 +56,13 @@ def test_system_component_does_not_perform_api_get(infinibox):
         system_component = infinibox.components.system_component
         assert system_component.get_index() == 0
 
+def _set_system_component_state_in_cache(system, cached_state):
+    system.components.system_component.update_field_cache({'operational_state': {'state': cached_state}})
+
+
 def test_system_component_get_state_caching(infinibox):
     system_component = infinibox.components.system_component
-    system_component.update_field_cache({'operational_state': {'state': 'fake_state'}})
+    _set_system_component_state_in_cache(infinibox, 'fake_state')
     assert system_component.get_state(from_cache=True) == 'fake_state'
     assert system_component.get_state() != 'fake_state'
 
@@ -68,6 +72,20 @@ def test_system_component(infinibox):
     system_component = infinibox.components.system_component
     assert system_component is infinibox.components.systems.get()
     assert isinstance(system_component.get_state(), string_types)
+
+def test_system_component_state_getters(infinibox):
+    system_component = infinibox.components.system_component
+    system_component.fields.operational_state.cached = True
+    _set_system_component_state_in_cache(infinibox, 'STANDBY')
+    assert system_component.is_stand_by()
+    assert not system_component.is_active()
+    assert not infinibox.is_active()
+
+    _set_system_component_state_in_cache(infinibox, 'ACTIVE')
+    assert not system_component.is_stand_by()
+    assert system_component.is_active()
+    assert infinibox.is_active()
+
 
 def test_rack_component(infinibox):
     _basic_check_for_component(infinibox, Rack, None)
