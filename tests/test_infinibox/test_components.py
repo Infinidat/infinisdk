@@ -1,16 +1,25 @@
 import pytest
 
 from capacity import Capacity
+from contextlib import contextmanager
 from infi.dtypes.wwn import WWN
-from infinisdk._compat import string_types
+from infinisdk._compat import string_types, ExitStack
 from infinisdk.core.config import config
-from infinibox_sysdefs import latest as defs
 from infinisdk.infinibox.components import (Drive, Enclosure, FcPort, Node, EthPort, LocalDrive,
                                             Rack, Service, System, ServiceCluster)
 from ..conftest import disable_api_context, new_to_version
 
 NO_OF_ENCLOSURES_DRIVES = config.get_path('infinibox.defaults.enlosure_drives.total_count.simulator')
 
+
+@contextmanager
+def _change_cached_context(component, field_name, new_value):
+    orig_value = component.fields.get(field_name).cached
+    component.fields.get(field_name).cached = new_value
+    try:
+        yield
+    finally:
+        component.fields.get(field_name).cached = orig_value
 
 def test_component_id_field(infinibox, component_collection, component):
     assert isinstance(component.id, str)
@@ -75,16 +84,16 @@ def test_system_component(infinibox):
 
 def test_system_component_state_getters(infinibox):
     system_component = infinibox.components.system_component
-    system_component.fields.operational_state.cached = True
-    _set_system_component_state_in_cache(infinibox, 'STANDBY')
-    assert system_component.is_stand_by()
-    assert not system_component.is_active()
-    assert not infinibox.is_active()
+    with _change_cached_context(system_component, 'operational_state', True):
+        _set_system_component_state_in_cache(infinibox, 'STANDBY')
+        assert system_component.is_stand_by()
+        assert not system_component.is_active()
+        assert not infinibox.is_active()
 
-    _set_system_component_state_in_cache(infinibox, 'ACTIVE')
-    assert not system_component.is_stand_by()
-    assert system_component.is_active()
-    assert infinibox.is_active()
+        _set_system_component_state_in_cache(infinibox, 'ACTIVE')
+        assert not system_component.is_stand_by()
+        assert system_component.is_active()
+        assert infinibox.is_active()
 
 
 def test_rack_component(infinibox):
@@ -122,8 +131,10 @@ def test_get_online_target_addresses(infinibox):
 def test_using_from_cache_context_multiple_times(infinibox):
     nodes = infinibox.components.nodes
     fc_ports = infinibox.components.fc_ports
-    assert nodes.fields.state.cached == False
-    with nodes.fetch_tree_once_context():
+
+    with ExitStack() as stack:
+        stack.enter_context(_change_cached_context(nodes, 'state', False))
+        stack.enter_context(nodes.fetch_tree_once_context())
         infinibox.api = None
         with nodes.fetch_tree_once_context():
             assert nodes._force_fetching_from_cache
