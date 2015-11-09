@@ -14,6 +14,7 @@ from infinisdk.infinibox.dataset import (_BEGIN_FORK_HOOK, _CANCEL_FORK_HOOK,
 from ..conftest import create_pool
 
 
+
 def test_creation(pool, data_entity):
     kwargs = {'name': 'some_data_entity_name',
               'size': 2*GB,

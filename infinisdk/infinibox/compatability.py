@@ -27,7 +27,7 @@ class Compatability(object):
     def get_version_major(self):
         return self.system.get_version().partition('.')[0]
 
-    def _get_version_as_float(self):
+    def get_version_as_float(self):
         float_digit_list = self.system.get_version().split('.')[:2]
         return float(".".join(float_digit_list))
 
@@ -71,7 +71,7 @@ class Compatability(object):
         return self._get_feature_version('metadata', 1)
 
     def has_consistency_groups(self):
-        return self._get_version_as_float() >= 2.2
+        return self.get_version_as_float() >= 2.2
 
     def has_initiators(self):
-        return self._get_version_as_float() >= 2.2
+        return self.get_version_as_float() >= 2.2
