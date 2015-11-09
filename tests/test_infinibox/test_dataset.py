@@ -1,15 +1,16 @@
-import arrow
 from functools import partial
 
+import arrow
 import flux
-from capacity import GB, Capacity
-
 import gossip
 import pytest
-from infinisdk.core.translators_and_types import MillisecondsDatetimeTranslator
+from capacity import GB, Capacity, KiB
 from infinisdk.core.exceptions import (APICommandFailed,
                                        InvalidOperationException)
-from infinisdk.infinibox.dataset import _BEGIN_FORK_HOOK, _FINISH_FORK_HOOK, _CANCEL_FORK_HOOK
+from infinisdk.core.translators_and_types import MillisecondsDatetimeTranslator
+from infinisdk.infinibox.dataset import (_BEGIN_FORK_HOOK, _CANCEL_FORK_HOOK,
+                                         _FINISH_FORK_HOOK)
+
 from ..conftest import create_pool
 
 
@@ -22,7 +23,10 @@ def test_creation(pool, data_entity):
     obj = data_entity_binder.create(**kwargs)
 
     assert obj.get_name() == kwargs['name']
-    assert obj.get_size() == kwargs['size']
+    if isinstance(data_entity, data_entity.system.filesystems.object_type):
+        assert obj.get_size() == kwargs['size'].roundup(64 * KiB)
+    else:
+        assert obj.get_size() == kwargs['size']
     assert obj.get_pool().id == kwargs['pool_id']
     assert obj.get_provisioning() == kwargs['provisioning']
     obj.delete()
