@@ -113,18 +113,18 @@ class ConsGroup(InfiniBoxObject):
         path = self._get_members_url().add_path(str(member.id))
 
         if retain_staging_area:
-            path.set_query_param('retain_staging_area', 'true')
+            path = path.set_query_param('retain_staging_area', 'true')
         if create_replica:
-            path.set_query_param('create_replica', 'true')
+            path = path.set_query_param('create_replica', 'true')
         if force_if_no_remote_credentials:
-            path.set_query_param('force_if_no_remote_credentiala', 'true')
+            path = path.set_query_param('force_if_no_remote_credentials', 'true')
         if force_if_remote_error:
-            path.set_query_param('force_if_remote_erroa', 'true')
+            path = path.set_query_param('force_if_remote_error', 'true')
         if force_on_target:
-            path.set_query_param('force_on_targea', 'true')
+            path = path.set_query_param('force_on_target', 'true')
 
         if replica_name is not OMIT:
-            path.set_query_param('replica_name', replica_name)
+            path = path.set_query_param('replica_name', replica_name)
 
         self.system.api.delete(path)
         self.refresh('members_count')
