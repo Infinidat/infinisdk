@@ -1,5 +1,6 @@
 from collections import namedtuple
 from ..core import Field, MillisecondsDatetimeType
+from ..core.api.special_values import OMIT
 from ..core.object_query import PolymorphicQuery
 from ..core.bindings import RelatedObjectBinding
 from ..core.api.special_values import Autogenerate
@@ -107,8 +108,25 @@ class ConsGroup(InfiniBoxObject):
         self.system.api.post(self._get_members_url(), data=data)
         self.refresh('members_count')
 
-    def remove_member(self, member):
-        self.system.api.delete(self._get_members_url().add_path(str(member.id)))
+    def remove_member(self, member, retain_staging_area=False, create_replica=False, replica_name=OMIT, force_if_no_remote_credentials=False, force_if_remote_error=False, force_on_target=False):
+
+        path = self._get_members_url().add_path(str(member.id))
+
+        if retain_staging_area:
+            path.set_query_param('retain_staging_area', 'true')
+        if create_replica:
+            path.set_query_param('create_replica', 'true')
+        if force_if_no_remote_credentials:
+            path.set_query_param('force_if_no_remote_credentiala', 'true')
+        if force_if_remote_error:
+            path.set_query_param('force_if_remote_erroa', 'true')
+        if force_on_target:
+            path.set_query_param('force_on_targea', 'true')
+
+        if replica_name is not OMIT:
+            path.set_query_param('replica_name', replica_name)
+
+        self.system.api.delete(path)
         self.refresh('members_count')
 
     def restore(self, snap_group):
