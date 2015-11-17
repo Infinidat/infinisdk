@@ -34,7 +34,7 @@ class Dataset(InfiniBoxObject):
         assert isinstance(delta, Capacity), "Delta must be an instance of Capacity"
         return self.update_field('size', self.get_size() + delta)
 
-    def _create_child(self, name):
+    def create_child(self, name=None):
         self.refresh('has_children')
         self.trigger_begin_fork()
         if not name:
@@ -71,16 +71,15 @@ class Dataset(InfiniBoxObject):
         """Creates a clone from this entity, if supported by the system
         """
         if self.is_snapshot():
-            return self._create_child(name)
+            return self.create_child(name)
         raise InvalidOperationException('Cannot create clone for volume/clone')
 
     def create_snapshot(self, name=None):
         """Creates a snapshot from this entity, if supported by the system
         """
         if self.is_snapshot():
-            raise InvalidOperationException(
-                'Cannot create snapshot for snapshot')
-        return self._create_child(name)
+            raise InvalidOperationException('Cannot create snapshot for snapshot')
+        return self.create_child(name)
 
     def restore(self, snapshot):
         """Restores this entity from a given snapshot object
