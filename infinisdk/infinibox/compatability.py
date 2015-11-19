@@ -19,7 +19,7 @@ class Compatability(object):
         return any(v.contains(system_version) for v in supported_versions)
 
     def normalize_version_string(self, version):
-        return packaging.version.parse(version)
+        return packaging.version.parse(version.tion('-')[0])
 
     def get_parsed_system_version(self):
         return self.normalize_version_string(self.system.get_version())
