@@ -238,8 +238,12 @@ class API(object):
 
             prepared = self._session.prepare_request(api_request)
             gossip.trigger('infinidat.sdk.before_api_request', request=prepared)
+            start_time = flux.current_timeline.time()
             response = self._session.send(prepared, **kwargs)
+            end_time = flux.current_timeline.time()
             gossip.trigger('infinidat.sdk.after_api_request', request=prepared, response=response)
+            response.start_time = start_time
+            response.end_time = end_time
 
             elapsed = get_timedelta_total_seconds(response.elapsed)
             _logger.debug("{0} --> {1} {2} (took {3:.04f}s)", hostname, response.status_code, response.reason, elapsed)

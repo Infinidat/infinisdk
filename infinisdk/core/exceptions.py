@@ -1,3 +1,5 @@
+import arrow
+
 from munch import munchify
 
 class InfiniSDKException(Exception):
@@ -75,6 +77,8 @@ class APICommandFailed(APICommandException):
     def __repr__(self):
         returned = ("API Command Failed\n\t"
                 "Request: {e.response.method} {e.response.url}\n\t"
+                "Request Timestamp: {e.request_timestamp}\n\t"
+                "Response Timestamp: {e.response_timestamp}\n\t"
                 "Data: {e.response.sent_data}\n\t"
                 "Status: {e.status_code}\n\t"
                 "Message: {e.message}".format(e=self))
@@ -83,6 +87,14 @@ class APICommandFailed(APICommandException):
             for reason in self.reasons:
                 returned += "\n\t\t{0}".format(reason)
         return returned
+
+    @property
+    def request_timestamp(self):
+        return arrow.Arrow.fromtimestamp(self.response.response.start_time)
+
+    @property
+    def response_timestamp(self):
+        return arrow.Arrow.fromtimestamp(self.response.response.end_time)
 
     def __str__(self):
         return repr(self)
