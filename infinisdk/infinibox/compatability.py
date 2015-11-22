@@ -119,7 +119,7 @@ class _InfiniboxVersion(object):
             else:
                 parsed_version += (after_dash, )
 
-        parsed_version += tuple('*' for index in range(
+        parsed_version += tuple(('*' if index >= 4 else 0) for index in range(
             len(parsed_version), _VERSION_TUPLE_LEN))
         return cls(parsed_version, is_dev, is_odd=is_odd)
 
