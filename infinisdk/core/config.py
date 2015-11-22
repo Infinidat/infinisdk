@@ -3,7 +3,6 @@ import os
 from .._compat import ConfigParser
 
 import confetti
-from packaging.specifiers import SpecifierSet
 
 config = confetti.Config(dict(
 
@@ -38,7 +37,7 @@ config = confetti.Config(dict(
     infinibox=dict(
 
         compatible_versions = [
-            SpecifierSet(">=1.5"),
+            "ge:1.5",
         ],
 
         defaults=dict(

@@ -1,28 +1,41 @@
-import packaging.version
-from sentinels import NOTHING
+import functools
+import operator
 
-from packaging.version import parse as parse_version
+from sentinels import NOTHING
 
 from .._compat import httplib
 from ..core.config import config
 
 
 class Compatability(object):
+
     def __init__(self, system):
         self.system = system
         self._features = None
+        self._system_version = None
 
     def can_run_on_system(self):
         version_string = self.system.get_version().split('-', 1)[0]
         system_version = self.normalize_version_string(version_string)
-        supported_versions = config.root.infinibox.compatible_versions
-        return any(v.contains(system_version) for v in supported_versions)
+        restrictions = self._parse_restrictions(config.root.infinibox.compatible_versions)
+        return all(restriction(system_version) for restriction in restrictions)
+
+    def _parse_restrictions(self, restrictions):
+        returned = []
+        for restriction in restrictions:
+            operator_name, value = restriction.split(':', 1)
+            op = getattr(operator, operator_name)
+            returned.append(lambda version, op=op: op(version, value))
+        return returned
 
     def normalize_version_string(self, version):
-        return packaging.version.parse(version.partition('-')[0])
+        return _InfiniboxVersion.parse(version)
 
     def get_parsed_system_version(self):
-        return self.normalize_version_string(self.system.get_version())
+        if self._system_version is None:
+            self._system_version = self.normalize_version_string(
+                self.system.get_version())
+        return self._system_version
 
     def get_version_major(self):
         return self.system.get_version().partition('.')[0]
@@ -38,7 +51,8 @@ class Compatability(object):
         else:
             resp.assert_success()
             features_list = resp.get_result()
-        self._features = dict((feature_info['name'], feature_info['version']) for feature_info in features_list)
+        self._features = dict((feature_info['name'], feature_info[
+                              'version']) for feature_info in features_list)
 
     def _get_feature_version(self, feature_key, default_version=NOTHING):
         if self._features is None:
@@ -49,7 +63,8 @@ class Compatability(object):
         return self._get_feature_version(feature_key, NOTHING) is not NOTHING
 
     def set_feature_as_supported(self, feature_key, version=0):
-        assert self._get_feature_version(feature_key, 0) <= version, "Cannot downgrade feature's supported version"
+        assert self._get_feature_version(
+            feature_key, 0) <= version, "Cannot downgrade feature's supported version"
         self._features[feature_key] = version
 
     def has_npiv(self):
@@ -75,3 +90,78 @@ class Compatability(object):
 
     def has_initiators(self):
         return self.get_version_as_float() >= 2.2
+
+
+_VERSION_TUPLE_LEN = 5
+
+
+class _InfiniboxVersion(object):
+
+    def __init__(self, version_tuple, is_dev, is_odd=False):
+        self.version = version_tuple
+        self._is_dev = is_dev
+        self._is_odd_version = is_odd
+
+    @classmethod
+    def parse(cls, version):
+        if isinstance(version, _InfiniboxVersion):
+            return version
+        before_dash, _, after_dash = version.partition('-')
+        is_dev = is_odd = False
+        parsed_version = tuple(int(ver_digit)
+                               for ver_digit in before_dash.split('.'))
+
+        if after_dash:
+            if after_dash.startswith('dev'):
+                is_dev = True
+            elif len(after_dash) > 1:
+                is_odd = True
+            else:
+                parsed_version += (after_dash, )
+
+        parsed_version += tuple('*' for index in range(
+            len(parsed_version), _VERSION_TUPLE_LEN))
+        return cls(parsed_version, is_dev, is_odd=is_odd)
+
+    def __eq__(self, other):
+        other_ver = self.parse(other)
+        if self.version != other_ver.version:
+            return False
+        if self._is_odd_version or other_ver._is_odd_version:  # pylint: disable=protected-access
+            return False
+
+        if self._is_dev or other_ver._is_dev:  # pylint: disable=protected-access
+            return False
+        return True
+
+    def __ne__(self, other):
+        return not self == other
+
+    def __lt__(self, other):
+        # pylint: disable=protected-access
+        other_ver = self.parse(other)
+        if self.version == other_ver.version:
+            if self._is_odd_version or other_ver._is_odd_version or (self._is_dev and other_ver._is_dev):
+                return str(self) < str(other)
+            if self._is_dev ^ other_ver._is_dev:
+                return self._is_dev
+            return False  # we're identical -- both not odd, and no dev on either side
+
+        return self.version < other_ver.version  # we judge by the version tuple
+
+    def __le__(self, other):
+        return self == other or self < other
+
+    def __gt__(self, other):
+        return not self == other and not self < other
+
+    def __ge__(self, other):
+        return self == other or self > other
+
+    def __repr__(self):
+        extra_info = ""
+        if self._is_dev:
+            extra_info += " dev version"
+        if not self._is_odd_version:
+            extra_info += " (unknown structure)"
+        return "<InfiniboxVersion: {0}{1}>".format(self.version, extra_info)

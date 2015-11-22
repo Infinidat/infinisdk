@@ -78,12 +78,12 @@ def validate_unittest_compatability_with_infinibox_version(system, **kwargs):
     from_version = kwargs.pop('from_version', None)
     until_version = kwargs.pop('until_version', None)
     assert not kwargs, "Version marker got unexpected kwargs: {0}".format(list(kwargs))
-    sys_version = parse_version(system.get_version())
+    sys_version = system.compat.normalize_version_string(system.get_version())
 
-    if from_version is not None and parse_version(from_version) > sys_version:
+    if from_version is not None and sys_version < from_version:
         pytest.skip("System does not support this unittest (too old)")
 
-    if until_version is not None and parse_version(until_version) > sys_version:
+    if until_version is not None and sys_version > until_version:
         pytest.skip("System does not support this unittest (too new)")
 
 _DEFAULT_REQUIRED_VERSION = Munch(kwargs={})

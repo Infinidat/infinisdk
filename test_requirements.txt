@@ -4,4 +4,3 @@ pytest-xdist
 pyforge
 waiting
 pytest-capturelog
-packaging
