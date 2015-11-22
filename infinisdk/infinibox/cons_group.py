@@ -1,4 +1,5 @@
 import gossip
+import functools
 
 from collections import namedtuple
 from ..core import Field, MillisecondsDatetimeType
