@@ -171,7 +171,7 @@ class Replica(InfiniBoxObject):
         Field('state', type=str),
         Field('sync_interval', api_name='sync_interval', type=MillisecondsDeltaType,
               mutable=True,
-              creation_parameter=True, default=timedelta(seconds=30)),
+              creation_parameter=True, default=timedelta(seconds=4)),
 
         Field('rpo', api_name='rpo_value', type=MillisecondsDeltaType, mutable=True),
         Field('rpo_state'),
