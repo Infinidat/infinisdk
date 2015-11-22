@@ -1,3 +1,5 @@
+import gossip
+
 from collections import namedtuple
 from ..core import Field, MillisecondsDatetimeType
 from ..core.api.special_values import OMIT
@@ -105,7 +107,10 @@ class ConsGroup(InfiniBoxObject):
                 'remote_base_action': 'NO_BASE_DATA',
                 'remote_entity_id': remote_entity.id
             }
+        _trigger = functools.partial(gossip.trigger_with_tags, kwargs={'cons_group': self, 'member': member, 'request': data}, tags=['infinibox'])
+        _trigger('infinidat.sdk.pre_cons_group_add_member')
         self.system.api.post(self._get_members_url(), data=data)
+        _trigger('infinidat.sdk.post_cons_group_add_member')
         self.refresh('members_count')
 
     def remove_member(self, member, retain_staging_area=False, create_replica=False, replica_name=OMIT, force_if_no_remote_credentials=False, force_if_remote_error=False, force_on_target=False):
