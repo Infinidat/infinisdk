@@ -266,3 +266,7 @@ def test_get_capacity_field_with_null_value(data_entity):
     assert isinstance(data_entity.get_size(), Capacity)
     data_entity.update_field_cache({'size': None})
     assert data_entity.get_size(from_cache=True) is None
+    
+    
+def test_calculate_reclaimable_space(data_entity):
+    assert isinstance(data_entity.calculate_reclaimable_space(), Capacity)

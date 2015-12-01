@@ -1,8 +1,8 @@
-from capacity import Capacity
 import gossip
+from capacity import Capacity, byte
+from urlobject import URLObject as URL
 from collections import namedtuple
 from ..core.exceptions import InvalidOperationException
-from ..core.system_object import APICommandFailed
 from .system_object import InfiniBoxObject
 
 _BEGIN_FORK_HOOK = "infinidat.sdk.begin_fork"
@@ -133,6 +133,9 @@ class Dataset(InfiniBoxObject):
         """Retrieves creation time for this entity
         """
         return self.get_field("created_at", from_cache=True)
+
+    def calculate_reclaimable_space(self):
+        return self.system.api.post(URL(self.get_url_path(self.system)).add_path('delete_simulation'), data=dict(entities=[self.id])).get_result()['space_reclaimable']*byte
 
     @InfiniBoxObject.requires_refresh("pool")
     def move_pool(self, target_pool, with_capacity=False):
