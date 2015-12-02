@@ -248,6 +248,7 @@ class Rack(InfiniBoxSystemComponent):
         Field("index", api_name="rack", type=int, cached=True),
         Field("enclosures", type=list, binding=ListOfRelatedComponentBinding()),
         Field("nodes", type=list, binding=ListOfRelatedComponentBinding()),
+        Field("bbus", api_name='ups', type=list, binding=ListOfRelatedComponentBinding()),
     ]
 
     @classmethod
@@ -260,7 +261,8 @@ class Rack(InfiniBoxSystemComponent):
         return self.get_specific_rack_url(self.get_index())
 
     def refresh_without_enclosures(self):
-        url = self.get_this_url_path().add_query_param('fields', 'enclosures_number,rack,nodes')
+        fields = ",".join(field.api_name for field in self.fields if field.name != 'enclosures')
+        url = self.get_this_url_path().add_query_param('fields', fields)
         self.system.components.mark_fetched_nodes()
         data = self.system.api.get(url).get_result()
         data['enclosures'] = []
@@ -587,6 +589,25 @@ class ServiceCluster(InfiniBoxSystemComponent):
 
     def is_inactive(self):
         return self.get_state() == 'INACTIVE'
+
+
+@InfiniBoxSystemComponents.install_component_type
+class BBU(InfiniBoxSystemComponent):
+    FIELDS = [
+        Field("index", api_name="id", type=int, cached=True),
+        Field("state", cached=False),
+        Field("on_battery", api_name="onBattery", type=bool, cached=False),
+        Field("charging", type=bool, cached=False),
+    ]
+
+    @classmethod
+    def get_url_path(cls, system):
+        return cls.BASE_URL.add_path('ups')
+
+    @cached_method
+    def get_this_url_path(self):
+        return self.get_url_path(self.system).add_path(str(self.get_index()))
+
 
 @InfiniBoxSystemComponents.install_component_type
 class System(InfiniBoxSystemComponent):
