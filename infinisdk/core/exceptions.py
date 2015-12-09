@@ -1,4 +1,5 @@
 import arrow
+from urlobject import URLObject as URL
 
 from munch import munchify
 
@@ -27,20 +28,21 @@ class CannotGetReplicaState(InfiniSDKException):
     pass
 
 class SystemNotFoundException(APICommandException):
-    def __init__(self, msg, sys_address=None):
-        super(SystemNotFoundException, self).__init__(msg)
-        self.address = sys_address
+    def __init__(self, err):
+        self.address = URL(err.api_request_obj.url).hostname
+        super(SystemNotFoundException, self).__init__("Cannot connect {0}".format(self.address))
 
 class APITransportFailure(APICommandException):
     def __init__(self, request_kwargs, err):
         super(APITransportFailure, self).__init__('APITransportFailure: {0}'.format(err))
         self.err = err
+        self.address = URL(err.api_request_obj.url).hostname
         self.attrs = munchify(request_kwargs)
         self.error_desc = str(err)
 
     def __repr__(self):
         return ("API Transport Failure\n\t"
-                "Request: {e.attrs.method} {e.attrs.url}\n\t"
+                "Request: {e.attrs.method} {e.err.api_request_obj.url}\n\t"
                 "Error Description: {e.error_desc}".format(e=self))
 
     __str__ = __repr__
@@ -60,6 +62,7 @@ class APICommandFailed(APICommandException):
             message = (json.get("error") or {}).get("message", "?")
         self.reasons = self._parse_reasons(error or {})
         self.message = message
+        self.address = URL(response.response.request.url).hostname
 
     @classmethod
     def raise_from_response(cls, response):

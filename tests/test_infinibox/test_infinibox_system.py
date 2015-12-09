@@ -32,6 +32,7 @@ def test_api_transport_error(infinibox):
     transport_repr = repr(e.value)
     assert url in transport_repr
     assert 'get' in transport_repr
+    assert infinibox.get_name() in transport_repr
 
 
 def test_get_api_auth(infinibox):

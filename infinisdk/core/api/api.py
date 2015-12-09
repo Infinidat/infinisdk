@@ -239,7 +239,11 @@ class API(object):
             prepared = self._session.prepare_request(api_request)
             gossip.trigger('infinidat.sdk.before_api_request', request=prepared)
             start_time = flux.current_timeline.time()
-            response = self._session.send(prepared, **kwargs)
+            try:
+                response = self._session.send(prepared, **kwargs)
+            except Exception as e:
+                e.api_request_obj = api_request
+                raise
             end_time = flux.current_timeline.time()
             gossip.trigger('infinidat.sdk.after_api_request', request=prepared, response=response)
             response.start_time = start_time
@@ -315,8 +319,7 @@ class API(object):
                     error_str = str(e)
                     if 'gaierror' in error_str or 'nodename nor servname' in error_str or \
                        'Name or service not known' in error_str:
-                        hostname = URL(e.request.url).hostname
-                        raise SystemNotFoundException("Cannot connect {0}".format(hostname), hostname)
+                        raise SystemNotFoundException(e)
                     raise APITransportFailure(request_kwargs, e)
 
                 if assert_success:
