@@ -35,6 +35,7 @@ from .replica import Replica
 from .user import User
 from .volume import Volume
 from .metrics import Metrics
+from .metadata import SystemMetadata
 
 try:
     from infinisim.core.context import lookup_simulator_by_address
@@ -55,6 +56,7 @@ class InfiniBox(APITarget):
         self.compat = Compatability(self)
         self.capacities = InfiniBoxSystemCapacity(self)
         self.metrics = Metrics(self)
+        self.system_metadata = SystemMetadata(self)
         self._related_systems = []
 
     def check_version(self):
