@@ -60,6 +60,7 @@ def test_filter_with_Q_predicates(infinibox):
         assert service.get_state() == 'ACTIVE'
 
 def test_filtering_by_special_operators(infinibox):
+    pytest.skip('INFRADEV-5884')
     query = infinibox.components.services.find(Q.name.like('cor'))
     with pytest.raises(NotImplementedError):
         list(query)
