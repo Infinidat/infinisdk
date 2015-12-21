@@ -73,6 +73,9 @@ class Compatability(object):
     def has_replication(self):
         return int(self.get_version_major()) >= 2
 
+    def has_iscsi(self):
+        return self._has_feature('iscsi')
+
     def get_nas_version(self):
         return self._get_feature_version('nas', 0)
 

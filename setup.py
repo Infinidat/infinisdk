@@ -14,6 +14,7 @@ _INSTALL_REQUIRES = [
     "flux",
     "gossip>=0.8.0",
     "infi.dtypes.wwn>=0.0.2",
+    "infi.dtypes.iqn",
     "infi.pyutils",
     "logbook>=0.10.0",
     "munch",

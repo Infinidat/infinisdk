@@ -1,7 +1,9 @@
 import arrow
-from datetime import timedelta
 import munch
+from .._compat import string_types
 from capacity import byte, Capacity
+from datetime import timedelta
+from infi.dtypes.iqn import IQN
 from infi.dtypes.wwn import WWN
 
 from api_object_schema import TypeInfo, ValueTranslator
@@ -89,3 +91,31 @@ class WWNListTranslator(ValueTranslator):
         return [WWN(wwpn) for wwpn in value]
 
 WWNListType = TypeInfo(type=list, api_type=list, translator=WWNListTranslator())
+
+
+def host_port_to_api(value):
+    if isinstance(value, WWN):
+        port_type = 'fc'
+    elif isinstance(value, string_types):
+        port_type = 'fc'
+        value = WWN(value)
+    elif isinstance(value, IQN):
+        port_type = 'iscsi'
+    else:
+        assert False, "Unknown type of {0}".format(value)
+    return {'type': port_type, 'address': str(value)}
+
+
+def host_port_from_api(value):
+    _PORT_TYPES = {'fc': WWN, 'iscsi': IQN}
+    return _PORT_TYPES[value['type'].lower()](value['address'])
+
+
+class HostPortListTranslator(ValueTranslator):
+    def _to_api(self, value):
+        return [host_port_to_api(v) for v in value]
+
+    def _from_api(self, value):
+        return [host_port_from_api(v) for v in value]
+
+HostPortListType = TypeInfo(type=list, api_type=list, translator=HostPortListTranslator())
