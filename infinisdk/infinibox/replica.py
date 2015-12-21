@@ -308,7 +308,7 @@ class Replica(InfiniBoxObject):
 
     def is_active(self, *args, **kwargs):
         self._validate_can_check_state()
-        return self.get_state(*args, **kwargs).lower() in ['idle', 'initiating', 'replicating']
+        return self.get_state(*args, **kwargs).lower() in ['idle', 'initiating', 'initial_replication', 'replicating']
 
     def change_role(self, entity_pairs=OMIT):
         data = {'entity_pairs': entity_pairs} if entity_pairs is not OMIT else None
