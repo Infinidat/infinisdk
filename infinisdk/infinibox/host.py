@@ -85,5 +85,10 @@ class Host(InfiniBoxLURelatedObject):
     def get_fc_ports(self):
         return [port for port in self.get_ports() if isinstance(port, WWN)]
 
-    add_fc_port = deprecated("Use add_port() instead")(add_port)
-    remove_fc_port = deprecated("Use remove_port() instead")(remove_port)
+    @deprecated("Use add_port() instead")
+    def add_fc_port(self, *args, **kwargs):
+        return self.add_port(*args, **kwargs)
+
+    @deprecated("Use remove_port() instead")
+    def remove_fc_port(self, *args, **kwargs):
+        return self.remove_port(*args, **kwargs)
