@@ -30,7 +30,7 @@ class InfiniBoxObject(SystemObject):
     def set_metadata_from_dict(self, data_dict):
         """Sets multiple metadata keys/values in the system associated with this object
         """
-        return self.system.api.post(self._get_metadata_uri(), data=data_dict)
+        return self.system.api.put(self._get_metadata_uri(), data=data_dict)
 
     def get_metadata_value(self, key, default=NOTHING):
         """Gets a metadata value, optionally specifying a default
