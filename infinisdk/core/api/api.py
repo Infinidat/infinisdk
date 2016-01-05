@@ -77,6 +77,12 @@ class API(object):
     def urls(self):
         return list(self._urls)
 
+    @property
+    def url(self):
+        if not self._urls:
+            raise RuntimeError('No URLs configured for {0}'.format(self.system))
+        return self._urls[0]
+
     @contextmanager
     def query_preprocessor(self, preprocessor):
         self._preprocessors.append(preprocessor)
