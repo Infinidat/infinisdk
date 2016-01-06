@@ -236,7 +236,7 @@ class API(object):
                 preprocessor(api_request)
 
 
-            _logger.debug("{0} <-- {1} {2}", hostname, http_method.upper(), api_request.url)
+            _logger.trace("{0} <-- {1} {2}", hostname, http_method.upper(), api_request.url)
             if data is not NOTHING:
                 if data != api_request.data:
                     sent_json_object = json.loads(api_request.data)
@@ -256,7 +256,7 @@ class API(object):
             response.end_time = end_time
 
             elapsed = get_timedelta_total_seconds(response.elapsed)
-            _logger.debug("{0} --> {1} {2} (took {3:.04f}s)", hostname, response.status_code, response.reason, elapsed)
+            _logger.trace("{0} --> {1} {2} (took {3:.04f}s)", hostname, response.status_code, response.reason, elapsed)
             returned = Response(response, data)
             resp_data = "..." if self._no_reponse_logs else returned.get_json()
             if self._use_pretty_json and returned.get_json() is not None:
@@ -265,7 +265,7 @@ class API(object):
                     indent=4, separators=(',', ': '))
             else:
                 logged_response_data = resp_data
-            _logger.debug("{0} --> {1}", hostname, logged_response_data)
+            _logger.trace("{0} --> {1}", hostname, logged_response_data)
             if response.status_code != httplib.SERVICE_UNAVAILABLE:
                 if specified_address is None: # need to remember our next API target
                     self._active_url = url
@@ -281,7 +281,7 @@ class API(object):
                     )
         except Exception:
             pass
-        _logger.debug("{0} <-- DATA: {1}" , hostname, data)
+        _logger.trace("{0} <-- DATA: {1}" , hostname, data)
 
     @contextmanager
     def get_no_response_logs_context(self):

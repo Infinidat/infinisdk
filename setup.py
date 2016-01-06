@@ -16,7 +16,7 @@ _INSTALL_REQUIRES = [
     "infi.dtypes.wwn>=0.0.2",
     "infi.dtypes.iqn",
     "infi.pyutils",
-    "logbook>=0.10.0",
+    "logbook>=0.11.0",
     "munch",
     "pact>=1.0.0",
     "requests>=2.4.0",
