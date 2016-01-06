@@ -167,3 +167,11 @@ def test_current_user_proxy(infinibox):
 def test_current_user_roles(infinibox):
     infinidat_roles = infinibox.current_user.get_roles()
     assert infinidat_roles == [defs.enums.users.roles.infinidat.get_name()]
+
+def test_infinibox_hashing(infinibox_simulator):
+    user = infinibox_simulator.auth.get_current_user()
+    infinibox1 = InfiniBox(infinibox_simulator, auth=(user.get_username(), user.get_password()))
+    infinibox2 = InfiniBox(infinibox_simulator, auth=(user.get_username(), user.get_password()))
+    assert infinibox1 == infinibox2
+    assert (not infinibox1 != infinibox2)
+    assert hash(infinibox1) == hash(infinibox2)

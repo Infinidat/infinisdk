@@ -232,6 +232,15 @@ class InfiniBox(APITarget):
     def is_active(self):
         return self.components.system_component.is_active()
 
+    def __hash__(self):
+        return self.get_serial()
+
+    def __eq__(self, other):
+        return self.get_serial() == other.get_serial()
+
+    def __ne__(self, other):
+        return not (self == other)
+
 
 class _CurrentUserProxy(object):
     def __init__(self, system):
