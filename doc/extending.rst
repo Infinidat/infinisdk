@@ -12,8 +12,8 @@ A very common case is adding methods to InfiniSDK objects. Let's assume we want 
 
 .. code-block:: python
 
-   >>> s1 = InfiniBox(system1_address)
-   >>> s2 = InfiniBox(system2_address)
+   >>> s1 = InfiniBox(system1_address, auth = (username, password))
+   >>> s2 = InfiniBox(system2_address, auth = (username, password))
    >>> locations = {s1: "upper floor", s2: "lower floor"}
 
 By default, of course, we don't have such a mechanism:
@@ -44,4 +44,3 @@ Now we can get the location safely:
    'upper floor'
    >>> s2.get_location()
    'lower floor'
-
