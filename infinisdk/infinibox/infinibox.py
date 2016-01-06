@@ -236,6 +236,8 @@ class InfiniBox(APITarget):
         return self.get_serial()
 
     def __eq__(self, other):
+        if not isinstance(other, InfiniBox):
+            return False
         return self.get_serial() == other.get_serial()
 
     def __ne__(self, other):
