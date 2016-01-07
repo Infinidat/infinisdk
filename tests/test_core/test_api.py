@@ -14,7 +14,7 @@ def test_data_none(infinibox):
 
 @pytest.fixture
 def capture(request):
-    handler = logbook.TestHandler(level=logbook.DEBUG)
+    handler = logbook.TestHandler(level=logbook.TRACE)
     handler.push_application()
 
     @request.addfinalizer
