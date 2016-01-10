@@ -126,10 +126,10 @@ class InfiniBox(APITarget):
     def is_mock(self):
         return "mock" in self.get_system_info("name")
 
-    def get_system_info(self, field_name):
-        return self.components.system_component.get_field(field_name,
-                                                          from_cache=True,
-                                                          fetch_if_not_cached=True)
+    def get_system_info(self, field_name, **kwargs):
+        kwargs.setdefault('fetch_if_not_cached', True)
+        kwargs.setdefault('from_cache', True)
+        return self.components.system_component.get_field(field_name, **kwargs)
 
     def get_name(self):
         """
@@ -140,11 +140,11 @@ class InfiniBox(APITarget):
         except CacheMiss:
             return self._get_received_name_or_ip()
 
-    def get_serial(self):
+    def get_serial(self, **kwargs):
         """
         Returns the serial number of the system
         """
-        return self.get_system_info('serial_number')
+        return self.get_system_info('serial_number', **kwargs)
 
     def get_model_name(self):
         """
@@ -202,6 +202,7 @@ class InfiniBox(APITarget):
 
     def _after_login(self):
         self.components.system_component.refresh()
+
         gossip.trigger('infinidat.sdk.after_login', system=self)
 
     def login(self):
@@ -233,12 +234,15 @@ class InfiniBox(APITarget):
         return self.components.system_component.is_active()
 
     def __hash__(self):
-        return self.get_serial()
+        return hash(self.get_name())
 
     def __eq__(self, other):
         if not isinstance(other, InfiniBox):
             return NotImplemented
-        return self.get_serial() == other.get_serial()
+        try:
+            return self.get_serial(fetch_if_not_cached = False) == other.get_serial(fetch_if_not_cached = False)
+        except CacheMiss:
+            return self.get_api_addresses() == other.get_api_addresses()
 
     def __ne__(self, other):
         return not (self == other)

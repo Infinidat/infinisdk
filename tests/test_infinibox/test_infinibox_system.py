@@ -175,3 +175,9 @@ def test_infinibox_hashing(infinibox_simulator):
     assert infinibox1 == infinibox2
     assert (not infinibox1 != infinibox2)
     assert hash(infinibox1) == hash(infinibox2)
+
+
+def test_is_eq_no_api(infinibox, secondary_infinibox):
+    infinibox.api = None
+    secondary_infinibox.api = None
+    assert(infinibox != secondary_infinibox)
