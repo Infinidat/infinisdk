@@ -13,6 +13,7 @@ class NetworkInterface(InfiniBoxObject):
         Field("node", api_name="node_id", creation_parameter=True, use_in_repr=True, mutable=False, type=int, binding=RelatedComponentBinding()),
         Field("state", cached=False),
         Field("type", creation_parameter=True, default="PORT_GROUP"),
+        Field("rate_limit", type=int, mutable=True, creation_parameter=True, optional=True),
         Field("name", creation_parameter=True, mutable=True, default=Autogenerate("pg_{ordinal}")),
     ]
 
