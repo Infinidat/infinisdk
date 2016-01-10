@@ -17,6 +17,7 @@ class NetworkSpace(InfiniBoxObject):
         Field("ips", creation_parameter=False, mutable=False, type=MunchListType),
         Field("properties", creation_parameter=False, mutable=False, type=MunchType),
         Field("automatic_ip_failback", creation_parameter=True, mutable=True, optional=True, type=bool),
+        Field("mtu",  creation_parameter=True, mutable=True, optional=True, type=int)
     ]
 
     @classmethod
