@@ -126,6 +126,7 @@ class InfiniBoxGenericComponentQuery(object):
                     for item in query:
                         items.append(item)
         self._fetched_items = items
+        return self._fetched_items
 
     def __len__(self):
         return len([item for item in self])
