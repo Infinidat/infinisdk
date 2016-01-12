@@ -8,7 +8,7 @@ from ..core.exceptions import ObjectNotFound
 from ..core.type_binder import TypeBinder
 from ..core.translators_and_types import WWNType, CapacityType
 from infi.pyutils.lazy import cached_method
-from .component_query import InfiniBoxComponentQuery
+from .component_query import InfiniBoxComponentQuery, InfiniBoxGenericComponentQuery
 from ..core.bindings import InfiniSDKBinding, ListOfRelatedComponentBinding, RelatedComponentBinding
 
 from collections import defaultdict
@@ -62,6 +62,12 @@ class InfiniBoxSystemComponents(SystemComponentsBinder):
 
     def get_rack_1(self):
         return self._rack_1
+
+    def find(self,component_type = None, *predicates, **kw):
+        if component_type == None:
+            return InfiniBoxGenericComponentQuery(self.system, *predicates, **kw)
+        component_type = self._COMPONENTS_BY_TYPE_NAME[component_type]
+        return component_type.find(self.system, *predicates, **kw)
 
 
 class ComputedIDBinding(InfiniSDKBinding):

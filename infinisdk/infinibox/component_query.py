@@ -92,3 +92,29 @@ class InfiniBoxComponentQuery(object):
 
     def only_fields(self, field_names):
         raise NotImplementedError()  # pragma: no cover
+
+
+class InfiniBoxGenericComponentQuery(object):
+    def __init__(self, system, *predicates, **kw):
+        self.system = system
+        self.predicates = predicates
+        self.kw = kw
+        self._force_fetch = False
+
+    def force_fetching_objects(self):
+        self._force_fetch = True
+        return self
+
+    def __iter__(self):
+        for component_type in self.system.components.get_component_types():
+            query = component_type.find(self.system, *self.predicates, **self.kw)
+            if self._force_fetch:
+                query.force_fetching_objects()
+            for item in query:
+                yield item
+
+    def __len__(self):
+        return len([item for item in self])
+
+    def to_list(self):
+        return list(self)

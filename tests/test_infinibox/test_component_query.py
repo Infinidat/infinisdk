@@ -113,3 +113,16 @@ def test_len_caching_on_empty_lists(infinibox, operation):
         assert not result
 
     [r] = [record for record in handler.records if '<-- GET http://' in record.message]
+
+def test_system_component_find(infinibox):
+    for component_type_name in infinibox.components.get_component_type_names():
+        assert(infinibox.components[component_type_name + "s"].find().to_list() == infinibox.components.find(component_type = component_type_name).to_list())
+
+def test_system_component_find_with_params(infinibox):
+    for component_type_name in infinibox.components.get_component_type_names():
+        assert(infinibox.components.nodes.find(index = 2).to_list() == infinibox.components.find(component_type = 'node', index = 2).to_list())
+
+def test_system_component_find_no_type(infinibox):
+    fetched_types = set(type(component) for component in infinibox.components.find())
+    for component_type in infinibox.components.get_component_types():
+        assert(component_type in fetched_types)
