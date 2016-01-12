@@ -100,18 +100,32 @@ class InfiniBoxGenericComponentQuery(object):
         self.predicates = predicates
         self.kw = kw
         self._force_fetch = False
+        self._fetched_items = None
 
     def force_fetching_objects(self):
         self._force_fetch = True
         return self
 
     def __iter__(self):
-        for component_type in self.system.components.get_component_types():
-            query = component_type.find(self.system, *self.predicates, **self.kw)
-            if self._force_fetch:
-                query.force_fetching_objects()
-            for item in query:
-                yield item
+        for item in self._get_items():
+            yield item
+
+    def _get_items(self):
+        if self._fetched_items is not None:
+            return self._fetched_items
+        items = []
+        with self.system.components.racks.fetch_tree_once_context():
+            with self.system.components.service_clusters.fetch_tree_once_context():
+                fields = set(predicate.field.name for predicate in self.predicates) | set(self.kw)
+                for component_type in self.system.components.get_component_types():
+                    if not fields.issubset(set(field.name for field in component_type.fields)):
+                        continue
+                    query = component_type.find(self.system, *self.predicates, **self.kw)
+                    if self._force_fetch:
+                        query.force_fetching_objects()
+                    for item in query:
+                        items.append(item)
+        self._fetched_items = items
 
     def __len__(self):
         return len([item for item in self])
