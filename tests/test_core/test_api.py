@@ -1,6 +1,7 @@
 import logbook
 import pytest
 from infinisdk.core.api import Autogenerate, OMIT
+from infinisdk.core.config import config
 from infinisdk.core.exceptions import APICommandFailed, ObjectNotFound
 from infinisdk._compat import httplib
 from ..conftest import no_op_context
@@ -22,7 +23,11 @@ def capture(request):
         handler.pop_application()
     return handler
 
-def test_no_response_bal(infinibox, capture):
+@pytest.fixture(params=[True, False])
+def toggle_pretty_response(request, backup_config):
+    config.root.api.log.pretty_json = request.param
+
+def test_no_response_logs(toggle_pretty_response, infinibox, capture):
     with infinibox.api.get_no_response_logs_context():
         infinibox.api.get('system')
     assert len(capture.records) == 3

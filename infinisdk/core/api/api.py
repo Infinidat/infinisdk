@@ -258,11 +258,11 @@ class API(object):
             elapsed = get_timedelta_total_seconds(response.elapsed)
             _logger.trace("{0} --> {1} {2} (took {3:.04f}s)", hostname, response.status_code, response.reason, elapsed)
             returned = Response(response, data)
-            resp_data = "..." if self._no_reponse_logs else returned.get_json()
-            if self._use_pretty_json and returned.get_json() is not None:
-                logged_response_data = json.dumps(
-                    returned.get_json(),
-                    indent=4, separators=(',', ': '))
+            resp_data = returned.get_json()
+            if self._no_reponse_logs:
+                logged_response_data = "..."
+            elif self._use_pretty_json and resp_data is not None:
+                logged_response_data = json.dumps(resp_data, indent=4, separators=(',', ': '))
             else:
                 logged_response_data = resp_data
             _logger.trace("{0} --> {1}", hostname, logged_response_data)
