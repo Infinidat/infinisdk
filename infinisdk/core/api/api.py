@@ -13,7 +13,7 @@ from urlobject import URLObject as URL
 import colorama
 
 from ... import _compat
-from ..._compat import get_timedelta_total_seconds, httplib, iteritems, requests, RequestException, ProtocolError
+from ..._compat import httplib, iteritems, requests, RequestException, ProtocolError
 from ..config import config
 from ..exceptions import (APICommandFailed, APITransportFailure,
                           CommandNotApproved, SystemNotFoundException)
@@ -255,7 +255,7 @@ class API(object):
             response.start_time = start_time
             response.end_time = end_time
 
-            elapsed = get_timedelta_total_seconds(response.elapsed)
+            elapsed = response.elapsed.total_seconds()
             _logger.trace("{0} --> {1} {2} (took {3:.04f}s)", hostname, response.status_code, response.reason, elapsed)
             returned = Response(response, data)
             resp_data = returned.get_json()

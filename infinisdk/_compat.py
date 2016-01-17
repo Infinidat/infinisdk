@@ -87,22 +87,6 @@ else:
 
     from contextlib import ExitStack
 
-
-if sys.version_info < (2, 7):
-
-    def get_timedelta_total_seconds(d):
-        return d.seconds
-
-else:
-
-    def get_timedelta_total_seconds(d):
-        return d.total_seconds()
-try:
-    from collections import OrderedDict
-except ImportError: # python 2.6
-    from ordereddict import OrderedDict
-
-
 if PY2:
     #Yucky, but apparently that's the only way to do this
     exec("""

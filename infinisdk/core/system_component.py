@@ -1,4 +1,5 @@
-from .._compat import itervalues, iterkeys, OrderedDict
+from collections import OrderedDict
+from .._compat import itervalues, iterkeys
 from .type_binder import TypeBinder
 
 class SystemComponentsBinder(TypeBinder):
