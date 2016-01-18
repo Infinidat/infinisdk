@@ -57,7 +57,7 @@ def incompatible_system(infinibox_simulator):
     match = re.match(r"^(\d+)\.(\d+).+", version)
     major = int(match.group(1))
     minor = int(match.group(2))
-    infinibox_simulator.set_version('{0}.{1}'.format(major - 1, minor))
+    infinibox_simulator.set_version('1.4')
 
     # simply initializing a system does not carry out any API commands
     user = infinibox_simulator.auth.get_current_user()
