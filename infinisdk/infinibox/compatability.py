@@ -13,6 +13,9 @@ class Compatability(object):
         self._features = None
         self._system_version = None
 
+    def is_initialized(self):
+        return self._features is not None
+
     def can_run_on_system(self):
         version_string = self.system.get_version().split('-', 1)[0]
         system_version = self.normalize_version_string(version_string)

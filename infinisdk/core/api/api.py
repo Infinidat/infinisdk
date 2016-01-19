@@ -52,26 +52,27 @@ class API(object):
         super(API, self).__init__()
         self._preprocessors = []
         self.system = target
-        self._auth = auth
         self._use_ssl = use_ssl
         self._ssl_cert = ssl_cert
         self._default_request_timeout = None
         self._interactive = False
         self._auto_retry_predicates = {}
-        self.reinitialize_session()
+        self.reinitialize_session(auth=auth)
         self._urls = [self._url_from_address(address, use_ssl) for address in target.get_api_addresses()]
         self._active_url = None
         self._checked_version = False
         self._no_reponse_logs = False
         self._use_pretty_json = config.root.api.log.pretty_json
 
-    def reinitialize_session(self):
+    def reinitialize_session(self, auth=None):
+        if auth is None:
+            auth = self._auth
         self._session = requests.Session()
         assert self._session.cert is None
         self._session.cert = self._ssl_cert
         if not self._ssl_cert:
             self._session.verify = False
-        self._session.auth = self._auth
+        self.set_auth(auth)
 
     @property
     def urls(self):
@@ -139,14 +140,13 @@ class API(object):
             if password is NOTHING:
                 raise TypeError("Password not specified")
             username = username_or_auth
-
-        self._session.auth = (username, password)
+        self._auth = (username, password)
 
     def get_auth(self):
         """
         Returns a tuple of the current username/password used by the API
         """
-        return self._session.auth
+        return self._auth
 
     @contextmanager
     def get_auth_context(self, username, password):
@@ -194,6 +194,9 @@ class API(object):
 
         returned = None
         kwargs.setdefault("timeout", self._default_request_timeout)
+        auth = None
+        if not self.system.compat.is_initialized() or not self.system.compat.has_auth_sessions():
+            auth = self._auth
         raw_data = kwargs.pop("raw_data", False)
         data = kwargs.pop("data", NOTHING)
         sent_json_object = None
@@ -228,7 +231,7 @@ class API(object):
                 full_url = self._with_approved(full_url)
 
             hostname = full_url.hostname
-            api_request = requests.Request(http_method, full_url, data=data if data is not NOTHING else None, params=url_params, headers=headers)
+            api_request = requests.Request(http_method, full_url, data=data if data is not NOTHING else None, params=url_params, headers=headers, auth=auth)
             for preprocessor in self._preprocessors:
                 preprocessor(api_request)
 
