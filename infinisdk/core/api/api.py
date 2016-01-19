@@ -158,11 +158,14 @@ class API(object):
         """
         auth = (username, password)
         prev = self.get_auth()
+        prev_cookies = self._session.cookies.copy()
+        self._session.cookies.clear()
         self.set_auth(*auth)
         try:
             yield
         finally:
             self.set_auth(*prev)
+            self._session.cookies.update(prev_cookies)
 
     @deprecated(message="Use get_auth_context instead")
     def auth_context(self, *args, **kwargs):
