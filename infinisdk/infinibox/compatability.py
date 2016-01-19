@@ -95,6 +95,9 @@ class Compatability(object):
     def has_initiators(self):
         return self.get_version_as_float() >= 2.2
 
+    def has_auth_sessions(self):
+        return self._has_feature('auth_sessions') or self._has_feature('api/auth_sessions')
+
 
 _VERSION_TUPLE_LEN = 5
 
