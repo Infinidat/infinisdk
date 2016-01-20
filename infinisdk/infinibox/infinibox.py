@@ -1,36 +1,39 @@
 import itertools
-import gossip
+import os
 import weakref
 
+import gossip
 from sentinels import NOTHING
 from urlobject import URLObject as URL
 
+from ..__version__ import __version__
 from .._compat import iteritems
 from ..core.api import APITarget
 from ..core.config import config, get_ini_option
+from ..core.exceptions import CacheMiss, VersionNotSupported
 from ..core.object_query import LazyQuery
-from ..core.exceptions import VersionNotSupported, CacheMiss
 from ..core.utils import deprecated
-from .host_cluster import HostCluster
-from .components import InfiniBoxSystemComponents
+from ..core.utils.environment import get_hostname, get_logged_in_username
 from .capacities import InfiniBoxSystemCapacity
+from .compatability import Compatability
+from .components import InfiniBoxSystemComponents
+from .cons_group import ConsGroup
 from .events import Events
+from .export import Export
+from .filesystem import Filesystem
 from .host import Host
+from .host_cluster import HostCluster
+from .initiator import Initiator
+from .ldap_config import LDAPConfig
+from .link import Link
+from .network_interface import NetworkInterface
+from .network_space import NetworkSpace
+from .notification_rule import NotificationRule
+from .notification_target import NotificationTarget
 from .pool import Pool
+from .replica import Replica
 from .user import User
 from .volume import Volume
-from .filesystem import Filesystem
-from .export import Export
-from .network_space import NetworkSpace
-from .network_interface import NetworkInterface
-from .ldap_config import LDAPConfig
-from .notification_target import NotificationTarget
-from .notification_rule import NotificationRule
-from .link import Link
-from .replica import Replica
-from .compatability import Compatability
-from .cons_group import ConsGroup
-from .initiator import Initiator
 
 try:
     from infinisim.core.context import lookup_simulator_by_address
@@ -212,9 +215,15 @@ class InfiniBox(APITarget):
         Verifies the current user against the system
         """
         username, password = self.api.get_auth()
-        res = self.api.post("users/login", data={"username": username, "password": password})
+        login_data = {"username": username, "password": password}
+        if self.compat.has_auth_sessions():
+            login_data['clientid'] = self._get_client_id()
+        res = self.api.post("users/login", data=login_data)
         self._after_login()
         return res
+
+    def _get_client_id(self):
+        return 'infinisdk.v{}.{}.{}.{}'.format(__version__, get_hostname(), get_logged_in_username(), os.getpid())
 
     def _get_v1_metadata_generator(self):
         system_metadata = self.api.get('metadata').get_result()
