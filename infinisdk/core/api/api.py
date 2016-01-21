@@ -156,6 +156,7 @@ class API(object):
         >>> with system.api.get_auth_context('username', 'password'):
         ...     ... # execute operations as 'username'
         """
+        _logger.debug('Changing credentials to {}', username)
         auth = (username, password)
         prev = self.get_auth()
         prev_cookies = self._session.cookies.copy()
@@ -164,6 +165,7 @@ class API(object):
         try:
             yield
         finally:
+            _logger.debug('Changing credentials back to {[0]}', prev)
             self.set_auth(*prev)
             self._session.cookies.update(prev_cookies)
 
