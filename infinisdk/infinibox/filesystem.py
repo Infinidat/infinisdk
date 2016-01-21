@@ -3,12 +3,10 @@ from ..core.q import Q
 from ..core import Field, CapacityType, MillisecondsDatetimeType
 from ..core.api.special_values import Autogenerate
 from ..core.bindings import RelatedObjectBinding
-from .base_data_entity import BaseDataEntity
+from .dataset import Dataset
 
 
-# TODO: use a common baseclass for volume and filesystem
-
-class Filesystem(BaseDataEntity):
+class Filesystem(Dataset):
 
     FIELDS = [
         Field("id", type=int, is_identity=True,
@@ -33,7 +31,7 @@ class Filesystem(BaseDataEntity):
         Field("write_protected", type=bool, mutable=True, creation_parameter=True, optional=True, is_filterable=True, is_sortable=True),
         Field("depth", cached=True, type=int, is_sortable=True, is_filterable=True),
         Field("mapped", type=bool, is_sortable=True, is_filterable=True),
-        Field("has_children", type=bool),
+        Field("has_children", type=bool, add_getter=False),
         Field("root_mode", creation_parameter=True, optional=True),
     ]
 

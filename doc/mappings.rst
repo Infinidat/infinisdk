@@ -136,7 +136,7 @@ Of course there is a much more convenient shortcut for unmapping a volume from a
 Clusters and Hosts
 ------------------
 
-Manipulating clusters is done with the :class:`.Cluster` class:
+Manipulating clusters is done with the :class:`infinisdk.infinibox.host_cluster.HostCluster` class:
 
 .. code-block:: python
 
@@ -156,4 +156,4 @@ Manipulating clusters is done with the :class:`.Cluster` class:
 
 .. seealso:: 
     * :mod:`Host API documentation <infinisdk.infinibox.host>`
-    * :mod:`Cluster API documentation <infinisdk.infinibox.cluster>`
+    * :mod:`Cluster API documentation <infinisdk.infinibox.host_cluster>`

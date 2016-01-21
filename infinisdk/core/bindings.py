@@ -57,7 +57,7 @@ class RelatedObjectBinding(InfiniSDKBinding):
         return obj.id
 
     def get_value_from_api_value(self, system, objtype, obj, value):
-        if value == self._value_for_none:
+        if value == self._value_for_none or value is None:
             return None
         return getattr(system, self._collection_name).get_by_id_lazy(value)
 

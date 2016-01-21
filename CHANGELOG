@@ -1,0 +1,7 @@
+Version 57.0 (Released 2016-01-21)
+----------------------------------
+
+* Added support for consistency groups
+* Added support for Remote Replication
+* Added support for NAS
+* Many more bugfixes and improvements

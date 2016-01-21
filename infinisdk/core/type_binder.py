@@ -43,9 +43,9 @@ class TypeBinder(object):
             system.volumes.find(system.volumes.fields.size > GiB)
             system.volumes.find(Q.name != 'some_name')
 
-        :rtype: Lazy query result object.
+        :returns: Lazy query result object.
 
-        .. seealso:: :class:`infinisdk.core.object_query:ObjectQuery`
+        .. seealso:: :class:`infinisdk.core.object_query.ObjectQuery`
         """
         return self.object_type.find(self.system, *predicates, **kw)
 
@@ -75,7 +75,7 @@ class TypeBinder(object):
 
     def get(self, *predicates, **kw):
         """
-        Finds exactly one object matching criteria. Raises :class:`ObjectNotFound` if not found, :class:`TooManyObjectsFound` if more than one is found
+        Finds exactly one object matching criteria. Raises :class:`.ObjectNotFound` if not found, :class:`.TooManyObjectsFound` if more than one is found
         """
         returned = self.find(*predicates, **kw)
         if not returned:
@@ -87,7 +87,7 @@ class TypeBinder(object):
 
     def safe_get(self, *predicates, **kw):
         """
-        Like :func:`.get`, only returns ``None`` if no objects were found
+        Like :meth:`.TypeBinder.get`, only returns ``None`` if no objects were found
         """
         try:
             return self.get(*predicates, **kw)

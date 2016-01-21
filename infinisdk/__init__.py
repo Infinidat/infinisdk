@@ -16,6 +16,7 @@ def _install_hooks():
             full_hook_name = hook_name_template.format(operation)
             gossip.define(full_hook_name, tags=obj_type_name)
     gossip.define(_SDK_HOOK('object_operation_failure'), tags=obj_type_name)
+    gossip.define(_SDK_HOOK('object_creation_failure'), tags=obj_type_name)
 
     gossip.define(_SDK_HOOK("begin_fork"),  tags=['infinibox', 'volume', 'filesystem'])
     gossip.define(_SDK_HOOK("cancel_fork"), tags=['infinibox', 'volume', 'filesystem'])
@@ -29,14 +30,8 @@ def _install_hooks():
 
     gossip.define(_SDK_HOOK('pre_fields_update'), tags=['infinibox'])
 
-    gossip.define(_SDK_HOOK('pre_node_phase_in'), tags=['infinibox', 'node1', 'node2', 'node3'])
-    gossip.define(_SDK_HOOK('post_node_phase_in'), tags=['infinibox', 'node1', 'node2', 'node3'])
-    gossip.define(_SDK_HOOK('node_phase_in_failure'), tags=['infinibox', 'node1', 'node2', 'node3'])
-    gossip.define(_SDK_HOOK('node_phased_in'), tags=['infinibox', 'node1', 'node2', 'node3'])
-
-    gossip.define(_SDK_HOOK('pre_node_phase_out'), tags=['infinibox', 'node1', 'node2', 'node3'])
-    gossip.define(_SDK_HOOK('post_node_phase_out'), tags=['infinibox', 'node1', 'node2', 'node3'])
-    gossip.define(_SDK_HOOK('node_phase_out_failure'), tags=['infinibox', 'node1', 'node2', 'node3'])
+    gossip.define(_SDK_HOOK('pre_cons_group_add_member'), tags=['infinibox'])
+    gossip.define(_SDK_HOOK('post_cons_group_add_member'), tags=['infinibox'])
 
     gossip.define(_SDK_HOOK('replica_snapshot_created'), tags=['infinibox'])
     gossip.define(_SDK_HOOK('replica_after_change_role'), tags=['infinibox'])

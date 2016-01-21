@@ -17,6 +17,7 @@ from ..._compat import get_timedelta_total_seconds, httplib, iteritems, requests
 from ..config import config
 from ..exceptions import (APICommandFailed, APITransportFailure,
                           CommandNotApproved, SystemNotFoundException)
+from ..utils import deprecated
 from .special_values import translate_special_values
 
 
@@ -25,8 +26,8 @@ _RETRY_REQUESTS_EXCEPTION_TYPES = (RequestException, socket.error, ProtocolError
 _logger = Logger(__name__)
 
 def _get_request_delegate(http_method):
-    def returned(self, *args, **kwargs):
-        return self.request(http_method, *args, **kwargs)
+    def returned(self, path, **kwargs):
+        return self.request(http_method, path=path, **kwargs)
     returned.__name__ = http_method
     returned.__doc__ = "Shortcut for :func:`.request({0!r}) <API.request>`".format(http_method)
     return returned
@@ -62,6 +63,7 @@ class API(object):
         self._active_url = None
         self._checked_version = False
         self._no_reponse_logs = False
+        self._use_pretty_json = config.root.api.log.pretty_json
 
     def reinitialize_session(self):
         self._session = requests.Session()
@@ -70,7 +72,6 @@ class API(object):
         if not self._ssl_cert:
             self._session.verify = False
         self._session.auth = self._auth
-        self._session.headers["content-type"] = "application/json"
 
     @property
     def urls(self):
@@ -148,11 +149,11 @@ class API(object):
         return self._session.auth
 
     @contextmanager
-    def auth_context(self, username, password):
+    def get_auth_context(self, username, password):
         """
         Changes the API authentication information for the duration of the context:
 
-        >>> with system.api.auth_context('username', 'password'):
+        >>> with system.api.get_auth_context('username', 'password'):
         ...     ... # execute operations as 'username'
         """
         auth = (username, password)
@@ -162,6 +163,10 @@ class API(object):
             yield
         finally:
             self.set_auth(*prev)
+
+    @deprecated(message="Use get_auth_context instead")
+    def auth_context(self, *args, **kwargs):
+        return self.get_auth_context(*args, **kwargs)
 
     get = _get_request_delegate("get")
     put = _get_request_delegate("put")
@@ -173,7 +178,7 @@ class API(object):
         """
         Sends a request to the system API interface
 
-        :rtype: :class:`.Response`
+        :returns: :class:`.Response`
         """
         check_version = kwargs.pop("check_version", True)
         if check_version and not self._checked_version and config.root.check_version_compatibility:
@@ -187,15 +192,24 @@ class API(object):
         returned = None
         kwargs.setdefault("timeout", self._default_request_timeout)
         raw_data = kwargs.pop("raw_data", False)
-        data = kwargs.pop("data", None)
+        data = kwargs.pop("data", NOTHING)
         sent_json_object = None
-        if data is not None:
+        headers = kwargs.pop('headers', None)
+        if headers is None:
+            headers = {}
+        else:
+            headers = headers.copy()
+
+        if data is not NOTHING:
+            headers['Content-type'] = 'application/json'
             if raw_data:
                 sent_json_object = data
             else:
                 data = translate_special_values(data)
                 sent_json_object = data
                 data = json.dumps(data)
+        else:
+            assert raw_data is False, "Cannot handle raw_data with no data"
 
         url_params = kwargs.pop('params', None)
         if url_params is not None:
@@ -211,27 +225,41 @@ class API(object):
                 full_url = self._with_approved(full_url)
 
             hostname = full_url.hostname
-            api_request = requests.Request(http_method, full_url, data=data, params=url_params)
+            api_request = requests.Request(http_method, full_url, data=data if data is not NOTHING else None, params=url_params, headers=headers)
             for preprocessor in self._preprocessors:
                 preprocessor(api_request)
 
 
             _logger.debug("{0} <-- {1} {2}", hostname, http_method.upper(), api_request.url)
-            if data is not None:
+            if data is not NOTHING:
                 if data != api_request.data:
                     sent_json_object = json.loads(api_request.data)
                 self._log_sent_data(hostname, data, sent_json_object)
 
             prepared = self._session.prepare_request(api_request)
             gossip.trigger('infinidat.sdk.before_api_request', request=prepared)
-            response = self._session.send(prepared, **kwargs)
+            start_time = flux.current_timeline.time()
+            try:
+                response = self._session.send(prepared, **kwargs)
+            except Exception as e:
+                e.api_request_obj = api_request
+                raise
+            end_time = flux.current_timeline.time()
             gossip.trigger('infinidat.sdk.after_api_request', request=prepared, response=response)
+            response.start_time = start_time
+            response.end_time = end_time
 
             elapsed = get_timedelta_total_seconds(response.elapsed)
             _logger.debug("{0} --> {1} {2} (took {3:.04f}s)", hostname, response.status_code, response.reason, elapsed)
             returned = Response(response, data)
             resp_data = "..." if self._no_reponse_logs else returned.get_json()
-            _logger.debug("{0} --> {1}", hostname, resp_data)
+            if self._use_pretty_json and returned.get_json() is not None:
+                logged_response_data = json.dumps(
+                    returned.get_json(),
+                    indent=4, separators=(',', ': '))
+            else:
+                logged_response_data = resp_data
+            _logger.debug("{0} --> {1}", hostname, logged_response_data)
             if response.status_code != httplib.SERVICE_UNAVAILABLE:
                 if specified_address is None: # need to remember our next API target
                     self._active_url = url
@@ -250,13 +278,17 @@ class API(object):
         _logger.debug("{0} <-- DATA: {1}" , hostname, data)
 
     @contextmanager
-    def no_response_logs_context(self):
+    def get_no_response_logs_context(self):
         prev = self._no_reponse_logs
         self._no_reponse_logs = True
         try:
             yield
         finally:
             self._no_reponse_logs = prev
+
+    @deprecated(message="Use get_no_response_logs_context instead")
+    def no_response_logs_context(self):
+        return self.get_no_response_logs_context()
 
     def add_auto_retry(self, retry_predicate, max_retries=1, sleep_seconds=None):
         if sleep_seconds is None: # backwards compatibility
@@ -284,9 +316,10 @@ class API(object):
                 except _RETRY_REQUESTS_EXCEPTION_TYPES as e:
                     request_kwargs = dict(url=path, method=http_method, **kwargs)
                     _logger.debug('Exception while sending API command to {0}: {1}', self.system, e)
-                    if 'gaierror' in str(e):
-                        hostname = URL(e.request.url).hostname
-                        raise SystemNotFoundException("Cannot connect {0}".format(hostname), hostname)
+                    error_str = str(e)
+                    if 'gaierror' in error_str or 'nodename nor servname' in error_str or \
+                       'Name or service not known' in error_str:
+                        raise SystemNotFoundException(e)
                     raise APITransportFailure(request_kwargs, e)
 
                 if assert_success:
@@ -361,6 +394,7 @@ class Response(object):
         self.url = URL(resp.request.url)
         #: Data sent to on
         self.sent_data = data
+        self._cached_json = NOTHING
 
     @property
     def status_code(self):
@@ -370,10 +404,14 @@ class Response(object):
         """
         :returns: The JSON object returned from the system, or None if no json could be decoded
         """
-        try:
-            return self.response.json()
-        except (ValueError, TypeError):
-            return None
+        returned = self._cached_json
+        if returned is NOTHING:
+            try:
+                returned = self.response.json()
+            except (ValueError, TypeError):
+                returned = None
+            self._cached_json = returned
+        return returned
 
     def _get_result(self):
         return self.get_json()["result"]
@@ -413,9 +451,9 @@ class Response(object):
         try:
             self.response.raise_for_status()
         except requests.exceptions.HTTPError as e:
-            if self.sent_data and 'password' in self.sent_data:
+            if self.sent_data is not NOTHING  and self.sent_data and 'password' in self.sent_data:
                 self.sent_data = '<HIDDEN>'
-            raise APICommandFailed(self)
+            raise APICommandFailed.raise_from_response(self)
 
 
 class _AutoRetryContext(object):

@@ -3,10 +3,10 @@ from .._compat import ExitStack, zip
 from ..core.field import Field
 from ..core.utils import deprecated
 from ..core.system_component import SystemComponentsBinder
-from ..core.system_object import SystemObject
+from ..core.system_object import BaseSystemObject
 from ..core.exceptions import ObjectNotFound
 from ..core.type_binder import TypeBinder
-from ..core.translators_and_types import WWNType
+from ..core.translators_and_types import WWNType, CapacityType
 from infi.pyutils.lazy import cached_method
 from .component_query import InfiniBoxComponentQuery
 from ..core.bindings import InfiniSDKBinding, ListOfRelatedComponentBinding, RelatedComponentBinding
@@ -173,7 +173,7 @@ class InfiniBoxComponentBinder(TypeBinder):
             service_cluster_type.construct(self.system, cluster_data, None)
 
 
-class InfiniBoxSystemComponent(SystemObject):
+class InfiniBoxSystemComponent(BaseSystemObject):
     BINDER_CLASS = InfiniBoxComponentBinder
     BASE_URL = URL("components")
     FIELDS = [
@@ -200,14 +200,6 @@ class InfiniBoxSystemComponent(SystemObject):
     def get_url_path(cls, system):
         # Currently there is no url, in infinibox, to get all instances of specific component
         raise NotImplementedError()  # pragma: no cover
-
-    @classmethod
-    def get_type_name(cls):
-        return cls.__name__.lower()
-
-    @classmethod
-    def get_plural_name(cls):
-        return "{0}s".format(cls.get_type_name())
 
     @classmethod
     def find(cls, system, *predicates, **kw):
@@ -301,6 +293,7 @@ class Node(InfiniBoxSystemComponent):
     FIELDS = [
         Field("index", api_name="id", type=int, cached=True),
         Field("name", cached=True),
+        Field("model", cached=True),
         Field("fc_ports", type=list, binding=ListOfRelatedComponentBinding()),
         Field("eth_ports", type=list, binding=ListOfRelatedComponentBinding()),
         Field("drives", type=list, binding=ListOfRelatedComponentBinding("local_drives")),
@@ -462,6 +455,7 @@ class Drive(InfiniBoxSystemComponent):
         Field("enclosure_index", type=int, cached=True),
         Field("enclosure", api_name="enclosure_index", type=int, cached=True, binding=RelatedComponentBinding()),
         Field("serial_number"),
+        Field("capacity", api_name="bytes_capacity", type=CapacityType),
         Field("state", cached=False),
     ]
 
@@ -489,9 +483,11 @@ class Service(InfiniBoxSystemComponent):
         except ObjectNotFound:
             raise NotImplementedError("This service ({0}) doesn't support CLM".format(self.get_name()))
 
+    @deprecated("Use Service.op.activate instead")
     def start(self):
         return self.get_service_cluster().start(node=self.get_parent())
 
+    @deprecated("Use Service.op.deactivate instead")
     def stop(self):
         return self.get_service_cluster().stop(node=self.get_parent())
 
@@ -499,7 +495,7 @@ class Service(InfiniBoxSystemComponent):
         return self.get_state() == 'ACTIVE'
 
     def is_inactive(self):
-        return self.get_state() == 'INACTIVE'
+        return self.get_state() in ('INACTIVE', 'PROCESS_FINISHED', 'SHUTDOWN', 'INVALID')  # Workaround for INFINIBOX-18309 & INFINIBOX-18308 & INFINIBOX-18647 & INFINIBOX-17256
 
     def is_master(self):
         return self.get_role() == 'MASTER'
@@ -539,6 +535,7 @@ class ServiceCluster(InfiniBoxSystemComponent):
         return [self.system.components.nodes.get(index=service_info['node_id']).get_service(self.get_name())
                 for service_info in self.get_field('node_states')]
 
+    @deprecated("Use ServiceCluster.op.activate instead")
     def start(self, node=None):
         if node:
             data = {'node_id': node.get_index()}
@@ -550,6 +547,7 @@ class ServiceCluster(InfiniBoxSystemComponent):
         self.system.api.post(self.get_this_url_path().add_path('start'), data=data)
         return pact
 
+    @deprecated("Use ServiceCluster.op.deactivate instead")
     def stop(self, node=None):
         if node:
             data = {'node_id': node.get_index()}

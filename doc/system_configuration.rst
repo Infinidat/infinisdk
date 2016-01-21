@@ -46,6 +46,7 @@ Creating SNMP targets:
 Querying SNMP targets:
 
 .. code-block:: python
+
       >>> for snmp_target in system.notification_targets.find(protocol='SNMP'):
       ...     pass
 

@@ -20,15 +20,14 @@ class Events(EventsBase):
     def get_levels_name_to_number_mapping(self):
         return dict((level_info['name'], level_info['value']) for level_info in self._get_events_types()['levels'])
 
+    def _get_anti_flooding_path(self):
+        return "config/mgmt/events.flooding_detector.enabled"
 
-class EmailRule(SystemObject):
+    def is_anti_flooding_enabled(self):
+        return self.system.api.get(self._get_anti_flooding_path()).get_result()
 
-    URL_PATH = "/api/rest/events/mail"
+    def disable_anti_flooding(self):
+        self.system.api.put(self._get_anti_flooding_path(), data=False)
 
-    FIELDS = [
-        Field("id", type=int, is_identity=True, is_filterable=True, is_sortable=True),
-        Field("visibility", creation_parameter=True, default="CUSTOMER", is_filterable=True, is_sortable=True),
-        Field("filters", creation_parameter=True, type=list, default=list),
-        Field("recipients", creation_parameter=True, type=list, default=["a@a.com"]),
-        Field("name", creation_parameter=True, default=Autogenerate("rule_{timestamp}"), is_filterable=True, is_sortable=True),
-    ]
+    def enable_anti_flooding(self):
+        self.system.api.put(self._get_anti_flooding_path(), data=True)

@@ -1,7 +1,4 @@
 # -*- mode: python -*-
-import flux
-import arrow
-import datetime
 from contextlib import contextmanager
 from infinisim.infinibox import Infinibox as Simulator
 from infinisdk import InfiniBox
@@ -11,14 +8,10 @@ def doctest_context():
     simulator = Simulator()
     simulator.activate()
     system = InfiniBox(simulator, auth=('infinidat', '123456'))
-    pool = system.pools.create()
-    volume = system.volumes.create(pool=pool)
     try:
         yield {
-            "current_time": arrow.get(flux.current_timeline.time()).replace(days=+15),
             "system": system,
-            "volume": volume,
-            "pool": pool,
+            "pool": system.pools.create(),
         }
     finally:
         simulator.deactivate()

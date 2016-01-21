@@ -3,13 +3,18 @@ import os
 from .._compat import ConfigParser
 
 import confetti
-from packaging.specifiers import SpecifierSet
 
 config = confetti.Config(dict(
 
     check_version_compatibility=True,
 
     ini_file_path="~/.infinidat/infinisdk.ini",
+
+    api={
+        'log': {
+            'pretty_json': False,
+        }
+    },
 
     defaults=dict(
         system_api_port=80,
@@ -32,7 +37,7 @@ config = confetti.Config(dict(
     infinibox=dict(
 
         compatible_versions = [
-            SpecifierSet(">=1.5"),
+            "ge:1.5",
         ],
 
         defaults=dict(
@@ -48,6 +53,7 @@ config = confetti.Config(dict(
             "APPROVAL_REQUIRED_VOLUME_HAS_CHILDREN",
         )),
     ),
+
 ))
 
 _cached_ini_parser = None

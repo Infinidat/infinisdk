@@ -130,7 +130,7 @@ Once an object is obtained (either by creation or querying as described further 
 		True
 
 
-All fields can be accessed via the :meth:`get_field <infinisdk.core.system_object.SystemObject.get_field>` / :meth:`update_field <infinisdk.core.system_object.SystemObject.update_field>` methods:
+All fields can be accessed via the :meth:`.SystemObject.get_field` / :meth:`.SystemObject.update_field` methods:
 
 .. code-block:: python
 

@@ -93,6 +93,10 @@ class _DeprecatedFunction(object):
                 returned += "   {0}".format(self._message)  # pylint: disable=no-member
         return returned
 
+    @__doc__.setter
+    def __doc__(self, doc):
+        self._get_underlying_func().__doc__ = doc
+
 
 
 def deprecated(func=None, message=None):

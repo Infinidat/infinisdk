@@ -3,10 +3,10 @@ from storage_interfaces.scsi.abstracts import ScsiVolume
 from ..core.type_binder import TypeBinder
 from ..core import Field, CapacityType, MillisecondsDatetimeType
 from ..core.exceptions import InfiniSDKException, ObjectNotFound, TooManyObjectsFound
-from ..core.api.special_values import Autogenerate
+from ..core.api.special_values import Autogenerate, SpecialValue, OMIT
 from ..core.bindings import RelatedObjectBinding
 from ..core.utils import deprecated, DONT_CARE
-from .base_data_entity import BaseDataEntity
+from .dataset import Dataset
 from .lun import LogicalUnit, LogicalUnitContainer
 from .scsi_serial import SCSISerial
 
@@ -18,8 +18,9 @@ class VolumesBinder(TypeBinder):
         Creates multiple volumes with a single call. Parameters are just like ``volumes.create``, only with the
         addition of the ``count`` parameter
 
+        Returns: list of volumes
+
         :param count: number of volumes to create. Defaults to 1.
-        :rtype: list of volumes
         """
         name = kwargs.pop('name', None)
         if name is None:
@@ -28,8 +29,48 @@ class VolumesBinder(TypeBinder):
         return [self.create(*args, name='{0}_{1}'.format(name, i), **kwargs)
                 for i in range(1, count + 1)]
 
+    def create_group_snapshot(self, volumes, snap_prefix=Autogenerate('{ordinal}'), snap_suffix=OMIT):
+        """
+        Creates multiple snapshots with a single consistent point-in-time, returning the snapshots
+        in respective order to parent volumes
 
-class Volume(BaseDataEntity):
+        :param volumes: list of volumes we should create a snapshot of
+        """
+        volumes = list(volumes)
+        returned = []
+        for v in volumes:
+            v.trigger_begin_fork()
+        try:
+            resp = self.system.api.post('volumes/group_snapshot', data={
+                'snap_prefix': snap_prefix,
+                'snap_suffix': snap_suffix,
+                'entities': [
+                    {'id': v.id}
+                    for v in volumes
+                ]
+            })
+        except:
+            for v in volumes:
+                v.trigger_cancel_fork()
+            raise
+        else:
+            snaps_by_parent_id = {}
+            for entity in resp.get_result():
+                snaps_by_parent_id[entity['parent_id']] = self.object_type(self.system, entity)
+            for v in volumes:
+                snap = snaps_by_parent_id.get(v.id)
+                if snap is None:
+                    _logger.warning('No snapshot was created for {0} in group snapshot operation', v)
+                    v.trigger_cancel_fork()
+                else:
+                    v.trigger_finish_fork(snap)
+                returned.append(snap)
+
+        return returned
+
+
+
+class Volume(Dataset):
 
     BINDER_CLASS = VolumesBinder
 
@@ -45,7 +86,8 @@ class Volume(BaseDataEntity):
         Field("tree_allocated", type=CapacityType),
         Field("pool", type='infinisdk.infinibox.pool:Pool', api_name="pool_id", creation_parameter=True, is_filterable=True, is_sortable=True,
               binding=RelatedObjectBinding()),
-
+        Field("cons_group", type='infinisdk.infinibox.cons_group:ConsGroup', api_name="cg_id", is_filterable=True, is_sortable=True,
+              binding=RelatedObjectBinding('cons_groups', None)),
         Field("type", cached=True, is_filterable=True, is_sortable=True),
         Field("parent", type='infinisdk.infinibox.volume:Volume', cached=True, api_name="parent_id",
                 binding=RelatedObjectBinding('volumes'), is_filterable=True),
@@ -59,10 +101,17 @@ class Volume(BaseDataEntity):
               , is_filterable=True, is_sortable=True),
         Field("depth", cached=True, type=int, is_sortable=True, is_filterable=True),
         Field("mapped", type=bool, is_sortable=True, is_filterable=True),
-        Field("has_children", type=bool),
+        Field("has_children", type=bool, add_getter=False),
         Field('rmr_source', type=bool),
         Field('rmr_target', type=bool),
     ]
+
+    @classmethod
+    def create(cls, system, **fields):
+        pool = fields.get('pool')
+        if pool and not isinstance(pool, SpecialValue):
+            pool.refresh('allocated_physical_capacity', 'free_physical_capacity', 'free_virtual_capacity', 'reserved_capacity')
+        return super(Volume, cls).create(system, **fields)
 
     @deprecated(message="Use volume.is_master instead")
     def is_master_volume(self):

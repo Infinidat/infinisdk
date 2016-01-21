@@ -14,7 +14,7 @@ from ..core.utils import deprecated
 from .host_cluster import HostCluster
 from .components import InfiniBoxSystemComponents
 from .capacities import InfiniBoxSystemCapacity
-from .events import EmailRule, Events
+from .events import Events
 from .host import Host
 from .pool import Pool
 from .user import User
@@ -25,9 +25,12 @@ from .network_space import NetworkSpace
 from .network_interface import NetworkInterface
 from .ldap_config import LDAPConfig
 from .notification_target import NotificationTarget
+from .notification_rule import NotificationRule
 from .link import Link
 from .replica import Replica
 from .compatability import Compatability
+from .cons_group import ConsGroup
+from .initiator import Initiator
 
 try:
     from infinisim.core.context import lookup_simulator_by_address
@@ -36,9 +39,9 @@ except ImportError:
 
 
 class InfiniBox(APITarget):
-    OBJECT_TYPES = [Volume, Pool, Host, HostCluster, User, EmailRule, Filesystem, Export,
+    OBJECT_TYPES = [Volume, Pool, Host, HostCluster, User, Filesystem, Export,
                     NetworkSpace, NetworkInterface, Link, Replica, LDAPConfig,
-                    NotificationTarget]
+                    NotificationTarget, NotificationRule, ConsGroup, Initiator]
     SYSTEM_EVENTS_TYPE = Events
     SYSTEM_COMPONENTS_TYPE = InfiniBoxSystemComponents
 
@@ -225,6 +228,9 @@ class InfiniBox(APITarget):
         if self.compat.get_metadata_version() < 2:
             return self._get_v1_metadata_generator()
         return self._get_v2_metadata_generator()
+
+    def is_active(self):
+        return self.components.system_component.is_active()
 
 
 class _CurrentUserProxy(object):

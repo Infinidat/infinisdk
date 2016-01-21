@@ -47,6 +47,7 @@ infinibox.pools
 
 .. autoclass:: Pool
    :members:
+   :inherited-members:
 
 infinibox.hosts
 ~~~~~~~~~~~~~~~
@@ -57,11 +58,13 @@ infinibox.hosts
 
 .. autoclass:: HostBinder
    :members:
+   :inherited-members:
 
 Individual host objects are of type :class:`.Host`:
 
 .. autoclass:: Host
    :members:
+   :inherited-members:
 
 infinibox.clusters
 ~~~~~~~~~~~~~~~~~~
@@ -91,6 +94,13 @@ infinibox.links
 .. autoclass:: Link
    :members:
 
+infinibox.network_spaces
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. autoclass:: infinisdk.infinibox.network_space.NetworkSpace
+   :members:
+
+
 infinibox.events
 ~~~~~~~~~~~~~~~~
 
@@ -102,10 +112,9 @@ infinibox.events
 infinibox.users
 ~~~~~~~~~~~~~~~
 
-.. automodule:: infinisdk.infinibox.user
-
-.. autoclass:: User
+.. autoclass:: infinisdk.infinibox.user.User
    :members:
+   :inherited-members:
 
 infinibox.ldap_configs
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -121,6 +130,14 @@ infinibox.notification_targets
 .. automodule:: infinisdk.infinibox.notification_target
 
 .. autoclass:: NotificationTarget
+   :members:
+
+infinibox.cons_groups
+~~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: infinisdk.infinibox.cons_group
+
+.. autoclass:: ConsGroup
    :members:
 
 infinibox.components
@@ -161,16 +178,30 @@ Infinibox Utilities
    :members:
 
 
-
-Core Objects
-~~~~~~~~~~~~
-
-.. automodule:: infinisdk.core.system_object
-
-.. autoclass:: infinisdk.core.system_object.SystemObject
-  :members:
+Core Facilities
+~~~~~~~~~~~~~~~
 
 .. automodule:: infinisdk.core.type_binder
 
 .. autoclass:: infinisdk.core.type_binder.TypeBinder
   :members:
+
+.. automodule:: infinisdk.core.system_object
+
+.. autoclass:: infinisdk.core.system_object.SystemObject
+  :members:
+  :inherited-members:
+
+
+.. autoclass:: infinisdk.core.object_query.ObjectQuery
+  :members:
+
+.. autofunction:: infinisdk.core.extensions.add_method
+
+Exceptions
+~~~~~~~~~~
+
+.. automodule:: infinisdk.core.exceptions
+ 
+.. autoclass:: infinisdk.core.exceptions.ObjectNotFound
+.. autoclass:: infinisdk.core.exceptions.TooManyObjectsFound

@@ -10,9 +10,13 @@ from api_object_schema import TypeInfo, ValueTranslator
 class CapacityTranslator(ValueTranslator):
 
     def _to_api(self, value):
+        if value is None:
+            return value
         return int(value // byte)
 
     def _from_api(self, value):
+        if value is None:
+            return value
         return int(value) * byte
 
 CapacityType = TypeInfo(type=Capacity, api_type=int,
@@ -48,7 +52,7 @@ MunchListType = TypeInfo(type=list, api_type=list, translator=MunchListTraslator
 class MillisecondsDatetimeTranslator(ValueTranslator):
 
     def _to_api(self, value):
-        return int(value.float_timestamp * 1000.0)
+        return int(round(value.float_timestamp * 1000.0))
 
     def _from_api(self, value):
         return arrow.get(value / 1000.0)
@@ -75,3 +79,13 @@ MillisecondsDeltaType = TypeInfo(type=timedelta,
 
 
 WWNType = TypeInfo(type=WWN, api_type=str)
+
+
+class WWNListTranslator(ValueTranslator):
+    def _to_api(self, value):
+        return [str(wwpn) for wwpn in value]
+
+    def _from_api(self, value):
+        return [WWN(wwpn) for wwpn in value]
+
+WWNListType = TypeInfo(type=list, api_type=list, translator=WWNListTranslator())

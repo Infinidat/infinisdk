@@ -61,6 +61,13 @@ class Host(InfiniBoxLURelatedObject):
         self.system.api.post(url, data=data)
         self.refresh('ports')
 
+    def _remove_port(self, port_type, port_address):
+        port_wwn = str(WWN(port_address))
+        url = "{0}/ports/{1}/{2}".format(self.get_this_url_path(),
+                                         port_type, port_wwn)
+        self.system.api.delete(url)
+        self.refresh('ports')
+
     def add_fc_port(self, port_address):
         """
         Adds an FC port address (WWN) to this host
@@ -73,13 +80,6 @@ class Host(InfiniBoxLURelatedObject):
         Removes a FC port address (WWN) to this host
         """
         return self._remove_port('fc', port_address)
-
-    def _remove_port(self, port_type, port_address):
-        port_wwn = str(WWN(port_address))
-        url = "{0}/ports/{1}/{2}".format(self.get_this_url_path(),
-                                         port_type, port_wwn)
-        self.system.api.delete(url)
-        self.refresh('ports')
 
     def get_fc_ports(self):
         """

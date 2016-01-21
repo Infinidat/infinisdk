@@ -1,4 +1,5 @@
 import abc
+from munch import Munch
 from ..._compat import with_metaclass
 from .api import API
 from ..type_binder_container import TypeBinderContainer
@@ -28,12 +29,15 @@ class APITarget(with_metaclass(abc.ABCMeta)):
         self.api = API(self, auth, use_ssl=use_ssl, ssl_cert=ssl_cert)
         self.api.set_request_default_timeout(self._get_api_timeout())
 
+        self.types = Munch()
+
         self._initialize()
         self._caching_enabled = True
 
     def _initialize(self):
         for object_type in self.OBJECT_TYPES:
             self.objects.install(object_type)
+            self.types[object_type.get_type_name()] = self.types[object_type.__name__] = object_type
 
         self.components = self.SYSTEM_COMPONENTS_TYPE(self)
         self.events = self.SYSTEM_EVENTS_TYPE(self)
@@ -108,7 +112,7 @@ class APITarget(with_metaclass(abc.ABCMeta)):
 
     def _get_api_timeout(self):
         """
-        :rtype: number of seconds to wait for a command to return before raising a timeout
+        :returns: number of seconds to wait for a command to return before raising a timeout
         """
         raise NotImplementedError() # pragma: no cover
 

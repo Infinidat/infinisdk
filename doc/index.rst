@@ -19,10 +19,12 @@ Contents:
    getting_started
    querying
    system_object
+   capacities
    pools
    volumes
    mappings
    snapshots
+   cons_groups
    users
    system_configuration
    replication
@@ -30,6 +32,7 @@ Contents:
    events
    components
    extending
+   cookbook
    faq
    api
    advanced_usage

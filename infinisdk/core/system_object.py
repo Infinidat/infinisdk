@@ -29,15 +29,18 @@ class FieldsMeta(FieldsMetaBase):
     def FIELD_FACTORY(cls, name):
         return Field(name, binding=PassthroughBinding())
 
+class BaseSystemObject(with_metaclass(FieldsMeta)):
+    """
+    Base class for system objects and components
+    """
 
-class SystemObject(with_metaclass(FieldsMeta)):
     FIELDS = []
     URL_PATH = None
-    #: specifies which :class:`infinisdk.core.type_binder.TypeBinder` subclass is to be used for this type
+    #: specifies which :class:`.TypeBinder` subclass is to be used for this type
     BINDER_CLASS = TypeBinder
 
     def __init__(self, system, initial_data):
-        super(SystemObject, self).__init__()
+        super(BaseSystemObject, self).__init__()
         #: the system to which this object belongs
         self.system = system
         self._cache = initial_data
@@ -99,70 +102,6 @@ class SystemObject(with_metaclass(FieldsMeta)):
         """
         return cls(system, data)
 
-    def is_in_system(self):
-        """
-        Returns whether or not the object actually exists
-        """
-        try:
-            self.get_field("id", from_cache=False)
-        except APICommandFailed as e:
-            if e.status_code != httplib.NOT_FOUND:
-                raise
-            return False
-        else:
-            return True
-
-    @classmethod
-    def _get_tags_for_object_operations(cls, system):
-        return [cls.get_type_name().lower(), system.get_type_name().lower()]
-
-    @classmethod
-    def _create(cls, system, url, data, tags=None):
-        hook_tags = tags or cls._get_tags_for_object_operations(system)
-        gossip.trigger_with_tags('infinidat.sdk.pre_object_creation', {'data': data, 'system': system, 'cls': cls}, tags=hook_tags)
-        with _possible_api_failure_context(tags=hook_tags):
-            returned = system.api.post(url, data=data).get_result()
-        obj = cls(system, returned)
-        gossip.trigger_with_tags('infinidat.sdk.post_object_creation',
-                {'obj': obj, 'data': data, 'response_dict': returned}, tags=hook_tags)
-        return obj
-
-    @classmethod
-    def create(cls, system, **fields):
-        gossip.trigger_with_tags('infinidat.sdk.pre_creation_data_validation', {'fields': fields, 'system': system, 'cls': cls})
-        data = cls._get_data_for_post(system, fields)
-        return cls._create(system, cls.get_url_path(system), data)
-
-    @classmethod
-    def _get_data_for_post(cls, system, fields):
-        returned = {}
-        missing_fields = set()
-        extra_fields = fields.copy()
-        for field in cls.fields:
-            if field.name not in fields:
-                if not field.creation_parameter or field.optional:
-                    continue
-
-            field_value = extra_fields.get(field.name, NOTHING)
-            extra_fields.pop(field.name, None)
-            field_api_value = extra_fields.get(field.api_name, NOTHING)
-            extra_fields.pop(field.api_name, None)
-            if field_value is NOTHING and field_api_value is NOTHING:
-                field_value = field.generate_default()
-            if field_value is not NOTHING and field_api_value is not NOTHING:
-                raise ValueError("Multiple colliding arguments: {0} and {1}".format(field.name, field.api_name))
-            if field_value is NOTHING and field_api_value is NOTHING:
-                missing_fields.add(field.name)
-            if field_value is not NOTHING:
-                returned[field.api_name] = field.binding.get_api_value_from_value(system, cls, None, field_value)
-            else:
-                returned[field.api_name] = field_api_value
-
-        if missing_fields:
-            raise MissingFields("Following fields were not specified: {0}".format(", ".join(sorted(missing_fields))))
-        returned.update(extra_fields)
-        return returned
-
     @classmethod
     def bind(cls, system):
         return cls.BINDER_CLASS(cls, system)
@@ -173,21 +112,7 @@ class SystemObject(with_metaclass(FieldsMeta)):
 
     @classmethod
     def get_plural_name(cls):
-        return cls.get_type_name() + "s"
-
-    @classmethod
-    def get_creation_defaults(cls):
-        """
-        Returns a dict representing the default arguments as implicitly constructed by infinisdk to fulfill a ``create`` call
-
-        .. note:: This will cause generation of defaults, which will have side effects if they are special values
-
-        .. note:: This does not necessarily generate all fields that are passable into ``create``, only mandatory fields
-        """
-        return translate_special_values(dict(
-            (field.name, field.generate_default())
-            for field in cls.fields
-            if field.creation_parameter and not field.optional))
+        return "{0}s".format(cls.get_type_name())
 
     @classmethod
     def get_url_path(cls, system):
@@ -195,20 +120,6 @@ class SystemObject(with_metaclass(FieldsMeta)):
         if url_path is None:
             url_path = "/api/rest/{0}".format(cls.get_plural_name())
         return url_path
-
-    @classmethod
-    def find(cls, system, *predicates, **kw):
-        url = URL(cls.get_url_path(system))
-        if kw:
-            predicates = itertools.chain(
-                predicates,
-                (cls.fields.get_or_fabricate(key) == value for key, value in iteritems(kw)))
-        for pred in predicates:
-            if isinstance(pred.field, QField):
-                pred = FieldFilter(cls.fields.get_or_fabricate(pred.field.name), pred.operator_name, pred.value)
-            url = pred.add_to_url(url)
-
-        return ObjectQuery(system, url, cls)
 
     def get_field(self, field_name, from_cache=DONT_CARE, fetch_if_not_cached=True, raw_value=False):
         """
@@ -226,7 +137,7 @@ class SystemObject(with_metaclass(FieldsMeta)):
 
         :param from_cache: Attempt to fetch the fields from the cache
         :param fetch_if_not_cached: pass as False to force only from cache
-        :rtype: a dictionary of field names to their values
+        :returns: a dictionary of field names to their values
         """
 
         from_cache = self._deduce_from_cache(field_names, from_cache)
@@ -352,21 +263,6 @@ class SystemObject(with_metaclass(FieldsMeta)):
                 {'obj': self, 'data': update_dict, 'response_dict': response_dict}, tags=hook_tags)
         return res
 
-    def delete(self):
-        """
-        Deletes this object.
-        """
-        with self._get_delete_context():
-            self.system.api.delete(self.get_this_url_path())
-
-    @contextmanager
-    def _get_delete_context(self):
-        hook_tags = self._get_tags_for_object_operations(self.system)
-        gossip.trigger_with_tags('infinidat.sdk.pre_object_deletion', {'obj': self}, tags=hook_tags)
-        with _possible_api_failure_context(hook_tags):
-            yield
-        gossip.trigger_with_tags('infinidat.sdk.post_object_deletion', {'obj': self}, tags=hook_tags)
-
     @cached_method
     def get_this_url_path(self):
         return URL(self.get_url_path(self.system)).add_path(str(self.id))
@@ -382,6 +278,134 @@ class SystemObject(with_metaclass(FieldsMeta)):
                 s += ', {0}={1}'.format(field.name, value)
 
         return "<{0} {1}>".format(type(self).__name__, s)
+
+
+class SystemObject(BaseSystemObject):
+    """
+    System object, that has query methods, creation and deletion
+    """
+    @classmethod
+    def find(cls, system, *predicates, **kw):
+        url = URL(cls.get_url_path(system))
+        if kw:
+            predicates = itertools.chain(
+                predicates,
+                (cls.fields.get_or_fabricate(key) == value for key, value in iteritems(kw)))
+        for pred in predicates:
+            if isinstance(pred.field, QField):
+                pred = FieldFilter(cls.fields.get_or_fabricate(pred.field.name), pred.operator_name, pred.value)
+            url = pred.add_to_url(url)
+
+        return ObjectQuery(system, url, cls)
+
+    def is_in_system(self):
+        """
+        Returns whether or not the object actually exists
+        """
+        try:
+            self.get_field("id", from_cache=False)
+        except APICommandFailed as e:
+            if e.status_code != httplib.NOT_FOUND:
+                raise
+            return False
+        else:
+            return True
+
+    @classmethod
+    def _get_tags_for_object_operations(cls, system):
+        return [cls.get_type_name().lower(), system.get_type_name().lower()]
+
+    @classmethod
+    def _create(cls, system, url, data, tags=None):
+        hook_tags = tags or cls._get_tags_for_object_operations(system)
+        gossip.trigger_with_tags('infinidat.sdk.pre_object_creation', {'data': data, 'system': system, 'cls': cls}, tags=hook_tags)
+        try:
+            with _possible_api_failure_context(tags=hook_tags):
+                returned = system.api.post(url, data=data).get_result()
+            obj = cls(system, returned)
+        except Exception as e:
+            gossip.trigger_with_tags('infinidat.sdk.object_creation_failure',
+                {'cls': cls, 'system': system, 'data': data, 'exception': e}, tags=hook_tags)
+            raise
+        gossip.trigger_with_tags('infinidat.sdk.post_object_creation',
+                {'obj': obj, 'data': data, 'response_dict': returned}, tags=hook_tags)
+        return obj
+
+    @classmethod
+    def create(cls, system, **fields):
+        """
+        Creates a new object of this type
+        """
+        gossip.trigger_with_tags('infinidat.sdk.pre_creation_data_validation', {'fields': fields, 'system': system, 'cls': cls})
+        data = cls._get_data_for_post(system, fields)
+        return cls._create(system, cls.get_url_path(system), data)
+
+    @classmethod
+    def _get_data_for_post(cls, system, fields):
+        returned = {}
+        missing_fields = set()
+        extra_fields = fields.copy()
+        for field in cls.fields:
+            if field.name not in fields:
+                if not field.creation_parameter or field.optional:
+                    continue
+
+            field_value = extra_fields.get(field.name, NOTHING)
+            extra_fields.pop(field.name, None)
+            field_api_value = extra_fields.get(field.api_name, NOTHING)
+            extra_fields.pop(field.api_name, None)
+            if field_value is NOTHING and field_api_value is NOTHING:
+                field_value = field.generate_default()
+            if field_value is not NOTHING and field_api_value is not NOTHING:
+                raise ValueError("Multiple colliding arguments: {0} and {1}".format(field.name, field.api_name))
+            if field_value is NOTHING and field_api_value is NOTHING:
+                missing_fields.add(field.name)
+            if field_value is not NOTHING:
+                returned[field.api_name] = field.binding.get_api_value_from_value(system, cls, None, field_value)
+            else:
+                returned[field.api_name] = field_api_value
+
+        if missing_fields:
+            raise MissingFields("Following fields were not specified: {0}".format(", ".join(sorted(missing_fields))))
+        returned.update(extra_fields)
+        return returned
+
+    @classmethod
+    def get_creation_defaults(cls):
+        """
+        Returns a dict representing the default arguments as implicitly constructed by infinisdk to fulfill a ``create`` call
+
+        .. note:: This will cause generation of defaults, which will have side effects if they are special values
+
+        .. note:: This does not necessarily generate all fields that are passable into ``create``, only mandatory fields
+        """
+        return translate_special_values(dict(
+            (field.name, field.generate_default())
+            for field in cls.fields
+            if field.creation_parameter and not field.optional))
+
+    def safe_delete(self, *args, **kwargs):
+        try:
+            self.delete(*args, **kwargs)
+        except APICommandFailed as e:
+            if e.status_code != httplib.NOT_FOUND:
+                raise
+
+    def delete(self):
+        """
+        Deletes this object.
+        """
+        with self._get_delete_context():
+            self.system.api.delete(self.get_this_url_path())
+
+    @contextmanager
+    def _get_delete_context(self):
+        hook_tags = self._get_tags_for_object_operations(self.system)
+        gossip.trigger_with_tags('infinidat.sdk.pre_object_deletion', {'obj': self}, tags=hook_tags)
+        with _possible_api_failure_context(hook_tags):
+            yield
+        gossip.trigger_with_tags('infinidat.sdk.post_object_deletion', {'obj': self}, tags=hook_tags)
+
 
 @contextmanager
 def _possible_api_failure_context(tags):

@@ -99,12 +99,8 @@ html_theme_path = [alabaster.get_path()]
 html_theme = 'alabaster'
 html_theme_options = {
     "logo": "infinidat-logo-small.png",
-    "github_user": "Infinidat",
-    "github_button": True,
+    "github_button": False,
     "font_family": "sans-serif",
-    "extra_nav_links": {
-        'InfiniSDK@Github': 'https://github.com/Infinidat/infinisdk',
-    },
 }
 html_sidebars = {
    '**': [
