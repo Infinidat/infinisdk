@@ -149,7 +149,7 @@ class API(object):
         return self._auth
 
     @contextmanager
-    def get_auth_context(self, username, password):
+    def get_auth_context(self, username, password, login=False):
         """
         Changes the API authentication information for the duration of the context:
 
@@ -162,6 +162,8 @@ class API(object):
         prev_cookies = self._session.cookies.copy()
         self._session.cookies.clear()
         self.set_auth(*auth)
+        if login:
+            self.system.login()
         try:
             yield
         finally:
