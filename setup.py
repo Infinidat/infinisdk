@@ -37,12 +37,12 @@ setup(name="infinisdk",
           ],
       description="Infinidat API SDK",
       license="BSD3",
-      author="Infinidat",
+      author="INFINIDAT",
       author_email="info@infinidat.com",
       version=__version__, # pylint: disable=E0602
       packages=find_packages(exclude=["tests"]),
 
-      url="http://devdocs.infinidat.com/sphinx/infinisdk/",
+      url="http://infinisdk.readthedocs.org",
 
       install_requires=_INSTALL_REQUIRES,
       scripts=[],
