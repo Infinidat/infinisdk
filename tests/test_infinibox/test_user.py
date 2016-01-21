@@ -128,3 +128,12 @@ def test_reset_password(infinibox, infinibox_simulator, user):
     user.reset_password(token)
     msg = _get_last_mailboxer_msg(infinibox_simulator, user_email)
     assert 'successfully' in msg.content
+
+
+@new_to_version('2.2.8')
+def test_enable_disable_user(user):
+    assert user.is_enabled()
+    user.disable()
+    assert not user.is_enabled()
+    user.enable()
+    assert user.is_enabled()
