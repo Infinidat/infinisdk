@@ -22,6 +22,10 @@ class FakeSystem(object):
     def is_caching_enabled(self):
         return False
 
+    def is_field_supported(self, field):
+        return True
+
+
 def test_num_fields(system):
     assert len(SampleBaseObject.fields) == 2
     assert len(SampleDerivedObject.fields) == 4

@@ -211,7 +211,8 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
                 else:
                     value = field.binding.get_value_from_api_object(self.system, type(self), self, self._cache)
             except KeyError:
-                missed.append(field_name)
+                if self.system.is_field_supported(field):
+                    missed.append(field_name)
             else:
                 returned[field_name] = value
         if missed:
@@ -358,7 +359,7 @@ class SystemObject(BaseSystemObject):
                 field_value = field.generate_default()
             if field_value is not NOTHING and field_api_value is not NOTHING:
                 raise ValueError("Multiple colliding arguments: {0} and {1}".format(field.name, field.api_name))
-            if field_value is NOTHING and field_api_value is NOTHING:
+            if field_value is NOTHING and field_api_value is NOTHING and system.is_field_supported(field):
                 missing_fields.add(field.name)
             if field_value is not NOTHING:
                 returned[field.api_name] = field.binding.get_api_value_from_value(system, cls, None, field_value)

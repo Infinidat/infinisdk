@@ -32,8 +32,8 @@ def system_obj(system, object_id):
 @pytest.fixture
 def system(is_caching_enabled):
     class _System(object):
-        pass
-
+        def is_field_supported(self, field):
+            return True
     return _System()
 
 

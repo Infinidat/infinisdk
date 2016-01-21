@@ -56,6 +56,9 @@ class InfiniBox(APITarget):
         if not self.compat.can_run_on_system():
             raise VersionNotSupported(self.get_version())
 
+    def is_field_supported(self, field):
+        return self.compat.is_feature_supported(field.feature_name)
+
     @property
     @deprecated(message='Use <system>.host_clusters')
     def clusters(self):

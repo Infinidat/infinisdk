@@ -45,6 +45,9 @@ class APITarget(with_metaclass(abc.ABCMeta)):
     def _get_api_auth(self):
         return None
 
+    def is_field_supported(self, field):
+        return True
+
     def disable_caching(self):
         """Disables field caching, and causes each field fetching to fetch the actual up-to-date value from the system
         """

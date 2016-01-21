@@ -1,4 +1,3 @@
-import functools
 import operator
 
 from sentinels import NOTHING
@@ -27,6 +26,11 @@ class Compatability(object):
             op = getattr(operator, operator_name)
             returned.append(lambda version, op=op: op(version, value))
         return returned
+
+    def is_feature_supported(self, feature_name):
+        if feature_name is NOTHING:
+            return True
+        return getattr(self, 'has_{0}'.format(feature_name))()
 
     def normalize_version_string(self, version):
         return _InfiniboxVersion.parse(version)
