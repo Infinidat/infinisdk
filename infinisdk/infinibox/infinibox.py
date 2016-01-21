@@ -222,6 +222,12 @@ class InfiniBox(APITarget):
         self._after_login()
         return res
 
+    def logout(self):
+        """
+        Logs out the current user
+        """
+        return self.api.post('users/logout', data={})
+
     def _get_client_id(self):
         return 'infinisdk.v{}.{}.{}.{}'.format(__version__, get_hostname(), get_logged_in_username(), os.getpid())
 
