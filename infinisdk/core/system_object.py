@@ -258,7 +258,7 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
         if len(update_dict) == 1 and not isinstance(response_dict, dict):
             [key] = update_dict.keys()
             response_dict = {key: response_dict}
-        self.update_field_cache(response_dict)
+        self.update_field_cache({k: response_dict[k] for k in update_dict if k in response_dict})
         gossip.trigger_with_tags('infinidat.sdk.post_object_update',
                 {'obj': self, 'data': update_dict, 'response_dict': response_dict}, tags=hook_tags)
         return res

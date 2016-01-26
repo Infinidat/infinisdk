@@ -155,15 +155,24 @@ def test_get_fields_without_field_names(izbox):
     assert "name" in fields
     assert "username" not in fields
 
+
 def test_object_creation_missing_fields():
     with pytest.raises(MissingFields):
         SampleDerivedObject.create(FakeSystem())
+
 
 def test_update_field_updates_its_cache(system, user, user_name_field):
     new_name = "testing_update_field_caching"
     assert user.get_field(user_name_field, from_cache=True) != new_name
     user.update_field(user_name_field, new_name)
     assert user.get_field(user_name_field, from_cache=True) == new_name
+
+
+def test_update_field_does_not_update_other_fields_cache(user):
+    some_email = 'some@email.com'
+    user.update_field_cache({'email': some_email})
+    user.update_name('some_new_name')
+    assert user.get_email(from_cache=True) == some_email
 
 
 @pytest.fixture(params=[SampleBaseObject, SampleDerivedObject])
