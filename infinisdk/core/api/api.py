@@ -48,8 +48,10 @@ def _approval_preprocessor(approve, request):
 
 
 class API(object):
+
     def __init__(self, target, auth, use_ssl, ssl_cert):
         super(API, self).__init__()
+        self._auth = None
         self._preprocessors = []
         self.system = target
         self._use_ssl = use_ssl
