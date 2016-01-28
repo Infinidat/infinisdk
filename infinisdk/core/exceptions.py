@@ -33,17 +33,18 @@ class SystemNotFoundException(APICommandException):
         super(SystemNotFoundException, self).__init__("Cannot connect {0}".format(self.address))
 
 class APITransportFailure(APICommandException):
-    def __init__(self, request_kwargs, err):
+    def __init__(self, system, request_kwargs, err):
         super(APITransportFailure, self).__init__('APITransportFailure: {0}'.format(err))
         self.err = err
+        self.system = system
         self.address = URL(err.api_request_obj.url).hostname
         self.attrs = munchify(request_kwargs)
         self.error_desc = str(err)
 
     def __repr__(self):
-        return ("API Transport Failure\n\t"
+        return ("API Transport Failure on {system_name}\n\t"
                 "Request: {e.attrs.method} {e.err.api_request_obj.url}\n\t"
-                "Error Description: {e.error_desc}".format(e=self))
+                "Error Description: {e.error_desc}".format(e=self, system_name=self.system.get_name()))
 
     __str__ = __repr__
 

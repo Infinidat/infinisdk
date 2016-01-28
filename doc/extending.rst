@@ -14,6 +14,8 @@ A very common case is adding methods to InfiniSDK objects. Let's assume we want 
 
    >>> s1 = InfiniBox(system1_address, auth = (username, password))
    >>> s2 = InfiniBox(system2_address, auth = (username, password))
+   >>> _ = s1.login()
+   >>> _ = s2.login()
    >>> locations = {s1: "upper floor", s2: "lower floor"}
 
 By default, of course, we don't have such a mechanism:

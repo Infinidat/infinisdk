@@ -8,6 +8,7 @@ def doctest_context():
     simulator = Simulator()
     simulator.activate()
     system = InfiniBox(simulator, auth=('admin', '123456'))
+    system.login()
     try:
         yield {
             "system": system,

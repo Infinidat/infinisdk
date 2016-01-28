@@ -29,7 +29,8 @@ def test_incompatible_version(incompatible_system, operator):
 def test_ignore_version_check(incompatible_system, should_check_version):
     op_context = pytest.raises if should_check_version else no_op_context
     with op_context(VersionNotSupported):
-        incompatible_system.api.get('/api/rest/system', check_version=should_check_version)
+        incompatible_system.api.get(
+            '/api/rest/system', check_version=should_check_version)
     assert not incompatible_system.api._checked_version
 
 
@@ -52,17 +53,19 @@ def restore_version_checks(request):
 
 
 @pytest.fixture
-def incompatible_system(infinibox_simulator):
-    version = infinibox_simulator.get_version()
-    match = re.match(r"^(\d+)\.(\d+).+", version)
-    major = int(match.group(1))
-    minor = int(match.group(2))
-    infinibox_simulator.set_version('1.4')
+def incompatible_system(infinibox_simulator, incompatible_version):
+    infinibox_simulator.set_version(incompatible_version)
 
     # simply initializing a system does not carry out any API commands
     user = infinibox_simulator.auth.get_current_user()
     auth = (user.get_username(), user.get_password())
     return InfiniBox(infinibox_simulator.get_floating_addresses()[0], auth=auth)
+
+
+@pytest.fixture(params=[(1, 5), (1, 7)])
+def incompatible_version(request, version_template):
+    returned = version_template.format(major=request.param[0], minor=request.param[1])
+    return returned
 
 
 @pytest.fixture(params=[(1, 5), (1, 6), (2, 0)])
@@ -78,6 +81,11 @@ def major_minor(request):
     '{major}.{minor}.0.1',
     '{major}.{minor}.0.1-bla',
 ])
-def version_string(request, major_minor):
+def version_template(request):
+    return request.param
+
+
+@pytest.fixture
+def version_string(version_template, major_minor):
     major, minor = major_minor
-    return request.param.format(major=major, minor=minor)
+    return version_template.format(major=major, minor=minor)

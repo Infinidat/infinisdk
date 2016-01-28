@@ -11,6 +11,7 @@ def doctest_context():
     simulator = Simulator()
     simulator.activate()
     system = InfiniBox(simulator, auth=('infinidat', '123456'))
+    system.login()
     pool = system.pools.create()
     volume = system.volumes.create(pool=pool)
     try:

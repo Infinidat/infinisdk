@@ -97,6 +97,7 @@ _DEFAULT_REQUIRED_VERSION = Munch(kwargs={})
 def infinibox(request, infinibox_simulator):
     user = infinibox_simulator.auth.get_current_user()
     infinibox = InfiniBox(infinibox_simulator, auth=(user.get_username(), user.get_password()))
+    infinibox.login()
     required_version_kwargs = getattr(request.function, 'required_version', _DEFAULT_REQUIRED_VERSION).kwargs
     validate_unittest_compatability_with_infinibox_version(infinibox, **required_version_kwargs)
     if infinibox.compat.get_nas_version() == 1:

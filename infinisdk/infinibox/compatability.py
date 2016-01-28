@@ -1,4 +1,3 @@
-import functools
 import operator
 
 from sentinels import NOTHING
@@ -14,6 +13,9 @@ class Compatability(object):
         self._features = None
         self._system_version = None
 
+    def is_initialized(self):
+        return self._features is not None
+
     def can_run_on_system(self):
         version_string = self.system.get_version().split('-', 1)[0]
         system_version = self.normalize_version_string(version_string)
@@ -27,6 +29,11 @@ class Compatability(object):
             op = getattr(operator, operator_name)
             returned.append(lambda version, op=op: op(version, value))
         return returned
+
+    def is_feature_supported(self, feature_name):
+        if feature_name is NOTHING:
+            return True
+        return getattr(self, 'has_{0}'.format(feature_name))()
 
     def normalize_version_string(self, version):
         return _InfiniboxVersion.parse(version)
@@ -95,7 +102,7 @@ class Compatability(object):
         return self.get_version_as_float() >= 2.2
 
     def has_auth_sessions(self):
-        return self._has_feature('auth_sessions') or self._has_feature('api/auth_sessions')
+        return self._has_feature('api_auth_sessions') or self._has_feature('api/auth_sessions')
 
 
 _VERSION_TUPLE_LEN = 5

@@ -9,6 +9,7 @@ def doctest_context():
     simulator.activate()
     simulator.api.put('/api/rest/config/mgmt/system.model_long_name', data='01IB...AF')
     system = InfiniBox(simulator, auth=('infinidat', '123456'))
+    system.login()
     try:
         yield {
             "system": system,

@@ -39,7 +39,15 @@ Authentication information can also be specified via the constructor:
 
 .. code-block:: python
 
-		>>> system = InfiniBox(SYSTEM_ADDRESS, auth=("admin", "password"))
+       >>> system = InfiniBox(SYSTEM_ADDRESS, auth=("admin", "password"))
+
+Note that you need to explicitly call ``login`` to actually log in to the system:
+
+.. code-block:: python
+       
+       >>> system.login()
+       <Response [200]>
+
 
 Another way authentication information can be provided is through an ``.ini`` file. Create a file named ``~/.infinidat/infinisdk.ini``, with the following structure::
 

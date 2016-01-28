@@ -134,11 +134,17 @@ def test_infinibox_system_type(infinibox):
 
 def test_get_name(infinibox):
     simulator_host_name = infinibox.get_simulator().get_hostname()
+    auth = infinibox.api.get_auth()
+    infinibox = InfiniBox(infinibox.get_simulator())
+    # NO LOGIN!
+
     with disable_api_context(infinibox):
         assert infinibox.get_name() == simulator_host_name
+
     infinibox.components.system_component.update_field_cache(
         {'name': 'fake_name'})
     assert infinibox.get_name() == 'fake_name'
+    infinibox.api.set_auth(*auth, login=True)
     infinibox.components.system_component.refresh()
     assert infinibox.get_name().startswith('simulator-')
 

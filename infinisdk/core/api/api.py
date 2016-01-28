@@ -48,30 +48,33 @@ def _approval_preprocessor(approve, request):
 
 
 class API(object):
+
     def __init__(self, target, auth, use_ssl, ssl_cert):
         super(API, self).__init__()
+        self._auth = None
         self._preprocessors = []
         self.system = target
-        self._auth = auth
         self._use_ssl = use_ssl
         self._ssl_cert = ssl_cert
         self._default_request_timeout = None
         self._interactive = False
         self._auto_retry_predicates = {}
-        self.reinitialize_session()
+        self.reinitialize_session(auth=auth)
         self._urls = [self._url_from_address(address, use_ssl) for address in target.get_api_addresses()]
         self._active_url = None
         self._checked_version = False
         self._no_reponse_logs = False
         self._use_pretty_json = config.root.api.log.pretty_json
 
-    def reinitialize_session(self):
+    def reinitialize_session(self, auth=None):
+        if auth is None:
+            auth = self._auth
         self._session = requests.Session()
         assert self._session.cert is None
         self._session.cert = self._ssl_cert
         if not self._ssl_cert:
             self._session.verify = False
-        self._session.auth = self._auth
+        self.set_auth(auth)
 
     @property
     def urls(self):
@@ -128,7 +131,7 @@ class API(object):
     def set_request_default_timeout(self, timeout_seconds):
         self._default_request_timeout = timeout_seconds
 
-    def set_auth(self, username_or_auth, password=NOTHING):
+    def set_auth(self, username_or_auth, password=NOTHING, login=False):
         """
         Sets the username and password under which operations will be performed
 
@@ -137,38 +140,49 @@ class API(object):
         >>> system.api.set_auth(('username', 'password'))
         >>> system.api.set_auth('username', 'password')
         """
-        if isinstance(username_or_auth, tuple):
-            if password is not NOTHING:
-                raise TypeError("Auth given as tuple, but password was used")
-            username, password = username_or_auth
+        if username_or_auth is None and password is NOTHING:
+            self._auth = None
+            password = None
         else:
-            if password is NOTHING:
-                raise TypeError("Password not specified")
-            username = username_or_auth
-
-        self._session.auth = (username, password)
+            if isinstance(username_or_auth, tuple):
+                if password is not NOTHING:
+                    raise TypeError("Auth given as tuple, but password was used")
+                username, password = username_or_auth
+            else:
+                if password is NOTHING:
+                    raise TypeError("Password not specified")
+                username = username_or_auth
+            self._auth = (username, password)
+        self._session.cookies.clear()
+        if login:
+            self.system.login()
 
     def get_auth(self):
         """
         Returns a tuple of the current username/password used by the API
         """
-        return self._session.auth
+        return self._auth
 
     @contextmanager
-    def get_auth_context(self, username, password):
+    def get_auth_context(self, username, password, login=False):
         """
         Changes the API authentication information for the duration of the context:
 
         >>> with system.api.get_auth_context('username', 'password'):
         ...     ... # execute operations as 'username'
         """
+        _logger.debug('Changing credentials to {}', username)
         auth = (username, password)
         prev = self.get_auth()
-        self.set_auth(*auth)
+        prev_cookies = self._session.cookies.copy()
+        self._session.cookies.clear()
+        self.set_auth(*auth, login=login)
         try:
             yield
         finally:
-            self.set_auth(*prev)
+            _logger.debug('Changing credentials back to {[0]}', prev)
+            self.set_auth(*prev, login=login)
+            self._session.cookies.update(prev_cookies)
 
     @deprecated(message="Use get_auth_context instead")
     def auth_context(self, *args, **kwargs):
@@ -197,6 +211,9 @@ class API(object):
 
         returned = None
         kwargs.setdefault("timeout", self._default_request_timeout)
+        auth = None
+        if hasattr(self.system, 'compat') and (not self.system.compat.is_initialized() or not self.system.compat.has_auth_sessions()):
+            auth = self._auth
         raw_data = kwargs.pop("raw_data", False)
         data = kwargs.pop("data", NOTHING)
         sent_json_object = None
@@ -231,7 +248,7 @@ class API(object):
                 full_url = self._with_approved(full_url)
 
             hostname = full_url.hostname
-            api_request = requests.Request(http_method, full_url, data=data if data is not NOTHING else None, params=url_params, headers=headers)
+            api_request = requests.Request(http_method, full_url, data=data if data is not NOTHING else None, params=url_params, headers=headers, auth=auth)
             for preprocessor in self._preprocessors:
                 preprocessor(api_request)
 
@@ -326,7 +343,7 @@ class API(object):
                     if 'gaierror' in error_str or 'nodename nor servname' in error_str or \
                        'Name or service not known' in error_str:
                         raise SystemNotFoundException(e)
-                    raise APITransportFailure(request_kwargs, e)
+                    raise APITransportFailure(self.system, request_kwargs, e)
 
                 if assert_success:
                     try:
