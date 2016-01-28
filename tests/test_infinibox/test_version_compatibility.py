@@ -29,7 +29,8 @@ def test_incompatible_version(incompatible_system, operator):
 def test_ignore_version_check(incompatible_system, should_check_version):
     op_context = pytest.raises if should_check_version else no_op_context
     with op_context(VersionNotSupported):
-        incompatible_system.api.get('/api/rest/system', check_version=should_check_version)
+        incompatible_system.api.get(
+            '/api/rest/system', check_version=should_check_version)
     assert not incompatible_system.api._checked_version
 
 

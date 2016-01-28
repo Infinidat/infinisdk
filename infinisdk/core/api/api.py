@@ -125,7 +125,7 @@ class API(object):
     def set_request_default_timeout(self, timeout_seconds):
         self._default_request_timeout = timeout_seconds
 
-    def set_auth(self, username_or_auth, password=NOTHING):
+    def set_auth(self, username_or_auth, password=NOTHING, login=False):
         """
         Sets the username and password under which operations will be performed
 
@@ -147,6 +147,9 @@ class API(object):
                     raise TypeError("Password not specified")
                 username = username_or_auth
             self._auth = (username, password)
+        self._session.cookies.clear()
+        if login:
+            self.system.login()
 
     def get_auth(self):
         """
@@ -167,14 +170,12 @@ class API(object):
         prev = self.get_auth()
         prev_cookies = self._session.cookies.copy()
         self._session.cookies.clear()
-        self.set_auth(*auth)
-        if login:
-            self.system.login()
+        self.set_auth(*auth, login=login)
         try:
             yield
         finally:
             _logger.debug('Changing credentials back to {[0]}', prev)
-            self.set_auth(*prev)
+            self.set_auth(*prev, login=login)
             self._session.cookies.update(prev_cookies)
 
     @deprecated(message="Use get_auth_context instead")
@@ -205,7 +206,7 @@ class API(object):
         returned = None
         kwargs.setdefault("timeout", self._default_request_timeout)
         auth = None
-        if not self.system.compat.is_initialized() or not self.system.compat.has_auth_sessions():
+        if hasattr(self.system, 'compat') and (not self.system.compat.is_initialized() or not self.system.compat.has_auth_sessions()):
             auth = self._auth
         raw_data = kwargs.pop("raw_data", False)
         data = kwargs.pop("data", NOTHING)
@@ -336,7 +337,7 @@ class API(object):
                     if 'gaierror' in error_str or 'nodename nor servname' in error_str or \
                        'Name or service not known' in error_str:
                         raise SystemNotFoundException(e)
-                    raise APITransportFailure(request_kwargs, e)
+                    raise APITransportFailure(self.system, request_kwargs, e)
 
                 if assert_success:
                     try:

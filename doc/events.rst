@@ -13,6 +13,7 @@ InfiniSDK represents system events through the *system.events* collection, which
 		<Event id=1003, code=VOLUME_DELETED>
 		<Event id=1004, code=VOLUME_CREATED>
 		<Event id=1005, code=VOLUME_DELETED>
+		<Event id=1006, code=USER_LOGIN_SUCCESS>
 
 
 Sorting is determined by the system by default, but we can easily change that. For instance, we can order the events by descending id:
@@ -21,6 +22,7 @@ Sorting is determined by the system by default, but we can easily change that. F
 
 		>>> for event in system.events.find().sort(-system.events.fields.id):
 		...     print(event)
+		<Event id=1006, code=USER_LOGIN_SUCCESS>
 		<Event id=1005, code=VOLUME_DELETED>
 		<Event id=1004, code=VOLUME_CREATED>
 		<Event id=1003, code=VOLUME_DELETED>
@@ -48,3 +50,5 @@ Example: Getting all Events Newer than a Specific Sequence Number
 		...     print(e)
 		<Event id=1004, code=VOLUME_CREATED>
 		<Event id=1005, code=VOLUME_DELETED>
+		<Event id=1006, code=USER_LOGIN_SUCCESS>
+
