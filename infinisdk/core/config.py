@@ -37,7 +37,7 @@ config = confetti.Config(dict(
     infinibox=dict(
 
         compatible_versions = [
-            "ge:1.5",
+            "ge:2.0",
         ],
 
         defaults=dict(
