@@ -134,15 +134,19 @@ class API(object):
         >>> system.api.set_auth(('username', 'password'))
         >>> system.api.set_auth('username', 'password')
         """
-        if isinstance(username_or_auth, tuple):
-            if password is not NOTHING:
-                raise TypeError("Auth given as tuple, but password was used")
-            username, password = username_or_auth
+        if username_or_auth is None and password is NOTHING:
+            self._auth = None
+            password = None
         else:
-            if password is NOTHING:
-                raise TypeError("Password not specified")
-            username = username_or_auth
-        self._auth = (username, password)
+            if isinstance(username_or_auth, tuple):
+                if password is not NOTHING:
+                    raise TypeError("Auth given as tuple, but password was used")
+                username, password = username_or_auth
+            else:
+                if password is NOTHING:
+                    raise TypeError("Password not specified")
+                username = username_or_auth
+            self._auth = (username, password)
 
     def get_auth(self):
         """
