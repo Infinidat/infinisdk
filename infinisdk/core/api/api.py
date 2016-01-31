@@ -324,6 +324,9 @@ class API(object):
         _logger.debug("Remove auto-retry predicate {0}", retry_predicate)
         del self._auto_retry_predicates[retry_predicate]
 
+    def is_auto_retry_active(self, retry_predicate):
+        return retry_predicate in self._auto_retry_predicates
+
     def _get_auto_retries_context(self):
         return _AutoRetryContext(self._auto_retry_predicates)
 
