@@ -8,7 +8,7 @@ from infinisdk.core.exceptions import APICommandFailed
 def test_set_auth(infinibox, params):
     _assert_authorized(infinibox)
 
-    infinibox.api.set_auth(*params)
+    infinibox.api.set_auth(*params, login=False)
 
     _assert_unauthorized(infinibox)
 
@@ -16,8 +16,9 @@ def test_set_auth(infinibox, params):
 def test_get_auth_context(infinibox):
     _assert_authorized(infinibox)
 
-    with infinibox.api.get_auth_context("other_username", "other_password"):
-        _assert_unauthorized(infinibox)
+    with pytest.raises(APICommandFailed):
+        with infinibox.api.get_auth_context("other_username", "other_password"):
+            assert False, 'shouldnt get here'
 
     _assert_authorized(infinibox)
 
@@ -27,7 +28,7 @@ def test_invalid_params(infinibox):
             ["a"],
             ]:
         with pytest.raises(TypeError):
-            infinibox.api.set_auth(*params)
+            infinibox.api.set_auth(*params, login=False)
 
 def _assert_authorized(infinibox):
     infinibox.api.get("volumes")
