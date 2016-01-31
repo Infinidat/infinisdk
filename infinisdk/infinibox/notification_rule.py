@@ -23,3 +23,16 @@ class NotificationRule(SystemObject):
     @classmethod
     def get_type_name(cls):
         return 'notification_rule'
+
+    def does_match_event(self, event):
+        if self.get_event_code() is not None:
+            return self.get_event_code() == event.get_code()
+
+        to_exclude = self.get_exclude_events()
+        if event.get_code() in to_exclude:
+            return False
+
+        if event.get_level in self.get_event_level():
+            return True
+
+        return event.get_code() in self.get_include_events()
