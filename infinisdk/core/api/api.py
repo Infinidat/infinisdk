@@ -74,7 +74,7 @@ class API(object):
         self._session.cert = self._ssl_cert
         if not self._ssl_cert:
             self._session.verify = False
-        self.set_auth(auth)
+        self.set_auth(auth, login=False)
 
     @property
     def urls(self):
@@ -125,7 +125,7 @@ class API(object):
     def set_request_default_timeout(self, timeout_seconds):
         self._default_request_timeout = timeout_seconds
 
-    def set_auth(self, username_or_auth, password=NOTHING, login=False):
+    def set_auth(self, username_or_auth, password=NOTHING, login=True):
         """
         Sets the username and password under which operations will be performed
 
@@ -158,7 +158,7 @@ class API(object):
         return self._auth
 
     @contextmanager
-    def get_auth_context(self, username, password, login=False):
+    def get_auth_context(self, username, password, login=True):
         """
         Changes the API authentication information for the duration of the context:
 
@@ -170,13 +170,14 @@ class API(object):
         prev = self.get_auth()
         prev_cookies = self._session.cookies.copy()
         self._session.cookies.clear()
-        self.set_auth(*auth, login=login)
         try:
+            self.set_auth(*auth, login=login)
             yield
         finally:
             _logger.debug('Changing credentials back to {[0]}', prev)
-            self.set_auth(*prev, login=login)
+            self.set_auth(*prev, login=False)
             self._session.cookies.update(prev_cookies)
+
 
     @deprecated(message="Use get_auth_context instead")
     def auth_context(self, *args, **kwargs):

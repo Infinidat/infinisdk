@@ -13,7 +13,7 @@ def test_login(infinibox):
 def test_passwords_are_not_logged(infinibox):
     with logbook.TestHandler() as handler:
         password = '12345678'
-        infinibox.api.set_auth('user', password)
+        infinibox.api.set_auth('user', password, login=False)
         with pytest.raises(APICommandFailed) as caught:
             infinibox.login()
 
@@ -25,7 +25,7 @@ def test_passwords_are_not_logged(infinibox):
 
 
 def test_invalid_login(infinibox):
-    with infinibox.api.get_auth_context('a', 'b'):
+    with infinibox.api.get_auth_context('a', 'b', login=False):
         with pytest.raises(APICommandFailed) as caught:
             infinibox.login()
 
@@ -38,7 +38,7 @@ def test_after_loging_operations(infinibox, user_role):
     user = infinibox.users.create(role=str(user_role), password=_PASS)
 
     infinibox2 = InfiniBox(infinibox_simulator, auth=None)
-    infinibox2.api.set_auth(user.get_name(), _PASS)
+    infinibox2.api.set_auth(user.get_name(), _PASS, login=False)
     with pytest.raises(CacheMiss):
         infinibox2.components.system_component.get_field('name', from_cache=True, fetch_if_not_cached=False)
     infinibox2.login()
