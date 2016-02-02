@@ -34,6 +34,7 @@ from .pool import Pool
 from .replica import Replica
 from .user import User
 from .volume import Volume
+from .metrics import Metrics
 
 try:
     from infinisim.core.context import lookup_simulator_by_address
@@ -53,6 +54,7 @@ class InfiniBox(APITarget):
         self.current_user = _CurrentUserProxy(self)
         self.compat = Compatability(self)
         self.capacities = InfiniBoxSystemCapacity(self)
+        self.metrics = Metrics(self)
         self._related_systems = []
 
     def check_version(self):
