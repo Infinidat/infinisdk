@@ -147,6 +147,7 @@ class API(object):
                     raise TypeError("Password not specified")
                 username = username_or_auth
             self._auth = (username, password)
+        _logger.trace('Clearing cookies: {}', self._session.cookies)
         self._session.cookies.clear()
         if login:
             self.system.login()
@@ -169,6 +170,7 @@ class API(object):
         auth = (username, password)
         prev = self.get_auth()
         prev_cookies = self._session.cookies.copy()
+        _logger.trace('Clearing cookies: {}', self._session.cookies)
         self._session.cookies.clear()
         try:
             self.set_auth(*auth, login=login)
@@ -176,6 +178,8 @@ class API(object):
         finally:
             _logger.debug('Changing credentials back to {[0]}', prev)
             self.set_auth(*prev, login=False)
+            _logger.trace('Restoring cookies for user: {}', prev_cookies)
+            self._session.cookies.clear()
             self._session.cookies.update(prev_cookies)
 
 
