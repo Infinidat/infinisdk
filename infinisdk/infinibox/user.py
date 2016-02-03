@@ -2,8 +2,6 @@ from ..core import Field, SystemObject
 from ..core.api.special_values import Autogenerate
 from ..core.utils import deprecated
 
-from sentinels import NOTHING
-
 
 class User(SystemObject):
 
@@ -13,6 +11,7 @@ class User(SystemObject):
         Field("email", creation_parameter=True, mutable=True, default=Autogenerate("user_{timestamp}@infinidat.com")),
         Field("name", creation_parameter=True, mutable=True, is_filterable=True, is_sortable=True, default=Autogenerate("user_{timestamp}")),
         Field("password", creation_parameter=True, add_getter=False, mutable=True, default="12345678"),
+        Field("enabled", type=bool, mutable=True, add_updater=False, feature_name='user_disabling')
     ]
 
 
@@ -35,3 +34,9 @@ class User(SystemObject):
     def request_reset_password(self):
         url = self.get_this_url_path().add_path('reset_password')
         self.system.api.post(url)
+
+    def enable(self):
+        self.update_field('enabled', True)
+
+    def disable(self):
+        self.update_field('enabled', False)
