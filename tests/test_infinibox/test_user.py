@@ -117,7 +117,7 @@ def _get_token_from_mail(simulator, mail_address):
 
 
 def _get_last_mailboxer_msg(simulator, mail_address):
-    msg = get_simulated_mail_server(simulator).get_messages(mail_address)
+    msg = get_simulated_mail_server(simulator).get_emails(mail_address, unread = True)
     return msg[0]
 
 
