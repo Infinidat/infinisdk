@@ -65,6 +65,20 @@ class API(object):
         self._checked_version = False
         self._no_reponse_logs = False
         self._use_pretty_json = config.root.api.log.pretty_json
+        self._login_refresh_enabled = True
+
+    @contextmanager
+    def disabled_login_refresh_context(self):
+        """Inside this context, InfiniSDK will not attempt to refresh login cookies
+        when logged out by expired cookies
+        """
+        prev = self._login_refresh_enabled
+        self._login_refresh_enabled = False
+        try:
+            yield
+        finally:
+            self._login_refresh_enabled = prev
+
 
     def reinitialize_session(self, auth=None):
         if auth is None:
@@ -147,8 +161,7 @@ class API(object):
                     raise TypeError("Password not specified")
                 username = username_or_auth
             self._auth = (username, password)
-        _logger.trace('Clearing cookies: {}', self._session.cookies)
-        self._session.cookies.clear()
+        self.clear_cookies()
         if login:
             self.system.login()
 
@@ -170,8 +183,7 @@ class API(object):
         auth = (username, password)
         prev = self.get_auth()
         prev_cookies = self._session.cookies.copy()
-        _logger.trace('Clearing cookies: {}', self._session.cookies)
-        self._session.cookies.clear()
+        self.clear_cookies()
         try:
             self.set_auth(*auth, login=login)
             yield
@@ -181,6 +193,11 @@ class API(object):
             _logger.trace('Restoring cookies for user: {}', prev_cookies)
             self._session.cookies.clear()
             self._session.cookies.update(prev_cookies)
+
+
+    def clear_cookies(self):
+        _logger.trace('Clearing cookies: {}', self._session.cookies)
+        self._session.cookies.clear()
 
 
     @deprecated(message="Use get_auth_context instead")
@@ -330,6 +347,8 @@ class API(object):
         """Sends HTTP API request to the remote system
         """
         did_interactive_confirmation = False
+        did_login = False
+        had_cookies = bool(self._session.cookies)
         auto_retries_context = self._get_auto_retries_context()
         while True:
             with auto_retries_context:
@@ -343,6 +362,17 @@ class API(object):
                        'Name or service not known' in error_str:
                         raise SystemNotFoundException(e)
                     raise APITransportFailure(self.system, request_kwargs, e)
+
+                if returned.status_code == requests.codes.unauthorized and \
+                   self._login_refresh_enabled and \
+                   had_cookies and \
+                   not did_login and \
+                   'login' not in path:
+
+                    _logger.trace('Performing login again due to expired cookie ({})', self._session.cookies)
+                    self.system.login()
+                    did_login = True
+                    continue
 
                 if assert_success:
                     try:
