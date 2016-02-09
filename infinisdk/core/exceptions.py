@@ -86,6 +86,10 @@ class APICommandFailed(APICommandException):
                 "Data: {e.response.sent_data}\n\t"
                 "Status: {e.status_code}\n\t"
                 "Message: {e.message}".format(e=self))
+
+        cookies = self.response.response.request.headers.get('cookie')
+        if cookies:
+            returned += "\n\tCookies: {}".format(cookies)
         if self.reasons:
             returned += "\n\tReasons:"
             for reason in self.reasons:
