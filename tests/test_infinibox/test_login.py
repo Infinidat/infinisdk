@@ -23,16 +23,6 @@ def test_passwords_are_not_logged(infinibox):
     for record in handler.records:
         assert password not in record.message
 
-
-def test_api_exception_cookies(infinibox, request):
-    infinibox.api.post('/api/rest/users/logout')
-    request.addfinalizer(infinibox.login)
-    with infinibox.api.disabled_login_refresh_context():
-        with pytest.raises(APICommandFailed) as caught:
-            infinibox.api.get('system')
-    assert 'Cookies: ' in repr(caught.value)
-
-
 def test_invalid_login(infinibox):
     with infinibox.api.get_auth_context('a', 'b', login=False):
         with pytest.raises(APICommandFailed) as caught:
