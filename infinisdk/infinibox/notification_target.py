@@ -18,6 +18,7 @@ class NotificationTarget(SystemObject):
         Field('from_address', mutable=True),
         Field('username', mutable=True),
         Field('password', mutable=True),
+        Field('visibility', mutable = False),
 
         #### SNMP ####
         Field('version', type=str, mutable=True),
