@@ -5,6 +5,11 @@ import arrow
 import flux
 from munch import Munch
 
+from urlobject import URLObject
+
+
+_METRICS_URL = URLObject('/api/rest/metrics')
+
 
 class Metrics(object):
     """Manages various actions needed for metric colllection
@@ -19,11 +24,11 @@ class Metrics(object):
 
         :return: a :class:`.Filter` object
         """
-        resp = self.system.api.post('/api/rest/metrics/filters', data=fields)
+        resp = self.system.api.post(_METRICS_URL.add_path('filters'), data=fields)
         return Filter(self.system, resp.get_result()['id'])
 
     def get_available_fields(self):
-        resp = self.system.api.get('/api/rest/metrics/available_fields')
+        resp = self.system.api.get(_METRICS_URL.add_path('available_fields'))
         return [
             TopLevelField.from_json(field)
             for field in resp.get_result()['available_filter_fields']
@@ -51,7 +56,7 @@ class Filter(object):
         self.system = system
         self.id = id
         available_fields = self.system.api.get(
-            '/api/rest/metrics/filters/{}/available_fields'.format(self.id)).get_result()
+            self.get_this_url_path().add_path('available_fields')).get_result()
         #: munch of :class:`.FilterField` objects describing the filter fields of this filter
         self.filter_fields = Munch({info['name']: FilterField(
             info) for info in available_fields['available_filter_fields']})
@@ -62,12 +67,21 @@ class Filter(object):
     def create_collector(self, collected_fields, type='COUNTER'):
         """Creates a collector from this filter
         """
-        resp = self.system.api.post('/api/rest/metrics/collectors', data={
+        resp = self.system.api.post(_METRICS_URL.add_path('collectors'), data={
             'collected_fields': collected_fields,
             'type': type,
             'filter_id': self.id})
 
         return Collector(self.system, self, collected_fields, resp.get_result()['id'])
+
+    def get_this_url_path(self):
+        return _METRICS_URL.add_path('filters').add_path(str(self.id))
+
+
+    def delete(self):
+        """Deletes this filter
+        """
+        self.system.api.delete(self.get_this_url_path())
 
 
 class FilterField(object):
@@ -133,7 +147,7 @@ class Collector(object):
             if next_sample_time is not None and next_sample_time > flux.current_timeline.time():
                 flux.current_timeline.sleep(max(0, next_sample_time - flux.current_timeline.time()))
             result = self.system.api.get(
-                '/api/rest/metrics/collectors/data?collector_id={}'.format(self.id)).get_result()
+                _METRICS_URL.add_path('collectors/data').set_query_param('collector_id', str(self.id))).get_result()
             [result] = [collector for collector in result[
                 'collectors'] if collector['id'] == self.id]
             interval = result['interval_milliseconds'] / 1000.0
