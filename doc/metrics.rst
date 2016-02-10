@@ -12,6 +12,14 @@ Creating a filter is done using ``system.metrics.create_filter``:
        
        >>> filter = system.metrics.create_filter(protocol='NFS')
 
+You can get the available fields and values for creation with :meth:`.Metrics.get_available_fields`:
+
+.. code-block:: python
+       
+       >>> for field in system.metrics.get_available_fields():
+       ...     unused = field.name
+       ...     unused = field.values
+
 You can get the filter field details and the collector field details using ``filter_fields`` and ``collector_fields`` respectively:
 
 .. code-block:: python

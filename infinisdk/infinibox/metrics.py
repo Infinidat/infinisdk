@@ -22,6 +22,25 @@ class Metrics(object):
         resp = self.system.api.post('/api/rest/metrics/filters', data=fields)
         return Filter(self.system, resp.get_result()['id'])
 
+    def get_available_fields(self):
+        resp = self.system.api.get('/api/rest/metrics/available_fields')
+        return [
+            TopLevelField.from_json(field)
+            for field in resp.get_result()['available_filter_fields']
+        ]
+
+
+class TopLevelField(object):
+
+    def __init__(self, name, values):
+        super(TopLevelField, self).__init__()
+        self.name = name
+        self.values = values
+
+    @classmethod
+    def from_json(cls, j):
+        return cls(name=j['name'], values=j['values'])
+
 
 class Filter(object):
     """Represents a single filter defined on the system for metric gathering
