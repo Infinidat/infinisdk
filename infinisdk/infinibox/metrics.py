@@ -181,6 +181,14 @@ class Collector(object):
                 yield sample
                 next_sample_time = sample.timestamp.timestamp + sample.interval
 
+    def delete(self):
+        """Deletes this collector
+        """
+        self.system.api.delete(self.get_this_url_path())
+
+    def get_this_url_path(self):
+        return _METRICS_URL.add_path('collectors').add_path(str(self.id))
+
 
 class Sample(object):
 
