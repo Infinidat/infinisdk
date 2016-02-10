@@ -83,6 +83,9 @@ class Compatability(object):
     def has_iscsi(self):
         return self._has_feature('iscsi')
 
+    def has_compression(self):
+        return self._has_feature('compression')
+
     def get_nas_version(self):
         return self._get_feature_version('nas', 0)
 

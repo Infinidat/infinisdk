@@ -99,6 +99,8 @@ class Volume(Dataset):
         Field("ssd_enabled", type=bool, mutable=True, creation_parameter=True, is_filterable=True, is_sortable=True, optional=True),
         Field("write_protected", type=bool, mutable=True, creation_parameter=True, optional=True
               , is_filterable=True, is_sortable=True),
+        Field("compression_enabled", type=bool, mutable=True, feature_name='compression', add_updater=False),
+        Field("compression_supressed", type=bool, feature_name='compression'),
         Field("depth", cached=True, type=int, is_sortable=True, is_filterable=True),
         Field("mapped", type=bool, is_sortable=True, is_filterable=True),
         Field("has_children", type=bool, add_getter=False),

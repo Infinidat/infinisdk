@@ -143,3 +143,9 @@ class Dataset(InfiniBoxObject):
         """
         data = dict(pool_id=target_pool.get_id(), with_capacity=with_capacity)
         self.system.api.post(self.get_this_url_path().add_path('move'), data=data)
+
+    def enable_compression(self):
+        self.update_field("compression_enabled", True)
+
+    def disable_compression(self):
+        self.update_field("compression_enabled", False)
