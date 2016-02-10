@@ -35,6 +35,29 @@ class Metrics(object):
             for field in resp.get_result()['available_filter_fields']
         ]
 
+    def get_samples(self, collectors):
+        """Retrieves all pending samples for a group of collectors
+        """
+        returned = []
+        collectors_by_id = {c.id: c for c in collectors}
+        path = _METRICS_URL.add_path('collectors/data')
+        path = path.set_query_param('collector_id', 'in:{}'.format(
+            ','.join(str(c.id) for c in collectors)))
+        resp = self.system.api.get(path).get_result()
+        for collector_data in resp['collectors']:
+            collector = collectors_by_id[collector_data['id']]
+            interval = collector_data['interval_milliseconds'] / 1000.0
+            end_timestamp = arrow.Arrow.fromtimestamp(
+                collector_data['end_timestamp_milliseconds'] / 1000.0)
+
+            series = collector_data['data']
+            for index, sample in enumerate(series):
+                timestamp = end_timestamp - \
+                            timedelta(seconds=interval * (len(series) - index + 1))
+                returned.append(Sample(collector, sample, timestamp, interval))
+
+        return returned
+
 
 class TopLevelField(object):
 
@@ -139,23 +162,7 @@ class Collector(object):
         """Get all samples which are ready for collection
         :returns: a list of :class:`.Sample` objects
         """
-        returned = []
-        resp = self.system.api.get(
-            _METRICS_URL.add_path('collectors/data').set_query_param('collector_id', str(self.id))).get_result()
-        for collector_data in resp['collectors']:
-            if collector_data['id'] == self.id:
-                interval = collector_data['interval_milliseconds'] / 1000.0
-                end_timestamp = arrow.Arrow.fromtimestamp(
-                    collector_data['end_timestamp_milliseconds'] / 1000.0)
-
-                series = collector_data['data']
-                for index, sample in enumerate(series):
-                    timestamp = end_timestamp - \
-                        timedelta(seconds=interval *
-                                  (len(series) - index + 1))
-                    returned.append(Sample(self, sample, timestamp, interval))
-
-        return returned
+        return self.system.metrics.get_samples([self])
 
     def iter_samples(self):
         """Iterates the collector, getting samples indefinitely

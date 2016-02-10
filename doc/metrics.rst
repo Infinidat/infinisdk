@@ -48,6 +48,13 @@ If your collector collects multiple fields, you can access them through the ``va
        >>> sample.values.ops
        True
 
+Getting the samples currently pending in the collector can be done by :func:`get_samples <infinisdk.infinibox.metrics.Collector.get_samples>`, or if multiple collectors are needed :func:`get_samples <infinisdk.infinibox.metrics.Metrics.get_samples>`:
+
+.. code-block:: python
+       
+       >>> samples = system.metrics.get_samples([collector]
+       >>> samples = collector.get_samples()
+
 You can also iterate using the :func:`iter_samples <infinisdk.infinibox.metrics.Collector.iter_samples>` method:
 
 .. code-block:: python
@@ -55,7 +62,8 @@ You can also iterate using the :func:`iter_samples <infinisdk.infinibox.metrics.
        >>> for index, sample in enumerate(collector.iter_samples()):
        ...     # ...
        ...     break
-       
+
+The samples returned are actually :class:`infinisdk.infinibox.metrics.Sample` objects that represent the data points collected.       
 
 
 .. seealso:: :class:`.infinibox.metrics.Metrics`
