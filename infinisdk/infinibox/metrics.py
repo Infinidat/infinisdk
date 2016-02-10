@@ -24,7 +24,8 @@ class Metrics(object):
 
         :return: a :class:`.Filter` object
         """
-        resp = self.system.api.post(_METRICS_URL.add_path('filters'), data=fields)
+        resp = self.system.api.post(
+            _METRICS_URL.add_path('filters'), data=fields)
         return Filter(self.system, resp.get_result()['id'])
 
     def get_available_fields(self):
@@ -76,7 +77,6 @@ class Filter(object):
 
     def get_this_url_path(self):
         return _METRICS_URL.add_path('filters').add_path(str(self.id))
-
 
     def delete(self):
         """Deletes this filter
@@ -135,6 +135,28 @@ class Collector(object):
         """
         return next(self.iter_samples())
 
+    def get_samples(self):
+        """Get all samples which are ready for collection
+        :returns: a list of :class:`.Sample` objects
+        """
+        returned = []
+        resp = self.system.api.get(
+            _METRICS_URL.add_path('collectors/data').set_query_param('collector_id', str(self.id))).get_result()
+        for collector_data in resp['collectors']:
+            if collector_data['id'] == self.id:
+                interval = collector_data['interval_milliseconds'] / 1000.0
+                end_timestamp = arrow.Arrow.fromtimestamp(
+                    collector_data['end_timestamp_milliseconds'] / 1000.0)
+
+                series = collector_data['data']
+                for index, sample in enumerate(series):
+                    timestamp = end_timestamp - \
+                        timedelta(seconds=interval *
+                                  (len(series) - index + 1))
+                    returned.append(Sample(self, sample, timestamp, interval))
+
+        return returned
+
     def iter_samples(self):
         """Iterates the collector, getting samples indefinitely
 
@@ -145,28 +167,17 @@ class Collector(object):
 
         while True:
             if next_sample_time is not None and next_sample_time > flux.current_timeline.time():
-                flux.current_timeline.sleep(max(0, next_sample_time - flux.current_timeline.time()))
-            result = self.system.api.get(
-                _METRICS_URL.add_path('collectors/data').set_query_param('collector_id', str(self.id))).get_result()
-            [result] = [collector for collector in result[
-                'collectors'] if collector['id'] == self.id]
-            interval = result['interval_milliseconds'] / 1000.0
-            next_sample_time = flux.current_timeline.time() + interval
-            end_timestamp = arrow.Arrow.fromtimestamp(
-                result['end_timestamp_milliseconds'] / 1000.0)
-            series = result['data']
-            if not series:
-                continue
-            for index, sample in enumerate(series):
-                timestamp = end_timestamp - \
-                    timedelta(seconds=interval *
-                              (len(series) - index + 1))
-                yield Sample(self, sample, timestamp)
+                flux.current_timeline.sleep(
+                    max(0, next_sample_time - flux.current_timeline.time()))
+            samples = self.get_samples()
+            for sample in samples:
+                yield sample
+                next_sample_time = sample.timestamp.timestamp + sample.interval
 
 
 class Sample(object):
 
-    def __init__(self, collector, values, timestamp):
+    def __init__(self, collector, values, timestamp, interval):
         super(Sample, self).__init__()
         self.collector = collector
         #: the values for this sample, as an ordered Python list
@@ -175,6 +186,8 @@ class Sample(object):
         self.values = Munch(izip_longest(collector.field_names, values))
         #: a timestamp (Arrow) object of when this sample was taken
         self.timestamp = timestamp
+        #: the interval, in seconds, until the next sample
+        self.interval = interval
 
     @property
     def value(self):
