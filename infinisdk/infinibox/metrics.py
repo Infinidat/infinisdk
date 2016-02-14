@@ -88,6 +88,11 @@ class Filter(object):
         self.collector_fields = Munch({info['name']: CollectorField(
             info) for info in available_fields['available_collector_fields']})
 
+    def update(self, **fields):
+        """Updates the filter according to the specified fields
+        """
+        self.system.api.put(self.get_this_url_path(), data=fields)
+
     def create_collector(self, collected_fields, type='COUNTER'):
         """Creates a collector from this filter
         """

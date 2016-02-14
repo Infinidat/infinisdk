@@ -31,6 +31,12 @@ You can get the filter field details and the collector field details using ``fil
        >>> print(filter.collector_fields.throughput.unit)
        B/Sec
 
+Updating a filter is done with the :meth:`.Filter.update` method:
+
+.. code-block:: python
+       
+       >>> filter.update(operation_type='commit')
+
 Creating a Collector and Polling Data
 -------------------------------------
 
