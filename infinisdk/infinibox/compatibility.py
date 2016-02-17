@@ -6,7 +6,7 @@ from .._compat import httplib
 from ..core.config import config
 
 
-class Compatability(object):
+class Compatibility(object):
 
     def __init__(self, system):
         self.system = system

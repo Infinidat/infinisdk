@@ -15,7 +15,7 @@ from ..core.object_query import LazyQuery
 from ..core.utils import deprecated
 from ..core.utils.environment import get_hostname, get_logged_in_username
 from .capacities import InfiniBoxSystemCapacity
-from .compatability import Compatability
+from .compatibility import Compatibility
 from .components import InfiniBoxSystemComponents
 from .cons_group import ConsGroup
 from .events import Events
@@ -53,7 +53,7 @@ class InfiniBox(APITarget):
         super(InfiniBox, self)._initialize()
         self._is_logged_in = False
         self.current_user = _CurrentUserProxy(self)
-        self.compat = Compatability(self)
+        self.compat = Compatibility(self)
         self.capacities = InfiniBoxSystemCapacity(self)
         self.metrics = Metrics(self)
         self._related_systems = []
