@@ -6,10 +6,14 @@ from .._compat import httplib
 from ..core.config import config
 
 
-class Compatability(object):
+class Compatibility(object):
 
     def __init__(self, system):
         self.system = system
+        self._features = None
+        self._system_version = None
+
+    def invalidate_cache(self):
         self._features = None
         self._system_version = None
 
@@ -51,7 +55,7 @@ class Compatability(object):
         float_digit_list = self.system.get_version().split('.')[:2]
         return float(".".join(float_digit_list))
 
-    def _init_fetatures(self):
+    def _init_features(self):
         resp = self.system.api.get("_features", assert_success=False)
         if resp.response.status_code == httplib.NOT_FOUND:
             features_list = []  # Backwards compatible
@@ -63,7 +67,7 @@ class Compatability(object):
 
     def _get_feature_version(self, feature_key, default_version=NOTHING):
         if self._features is None:
-            self._init_fetatures()
+            self._init_features()
         return self._features.get(feature_key, default_version)
 
     def _has_feature(self, feature_key):

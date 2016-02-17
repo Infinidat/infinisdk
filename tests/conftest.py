@@ -79,7 +79,7 @@ def simulator(izbox_simulator, infinibox_simulator, system_type):
 def izbox(izbox_simulator):
     return IZBox(izbox_simulator)
 
-def validate_unittest_compatability_with_infinibox_version(system, **kwargs):
+def validate_unittest_compatibility_with_infinibox_version(system, **kwargs):
     from_version = kwargs.pop('from_version', None)
     until_version = kwargs.pop('until_version', None)
     assert not kwargs, "Version marker got unexpected kwargs: {0}".format(list(kwargs))
@@ -99,7 +99,7 @@ def infinibox(request, infinibox_simulator):
     infinibox = InfiniBox(infinibox_simulator, auth=(user.get_username(), user.get_password()))
     infinibox.login()
     required_version_kwargs = getattr(request.function, 'required_version', _DEFAULT_REQUIRED_VERSION).kwargs
-    validate_unittest_compatability_with_infinibox_version(infinibox, **required_version_kwargs)
+    validate_unittest_compatibility_with_infinibox_version(infinibox, **required_version_kwargs)
     if infinibox.compat.get_nas_version() == 1:
         infinibox.compat.set_feature_as_supported('nas', 2)
     return infinibox

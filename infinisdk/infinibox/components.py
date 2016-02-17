@@ -24,6 +24,9 @@ class InfiniBoxSystemComponents(SystemComponentsBinder):
 
     def __init__(self, system):
         super(InfiniBoxSystemComponents, self).__init__(InfiniBoxSystemComponent, system)
+        self._initialize()
+
+    def _initialize(self):
         self.system_component = System(self.system, {'parent_id': "", 'id': 0})
         self.cache_component(self.system_component)
         Rack = self.racks.object_type
@@ -33,6 +36,10 @@ class InfiniBoxSystemComponents(SystemComponentsBinder):
         self._fetched_others = False
         self._fetched_service_clusters = False
         self._deps_by_compoents_tree = defaultdict(set)
+
+    def invalidate_cache(self):
+        super(InfiniBoxSystemComponents, self).invalidate_cache()
+        self._initialize()
 
     def get_depended_components_type(self, component_type):
         deps = self._deps_by_compoents_tree[component_type].copy()
@@ -48,7 +55,6 @@ class InfiniBoxSystemComponents(SystemComponentsBinder):
 
     def should_fetch_service_clusters(self):
         return not self._fetched_service_clusters
-
 
     def mark_fetched_nodes(self):
         self._fetched_nodes = True

@@ -48,7 +48,7 @@ class Field(FieldBase):
                 raise AttributeAlreadyExists(cls, getter_name)
             setattr(cls, getter_name, getter_func)
 
-            # For backward compatability
+            # For backward compatibility
             if getter_name.startswith('is_'):
                 deprecated_func = make_backwards_compatible_getter(self)
                 deprecated_name = deprecated_func.__name__
@@ -84,7 +84,7 @@ def _install_filter_factory(operator_name, operator_function_name):
 
 def _install_filter_factories():
     # Installing operators that python has overloading functions for them
-    # between operators exists as __between__ for backward compatability only
+    # between operators exists as __between__ for backward compatibility only
     for operator_name in ["eq", "gt", "lt", "ge", "le", "ne", "between"]:
         operator_function_name = "__{0}__".format(operator_name)
         _install_filter_factory(operator_name, operator_function_name)
