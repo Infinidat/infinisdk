@@ -9,7 +9,7 @@ from infi.pyutils.lazy import cached_method
 from urlobject import URLObject as URL
 
 from .exceptions import APICommandFailed, APITransportFailure
-from .._compat import with_metaclass, iteritems, httplib, reraise
+from .._compat import with_metaclass, iteritems, httplib, reraise, string_types  # pylint: disable=no-name-in-module
 from .exceptions import MissingFields, CacheMiss
 from api_object_schema import FieldsMeta as FieldsMetaBase
 from .field import Field
@@ -223,6 +223,7 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
         return returned
 
     def update_field_cache(self, api_obj):
+        assert all(isinstance(key, string_types) for key in api_obj.keys())
         self._cache.update(api_obj)
 
     def update_field(self, field_name, field_value):
