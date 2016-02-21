@@ -9,7 +9,7 @@ class NetworkSpace(InfiniBoxObject):
     URL_PATH = 'network/spaces'
 
     FIELDS = [
-        Field("id", is_identity=True, type=int, cached=True),
+        Field("id", is_identity=True, type=int, is_filterable=True, is_sortable = True, cached=True),
         Field("name", creation_parameter=True, mutable=True, default=Autogenerate("network_space_{uuid}")),
         Field("network_config", creation_parameter=True, mutable=True, type=MunchType),
         Field("interfaces", creation_parameter=True, mutable=True, type=list, binding=ListOfRelatedObjectIDsBinding('network_interfaces')),
@@ -17,7 +17,7 @@ class NetworkSpace(InfiniBoxObject):
         Field("ips", creation_parameter=False, mutable=False, type=MunchListType),
         Field("properties", creation_parameter=False, mutable=False, type=MunchType),
         Field("automatic_ip_failback", creation_parameter=True, mutable=True, optional=True, type=bool),
-        Field("mtu",  creation_parameter=True, mutable=True, optional=True, type=int)
+        Field("mtu",  creation_parameter=True, mutable=True, optional=True, type=int),
         Field("rate_limit", type=int, creation_parameter=True, mutable=True, optional=True),
     ]
 
