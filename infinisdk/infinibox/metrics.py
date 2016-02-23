@@ -79,14 +79,22 @@ class Filter(object):
         super(Filter, self).__init__()
         self.system = system
         self.id = id
+
+    def get_filter_fields(self):
+        """Returns a munch describing the filter fields of this filter
+        """
+        return self._format_fields_munch('available_filter_fields', FilterField)
+
+    def get_collector_fields(self):
+        """Returns a munch describing the collector fields of this filter
+        """
+        return self._format_fields_munch('available_collector_fields', CollectorField)
+
+    def _format_fields_munch(self, name, field_class):
         available_fields = self.system.api.get(
             self.get_this_url_path().add_path('available_fields')).get_result()
-        #: munch of :class:`.FilterField` objects describing the filter fields of this filter
-        self.filter_fields = Munch({info['name']: FilterField(
-            info) for info in available_fields['available_filter_fields']})
-        #: munch of :class:`.CollectorField` objects describing the collector fields of this filter
-        self.collector_fields = Munch({info['name']: CollectorField(
-            info) for info in available_fields['available_collector_fields']})
+        return Munch({info['name']: field_class(
+            info) for info in available_fields[name]})
 
     def update(self, **fields):
         """Updates the filter according to the specified fields
