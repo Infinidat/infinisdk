@@ -232,8 +232,5 @@ class Sample(object):
         returned = []
         for value_name, value in self.values.items():
             item = '{}: {}'.format(value_name, value)
-            unit = self.collector.filter.collector_fields[value_name].unit
-            if unit:
-                item += unit
             returned.append(item)
         return ', '.join(returned)
