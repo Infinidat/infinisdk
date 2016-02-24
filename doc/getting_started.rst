@@ -183,9 +183,9 @@ InfiniSDK reflects data sizes using the ``capacity`` module, allowing easy compu
 
 		>>> size = pool.get_virtual_capacity()
 		>>> print(size)
-		1*TB
+		1 TB
 		>>> print(size * 2)
-		2*TB
+		2 TB
 		>>> print(size // GiB)
 		931
 
