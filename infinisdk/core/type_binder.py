@@ -114,7 +114,7 @@ class TypeBinder(object):
             return None
 
     def count(self, *predicates, **kw):
-        return len(self.find(*predicates, **kw))
+        return len(self.find(*predicates, **kw).page_size(1))
 
     def __repr__(self):
         return "<{0}.{1}>".format(self.system, self.object_type.get_plural_name())
