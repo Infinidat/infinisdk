@@ -82,9 +82,10 @@ class InfiniBoxComponentQuery(object):
 
     def page(self, page_index):
         assert page_index == 1 # pragma: no cover
+        return self
 
     def page_size(self, page_size):
-        pass # pragma: no cover
+        return self # pragma: no cover
 
     def sort(self, *criteria):
         self.sort_criteria += criteria
