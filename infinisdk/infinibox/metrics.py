@@ -146,7 +146,8 @@ class CollectorField(object):
         #: name of this field
         self.name = info['name']
         #: Unit of measurement
-        self.unit = info['unit']
+        self.unit = info['units'] if 'units' in info else info['unit']
+
         if self.unit.lower() == 'n/a':
             self.unit = None
 
