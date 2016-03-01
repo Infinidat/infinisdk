@@ -34,7 +34,8 @@ class Filesystem(Dataset):
         Field("depth", cached=True, type=int, is_sortable=True, is_filterable=True),
         Field("mapped", type=bool, is_sortable=True, is_filterable=True),
         Field("has_children", type=bool, add_getter=False),
-        Field("root_mode", creation_parameter=True, optional=True),
+        Field("root_mode", creation_parameter=True, optional=True, is_filterable=True, is_sortable=True),
+        Field("atime_mode", is_filterable=True, is_sortable=True),
     ]
 
     @classmethod
