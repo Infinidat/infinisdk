@@ -80,19 +80,19 @@ class Filter(object):
         self.system = system
         self.id = id
 
-    def get_filter_fields(self):
+    def get_filter_fields(self, level='BASIC'):
         """Returns a munch describing the filter fields of this filter
         """
-        return self._format_fields_munch('available_filter_fields', FilterField)
+        return self._format_fields_munch('available_filter_fields', FilterField, level)
 
-    def get_collector_fields(self):
+    def get_collector_fields(self, level='BASIC'):
         """Returns a munch describing the collector fields of this filter
         """
-        return self._format_fields_munch('available_collector_fields', CollectorField)
+        return self._format_fields_munch('available_collector_fields', CollectorField, level)
 
-    def _format_fields_munch(self, name, field_class):
+    def _format_fields_munch(self, name, field_class, level):
         available_fields = self.system.api.get(
-            self.get_this_url_path().add_path('available_fields')).get_result()
+            self.get_this_url_path().add_path('available_fields').set_query_param('level', level)).get_result()
         return Munch({info['name']: field_class(
             info) for info in available_fields[name]})
 
