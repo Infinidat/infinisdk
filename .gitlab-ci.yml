@@ -1,0 +1,36 @@
+py27:
+  image: python:2.7
+  tags:
+    - infradev
+  script:
+    - pip install -i https://pypi.infinidat.com/simple -e .
+    - pip install -i https://pypi.infinidat.com/simple -r test_requirements.txt
+    - py.test tests/
+
+py34:
+  image: python:3.4
+  tags:
+    - infradev
+  script:
+    - pip install -i https://pypi.infinidat.com/simple -e .
+    - pip install -i https://pypi.infinidat.com/simple -r test_requirements.txt
+    - py.test tests/
+
+py35:
+  image: python:3.5
+  tags:
+    - infradev
+  script:
+    - pip install -i https://pypi.infinidat.com/simple -e .
+    - pip install -i https://pypi.infinidat.com/simple -r test_requirements.txt
+    - py.test tests/
+
+pypi:
+  image: python:2.7
+  tags:
+    - infradev
+  stage: deploy
+  only:
+    - master
+  script:
+    - curl -sL http://goto/pypi_register | python - -v ./
