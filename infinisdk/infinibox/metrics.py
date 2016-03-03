@@ -28,6 +28,17 @@ class Metrics(object):
             _METRICS_URL.add_path('filters'), data=fields)
         return Filter(self.system, resp.get_result()['id'])
 
+    def create_collector(self, collected_fields, filters, type='COUNTER'):
+        """Creates a collector from this filter
+        """
+        resp = self.system.api.post(_METRICS_URL.add_path('collectors'), data={
+            'collected_fields': collected_fields,
+            'type': type,
+            'filters': filters})
+
+        created_filter = Filter(self.system, resp.get_result()['filter_id'])
+        return Collector(self.system, created_filter, collected_fields, resp.get_result()['id'])
+
     def get_available_fields(self):
         resp = self.system.api.get(_METRICS_URL.add_path('available_fields'))
         return [
