@@ -1,6 +1,5 @@
 from ..core import Field, SystemObject
 from ..core.api.special_values import Autogenerate
-from ..core.utils import deprecated
 
 
 class User(SystemObject):
@@ -14,10 +13,6 @@ class User(SystemObject):
         Field("enabled", type=bool, mutable=True, add_updater=False, feature_name='user_disabling')
     ]
 
-
-    @deprecated(message='Use User.get_owned_pools or Pool.get_administered_pools instead')
-    def get_pools(self):
-        return self.get_owned_pools()
 
     def get_owned_pools(self):
         """Returns the pools that are owned by this user

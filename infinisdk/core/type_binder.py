@@ -1,6 +1,5 @@
 import random
 from .exceptions import ObjectNotFound, TooManyObjectsFound
-from .utils import deprecated
 
 
 class TypeBinder(object):
@@ -121,10 +120,6 @@ class TypeBinder(object):
 
     def __iter__(self):
         return iter(self.find())
-
-    @deprecated(message="Use to_list/count instead")
-    def __len__(self):
-        return len(self.find())
 
     def to_list(self):
         """Returns the entire set of objects as a Python list

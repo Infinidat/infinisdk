@@ -1,5 +1,5 @@
 from .exceptions import AttributeAlreadyExists
-from .system_object_utils import make_getter, make_updater, make_backwards_compatible_getter
+from .system_object_utils import make_getter, make_updater
 from .field_filter import FieldFilter
 from .field_sorting import FieldSorting
 from .utils import DONT_CARE
@@ -47,14 +47,6 @@ class Field(FieldBase):
             if getter_name in cls.__dict__:
                 raise AttributeAlreadyExists(cls, getter_name)
             setattr(cls, getter_name, getter_func)
-
-            # For backward compatability
-            if getter_name.startswith('is_'):
-                deprecated_func = make_backwards_compatible_getter(self)
-                deprecated_name = deprecated_func.__name__
-                if deprecated_name in cls.__dict__:
-                    raise AttributeAlreadyExists(cls, deprecated_name)
-                setattr(cls, deprecated_name, deprecated_func)
 
         if self.add_updater:
             updater_func = make_updater(self)

@@ -54,14 +54,6 @@ class Pool(InfiniBoxObject):
             url = url.add_path(str(owner_id))
         return url
 
-    @deprecated("Use set_owners instead")
-    def add_owner(self, user):
-        self.system.api.post(self._get_pool_owners_url(user.id), data={})
-
-    @deprecated("Use set_owners instead")
-    def discard_owner(self, user):
-        self.system.api.delete(self._get_pool_owners_url(user.id), data={})
-
     def set_owners(self, users):
         """sets the owners of this pool, replacing previous owners
         """

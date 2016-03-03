@@ -12,7 +12,7 @@ Querying all objects can be done by iterating over the collection proxies (e.g. 
 
 .. code-block:: python
 		
-		>>> len(system.volumes)
+		>>> system.volumes.count()
 		5
 		>>> for volume in system.volumes:
 		...     print("Found volume:", volume.get_name())
@@ -100,7 +100,7 @@ And here is a query to find all volumes greater than 1 GiB in size:
 .. code-block:: python
 		
 		>>> from capacity import GiB
-		>>> list(system.volumes.find(system.volumes.fields.size > GiB))
+		>>> system.volumes.find(system.volumes.fields.size > GiB).to_list()
 		[]
 
 .. seealso:: :ref:`capacities`

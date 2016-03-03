@@ -114,6 +114,10 @@ class InfiniBoxComponentBinder(TypeBinder):
             raise NotImplementedError("Initializing infinibox components lazily is not yet supported") # pragma: no cover
         return returned
 
+    @deprecated(message="Use to_list/count instead")
+    def __len__(self):
+        return len(self.find())
+
     @contextmanager
     def force_fetching_from_cache_context(self):
         prev = self._force_fetching_from_cache

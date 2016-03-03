@@ -200,10 +200,10 @@ Querying objects of various types is done relatively easily through InfiniSDK. T
 
 .. code-block:: python
 
-		>>> len(system.volumes)
+		>>> system.volumes.count()
 		0
 
-		>>> list(system.volumes)
+		>>> system.volumes.to_list()
 		[]
 
 .. seealso:: :ref:`querying`

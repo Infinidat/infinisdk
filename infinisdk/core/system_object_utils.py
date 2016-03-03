@@ -3,10 +3,6 @@ from capacity import Capacity
 from .utils import deprecated
 
 
-def make_backwards_compatible_getter(field):
-    getter_func = _make_getter(field, "get_{0}")
-    return deprecated(getter_func, "Use is_{0} instead".format(field.name))
-
 def _make_getter(field, name_template):
     def getter(self, **kwargs):
         return self.get_field(field.name, **kwargs)

@@ -62,11 +62,6 @@ class InfiniBox(APITarget):
     def is_field_supported(self, field):
         return self.compat.is_feature_supported(field.feature_name)
 
-    @property
-    @deprecated(message='Use <system>.host_clusters')
-    def clusters(self):
-        return self.host_clusters
-
     def _get_api_auth(self):
         username = self._get_auth_ini_option('username', None)
         password = self._get_auth_ini_option('password', None)

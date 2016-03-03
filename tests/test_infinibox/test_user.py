@@ -26,7 +26,7 @@ def test_get_administered_pools_multiple_pages(infinibox, user, forge):
     num_pools = 5
     for i in range(num_pools):
         pool = infinibox.pools.create()
-        pool.add_owner(user)
+        pool.set_owners([user])
     page_size = num_pools - 1
     infinibox.get_simulator().api.set_default_page_size(page_size)
     forge.replace_with(object_query, '_DEFAULT_SYSTEM_PAGE_SIZE', page_size)
@@ -36,7 +36,7 @@ def test_get_administered_pools_multiple_pages(infinibox, user, forge):
 @new_to_version('2.0')
 def test_get_administered_pools_with_pools(infinibox, user):
     pool = infinibox.pools.create()
-    pool.add_owner(user)
+    pool.set_owners([user])
     assert infinibox.pools.get_administered_pools().to_list() == [pool]
 
 
@@ -84,13 +84,13 @@ def test_get_owned_pools(infinibox, user):
     assert user.get_owned_pools() == []
 
     pool = infinibox.pools.create()
-    pool.add_owner(user)
+    pool.set_owners([user])
 
     pools = user.get_owned_pools()
     assert len(pools) == 1
     assert pools[0] == pool
 
-    pool.discard_owner(user)
+    pool.set_owners([])
     assert user.get_owned_pools() == []
 
 

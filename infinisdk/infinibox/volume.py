@@ -5,7 +5,7 @@ from ..core import Field, CapacityType, MillisecondsDatetimeType
 from ..core.exceptions import InfiniSDKException, ObjectNotFound, TooManyObjectsFound
 from ..core.api.special_values import Autogenerate, SpecialValue, OMIT
 from ..core.bindings import RelatedObjectBinding
-from ..core.utils import deprecated, DONT_CARE
+from ..core.utils import DONT_CARE
 from .dataset import Dataset
 from .lun import LogicalUnit, LogicalUnitContainer
 from .scsi_serial import SCSISerial
@@ -114,10 +114,6 @@ class Volume(Dataset):
         if pool and not isinstance(pool, SpecialValue):
             pool.refresh('allocated_physical_capacity', 'free_physical_capacity', 'free_virtual_capacity', 'reserved_capacity')
         return super(Volume, cls).create(system, **fields)
-
-    @deprecated(message="Use volume.is_master instead")
-    def is_master_volume(self):
-        return self.is_master()
 
     def own_replication_snapshot(self, name=None):
         if not name:
