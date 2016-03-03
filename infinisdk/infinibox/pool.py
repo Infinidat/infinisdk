@@ -27,7 +27,7 @@ class Pool(InfiniBoxObject):
     FIELDS = [
         Field("id", type=int, is_identity=True, is_filterable=True, is_sortable=True),
         Field("name", creation_parameter=True, mutable=True, is_filterable=True, is_sortable=True, default=Autogenerate("pool_{uuid}")),
-        Field("virtual_capacity",  creation_parameter=True, mutable=True, default=TB, type=CapacityType, is_filterable=True, is_sortable=True),
+        Field("virtual_capacity", creation_parameter=True, mutable=True, default=TB, type=CapacityType, is_filterable=True, is_sortable=True),
         Field("physical_capacity", creation_parameter=True, mutable=True, default=TB, type=CapacityType, is_filterable=True, is_sortable=True),
         Field("owners", mutable=True, type=list, add_updater=False, binding=ListOfRelatedObjectIDsBinding('users')),
         Field("allocated_physical_capacity", api_name="allocated_physical_space", type=CapacityType),
@@ -36,8 +36,8 @@ class Pool(InfiniBoxObject):
         Field("reserved_capacity", type=CapacityType),
         Field("created_at", type=MillisecondsDatetimeType, is_sortable=True, is_filterable=True),
         Field("updated_at", type=MillisecondsDatetimeType, is_sortable=True, is_filterable=True),
-        Field("ssd_enabled", type=bool, mutable=True, creation_parameter=True, is_filterable=True, is_sortable=True, optional=True),
-        Field("compression_enabled", type=bool, mutable=True, feature_name='compression', add_updater=False),
+        Field("ssd_enabled", type=bool, mutable=True, creation_parameter=True, is_filterable=True, is_sortable=True, optional=True, toggle_name='ssd'),
+        Field("compression_enabled", type=bool, mutable=True, feature_name='compression', toggle_name='compression'),
         Field("max_extend", type=CapacityType, mutable=True, binding=InfiniSDKBindingWithSpecialFlags([0, -1])),
         Field("state", cached=False),
     ]
@@ -81,9 +81,3 @@ class Pool(InfiniBoxObject):
     def is_over_critical_threshold(self):
         critical_threshold = self.get_field('physical_capacity_critical')
         return self._is_over_threshold(critical_threshold)
-
-    def enable_compression(self):
-        self.update_field("compression_enabled", True)
-
-    def disable_compression(self):
-        self.update_field("compression_enabled", False)

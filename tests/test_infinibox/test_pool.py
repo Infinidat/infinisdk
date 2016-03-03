@@ -2,7 +2,7 @@ import pytest
 from infinisdk._compat import xrange, iteritems
 from infinisdk.core import CapacityType
 from capacity import TB, GB, KiB, Capacity
-from ..conftest import create_volume, create_pool, create_filesystem
+from ..conftest import create_volume, create_pool, create_filesystem, new_to_version
 
 
 def update_all_capacities_in_dict_to_api(d):
@@ -112,3 +112,12 @@ def test_pool_thresholds(infinibox):
     infinibox.volumes.create(pool=pool, provisioning='THICK', size=100*GB)
     assert pool.is_over_warning_threshold()
     assert pool.is_over_critical_threshold()
+
+
+@new_to_version('3.0')
+def test_compression_enabled(data_entity):
+    assert not data_entity.is_compression_enabled()
+    data_entity.enable_compression()
+    assert data_entity.is_compression_enabled()
+    data_entity.disable_compression()
+    assert not data_entity.is_compression_enabled()

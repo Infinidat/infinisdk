@@ -96,10 +96,10 @@ class Volume(Dataset):
         Field("created_at", cached=True, type=MillisecondsDatetimeType, is_sortable=True, is_filterable=True),
         Field("updated_at", type=MillisecondsDatetimeType, is_sortable=True, is_filterable=True),
         Field("serial", type=SCSISerial, is_filterable=True, is_sortable=True),
-        Field("ssd_enabled", type=bool, mutable=True, creation_parameter=True, is_filterable=True, is_sortable=True, optional=True),
+        Field("ssd_enabled", type=bool, mutable=True, creation_parameter=True, is_filterable=True, is_sortable=True, optional=True, toggle_name='ssd'),
         Field("write_protected", type=bool, mutable=True, creation_parameter=True, optional=True
-              , is_filterable=True, is_sortable=True),
-        Field("compression_enabled", type=bool, mutable=True, feature_name='compression', add_updater=False),
+              , is_filterable=True, is_sortable=True, toggle_name='write_protection'),
+        Field("compression_enabled", type=bool, mutable=True, feature_name='compression', toggle_name='compression'),
         Field("compression_supressed", type=bool, feature_name='compression'),
         Field("depth", cached=True, type=int, is_sortable=True, is_filterable=True),
         Field("mapped", type=bool, is_sortable=True, is_filterable=True),

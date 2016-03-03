@@ -11,7 +11,7 @@ from infinisdk.core.translators_and_types import MillisecondsDatetimeTranslator
 from infinisdk.infinibox.dataset import (_BEGIN_FORK_HOOK, _CANCEL_FORK_HOOK,
                                          _FINISH_FORK_HOOK)
 
-from ..conftest import create_pool
+from ..conftest import create_pool, new_to_version
 
 
 
@@ -266,7 +266,16 @@ def test_get_capacity_field_with_null_value(data_entity):
     assert isinstance(data_entity.get_size(), Capacity)
     data_entity.update_field_cache({'size': None})
     assert data_entity.get_size(from_cache=True) is None
-    
-    
+
+
 def test_calculate_reclaimable_space(data_entity):
     assert isinstance(data_entity.calculate_reclaimable_space(), Capacity)
+
+
+@new_to_version('3.0')
+def test_compression_enabled(data_entity):
+    assert not data_entity.is_compression_enabled()
+    data_entity.enable_compression()
+    assert data_entity.is_compression_enabled()
+    data_entity.disable_compression()
+    assert not data_entity.is_compression_enabled()

@@ -17,3 +17,13 @@ def test_identity_field_caching():
         Field('testing_field', is_identity=True, cached=False).cached
     with pytest.raises(AssertionError):
         Field('testing_field', is_identity=True, cached=DONT_CARE).cached
+
+
+def test_updater_toggle_name():
+    assert Field('testing_field', toggle_name='my_toggle', type=bool, mutable=True).toggle_name == 'my_toggle'
+    assert Field('testing_field', type=bool, mutable=False).toggle_name is None
+    assert Field('testing_field', type=bool, mutable=True).toggle_name is 'testing_field'
+    with pytest.raises(AssertionError):
+        assert Field('testing_field', toggle_name='my_toggle', type=str, mutable=True)
+    with pytest.raises(AssertionError):
+        assert Field('testing_field', toggle_name='my_toggle', type=bool, mutable=False)

@@ -29,6 +29,29 @@ def make_updater(field):
 """.format(field, _format_type_doc(field.type._type))
     return updater
 
+def make_enable_disable_methods(field):
+    def enable(self, **kwargs):
+        return self.update_field(field.name, True, **kwargs)
+    def disable(self, **kwargs):
+        return self.update_field(field.name, False, **kwargs)
+    if field.toggle_name != 'enabled':
+        enable.__name__ = "enable_{0}".format(field.toggle_name)
+        disable.__name__ = "disable_{0}".format(field.toggle_name)
+    enable.__doc__ = "Set the value of the {0.name!r} field to True".format(field)
+    disable.__doc__ = "Set the value of the {0.name!r} field to False".format(field)
+    return [enable, disable]
+
+
+def make_field_updaters(field):
+    updater_func = make_updater(field)
+    if field.type._type is bool:
+        updaters_list = make_enable_disable_methods(field)
+        deprecation_msg = "Use {0} instead".format("/".join(func.__name__ for func in updaters_list))
+        updaters_list.append(deprecated(updater_func, deprecation_msg))
+    else:
+        updaters_list = [updater_func]
+    return updaters_list
+
 def _format_type_doc(_type):
     from .system_object import SystemObject
 

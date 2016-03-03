@@ -1,5 +1,5 @@
 from .exceptions import AttributeAlreadyExists
-from .system_object_utils import make_getter, make_updater
+from .system_object_utils import make_getter, make_field_updaters
 from .field_filter import FieldFilter
 from .field_sorting import FieldSorting
 from .utils import DONT_CARE
@@ -22,6 +22,7 @@ class Field(FieldBase):
         add_updater = kwargs.pop("add_updater", True)
         use_in_repr = kwargs.pop("use_in_repr", False)
         feature_name = kwargs.pop("feature_name", NOTHING)
+        toggle_name = kwargs.pop("toggle_name", None)
         super(Field, self).__init__(*args, **kwargs)
 
         if self.is_identity:
@@ -39,6 +40,14 @@ class Field(FieldBase):
         self.use_in_repr = use_in_repr
         #:Specifies the feature this field depended on (new/deprecated since version)
         self.feature_name = feature_name
+        #:Specifies the name for auto-updater: enable_toggle_name & disable_toggle_name will be added to the object
+        if toggle_name:
+            assert self.type.type is bool
+            assert self.mutable
+        else:
+            if self.add_updater:
+                toggle_name = self.name
+        self.toggle_name = toggle_name
 
     def notify_added_to_class(self, cls):
         if self.add_getter:
@@ -49,11 +58,11 @@ class Field(FieldBase):
             setattr(cls, getter_name, getter_func)
 
         if self.add_updater:
-            updater_func = make_updater(self)
-            updater_name = updater_func.__name__
-            if updater_name in cls.__dict__:
-                raise AttributeAlreadyExists(cls, updater_name)
-            setattr(cls, updater_name, updater_func)
+            for updater_func in make_field_updaters(self):
+                updater_name = updater_func.__name__
+                if updater_name in cls.__dict__:
+                    raise AttributeAlreadyExists(cls, updater_name)
+                setattr(cls, updater_name, updater_func)
 
     def get_default_binding_object(self):
         return InfiniSDKBinding()
