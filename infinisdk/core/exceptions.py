@@ -85,6 +85,7 @@ class APICommandFailed(APICommandException):
                 "Response Timestamp: {e.response_timestamp}\n\t"
                 "Data: {e.response.sent_data}\n\t"
                 "Status: {e.status_code}\n\t"
+                "Code: {e.error_code}\n\t"
                 "Message: {e.message}".format(e=self))
 
         cookies = self.response.response.request.headers.get('cookie')
