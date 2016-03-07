@@ -12,7 +12,7 @@ _INSTALL_REQUIRES = [
     "colorama",
     "confetti>=2.1.0",
     "flux",
-    "gossip>=0.8.0",
+    'gossip>=1.1.2',
     "infi.dtypes.wwn>=0.0.2",
     "infi.dtypes.iqn",
     "infi.pyutils",
