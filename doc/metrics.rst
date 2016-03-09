@@ -20,15 +20,15 @@ You can get the available fields and values for creation with :meth:`.Metrics.ge
        ...     unused = field.name
        ...     unused = field.values
 
-You can get the filter field details and the collector field details using ``filter_fields`` and ``collector_fields`` respectively:
+You can get the filter field details and the collector field details using ``get_filter_fields`` and ``get_collector_fields`` respectively:
 
 .. code-block:: python
 
-       >>> print(filter.filter_fields.pool_id.type)
+       >>> print(filter.get_filter_fields().pool_id.type)
        uint
-       >>> print(filter.collector_fields.average_operation_size.unit)
+       >>> print(filter.get_collector_fields().average_operation_size.unit)
        B
-       >>> print(filter.collector_fields.throughput.unit)
+       >>> print(filter.get_collector_fields().throughput.unit)
        B/Sec
 
 Updating a filter is done with the :meth:`.Filter.update` method:
@@ -52,13 +52,13 @@ If your collector collects multiple fields, you can access them through the ``va
 .. code-block:: python
        
        >>> sample.values.ops
-       True
+       0
 
 Getting the samples currently pending in the collector can be done by :func:`get_samples <infinisdk.infinibox.metrics.Collector.get_samples>`, or if multiple collectors are needed :func:`get_samples <infinisdk.infinibox.metrics.Metrics.get_samples>`:
 
 .. code-block:: python
        
-       >>> samples = system.metrics.get_samples([collector]
+       >>> samples = system.metrics.get_samples([collector])
        >>> samples = collector.get_samples()
 
 You can also iterate using the :func:`iter_samples <infinisdk.infinibox.metrics.Collector.iter_samples>` method:
