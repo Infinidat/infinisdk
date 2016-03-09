@@ -381,7 +381,8 @@ class LocalDrive(InfiniBoxSystemComponent):
 class EthPort(InfiniBoxSystemComponent):
     FIELDS = [
         Field("hw_addr", is_identity=True),
-        Field("connection_speed"),
+        Field("connection_speed", type = int),
+        Field("max_speed", type=int),
         Field("device_name", api_name="name"),
         Field("port_number", type=int, cached=True),
         Field("index", api_name="id", type=int, cached=True),

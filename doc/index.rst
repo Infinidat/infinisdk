@@ -25,6 +25,7 @@ Contents:
    mappings
    snapshots
    cons_groups
+   metrics
    users
    system_configuration
    replication
