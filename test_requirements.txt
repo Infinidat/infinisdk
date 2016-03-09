@@ -1,4 +1,5 @@
 izsim>=19
+infinisim
 pytest
 pytest-xdist
 pyforge
