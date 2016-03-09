@@ -40,6 +40,7 @@ if PY2:
         return d.iterkeys()
 
     from itertools import izip as zip
+    from itertools import izip_longest
     xrange = builtins.xrange
     sorted = builtins.sorted
     cmp = builtins.cmp
@@ -58,6 +59,8 @@ else:
     from io import StringIO
     from configparser import ConfigParser
     import http.client as httplib
+
+    from itertools import zip_longest as izip_longest
 
     raw_input = input
 

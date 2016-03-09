@@ -1,5 +1,5 @@
 from datetime import timedelta
-from itertools import izip_longest
+from .._compat import izip_longest
 
 import arrow
 import flux
