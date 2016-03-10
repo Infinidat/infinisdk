@@ -56,7 +56,7 @@ def _basic_check_for_component(infinibox, component_type, parent_type, blacklist
         blacklist = []
     if component_type not in [System]:
         for field in component_type.fields:
-            if field not in blacklist:
+            if field not in blacklist and infinibox.is_field_supported(field):
                 component_instance.get_field(field.name)
 
 

@@ -110,6 +110,10 @@ class Compatability(object):
     def has_auth_sessions(self):
         return self._has_feature('api_auth_sessions') or self._has_feature('api/auth_sessions')
 
+    def has_max_speed(self):
+        return self.get_version_as_float() > 2.2
+
+
 
 _VERSION_TUPLE_LEN = 5
 
