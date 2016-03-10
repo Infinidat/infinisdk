@@ -4,7 +4,7 @@ py27:
     - infradev
   script:
     - pip install --pre -i https://pypi.infinidat.com/simple -e .
-    - pip install --pre -i https://pypi.infinidat.com/simple -r test_requirements.txt
+    - pip install --pre -i https://pypi.infinidat.com/simple -r test_requirements.txt infinisim
     - py.test tests/
 
 py34:
@@ -13,7 +13,7 @@ py34:
     - infradev
   script:
     - pip install --pre -i https://pypi.infinidat.com/simple -e .
-    - pip install --pre -i https://pypi.infinidat.com/simple -r test_requirements.txt
+    - pip install --pre -i https://pypi.infinidat.com/simple -r test_requirements.txt infinisim
     - py.test tests/
 
 py35:
@@ -22,7 +22,7 @@ py35:
     - infradev
   script:
     - pip install --pre -i https://pypi.infinidat.com/simple -e .
-    - pip install --pre -i https://pypi.infinidat.com/simple -r test_requirements.txt
+    - pip install --pre -i https://pypi.infinidat.com/simple -r test_requirements.txt infinisim
     - py.test tests/
 
 pypi:
