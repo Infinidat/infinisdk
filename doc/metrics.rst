@@ -43,7 +43,7 @@ Creating a Collector and Polling Data
 .. code-block:: python
        
        >>> collector = filter.create_collector(collected_fields=['ops'])
-       >>> sample = collector.get_sample()
+       >>> sample = collector.get_samples(wait=True)[0]
        >>> sample.value
        0
 
