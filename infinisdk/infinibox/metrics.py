@@ -4,6 +4,7 @@ from itertools import izip_longest
 import arrow
 import flux
 from munch import Munch
+import waiting
 
 from urlobject import URLObject
 
@@ -46,26 +47,33 @@ class Metrics(object):
             for field in resp.get_result()['available_filter_fields']
         ]
 
-    def get_samples(self, collectors):
+    def get_samples(self, collectors, wait=False, timeout=30):
         """Retrieves all pending samples for a group of collectors
         """
         returned = []
-        collectors_by_id = {c.id: c for c in collectors}
-        path = _METRICS_URL.add_path('collectors/data')
-        path = path.set_query_param('collector_id', 'in:{}'.format(
-            ','.join(str(c.id) for c in collectors)))
-        resp = self.system.api.get(path).get_result()
-        for collector_data in resp['collectors']:
-            collector = collectors_by_id[collector_data['id']]
-            interval = collector_data['interval_milliseconds'] / 1000.0
-            end_timestamp = arrow.Arrow.fromtimestamp(
-                collector_data['end_timestamp_milliseconds'] / 1000.0)
 
-            series = collector_data['data']
-            for index, sample in enumerate(series):
-                timestamp = end_timestamp - \
-                            timedelta(seconds=interval * (len(series) - index + 1))
-                returned.append(Sample(collector, sample, timestamp, interval))
+        if wait:
+            iterator = waiting.iterwait(returned.__len__, timeout_seconds=timeout)
+        else:
+            iterator = range(1)
+
+        for _ in iterator:
+            collectors_by_id = {c.id: c for c in collectors}
+            path = _METRICS_URL.add_path('collectors/data')
+            path = path.set_query_param('collector_id', 'in:{}'.format(
+                ','.join(str(c.id) for c in collectors)))
+            resp = self.system.api.get(path).get_result()
+            for collector_data in resp['collectors']:
+                collector = collectors_by_id[collector_data['id']]
+                interval = collector_data['interval_milliseconds'] / 1000.0
+                end_timestamp = arrow.Arrow.fromtimestamp(
+                    collector_data['end_timestamp_milliseconds'] / 1000.0)
+
+                series = collector_data['data']
+                for index, sample in enumerate(series):
+                    timestamp = end_timestamp - \
+                                timedelta(seconds=interval * (len(series) - index + 1))
+                    returned.append(Sample(collector, sample, timestamp, interval))
 
         return returned
 
@@ -177,17 +185,14 @@ class Collector(object):
         self.field_names = field_names
         self.id = id
 
-    def get_sample(self):
-        """Get a single sample from the collector
-        :returns: a :class:`.Sample` object
-        """
-        return next(self.iter_samples())
-
-    def get_samples(self):
+    def get_samples(self, wait=False):
         """Get all samples which are ready for collection
+
+        :param wait: waits until there are samples ready, meaning guaranteeing at least one sample returned
+
         :returns: a list of :class:`.Sample` objects
         """
-        return self.system.metrics.get_samples([self])
+        return self.system.metrics.get_samples([self], wait=wait)
 
     def iter_samples(self):
         """Iterates the collector, getting samples indefinitely
