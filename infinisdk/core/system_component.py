@@ -11,6 +11,9 @@ class SystemComponentsBinder(TypeBinder):
         super(SystemComponentsBinder, self).__init__(base_component_type, system)
         self._components_by_id = OrderedDict()
 
+    def invalidate_cache(self):
+        self._components_by_id = OrderedDict()
+
     def get_component_types(self):
         """
         Returns all classes installed for specific component types
