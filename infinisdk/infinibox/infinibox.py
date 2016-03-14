@@ -51,6 +51,7 @@ class InfiniBox(APITarget):
 
     def _initialize(self):
         super(InfiniBox, self)._initialize()
+        self._is_logged_in = False
         self.current_user = _CurrentUserProxy(self)
         self.compat = Compatability(self)
         self.capacities = InfiniBoxSystemCapacity(self)
@@ -217,14 +218,24 @@ class InfiniBox(APITarget):
         if self.compat.has_auth_sessions():
             login_data['clientid'] = self._get_client_id()
         res = self.api.post("users/login", data=login_data)
+        self._is_logged_in = True
         self._after_login()
         return res
+
+    def is_logged_in(self):
+        """Returns True if login() was called on this system, and logout() hasn't been called yet
+        """
+        return self._is_logged_in
+
+    def mark_not_logged_in(self):
+        self._is_logged_in = False
 
     def logout(self):
         """
         Logs out the current user
         """
         returned = self.api.post('users/logout', data={})
+        self._is_logged_in = False
         self.api.clear_cookies()
         return returned
 
@@ -257,12 +268,12 @@ class InfiniBox(APITarget):
         if not isinstance(other, InfiniBox):
             return NotImplemented
         try:
-            return self.get_serial(fetch_if_not_cached = False) == other.get_serial(fetch_if_not_cached = False)
+            return self.get_serial(fetch_if_not_cached=False) == other.get_serial(fetch_if_not_cached=False)
         except CacheMiss:
             return self.get_api_addresses() == other.get_api_addresses()
 
     def __ne__(self, other):
-        return not (self == other)
+        return not (self == other) # pylint: disable=superfluous-parens
 
 
 class _CurrentUserProxy(object):

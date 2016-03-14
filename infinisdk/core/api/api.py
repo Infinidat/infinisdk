@@ -379,6 +379,7 @@ class API(object):
                    'login' not in path:
 
                     _logger.trace('Performing login again due to expired cookie ({})', self._session.cookies)
+                    self.syste.mark_not_logged_in()
                     self.system.login()
                     did_login = True
                     continue

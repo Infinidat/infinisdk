@@ -10,6 +10,13 @@ from infinibox_sysdefs.defs import latest
 def test_login(infinibox):
     infinibox.login()
 
+def test_is_logged_in(infinibox):
+    assert infinibox.is_logged_in()
+    infinibox.logout()
+    assert not infinibox.is_logged_in()
+    infinibox.login()
+    assert infinibox.is_logged_in()
+
 def test_passwords_are_not_logged(infinibox):
     with logbook.TestHandler() as handler:
         password = '12345678'
