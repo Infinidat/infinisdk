@@ -7,10 +7,10 @@ from infinisdk.core.exceptions import APICommandFailed, CacheMiss
 from infinibox_sysdefs.defs import latest
 from ..conftest import new_to_version
 
-
 def test_login(infinibox):
     infinibox.login()
 
+@new_to_version('3.0')
 def test_is_logged_in(infinibox):
     assert infinibox.is_logged_in()
     infinibox.logout()
