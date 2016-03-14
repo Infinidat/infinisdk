@@ -57,6 +57,7 @@ class API(object):
         self._use_ssl = use_ssl
         self._ssl_cert = ssl_cert
         self._use_basic_auth = False
+        self._check_version_compatibility = True
         self._default_request_timeout = None
         self._interactive = False
         self._auto_retry_predicates = {}
@@ -80,6 +81,15 @@ class API(object):
             yield
         finally:
             self._login_refresh_enabled = prev
+
+    @contextmanager
+    def disable_version_checking_context(self):
+        prev = self._check_version_compatibility
+        self._check_version_compatibility = False
+        try:
+            yield
+        finally:
+            self._check_version_compatibility = prev
 
     @contextmanager
     def use_basic_auth_context(self):
@@ -246,7 +256,7 @@ class API(object):
         :returns: :class:`.Response`
         """
         check_version = kwargs.pop("check_version", True)
-        if check_version and not self._checked_version and config.root.check_version_compatibility:
+        if check_version and self._check_version_compatibility and not self._checked_version and config.root.check_version_compatibility:
             self._checked_version = True
             try:
                 self.system.check_version()
