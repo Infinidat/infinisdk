@@ -5,6 +5,7 @@ import logbook
 from infinisdk.infinibox.infinibox import InfiniBox
 from infinisdk.core.exceptions import APICommandFailed, CacheMiss
 from infinibox_sysdefs.defs import latest
+from ..conftest import new_to_version
 
 
 def test_login(infinibox):
@@ -49,3 +50,12 @@ def test_after_loging_operations(infinibox, user_role):
         infinibox2.components.system_component.get_field('name', from_cache=True, fetch_if_not_cached=False)
     infinibox2.login()
     infinibox2.components.system_component.get_field('name', from_cache=True, fetch_if_not_cached=False)
+
+
+@new_to_version('3.0')
+def test_reinitialize_session_keeps_cookies(infinibox):
+    # pylint: disable=protected-access
+    cookies = infinibox.api._session.cookies.copy()
+    assert cookies
+    infinibox.api.reinitialize_session()
+    assert infinibox.api._session.cookies == cookies

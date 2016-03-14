@@ -59,6 +59,7 @@ class API(object):
         self._default_request_timeout = None
         self._interactive = False
         self._auto_retry_predicates = {}
+        self._session = None
         self.reinitialize_session(auth=auth)
         self._urls = [self._url_from_address(address, use_ssl) for address in target.get_api_addresses()]
         self._active_url = None
@@ -81,14 +82,24 @@ class API(object):
 
 
     def reinitialize_session(self, auth=None):
+        prev_auth = self._auth
         if auth is None:
             auth = self._auth
+        if self._session is not None:
+            prev_cookies = self._session.cookies.copy()
+        else:
+            prev_cookies = None
         self._session = requests.Session()
+
         assert self._session.cert is None
         self._session.cert = self._ssl_cert
         if not self._ssl_cert:
             self._session.verify = False
         self.set_auth(auth, login=False)
+
+        if prev_auth == auth and prev_cookies is not None:
+            self._session.cookies.update(prev_cookies)
+
 
     @property
     def urls(self):
