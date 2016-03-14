@@ -4,12 +4,14 @@ Getting Started
 Installation
 ------------
 
-1. Obtain the InfiniSDK package (Usually distributed as a ``.tar.gz`` file)
-2. Install the package via ``pip``::
+Installing InfiniSDK is done by using ``pip``::
 
-   $ pip install /path/to/infinisdk.tar.gz
+   $ pip install infinisdk
 
 .. note:: Depending on your Python installation, the above command might require root privileges
+
+
+.. seealso:: for more information on pip and how to use it to install Python packages, see https://pip.pypa.io/en/stable/
 
 Creating the Infinibox Object
 -----------------------------
