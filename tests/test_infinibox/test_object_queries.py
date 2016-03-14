@@ -14,3 +14,7 @@ def test_type_binder_to_list(type_binder):
     objs = type_binder.to_list()
     assert isinstance(objs, list)
     assert objs == list(type_binder)
+
+
+def test_query_count(type_binder):
+    assert type_binder.count() == type_binder.find().count()

@@ -55,6 +55,9 @@ class InfiniBoxComponentQuery(object):
     def __len__(self):
         return len([item for item in self])
 
+    def count(self):
+        return len(self)
+
     def to_list(self):
         return list(self)
 
@@ -131,6 +134,9 @@ class InfiniBoxGenericComponentQuery(object):
 
     def __len__(self):
         return len([item for item in self])
+
+    def count(self):
+        return len(self)
 
     def to_list(self):
         return list(self)

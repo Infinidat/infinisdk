@@ -39,6 +39,9 @@ class LazyQuery(object):
             return self._total_num_objects
         return self._get_requested_page_size()
 
+    def count(self):
+        return len(self)
+
     def __nonzero__(self):
         return len(self) != 0
 
