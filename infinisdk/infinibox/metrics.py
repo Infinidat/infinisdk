@@ -120,13 +120,16 @@ class Filter(object):
         """
         self.system.api.put(self.get_this_url_path(), data=fields)
 
-    def create_collector(self, collected_fields, type='COUNTER'):
+    def create_collector(self, collected_fields, type='COUNTER', **kwargs):
         """Creates a collector from this filter
         """
-        resp = self.system.api.post(_METRICS_URL.add_path('collectors'), data={
+        data={
             'collected_fields': collected_fields,
             'type': type,
-            'filter_id': self.id})
+            'filter_id': self.id}
+        data.update(kwargs)
+        
+        resp = self.system.api.post(_METRICS_URL.add_path('collectors'), data=data)
 
         return Collector(self.system, self, collected_fields, resp.get_result()['id'])
 
