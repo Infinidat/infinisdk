@@ -56,6 +56,7 @@ class API(object):
         self.system = target
         self._use_ssl = use_ssl
         self._ssl_cert = ssl_cert
+        self._use_basic_auth = False
         self._default_request_timeout = None
         self._interactive = False
         self._auto_retry_predicates = {}
@@ -79,6 +80,17 @@ class API(object):
             yield
         finally:
             self._login_refresh_enabled = prev
+
+    @contextmanager
+    def use_basic_auth_context(self):
+        """Causes API requests to send auth through Basic authorization
+        """
+        prev = self._use_basic_auth
+        try:
+            self._use_basic_auth = True
+            yield
+        finally:
+            self._use_basic_auth = prev
 
 
     def reinitialize_session(self, auth=None):
@@ -245,7 +257,7 @@ class API(object):
         returned = None
         kwargs.setdefault("timeout", self._default_request_timeout)
         auth = None
-        if hasattr(self.system, 'compat') and (not self.system.compat.is_initialized() or not self.system.compat.has_auth_sessions()):
+        if self._use_basic_auth or (hasattr(self.system, 'compat') and (not self.system.compat.is_initialized() or not self.system.compat.has_auth_sessions())):
             auth = self._auth
         raw_data = kwargs.pop("raw_data", False)
         data = kwargs.pop("data", NOTHING)
