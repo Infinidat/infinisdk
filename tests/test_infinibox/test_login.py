@@ -61,7 +61,7 @@ def test_reinitialize_session_keeps_cookies(infinibox):
     assert infinibox.api._session.cookies == cookies
 
 @new_to_version('3.0')
-def test_set_auth_no_login_doesnt_send_basic_auth(infinibox_simulator):
+def test_set_auth_no_login_doesnt_send_basic_auth(infinibox, infinibox_simulator):
     infinibox = InfiniBox(infinibox_simulator, auth=('infinidat', '123456'))
     infinibox.api.set_auth('admin', '123456', login=False)
     with pytest.raises(APICommandFailed) as caught:
