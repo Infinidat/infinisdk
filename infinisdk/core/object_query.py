@@ -98,9 +98,11 @@ class LazyQuery(object):
                 element_index = 0
         return element_index
 
+    def __str__(self):
+        return str(self.query)
 
     def __repr__(self):
-        return "<Query {0}>".format(self.query)
+        return "<Query {0}>".format(self)
 
     def page(self, page_index):
         """

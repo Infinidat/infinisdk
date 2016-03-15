@@ -78,9 +78,9 @@ class TypeBinder(object):
         """
         returned = self.find(*predicates, **kw)
         if not returned:
-            raise ObjectNotFound()
+            raise ObjectNotFound(str(returned))
         if len(returned) > 1:
-            raise TooManyObjectsFound()
+            raise TooManyObjectsFound(str(returned))
         [obj] = returned
         return obj
 
@@ -99,7 +99,7 @@ class TypeBinder(object):
         """
         returned = self.find(*predicates, **kw)
         if not returned:
-            raise ObjectNotFound()
+            raise ObjectNotFound(str(returned))
 
         return returned[random.randrange(len(returned))]
 

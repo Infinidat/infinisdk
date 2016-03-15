@@ -3,6 +3,7 @@ import logbook
 import random
 from infinisdk import Q
 from infinisdk.core.config import config
+from infinisdk.core.exceptions import ObjectNotFound
 from infinisdk.infinibox.components import Enclosure, Node
 
 NO_OF_ENCLOSURES_DRIVES = config.get_path('infinibox.defaults.enlosure_drives.total_count.mock')
@@ -126,3 +127,11 @@ def test_system_component_find_no_type(infinibox):
     fetched_types = set(type(component) for component in infinibox.components.find())
     for component_type in infinibox.components.get_component_types():
         assert(component_type in fetched_types)
+
+def test_component_not_found(infinibox):
+    rack_id = infinibox.components.get_rack_1().id
+    with pytest.raises(ObjectNotFound) as caught:
+        infinibox.components.fc_ports.get(Q.parent_id == rack_id, id='fake_id')
+    exc_msg = str(caught.value)
+    assert '(id=fake_id)' in exc_msg
+    assert '(parent_id={})'.format(rack_id) in exc_msg

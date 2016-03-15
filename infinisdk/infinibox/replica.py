@@ -195,7 +195,7 @@ class Replica(InfiniBoxObject):
 
         pairs = self.get_entity_pairs(from_cache=True)
         if len(pairs) > 1:
-            raise TooManyObjectsFound()
+            raise TooManyObjectsFound('Entity pairs for {}'.format(self))
         [pair] = pairs
         return self.system.volumes.get_by_id_lazy(pair['local_entity_id'])
 

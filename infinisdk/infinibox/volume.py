@@ -153,9 +153,9 @@ class Volume(Dataset):
     def get_replica(self):
         returned = self.get_replicas()
         if len(returned) > 1:
-            raise TooManyObjectsFound()
+            raise TooManyObjectsFound('Replicas of {}'.format(self))
         elif len(returned) == 0:
-            raise ObjectNotFound()
+            raise ObjectNotFound('Replicas of {}'.format(self))
         return returned[0]
 
     def is_replicated(self, from_cache=DONT_CARE):

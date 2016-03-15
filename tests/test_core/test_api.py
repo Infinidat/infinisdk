@@ -174,8 +174,11 @@ def test_query_preprocessor_context(infinibox):
             assert exception.value.status_code == httplib.BAD_REQUEST
             assert exception.value.error_code == exception.value.response.get_error()['code']
 
-        with pytest.raises(ObjectNotFound):
+        with pytest.raises(ObjectNotFound) as caught:
             infinibox.pools.get(id=p.id)
+        exc_msg = str(caught.value)
+        assert 'pools' in exc_msg
+        assert str(p.id) in exc_msg
 
     p2 = infinibox.pools.get(id=p.id)
     assert p == p2

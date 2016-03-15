@@ -4,20 +4,59 @@ from numbers import Number
 from .._compat import cmp, iteritems, itervalues, sorted
 
 
-class InfiniBoxComponentQuery(object):
-    def __init__(self, system, object_type, *predicates, **kw):
+class ComponentQueryBase(object):
+    def __init__(self, system, query_objects_str, *predicates, **kw):
         self.system = system
-        self.object_type = object_type
         self.predicates = predicates
         self.kw = kw
-        self.sort_criteria = tuple()
         self._fetched_items = None
-        self._force_fetch = bool(self.predicates) or \
-            any(self.object_type.fields.get_or_fabricate(field_name).cached != True for field_name in self.kw)
+        self._force_fetch = False
+        self._str = query_objects_str.replace('_', ' ').title()
+        if predicates or kw:
+            self._str += ' with '
+            self._str += ' AND '.join(["({})".format(pred) for pred in predicates] +\
+                                      ["({}={})".format(k, v) for k, v in kw.items()])
 
     def force_fetching_objects(self):
         self._force_fetch = True
         return self
+
+    def __getitem__(self, index):
+        if isinstance(index, Number) and index < 0:
+            raise NotImplementedError("Negative indices not supported yet")
+        return [item for item in self][index]
+
+    def __iter__(self):
+        for item in self._get_items():
+            yield item
+
+    def _get_items(self):
+        raise NotImplementedError()
+
+    def __len__(self):
+        return len([item for item in self])
+
+    def __str__(self):
+        return self._str
+
+    def __repr__(self):
+        return "<ComponentsQuery: {}>".format(self._str)
+
+    def count(self):
+        return len(self)
+
+    def to_list(self):
+        return list(self)
+
+
+class InfiniBoxComponentQuery(ComponentQueryBase):
+    def __init__(self, system, object_type, *predicates, **kw):
+        super(InfiniBoxComponentQuery, self).__init__(system, object_type.get_plural_name(), *predicates, **kw)
+        self.object_type = object_type
+        self.sort_criteria = tuple()
+        self._force_fetch = bool(self.predicates) or \
+            any(self.object_type.fields.get_or_fabricate(field_name).cached != True for field_name in self.kw)
+
 
     def _get_items(self):
         returned = self._fetched_items
@@ -47,24 +86,6 @@ class InfiniBoxComponentQuery(object):
         if self.object_type.get_type_name() == 'infiniboxsystemcomponent':
             return self.system.components.enclosures
         return self.system.components[self.object_type]
-
-    def __iter__(self):
-        for item in self._get_items():
-            yield item
-
-    def __len__(self):
-        return len([item for item in self])
-
-    def count(self):
-        return len(self)
-
-    def to_list(self):
-        return list(self)
-
-    def __getitem__(self, index):
-        if isinstance(index, Number) and index < 0:
-            raise NotImplementedError("Negative indices not supported yet")
-        return [item for item in self][index]
 
     def passed_filtering(self, item):
         if (self.object_type != self.system.components.object_type and
@@ -98,21 +119,9 @@ class InfiniBoxComponentQuery(object):
         raise NotImplementedError()  # pragma: no cover
 
 
-class InfiniBoxGenericComponentQuery(object):
+class InfiniBoxGenericComponentQuery(ComponentQueryBase):
     def __init__(self, system, *predicates, **kw):
-        self.system = system
-        self.predicates = predicates
-        self.kw = kw
-        self._force_fetch = False
-        self._fetched_items = None
-
-    def force_fetching_objects(self):
-        self._force_fetch = True
-        return self
-
-    def __iter__(self):
-        for item in self._get_items():
-            yield item
+        super(InfiniBoxGenericComponentQuery, self).__init__(system, 'All components', *predicates, **kw)
 
     def _get_items(self):
         if self._fetched_items is not None:
@@ -131,12 +140,3 @@ class InfiniBoxGenericComponentQuery(object):
                         items.append(item)
         self._fetched_items = items
         return self._fetched_items
-
-    def __len__(self):
-        return len([item for item in self])
-
-    def count(self):
-        return len(self)
-
-    def to_list(self):
-        return list(self)

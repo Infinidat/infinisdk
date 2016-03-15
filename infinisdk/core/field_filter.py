@@ -1,3 +1,11 @@
+_operator_name_to_sign_str = {
+    "eq": '=',
+    "gt": '>',
+    "lt": '<',
+    "ge": '>=',
+    "le": '<=',
+    "ne": '!='}
+
 class FieldFilter(object):
 
     def __init__(self, field, operator_name, value):
@@ -17,5 +25,11 @@ class FieldFilter(object):
             value = self._translate(self.value)
 
         return urlobj.add_query_param(self.field.api_name,
-                                      "{0}:{1}".format(self.operator_name,
-                                                       value))
+                                      "{0}:{1}".format(self.operator_name, value))
+
+    def __str__(self):
+        return  "{0.field.api_name}{1}{0.value}".format(
+            self, _operator_name_to_sign_str.get(self.operator_name, self.operator_name))
+
+    def __repr__(self):
+        return "<{0.__class__.__name__}: {0}>".format(self)
