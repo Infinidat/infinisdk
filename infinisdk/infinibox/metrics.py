@@ -73,7 +73,10 @@ class Metrics(object):
                 for index, sample in enumerate(series):
                     timestamp = end_timestamp - \
                                 timedelta(seconds=interval * (len(series) - index + 1))
-                    returned.append(Sample(collector, sample, timestamp, interval))
+                    if collector_data['collector_type'] == "HISTOGRAM":
+                        returned.append(HistogramSample(collector_data['histogram_field'], collector_data['ranges'], collector, sample, timestamp, interval))
+                    else:
+                        returned.append(Sample(collector, sample, timestamp, interval))
 
         return returned
 
@@ -231,7 +234,7 @@ class Sample(object):
         #: the values for this sample, as an ordered Python list
         self.value_list = values
         #: Munch mapping the field name to its respective sample
-        self.values = Munch(izip_longest(collector.field_names, values))
+        self.values = self._get_values()
         #: a timestamp (Arrow) object of when this sample was taken
         self.timestamp = timestamp
         #: the interval, in seconds, until the next sample
@@ -252,5 +255,35 @@ class Sample(object):
         returned = []
         for value_name, value in self.values.items():
             item = '{}: {}'.format(value_name, value)
+            returned.append(item)
+        return ', '.join(returned)
+
+    def _get_values(self):
+        return Munch(izip_longest(self.collector.field_names, self.value_list))
+
+class HistogramSample(Sample):
+    def __init__(self, histogram_field, ranges, *args):
+        self.histogram_field = histogram_field
+        self.ranges = ranges
+        super(HistogramSample, self).__init__(*args)
+
+    def value(self):
+        return self.value_list[0]
+
+    def __repr__(self):
+        return '[{}: {}: {}]'.format(self.timestamp, self.histogram_field, self._get_sample_string())
+
+    def _get_values(self):
+        bucket_values = [Munch(izip_longest(self.collector.field_names, v)) for v in self.value_list]
+        return Munch(izip_longest(self.ranges, bucket_values))
+
+    def _get_sample_string(self):
+        returned = []
+        for range, bucket in self.values.items():
+            bucket_str = []
+            for value_name, value in bucket.items():
+                item = '{}: {}'.format(value_name, value)
+                bucket_str.append(item)
+            item = '{}: {}'.format(range, bucket_str)
             returned.append(item)
         return ', '.join(returned)
