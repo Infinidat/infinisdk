@@ -20,6 +20,10 @@ class Compatibility(object):
     def is_initialized(self):
         return self._features is not None
 
+    def initialize(self):
+        if not self.is_initialized():
+            self._init_features()
+
     def can_run_on_system(self):
         version_string = self.system.get_version().split('-', 1)[0]
         system_version = self.normalize_version_string(version_string)

@@ -27,6 +27,8 @@ def test_incompatible_version(incompatible_system, operator):
 
 @pytest.mark.parametrize('should_check_version', [True, False])
 def test_ignore_version_check(incompatible_system, should_check_version):
+    with incompatible_system.api.disable_version_checking_context():
+        incompatible_system.login()
     op_context = pytest.raises if should_check_version else no_op_context
     with op_context(VersionNotSupported):
         incompatible_system.api.get(

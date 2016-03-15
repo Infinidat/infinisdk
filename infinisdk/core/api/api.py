@@ -259,7 +259,8 @@ class API(object):
         if check_version and self._check_version_compatibility and not self._checked_version and config.root.check_version_compatibility:
             self._checked_version = True
             try:
-                self.system.check_version()
+                with self.use_basic_auth_context():
+                    self.system.check_version()
             except:
                 self._checked_version = False
                 raise
@@ -267,8 +268,15 @@ class API(object):
         returned = None
         kwargs.setdefault("timeout", self._default_request_timeout)
         auth = None
-        if self._use_basic_auth or (hasattr(self.system, 'compat') and (not self.system.compat.is_initialized() or not self.system.compat.has_auth_sessions())):
-            auth = self._auth
+
+        if hasattr(self.system, 'compat'):
+            if path != '_features':
+                if not self.system.compat.is_initialized():
+                    with self.disable_version_checking_context():
+                        self.system.compat.initialize()
+            if self._use_basic_auth or not self.system.compat.is_initialized() or not self.system.compat.has_auth_sessions():
+                auth = self._auth
+
         raw_data = kwargs.pop("raw_data", False)
         data = kwargs.pop("data", NOTHING)
         sent_json_object = None
