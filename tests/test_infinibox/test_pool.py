@@ -1,7 +1,7 @@
 import pytest
 from infinisdk._compat import xrange, iteritems
 from infinisdk.core import CapacityType
-from capacity import TB, GB, KiB, Capacity
+from capacity import TB, GB, KiB, Capacity, TiB
 from ..conftest import create_volume, create_pool, create_filesystem, new_to_version
 
 
@@ -121,3 +121,19 @@ def test_compression_enabled(data_entity):
     assert data_entity.is_compression_enabled()
     data_entity.disable_compression()
     assert not data_entity.is_compression_enabled()
+
+
+def test_forbid_multiple_capacity_for_creation(infinibox):
+    with pytest.raises(AssertionError):
+        infinibox.pools.create(capacity=TB, virtual_capacity=TB)
+    with pytest.raises(AssertionError):
+        infinibox.pools.create(capacity=TB, physical_capacity=TB)
+    with pytest.raises(AssertionError):
+        infinibox.pools.create(capacity=TB, virtual_capacity=TB, physical_capacity=TB)
+
+
+def test_capacity_for_creation(infinibox):
+    capacity = 3*TiB
+    pool = infinibox.pools.create(capacity=capacity)
+    assert pool.get_virtual_capacity() == capacity
+    assert pool.get_physical_capacity() == capacity

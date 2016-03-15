@@ -1,4 +1,5 @@
 from capacity import TB
+from sentinels import NOTHING
 from ..core.type_binder import TypeBinder
 from ..core import Field, CapacityType, MillisecondsDatetimeType
 from ..core.api.special_values import Autogenerate
@@ -41,6 +42,15 @@ class Pool(InfiniBoxObject):
         Field("max_extend", type=CapacityType, mutable=True, binding=InfiniSDKBindingWithSpecialFlags([0, -1])),
         Field("state", cached=False),
     ]
+
+    @classmethod
+    def create(cls, system, **fields):
+        capacity = fields.pop('capacity', NOTHING)
+        if capacity is not NOTHING:
+            for field_name in ['virtual_capacity', 'physical_capacity']:
+                assert field_name not in fields
+                fields[field_name] = capacity
+        return super(Pool, cls).create(system, **fields)
 
     def get_volumes(self, **kwargs):
         return self.system.volumes.find(pool_id=self.id, **kwargs)
