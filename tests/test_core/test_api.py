@@ -185,14 +185,17 @@ def test_query_preprocessor_context(infinibox):
 
 
 def test_query_preprocessor_context_exception(infinibox):
+    class SomeException(Exception):
+        pass
+
     def preprocessor(_):
         pass
 
     assert not infinibox.api._preprocessors
 
-    with pytest.raises(Exception):
+    with pytest.raises(SomeException):
         with infinibox.api.query_preprocessor(preprocessor):
             assert infinibox.api._preprocessors == [preprocessor]
-            raise Exception()
+            raise SomeException()
 
     assert not infinibox.api._preprocessors
