@@ -14,7 +14,7 @@ def test_disable_enable_network_interface(infinibox, network_interface):
     assert network_interface.is_enabled()
 
 
-@new_to_version('2.0')
+@new_to_version('3.0')
 def test_disable_enable_network_space_ip(infinibox, network_space):
     ip_address = '127.0.0.1'
     assert network_space.get_ips() == []
