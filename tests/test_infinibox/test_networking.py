@@ -18,12 +18,13 @@ def test_disable_enable_network_interface(infinibox, network_interface):
 def test_disable_enable_network_space_ip(infinibox, network_space):
     ip_address = '127.0.0.1'
     assert network_space.get_ips() == []
+    interface_id = network_space.get_interfaces()[0].get_id()
     network_space.add_ip_address(ip_address)
-    assert network_space.get_ips() == [{'enabled': True, 'ip_address': ip_address, 'reserved': False, 'vlan_id': 1, 'interface_id': None}]
+    assert network_space.get_ips() == [{'enabled': True, 'ip_address': ip_address, 'reserved': False, 'vlan_id': 1, 'interface_id': interface_id}]
     network_space.disable_ip_address(ip_address)
     assert network_space.get_ips() == [{'enabled': False, 'ip_address': ip_address, 'reserved': False, 'vlan_id': 1, 'interface_id': None}]
     network_space.enable_ip_address(ip_address)
-    assert network_space.get_ips() == [{'enabled': True, 'ip_address': ip_address, 'reserved': False, 'vlan_id': 1, 'interface_id': None}]
+    assert network_space.get_ips() == [{'enabled': True, 'ip_address': ip_address, 'reserved': False, 'vlan_id': 1, 'interface_id': interface_id}]
     network_space.remove_ip_address(ip_address)
     assert network_space.get_ips() == []
 
