@@ -294,6 +294,12 @@ class Nodes(InfiniBoxComponentBinder):
     def get_by_wwpn(self, wwpn):
         return self.system.components.fc_ports.get(wwpn=wwpn).get_node()
 
+    def get_by_ip(self, ip_address):
+        for ns in self.system.network_spaces.get_all():
+            for ip in ns.get_ips():
+                if ip.ip_address == ip_address:
+                    return self.system.network_interfaces.get(id=ip.interface_id).get_node()
+
     def refresh_fields(self, field_names):
         assert isinstance(field_names, (list, tuple)), "field_names must be either a list or a tuple"
         field_names_str = ",".join(set(field_names).union(['id']))
