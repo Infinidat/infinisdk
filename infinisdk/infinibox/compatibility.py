@@ -121,6 +121,10 @@ class Compatibility(object):
     def has_max_speed(self):
         return self.get_version_as_float() > 2.2
 
+    def has_snapclones(self):
+        return self._has_feature('snapclones')
+
+
 
 
 _VERSION_TUPLE_LEN = 5

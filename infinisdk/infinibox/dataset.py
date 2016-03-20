@@ -2,6 +2,7 @@ import gossip
 from capacity import Capacity, byte
 from urlobject import URLObject as URL
 from collections import namedtuple
+from ..core.utils import deprecated
 from ..core.exceptions import InvalidOperationException
 from .system_object import InfiniBoxObject
 
@@ -12,22 +13,28 @@ _FINISH_FORK_HOOK = "infinidat.sdk.finish_fork"
 
 class Dataset(InfiniBoxObject):
     PROVISIONING = namedtuple('Provisioning', ['Thick', 'Thin'])('THICK', 'THIN')
-    ENTITY_TYPES = namedtuple('VolumeTypes', ['Master', 'Snapshot', 'Clone'])('MASTER', 'SNAP', 'CLONE')
+
+
+    def _get_snapshot_type(self):
+        return 'SNAPSHOT' if self.system.compat.has_snapclones() else 'SNAP'
 
     def is_master(self):
         """Returns whether or not this entity is a master entity (not a snapshot and not a clone)
         """
-        return self.get_type() == self.ENTITY_TYPES.Master
+        return self.get_type() == 'MASTER'
 
     def is_snapshot(self):
         """Returns whether or not this entity is a snapshot
         """
-        return self.get_type() == self.ENTITY_TYPES.Snapshot
+        return self.get_type() == self._get_snapshot_type()
 
+    @deprecated
     def is_clone(self):
         """Returns whether or not this entity is a clone
         """
-        return self.get_type() == self.ENTITY_TYPES.Clone
+        assert not self.system.compat.has_snapclones(), '{}.is_clone() with snapclones is not supported'.format(
+            self.__class__.__name__)
+        return self.get_type() == 'CLONE'
 
     def resize(self, delta):
         """Resize the entity by the given delta"""
@@ -67,9 +74,12 @@ class Dataset(InfiniBoxObject):
         if fields.get('rmr_snapshot_guid', None) is not None:
             gossip.trigger_with_tags('infinidat.sdk.replica_snapshot_created', {'snapshot': snapshot}, tags=['infinibox'])
 
+    @deprecated
     def create_clone(self, name=None):
         """Creates a clone from this entity, if supported by the system
         """
+        assert not self.system.compat.has_snapclones(), '{}.create_clone() with snapclones is not supported'.format(
+            self.__class__.__name__)
         if self.is_snapshot():
             return self.create_child(name)
         raise InvalidOperationException('Cannot create clone for volume/clone')
@@ -77,7 +87,7 @@ class Dataset(InfiniBoxObject):
     def create_snapshot(self, name=None):
         """Creates a snapshot from this entity, if supported by the system
         """
-        if self.is_snapshot():
+        if not self.system.compat.has_snapclones() and self.is_snapshot():
             raise InvalidOperationException('Cannot create snapshot for snapshot')
         return self.create_child(name)
 
@@ -109,12 +119,15 @@ class Dataset(InfiniBoxObject):
     def get_snapshots(self):
         """Retrieves all snapshot children of this entity
         """
-        return self.get_children(type=self.ENTITY_TYPES.Snapshot)
+        return self.get_children(type=self._get_snapshot_type())
 
+    @deprecated
     def get_clones(self):
         """Retrieves all clone children of this entity
         """
-        return self.get_children(type=self.ENTITY_TYPES.Clone)
+        assert not self.system.compat.has_snapclones(), '{}.get_clones() with snapclones is not supported'.format(
+            self.__class__.__name__)
+        return self.get_children(type='CLONE')
 
     def get_children(self, **kwargs):
         """Retrieves all child entities for this entity (either clones or snapshots)
