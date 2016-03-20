@@ -16,7 +16,7 @@ def test_query_by_pool(infinibox, pool, volume):
     assert [volume] == list(infinibox.volumes.find(pool=pool))
     assert [] == list(infinibox.volumes.find(pool=None))
 
-@new_to_version('2.0')
+@new_to_version('3.0')
 def test_sort_by_multiple_fields(infinibox, pool):
     vol_ab_thin = infinibox.volumes.create(pool=pool, name='ab', provisioning='THIN')
     vol_bb_thin = infinibox.volumes.create(pool=pool, name='bb', provisioning='THIN')
@@ -26,6 +26,6 @@ def test_sort_by_multiple_fields(infinibox, pool):
 
     get_sorted_volumes = lambda *sort_args: list(infinibox.volumes.get_all().sort(*sort_args))
     assert get_sorted_volumes(Q.name, Q.provtype) == [vol_aa_thick, vol_ab_thin, vol_ba_thick, vol_bb_thin]
-    assert get_sorted_volumes(Q.provtype, Q.name) == [vol_aa_thick, vol_ba_thick, vol_ab_thin, vol_bb_thin]
-    assert get_sorted_volumes(-Q.provtype, Q.name) == [vol_ab_thin, vol_bb_thin, vol_aa_thick, vol_ba_thick]
-    assert get_sorted_volumes(-Q.provtype, -Q.name) == [vol_bb_thin, vol_ab_thin, vol_ba_thick, vol_aa_thick]
+    assert get_sorted_volumes(Q.provtype, Q.name) == [vol_ab_thin, vol_bb_thin, vol_aa_thick, vol_ba_thick]
+    assert get_sorted_volumes(-Q.provtype, Q.name) == [vol_aa_thick, vol_ba_thick, vol_ab_thin, vol_bb_thin]
+    assert get_sorted_volumes(-Q.provtype, -Q.name) == [vol_ba_thick, vol_aa_thick, vol_bb_thin, vol_ab_thin]
