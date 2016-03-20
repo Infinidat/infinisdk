@@ -296,9 +296,9 @@ class Nodes(InfiniBoxComponentBinder):
 
     def get_by_ip(self, ip_address):
         for ns in self.system.network_spaces.get_all():
-            for ip in ns.get_ips():
+            for ip in ns.get_ips(from_cache=True):
                 if ip.ip_address == ip_address:
-                    return self.system.network_interfaces.get(id=ip.interface_id).get_node()
+                    return self.system.network_interfaces.get_by_id_lazy(ip.interface_id).get_node()
 
     def refresh_fields(self, field_names):
         assert isinstance(field_names, (list, tuple)), "field_names must be either a list or a tuple"
