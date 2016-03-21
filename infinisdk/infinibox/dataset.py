@@ -19,6 +19,17 @@ class Dataset(InfiniBoxObject):
         """
         return self.get_type() == self.ENTITY_TYPES.Master
 
+    def refresh_snapshot(self, parent_id=None):
+        """Refresh a snapshot with the most recent data from the parent
+
+        :param parent_id: the id of the volume to refresh from. Defaults to the parent id of the snapshot.
+
+        .. note:: parent_id can be provided only if the system supports specifying it
+        """
+        if parent_id is None:
+            parent_id = self.get_field('parent_id', from_cache=True)
+        self.system.api.post(self.get_this_url_path().add_path('refresh'), data={'source_id': parent_id})
+
     def is_snapshot(self):
         """Returns whether or not this entity is a snapshot
         """
