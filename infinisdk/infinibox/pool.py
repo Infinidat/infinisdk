@@ -34,6 +34,8 @@ class Pool(InfiniBoxObject):
         Field("allocated_physical_capacity", api_name="allocated_physical_space", type=CapacityType),
         Field("free_physical_capacity", api_name="free_physical_space", type=CapacityType),
         Field("free_virtual_capacity", api_name="free_virtual_space", type=CapacityType),
+        Field("physical_capacity_critical", type=int, creation_parameter=True, optional=True, mutable=True),
+        Field("physical_capacity_warning", type=int, creation_parameter=True, optional=True, mutable=True),
         Field("reserved_capacity", type=CapacityType),
         Field("created_at", type=MillisecondsDatetimeType, is_sortable=True, is_filterable=True),
         Field("updated_at", type=MillisecondsDatetimeType, is_sortable=True, is_filterable=True),
