@@ -87,7 +87,7 @@ def test_get_master_filesystems(infinibox, pool):
 def test_pool_capacity_fields_types(pool):
     for field in pool.FIELDS:
         field_name = field.name
-        if 'capacity' in field_name or 'space' in field_name:
+        if field_name.endswith('capacity') or field_name.endswith('space'):
             assert field.type.type == Capacity
             assert field.type.api_type == int
             assert isinstance(pool.get_field(field_name), Capacity)
