@@ -39,7 +39,7 @@ class Pool(InfiniBoxObject):
         Field("updated_at", type=MillisecondsDatetimeType, is_sortable=True, is_filterable=True),
         Field("ssd_enabled", type=bool, mutable=True, creation_parameter=True, is_filterable=True, is_sortable=True, optional=True, toggle_name='ssd'),
         Field("compression_enabled", type=bool, mutable=True, feature_name='compression', toggle_name='compression'),
-        Field("max_extend", type=CapacityType, mutable=True, binding=InfiniSDKBindingWithSpecialFlags([0, -1])),
+        Field("max_extend", type=CapacityType, mutable=True, creation_parameter=True, optional=True, binding=InfiniSDKBindingWithSpecialFlags([0, -1])),
         Field("state", cached=False),
     ]
 
