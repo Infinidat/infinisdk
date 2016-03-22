@@ -298,13 +298,26 @@ class Replica(InfiniBoxObject):
         """Returns whether or not this replica is in initiating state
         """
         self._validate_can_check_state()
+        if self.system.compat.has_sync_job_states():
+            for job in self.get_field('jobs'):
+                if job['is_initial'] and job['state'].lower() != 'done':
+                    return True
+            return False
         return 'initial' in self.get_state(*args, **kwargs).lower()
 
     def is_replicating(self, *args, **kwargs):
         """Returns whether or not this replica is in replicating state
         """
         self._validate_can_check_state()
+        if self.system.compat.has_sync_job_states():
+            return self._any_sync_job_state_contains('replicating')
         return self.get_state(*args, **kwargs).lower() == 'replicating'
+
+    def is_stalled(self):
+        self._validate_can_check_state()
+        if not self.system.compat.has_sync_job_states():
+            raise NotImplementedError("Checking for stalled is not supported on systems without sync job states")
+        return self._any_sync_job_state_contains('stall')
 
     def is_active(self, *args, **kwargs):
         self._validate_can_check_state()
@@ -358,6 +371,13 @@ class Replica(InfiniBoxObject):
                 gossip.trigger_with_tags(
                     'infinidat.sdk.replica_snapshot_created', {'snapshot': snap}, tags=['infinibox'])
         return local, remote
+
+    def _any_sync_job_state_contains(self, substr):
+        substr = substr.lower()
+        for sync_job in self.get_field('jobs'):
+            if substr in sync_job['state'].lower():
+                return True
+        return False
 
     def _get_deletion_result(self, result, remote_replica):
         if not result or 'entity_type' not in result:
