@@ -25,19 +25,19 @@ class Events(TypeBinder):
     def _get_events_types_from_system(self):
         return self.system.api.get("events/types").get_result()
 
-    def _get_events_types(self):
+    def get_events_types(self):
         if self._types is None:
             self._types = self._get_events_types_from_system()
         return self._types.copy()
 
     def get_codes(self):
-        return self._get_events_types()['codes']
+        return self.get_events_types()['codes']
 
     def get_visibilities(self):
-        return self._get_events_types()['visibilities']
+        return self.get_events_types()['visibilities']
 
     def get_reporters(self):
-        return self._get_events_types()['reporters']
+        return self.get_events_types()['reporters']
 
 
 class Event(SystemObject):

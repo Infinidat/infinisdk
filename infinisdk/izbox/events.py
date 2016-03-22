@@ -36,7 +36,7 @@ class Events(EventsBase):
         return [e['description'] for e in self.get_codes()]
 
     def get_levels(self):
-        return self._get_events_types()['levels']
+        return self.get_events_types()['levels']
 
 
 class PushRule(SystemObject):
