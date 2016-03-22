@@ -137,9 +137,6 @@ class Dataset(InfiniBoxObject):
         """
         return len(self.get_children()) > 0
 
-    def get_collection(self):
-        return getattr(self.system, self.get_plural_name())
-
     def get_creation_time(self):
         """Retrieves creation time for this entity
         """

@@ -316,6 +316,10 @@ class SystemObject(BaseSystemObject):
 
         return ObjectQuery(system, url, cls)
 
+    def get_binder(self):
+        return self.system.objects[self.get_plural_name()]
+    get_collection = get_binder
+
     def is_in_system(self):
         """
         Returns whether or not the object actually exists
