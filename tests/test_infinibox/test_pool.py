@@ -31,7 +31,7 @@ def test_creation(infinibox, pool):
 @pytest.mark.parametrize('max_extend_value', [0, -1, GB])
 def test_max_extend_type(pool, max_extend_value):
     pool.update_max_extend(max_extend_value)
-    should_be_capacity = max_extend_value not in (0, -1)
+    should_be_capacity = max_extend_value not in (-1,)
     assert isinstance(pool.get_max_extend(), Capacity) == should_be_capacity
 
 
