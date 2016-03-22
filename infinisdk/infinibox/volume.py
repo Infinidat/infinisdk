@@ -101,6 +101,7 @@ class Volume(Dataset):
               , is_filterable=True, is_sortable=True, toggle_name='write_protection'),
         Field("compression_enabled", type=bool, mutable=True, creation_parameter=True, optional=True, feature_name='compression', toggle_name='compression'),
         Field("compression_supressed", type=bool, feature_name='compression'),
+        Field("capacity_savings", type=CapacityType, feature_name='compression'),
         Field("depth", cached=True, type=int, is_sortable=True, is_filterable=True),
         Field("mapped", type=bool, is_sortable=True, is_filterable=True),
         Field("has_children", type=bool, add_getter=False),
