@@ -12,6 +12,9 @@ class TypeBinder(object):
         self.object_type = object_type
         self.system = system
 
+    def get_url_path(self):
+        return self.object_type.get_url_path(self.system)
+
     def create(self, *args, **kwargs):
         """
         Creats an object on the system
