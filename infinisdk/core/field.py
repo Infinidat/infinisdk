@@ -1,12 +1,12 @@
-from .exceptions import AttributeAlreadyExists
-from .system_object_utils import make_getter, make_field_updaters
-from .field_filter import FieldFilter
-from .field_sorting import FieldSorting
-from .utils import DONT_CARE
-
 from api_object_schema import Field as FieldBase
 from sentinels import NOTHING
+
 from .bindings import InfiniSDKBinding
+from .exceptions import AttributeAlreadyExists
+from .field_filter import FieldFilter
+from .field_sorting import FieldSorting
+from .system_object_utils import make_getter, make_field_updaters
+from .utils import DONT_CARE
 
 
 class Field(FieldBase):
@@ -73,7 +73,7 @@ class Field(FieldBase):
     def __pos__(self):
         return FieldSorting(self)
 
-    def extract_from_json(self, obj_class, json):
+    def extract_from_json(self, obj_class, json):  # pylint: disable=unused-argument
         return json[self.api_name]  #TODO: Use api_object_schema.binding instead
 
 def _install_filter_factory(operator_name, operator_function_name):

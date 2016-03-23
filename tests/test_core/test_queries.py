@@ -1,9 +1,10 @@
-import pytest
 import operator
-from infinisdk.core import *
+import pytest
+
 from infinisdk.core.exceptions import ObjectNotFound, TooManyObjectsFound
 from infinisdk.izbox.filesystem import Filesystem
 
+# pylint: disable=redefined-outer-name
 
 def test_querying_length(izbox, izbox_simulator):
     assert len(Filesystem.find(izbox)) == 0
@@ -33,15 +34,15 @@ def field(izbox):
     return izbox.objects.filesystems.fields.id
 
 
-def test_querying_equal(izbox, field):
+def test_querying_equal(izbox):
     for query in [
             Filesystem.find(izbox, id=2),
-            Filesystem.find(izbox, Filesystem.fields.id == 2),
+            Filesystem.find(izbox, Filesystem.fields.id == 2),  # pylint: disable=no-member
     ]:
         assert_query_equals(query, "id=eq%3A2")
 
 
-def test_unknown_fields(izbox, field):
+def test_unknown_fields(izbox):
     assert_query_equals(Filesystem.find(izbox, unknown_field=2),
                         "unknown_field=eq%3A2")
 
@@ -84,7 +85,8 @@ def test_querying_not_in(izbox, field):
         Filesystem.find(izbox, field.not_in(id_range)), expected)
 
 
-def test_sorting(izbox, field):
+def test_sorting(izbox):
+    # pylint: disable=no-member
     assert_query_equals(
         Filesystem.find(izbox).sort(-Filesystem.fields.quota), "sort=-quota_in_bytes")
     assert_query_equals(
@@ -93,19 +95,20 @@ def test_sorting(izbox, field):
         Filesystem.find(izbox).sort(Filesystem.fields.quota), "sort=quota_in_bytes")
 
 
-def test_sorting_multiple(izbox, field):
+def test_sorting_multiple(izbox):
+    # pylint: disable=no-member
     assert_query_equals(
         Filesystem.find(izbox).sort(-Filesystem.fields.quota, +Filesystem.fields.id), "sort=-quota_in_bytes%2Cid")
 
 
-def test_only_fields(izbox, field):
+def test_only_fields(izbox):
     lazy_query = Filesystem.find(izbox).only_fields(["quota"])  # NOTE: uses api name!
     assert str(lazy_query.query.path) == '/api/rest/filesystems'
     assert list(lazy_query.query.query_dict) == ['fields']
     assert set(['id', 'quota_in_bytes']) == set(lazy_query.query.query_dict['fields'].split(','))
 
 
-def test_pagination(izbox, field):
+def test_pagination(izbox):
     assert_query_equals(
         Filesystem.find(izbox).page(5).page_size(100), None)  # pages are only added at query
 
@@ -118,9 +121,9 @@ def assert_query_equals(q, expected):
     assert q.query == ('/api/rest/filesystems' + expected)
 
 
-def test_negative_item_position(izbox, field):
+def test_negative_item_position(izbox):
     with pytest.raises(NotImplementedError):
-        izbox.events.find()[-3]
+        izbox.events.find()[-3]  # pylint: disable=expression-not-assigned
 
 
 def test_paged_query_traversal(izbox):
