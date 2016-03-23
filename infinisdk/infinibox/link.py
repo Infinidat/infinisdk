@@ -43,7 +43,7 @@ class Link(InfiniBoxObject):
         if remote_host:
             data['remote_host'] = remote_host
             self.refresh('remote_host')
-        url = self.get_this_url_path()
+        url = self.get_this_url_path().add_path('refresh')
         self.system.api.post(url, data=data)
 
     def delete(self, force_if_remote_error=False, force_if_no_remote_credentials=False):
