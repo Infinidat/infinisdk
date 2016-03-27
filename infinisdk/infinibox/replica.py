@@ -321,6 +321,8 @@ class Replica(InfiniBoxObject):
 
     def is_active(self, *args, **kwargs):
         self._validate_can_check_state()
+        if self.system.compat.has_sync_job_states():
+            return self.get_state().lower() == 'active'
         return self.get_state(*args, **kwargs).lower() in ['idle', 'initiating', 'initial_replication', 'replicating']
 
     def change_role(self, entity_pairs=OMIT):
