@@ -286,6 +286,8 @@ class Replica(InfiniBoxObject):
         """Returns whether or not this replica is in idle state
         """
         self._validate_can_check_state()
+        if self.system.compat.has_sync_job_states():
+            return self.is_active() and not self.is_replicating()
         return self.get_state(*args, **kwargs).lower() == 'idle'
 
     def is_auto_suspended(self, *args, **kwargs):
@@ -310,7 +312,7 @@ class Replica(InfiniBoxObject):
         """
         self._validate_can_check_state()
         if self.system.compat.has_sync_job_states():
-            return self._any_sync_job_state_contains('replicating')
+            return self.is_active() and self._any_sync_job_state_contains('replicating')
         return self.get_state(*args, **kwargs).lower() == 'replicating'
 
     def is_stalled(self):
