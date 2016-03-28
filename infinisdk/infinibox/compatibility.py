@@ -130,7 +130,7 @@ class Compatibility(object):
         self.has_writable_snapshots()
 
     def has_sync_job_states(self):
-        return self.get_version_as_float() > 3.0
+        return self.get_version_as_float() >= 3.0
 
 
 _VERSION_TUPLE_LEN = 5
