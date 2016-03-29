@@ -18,6 +18,11 @@ class Dataset(InfiniBoxObject):
     def _get_snapshot_type(self):
         return 'SNAPSHOT' if self.system.compat.has_snapclones() else 'SNAP'
 
+    def get_family_master(self):
+        if self.is_master():
+            return self
+        return self.get_binder().get_by_id_lazy(self.get_family_id())
+
     def is_master(self):
         """Returns whether or not this entity is a master entity (not a snapshot and not a clone)
         """

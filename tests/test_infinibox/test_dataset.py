@@ -273,6 +273,14 @@ def test_calculate_reclaimable_space(data_entity):
 
 
 @new_to_version('3.0')
+def test_get_family_master(data_entity):
+    assert data_entity.get_family_master() is data_entity
+    child = data_entity.create_child()
+    assert child.get_family_master() == data_entity
+    assert child.get_family_master().get_id() == data_entity.get_id()
+
+
+@new_to_version('3.0')
 def test_compression_enabled(data_entity):
     assert not data_entity.is_compression_enabled()
     data_entity.enable_compression()

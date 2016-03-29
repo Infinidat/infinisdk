@@ -91,7 +91,7 @@ class Volume(Dataset):
         Field("type", cached=True, is_filterable=True, is_sortable=True),
         Field("parent", type='infinisdk.infinibox.volume:Volume', cached=True, api_name="parent_id",
                 binding=RelatedObjectBinding('volumes'), is_filterable=True),
-        Field("family_id", type=int, is_filterable=True, is_sortable=True),
+        Field("family_id", type=int, cached=True, is_filterable=True, is_sortable=True),
         Field("provisioning", api_name="provtype", mutable=True, creation_parameter=True,
                 is_filterable=True, is_sortable=True, default="THICK"),
         Field("created_at", cached=True, type=MillisecondsDatetimeType, is_sortable=True, is_filterable=True),
