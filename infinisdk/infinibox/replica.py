@@ -301,11 +301,17 @@ class Replica(InfiniBoxObject):
         """
         self._validate_can_check_state()
         if self.system.compat.has_sync_job_states():
-            for job in self.get_field('jobs'):
+            for job in self._get_jobs():
                 if job['is_initial'] and job['state'].lower() != 'done':
                     return True
             return False
         return 'initial' in self.get_state(*args, **kwargs).lower()
+
+    def _get_jobs(self):
+        returned = self.get_field('jobs')
+        if not returned:
+            returned = []
+        return returned
 
     def is_replicating(self, *args, **kwargs):
         """Returns whether or not this replica is in replicating state
@@ -378,7 +384,7 @@ class Replica(InfiniBoxObject):
 
     def _any_sync_job_state_contains(self, substr):
         substr = substr.lower()
-        for sync_job in self.get_field('jobs'):
+        for sync_job in self._get_jobs():
             if substr in sync_job['state'].lower():
                 return True
         return False
