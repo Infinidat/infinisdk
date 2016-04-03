@@ -185,6 +185,7 @@ def test_query_preprocessor_context(infinibox):
 
 
 def test_query_preprocessor_context_exception(infinibox):
+    # pylint: disable=protected-access
     class SomeException(Exception):
         pass
 
@@ -199,3 +200,20 @@ def test_query_preprocessor_context_exception(infinibox):
             raise SomeException()
 
     assert not infinibox.api._preprocessors
+
+
+def test_set_cookie(infinibox):
+    # pylint: disable=protected-access
+    infinibox.api.set_cookie('x', 'y')
+    assert infinibox.api._session.cookies['x'] == 'y'
+
+
+def test_get_cookie(infinibox):
+    infinibox.api.set_cookie('x', 'y')
+    assert infinibox.api.get_cookie('x') == 'y'
+
+def test_delete_cookie(infinibox):
+    # pylint: disable=protected-access
+    infinibox.api.set_cookie('x', 'y')
+    infinibox.api.delete_cookie('x')
+    assert 'x' not in infinibox.api._session.cookies

@@ -393,6 +393,15 @@ class API(object):
     def _get_auto_retries_context(self):
         return _AutoRetryContext(self._auto_retry_predicates)
 
+    def set_cookie(self, cookie, value):
+        self._session.cookies[cookie] = value
+
+    def get_cookie(self, cookie):
+        return self._session.cookies[cookie]
+
+    def delete_cookie(self, cookie):
+        del self._session.cookies[cookie]
+
     def request(self, http_method, path, assert_success=True, **kwargs):
         """Sends HTTP API request to the remote system
         """
