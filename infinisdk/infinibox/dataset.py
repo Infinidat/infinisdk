@@ -16,7 +16,7 @@ class Dataset(InfiniBoxObject):
 
 
     def _get_snapshot_type(self):
-        return 'SNAPSHOT' if self.system.compat.has_snapclones() else 'SNAP'
+        return 'SNAPSHOT' if self.system.compat.has_writable_snapshots() else 'SNAP'
 
     def get_family_master(self):
         if self.is_master():
@@ -48,7 +48,7 @@ class Dataset(InfiniBoxObject):
     def is_clone(self):
         """Returns whether or not this entity is a clone
         """
-        assert not self.system.compat.has_snapclones(), '{}.is_clone() with snapclones is not supported'.format(
+        assert not self.system.compat.has_writable_snapshots(), '{}.is_clone() with snapclones is not supported'.format(
             self.__class__.__name__)
         return self.get_type() == 'CLONE'
 
@@ -94,7 +94,7 @@ class Dataset(InfiniBoxObject):
     def create_clone(self, name=None):
         """Creates a clone from this entity, if supported by the system
         """
-        assert not self.system.compat.has_snapclones(), '{}.create_clone() with snapclones is not supported'.format(
+        assert not self.system.compat.has_writable_snapshots(), '{}.create_clone() with snapclones is not supported'.format(
             self.__class__.__name__)
         if self.is_snapshot():
             return self.create_child(name)
@@ -103,7 +103,7 @@ class Dataset(InfiniBoxObject):
     def create_snapshot(self, name=None):
         """Creates a snapshot from this entity, if supported by the system
         """
-        if not self.system.compat.has_snapclones() and self.is_snapshot():
+        if not self.system.compat.has_writable_snapshots() and self.is_snapshot():
             raise InvalidOperationException('Cannot create snapshot for snapshot')
         return self.create_child(name)
 
@@ -141,7 +141,7 @@ class Dataset(InfiniBoxObject):
     def get_clones(self):
         """Retrieves all clone children of this entity
         """
-        assert not self.system.compat.has_snapclones(), '{}.get_clones() with snapclones is not supported'.format(
+        assert not self.system.compat.has_writable_snapshots(), '{}.get_clones() with snapclones is not supported'.format(
             self.__class__.__name__)
         return self.get_children(type='CLONE')
 

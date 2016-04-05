@@ -4,6 +4,7 @@ from sentinels import NOTHING
 
 from .._compat import httplib
 from ..core.config import config
+from ..core.utils import deprecated
 
 
 class Compatibility(object):
@@ -121,8 +122,12 @@ class Compatibility(object):
     def has_max_speed(self):
         return self.get_version_as_float() > 2.2
 
+    def has_writable_snapshots(self):
+        return self._has_feature('snapshots')
+
+    @deprecated('Use has_writable_snapshots instead')
     def has_snapclones(self):
-        return self._has_feature('snapclones')
+        self.has_writable_snapshots()
 
 
 
