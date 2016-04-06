@@ -65,6 +65,9 @@ class Host(InfiniBoxLURelatedObject):
     def add_port(self, address):
         """
         Adds a port address to this host
+
+        :param address: the port address to add
+        :type address: Either an ``infi.dtypes.wwn.WWN`` or ``infi.dtypes.iqn.IQN``. Plain strings are assumed to be WWNs
         """
         data = host_port_to_api(address)
         self.system.api.post(self.get_this_url_path().add_path('ports'), data=data)
