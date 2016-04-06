@@ -92,6 +92,9 @@ class TopLevelField(object):
     def from_json(cls, j):
         return cls(name=j['name'], values=j['values'])
 
+    def __repr__(self):
+        return '<Top-level field {}>'.format(self.name)
+
 
 class Filter(object):
     """Represents a single filter defined on the system for metric gathering
