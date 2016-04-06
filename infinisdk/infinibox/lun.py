@@ -53,7 +53,7 @@ class LogicalUnit(object):
         except APICommandFailed as e:
             if e.status_code != requests.codes.not_found:
                 raise
-        obj.refresh('luns')
+        obj.invalidate_cache('luns')
 
     def delete(self):
         """ Deletes (or unmaps) this LU

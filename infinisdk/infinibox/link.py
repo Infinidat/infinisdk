@@ -42,7 +42,7 @@ class Link(InfiniBoxObject):
         data = {}
         if remote_host:
             data['remote_host'] = remote_host
-            self.refresh('remote_host')
+            self.invalidate_cache('remote_host')
         url = self.get_this_url_path().add_path('refresh')
         self.system.api.post(url, data=data)
 

@@ -137,17 +137,17 @@ def test_volume_get_replica_single(volume, replica):
 
 @new_to_version('2.0')
 def test_is_rmr_source(volume, replica):
-    volume.refresh()
+    volume.invalidate_cache()
     assert not volume.is_rmr_target()
     assert volume.is_rmr_source()
 
 
 @new_to_version('2.0')
 def test_is_replicated(volume, replica):
-    volume.refresh()
+    volume.invalidate_cache()
     assert volume.is_replicated()
     replica.delete()
-    volume.refresh()
+    volume.invalidate_cache()
     assert not volume.is_replicated()
 
 
@@ -159,7 +159,7 @@ def test_regtulard_volume_is_not_rmr_source_target(volume):
 
 @new_to_version('2.0')
 def test_is_rmr_target(volume, replica, secondary_volume):
-    secondary_volume.refresh()
+    secondary_volume.invalidate_cache()
     assert secondary_volume.is_rmr_target()
     assert not secondary_volume.is_rmr_source()
 

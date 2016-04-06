@@ -74,8 +74,8 @@ class InfiniBoxLURelatedObject(InfiniBoxObject):
             post_data['lun'] = int(lun)
         url = self.get_this_url_path().add_path('luns')
         res = self.system.api.post(url, data=post_data)
-        volume.refresh('mapped')
-        self.refresh('luns')
+        volume.invalidate_cache('mapped')
+        self.invalidate_cache('luns')
         return LogicalUnit(system=self.system, **res.get_result())
 
     def unmap_volume(self, volume=None, lun=None):
@@ -91,7 +91,7 @@ class InfiniBoxLURelatedObject(InfiniBoxObject):
         else:
             raise InfiniSDKException('unmap_volume does must get or volume or lun')
         assert self == lun.get_mapping_object()
-        self.refresh('luns')
+        self.invalidate_cache('luns')
         lun.unmap()
         if volume:
-            volume.refresh('mapped')
+            volume.invalidate_cache('mapped')

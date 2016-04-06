@@ -101,7 +101,7 @@ def test_rack_refresh(infinibox):
     assert comp_no + nodes_no < comp_with_nodes_no
     assert not any(isinstance(comp, Enclosure) for comp in components._components_by_id)
 
-    rack_1.refresh()
+    rack_1.invalidate_cache()
     assert comp_with_nodes_no < len(components._components_by_id)
 
 @pytest.mark.parametrize('operation', [
