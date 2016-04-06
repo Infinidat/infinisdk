@@ -61,8 +61,8 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
             self._cache.clear()
 
     @deprecated(message='use invalidate_cache instead')
-    def refresh(self):
-        return self.invalidate_cache()
+    def refresh(self, *field_names):
+        return self.invalidate_cache(*field_names)
 
     @classmethod
     def is_supported(cls, system):
