@@ -31,23 +31,23 @@ class NetworkSpace(InfiniBoxObject):
 
     def add_ip_address(self, ip_address):
         res = self.system.api.post(self.get_this_url_path().add_path("ips"), data=ip_address).get_result()
-        self.refresh('ips')
+        self.invalidate_cache('ips')
         return res
 
     def remove_ip_address(self, ip_address):
         url = self.get_this_url_path().add_path("ips/{0}".format(ip_address))
         res = self.system.api.delete(url).get_result()
-        self.refresh('ips')
+        self.invalidate_cache('ips')
         return res
 
     def disable_ip_address(self, ip_address):
         returned = self.system.api.post(self.get_this_url_path().add_path('ips').add_path(ip_address).add_path('disable'))
-        self.refresh('ips')
+        self.invalidate_cache('ips')
         return returned
 
     def enable_ip_address(self, ip_address):
         returned = self.system.api.post(self.get_this_url_path().add_path('ips').add_path(ip_address).add_path('enable'))
-        self.refresh('ips')
+        self.invalidate_cache('ips')
         return returned
 
     def get_links(self):

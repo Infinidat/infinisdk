@@ -65,15 +65,15 @@ def _attach_method(instance, function):
     setattr(instance, function.__name__, types.MethodType(function, instance))
 
 @pytest.mark.parametrize("with_fields", [True, False])
-def test_requires_refresh_decorator(system, with_fields):
+def test_requires_cache_invalidation_decorator(system, with_fields):
     obj = SampleDerivedObject(system, {"id": 1, "number": 2, "string": "asdf"})
-    @SystemObject.requires_refresh("number", "string")
+    @SystemObject.requires_cache_invalidation("number", "string")
     def get_meaning_of_life(self, *args, **kwargs):
         return 42
     if with_fields:
-        get_meaning_of_life = SystemObject.requires_refresh("number", "string")(get_meaning_of_life)
+        get_meaning_of_life = SystemObject.requires_cache_invalidation("number", "string")(get_meaning_of_life)
     else:
-        get_meaning_of_life = SystemObject.requires_refresh(get_meaning_of_life)
+        get_meaning_of_life = SystemObject.requires_cache_invalidation(get_meaning_of_life)
     _attach_method(obj, get_meaning_of_life)
     assert 1 == obj.get_field('id', from_cache=True, fetch_if_not_cached=False)
     assert 2 == obj.get_field('number', from_cache=True, fetch_if_not_cached=False)

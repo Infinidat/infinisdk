@@ -269,7 +269,7 @@ class Rack(InfiniBoxSystemComponent):
         return self.get_specific_rack_url(self.get_index())
 
     def refresh_without_enclosures(self):
-        url = self.get_this_url_path().add_query_param('fields','enclosures_number,rack,nodes')
+        url = self.get_this_url_path().add_query_param('fields', 'enclosures_number,rack,nodes')
         self.system.components.mark_fetched_nodes()
         data = self.system.api.get(url).get_result()
         data['enclosures'] = []

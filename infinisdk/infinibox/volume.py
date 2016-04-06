@@ -114,7 +114,7 @@ class Volume(Dataset):
     def create(cls, system, **fields):
         pool = fields.get('pool')
         if pool and not isinstance(pool, SpecialValue):
-            pool.refresh('allocated_physical_capacity', 'free_physical_capacity', 'free_virtual_capacity', 'reserved_capacity')
+            pool.invalidate_cache('allocated_physical_capacity', 'free_physical_capacity', 'free_virtual_capacity', 'reserved_capacity')
         return super(Volume, cls).create(system, **fields)
 
     def own_replication_snapshot(self, name=None):
@@ -170,7 +170,7 @@ class Volume(Dataset):
         """
         for lun in self.get_logical_units():
             lun.unmap()
-        self.refresh('mapped')
+        self.invalidate_cache('mapped')
 
     def has_children(self):
         return self.get_field("has_children")

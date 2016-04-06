@@ -153,14 +153,14 @@ def test_get_name(infinibox):
 @pytest.mark.parametrize('invalidate_cache', [True, False])
 def test_get_field_raw_value(volume, from_cache, invalidate_cache):
     if invalidate_cache:
-        volume.refresh('size')
+        volume.invalidate_cache('size')
     assert isinstance(volume.get_size(from_cache=from_cache), Capacity)
     if invalidate_cache:
-        volume.refresh('size')
+        volume.invalidate_cache('size')
     assert isinstance(
         volume.get_size(from_cache=from_cache, raw_value=False), Capacity)
     if invalidate_cache:
-        volume.refresh('size')
+        volume.invalidate_cache('size')
     assert isinstance(
         volume.get_size(from_cache=from_cache, raw_value=True), int)
 
