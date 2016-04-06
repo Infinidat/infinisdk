@@ -177,7 +177,7 @@ class InfiniBoxComponentBinder(TypeBinder):
         else:
             if force_fetch or components.should_fetch_all():
                 rack_1 = components.get_rack_1()
-                rack_1.refresh()
+                rack_1.refresh_cache()
 
     def _fetch_service_clusters(self):
         components = self.system.components
@@ -224,9 +224,13 @@ class InfiniBoxSystemComponent(BaseSystemObject):
     def get_sub_components(self):
         return self.system.components.find(parent_id=self.id)
 
-    def refresh(self):
+    def refresh_cache(self):
         data = self.system.api.get(self.get_this_url_path()).get_result()
         self.construct(self.system, data, self.get_parent_id())
+
+    @deprecated(message='Use refresh_cache()')
+    def refresh(self):
+        self.refresh_cache()
 
     @classmethod
     def construct(cls, system, data, parent_id, allow_partial_fields=False):
@@ -275,9 +279,9 @@ class Rack(InfiniBoxSystemComponent):
         data['enclosures'] = []
         self.construct(self.system, data, self.get_parent_id())
 
-    def refresh(self):
+    def refresh_cache(self):
         self.system.components.mark_fetched_all()
-        super(Rack, self).refresh()
+        super(Rack, self).refresh_cache()
 
 
 @InfiniBoxSystemComponents.install_component_type
@@ -617,6 +621,6 @@ class System(InfiniBoxSystemComponent):
     def is_down(self):
         return self.safe_get_state() is None
 
-    def refresh(self):
+    def refresh_cache(self):
         data = self.system.api.get(self.get_this_url_path()).get_result()
         self.update_field_cache(data)

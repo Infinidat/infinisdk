@@ -145,7 +145,7 @@ def test_get_name(infinibox):
         {'name': 'fake_name'})
     assert infinibox.get_name() == 'fake_name'
     infinibox.api.set_auth(*auth, login=True)
-    infinibox.components.system_component.refresh()
+    infinibox.components.system_component.refresh_cache()
     assert infinibox.get_name().startswith('simulator-')
 
 
