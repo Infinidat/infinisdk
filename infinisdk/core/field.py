@@ -14,7 +14,15 @@ class Field(FieldBase):
     This class represents a single field exposed by a schema
     """
     def __repr__(self):
-        return "<FIELD {}>".format(self.name)
+        extra = []
+        if self.creation_parameter:
+            extra.append('Creation param')
+        if self.mutable:
+            extra.append('Mutable')
+        return "<FIELD {}{}>".format(
+            self.name,
+            ' ({})'.format(', '.join(extra)) if extra else ''
+        )
 
     def __init__(self, *args, **kwargs):
         cached = kwargs.pop("cached", NOTHING)
