@@ -19,7 +19,7 @@ from .object_query import ObjectQuery
 from .type_binder import TypeBinder
 from .bindings import PassthroughBinding
 from .api.special_values import translate_special_values
-from .utils import DONT_CARE
+from .utils import DONT_CARE, deprecated
 
 
 class FieldsMeta(FieldsMetaBase):
@@ -50,7 +50,7 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
     def get_system(self):
         return self.system
 
-    def refresh(self, *field_names):
+    def invalidate_cache(self, *field_names):
         """Discards the cached field values of this object, causing the next fetch to retrieve the fresh value from the system
         """
         if field_names:
@@ -59,6 +59,10 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
                     field_name).api_name, None)
         else:
             self._cache.clear()
+
+    @deprecated(message='use invalidate_cache instead')
+    def refresh(self):
+        return self.invalidate_cache()
 
     @classmethod
     def is_supported(cls, system):
