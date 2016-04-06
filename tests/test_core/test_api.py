@@ -2,12 +2,13 @@ import logbook
 import pytest
 from infinisdk.core.api import Autogenerate, OMIT
 from infinisdk.core.config import config
-from infinisdk.core.exceptions import APICommandFailed, ObjectNotFound
+from infinisdk.core.exceptions import APICommandFailed, ObjectNotFound, SystemNotFoundException
 from infinisdk._compat import httplib
 from ..conftest import no_op_context
 
 from urlobject import URLObject as URL
 
+# pylint: disable=redefined-outer-name
 
 def test_data_none(infinibox):
     resp = infinibox.api.post('/api/infinisim/echo', data=None)
@@ -19,15 +20,15 @@ def capture(request):
     handler.push_application()
 
     @request.addfinalizer
-    def pop():
+    def pop():  # pylint: disable=unused-variable
         handler.pop_application()
     return handler
 
 @pytest.fixture(params=[True, False])
-def toggle_pretty_response(request, backup_config):
+def toggle_pretty_response(request, backup_config):  # pylint: disable=unused-argument
     config.root.api.log.pretty_json = request.param
 
-def test_no_response_logs(toggle_pretty_response, infinibox, capture):
+def test_no_response_logs(toggle_pretty_response, infinibox, capture):  # pylint: disable=unused-argument
     with infinibox.api.get_no_response_logs_context():
         infinibox.api.get('system')
     assert len(capture.records) == 3
@@ -36,27 +37,28 @@ def test_no_response_logs(toggle_pretty_response, infinibox, capture):
     assert capture.records[2].message.endswith('...')  # Response data log message
 
 
-def test_omit_fields(izbox):
-    resp = izbox.api.post("/api/izsim/echo_post", data={"a": "b"})
+def test_omit_fields(infinibox):
+    resp = infinibox.api.post("/api/infinisim/echo", data={"a": "b"})
     assert resp.get_result() == {'a': 'b'}
 
-    resp = izbox.api.post("/api/izsim/echo_post",
-                          data={"a": "b", "c": {"d": {"e": OMIT}}})
+    resp = infinibox.api.post("/api/infinisim/echo",
+                              data={"a": "b", "c": {"d": {"e": OMIT}}})
     assert resp.get_result() == {'a': 'b', 'c': {'d': {}}}
 
 
-def test_error_response(izbox):
+def test_error_response(infinibox):
     with pytest.raises(APICommandFailed) as caught:
-        izbox.api.post("/api/izsim/echo_error", data={'a': 1})
+        infinibox.api.post("/api/infinisim/return_error", data={'a': 1})
 
     exception_response = caught.value.response
-    assert exception_response.get_error() is None
+    error_keys = set(exception_response.get_error())
+    assert error_keys.issuperset({'code', 'message'})
 
 
-def test_url_params(izbox):
+def test_url_params(infinibox):
     params = {'a': 'b', 'c': 2, 'd': OMIT, 'e': Autogenerate('param_{ordinal}'), 'f': True}
     expected = {'a': 'b', 'c': '2', 'e': 'param_1', 'f': 'True'}
-    resp = izbox.api.post("/api/izsim/echo_post", params=params)
+    resp = infinibox.api.post("/api/infinisim/echo", params=params)
     url = URL(resp.response.request.url)
     encoded = url.query_dict
     encoded.pop('approved', None)
@@ -82,23 +84,23 @@ def set_autogenerate(request):
     old_prefix = Autogenerate.get_prefix()
     Autogenerate.set_prefix(request.param)
     @request.addfinalizer
-    def restore():
-        Autogenerate._ORDINALS = {}
+    def restore():  # pylint: disable=unused-variable
+        Autogenerate._ORDINALS = {}  # pylint: disable=protected-access
         Autogenerate.set_prefix(old_prefix)
 
 
-def test_autogenerate_fields(izbox):
+def test_autogenerate_fields(infinibox):
     responses = [
-        izbox.api.post(
-            "/api/izsim/echo_post",
+        infinibox.api.post(
+            "/api/infinisim/echo",
             data={"a":
                   {"b":
                    {"name": Autogenerate("{prefix}-obj-{ordinal}-{time}-{timestamp}-{uuid}")}}})
-        for i in range(2)]
+        for _ in range(2)]
     jsons = [r.get_result() for r in responses]
     for index, json in enumerate(jsons):
         name = json["a"]["b"]["name"]
-        prefix, obj, ordinal, time, timestamp, uuid = name.split("-")
+        prefix, _, ordinal, time, timestamp, uuid = name.split("-")
         assert prefix == Autogenerate.get_prefix()
         assert (int(ordinal) - 1) == index
         assert abs((float(timestamp) / 1000.0) - float(time)) < 0.01
@@ -106,18 +108,18 @@ def test_autogenerate_fields(izbox):
         assert len(set(uuid)) > 1
 
 
-def test_specific_address(izbox, izbox_simulator):
-    with pytest.raises(APICommandFailed):
-        izbox.api.get("/api/rest/system",
-                      address=izbox_simulator.get_inactive_node_address())
+def test_specific_address(infinibox):
+    with pytest.raises(SystemNotFoundException):
+        infinibox.api.get("/api/rest/system", address=("http://non-exist-sim-address", 80))
 
 
-def test_specific_address_doesnt_change_active_url(izbox, izbox_simulator):
-    izbox.api.get("/api/rest/system")
-    new_url = izbox.api._active_url = "http://blap.com/a/b/c"
-    izbox.api.get("/api/rest/system",
-                  address=izbox_simulator.get_active_node_address())
-    assert izbox.api._active_url == new_url
+def test_specific_address_doesnt_change_active_url(infinibox):
+    # pylint: disable=protected-access
+    infinibox.api.get("/api/rest/system")
+    prev_url = infinibox.api._active_url
+    new_url = infinibox.api._active_url = ("http://blap.com/a/b/c", 80)
+    infinibox.api.get("/api/rest/system", address=(prev_url.hostname, prev_url.port))
+    assert infinibox.api._active_url == new_url
 
 
 
@@ -139,7 +141,7 @@ def test_absolute_api(system):
 
 
 def test_normalize_addresses(system):
-    get_normalized = system._normalize_addresses
+    get_normalized = system._normalize_addresses  # pylint: disable=protected-access
     assert get_normalized('1.2.3.4', use_ssl=False) == [('1.2.3.4', 80)]
     assert get_normalized('1.2.3.4', use_ssl=True) == [('1.2.3.4', 443)]
 

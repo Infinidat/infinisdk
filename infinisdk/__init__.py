@@ -1,7 +1,6 @@
 from .core.q import Q
 
 from .infinibox import InfiniBox
-from .izbox import IZBox
 
 _SDK_HOOK = 'infinidat.sdk.{0}'.format
 
@@ -9,7 +8,7 @@ def _install_hooks():
     import gossip
 
     # Define systems objects operation hooks
-    obj_type_name = set(tag for sys in (InfiniBox, IZBox) for obj_cls in sys.OBJECT_TYPES
+    obj_type_name = set(tag for sys in (InfiniBox, ) for obj_cls in sys.OBJECT_TYPES
             for tag in obj_cls._get_tags_for_object_operations(sys))
     for hook_name_template in (_SDK_HOOK('pre_object_{0}'), _SDK_HOOK('post_object_{0}')):
         for operation in ('creation', 'deletion', 'update'):

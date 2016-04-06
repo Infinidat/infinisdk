@@ -1,4 +1,3 @@
-from capacity import GB
 from forge import And, HasKeyValue, Is, IsA, HasAttributeValue
 
 import gossip
@@ -6,6 +5,7 @@ import pytest
 from infinisdk.core.api import OMIT
 from infinisdk.core.exceptions import APICommandFailed
 
+# pylint: disable=redefined-outer-name
 
 @pytest.fixture
 def hooks(forge, request):
@@ -37,35 +37,36 @@ def hooks(forge, request):
     return returned
 
 
-def test_creation_hook(hooks, forge, izbox):
+def test_creation_hook(hooks, forge, infinibox):
     hooks.pre_object_creation_hook(
-        system=Is(izbox),
-        data=HasKeyValue("name", "test_fs"),
-        cls=izbox.objects.filesystems.object_type
+        system=Is(infinibox),
+        data=HasKeyValue("name", "test_pool"),
+        cls=infinibox.pools.object_type
     )
     hooks.post_object_creation_hook(
         obj=And(
-            IsA(izbox.objects.filesystems.object_type),
-            HasAttributeValue("system", izbox)),
-        data=HasKeyValue("name", "test_fs"),
-        response_dict=HasKeyValue("name", "test_fs"),
+            IsA(infinibox.pools.object_type),
+            HasAttributeValue("system", infinibox)),
+        data=HasKeyValue("name", "test_pool"),
+        response_dict=HasKeyValue("name", "test_pool"),
     )
     forge.replay()
-    izbox.objects.filesystems.create(name="test_fs", quota=GB)
+    infinibox.pools.create(name="test_pool")
 
-def test_creation_hook_failure(hooks, forge, izbox):
+
+def test_creation_hook_failure(hooks, forge, infinibox):
     failure_hook_kwargs = {}
 
     hooks.pre_object_creation_hook(
-        system=Is(izbox),
-        data=HasKeyValue("name", "test_fs"),
-        cls=izbox.objects.filesystems.object_type
+        system=Is(infinibox),
+        data=HasKeyValue("name", "test_pool"),
+        cls=infinibox.pools.object_type
     )
     hooks.object_operation_failure_hook(exception=IsA(APICommandFailed)).\
         and_call_with_args(failure_hook_kwargs.update)
 
     forge.replay()
     with pytest.raises(APICommandFailed) as caught:
-        izbox.objects.filesystems.create(name="test_fs", quota=OMIT)
+        infinibox.pools.create(name="test_pool", capacity=OMIT)
 
     assert caught.value is failure_hook_kwargs['exception']

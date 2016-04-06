@@ -20,20 +20,6 @@ config = confetti.Config(dict(
         system_api_port=80,
         retry_sleep_seconds=5,
     ),
-    izbox=dict(
-        defaults=dict(
-            system_api=dict(
-                timeout_seconds=180,
-            ),
-            events=dict(
-                page_size=1000,
-                max_events=10 ** 6,
-                max_page_size=1000),
-        ),
-        approval_required_codes=tuple((
-            "DANGEROUS_OPERATION",
-        )),
-    ),
     infinibox=dict(
 
         compatible_versions = [

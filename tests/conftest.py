@@ -7,14 +7,14 @@ from munch import Munch
 
 import pytest
 from ecosystem import SimulationContext
-from infinisdk._compat import xrange
+from infinisdk._compat import xrange  # pylint: disable=redefined-builtin
 from infinisdk.core import extensions
 from infinisdk.core.config import config
 from infinisdk.infinibox import InfiniBox
-from infinisdk.izbox import IZBox
 from infinisim.infinibox import Infinibox as InfiniboxSimulator
-from izsim import Simulator as IZBoxSimulator
 
+
+# pylint: disable=redefined-outer-name
 new_to_version = lambda version: pytest.mark.required_version(from_version=version)
 
 
@@ -36,7 +36,7 @@ def setup_logging(request):
 def freeze_timeline(request):
     prev = flux.current_timeline.get_time_factor()
     @request.addfinalizer
-    def restore():
+    def restore():  # pylint: disable=unused-variable
         flux.current_timeline.set_time_factor(prev)
     flux.current_timeline.set_time_factor(0)
 
@@ -48,7 +48,7 @@ def disable_version_checks():
 @pytest.fixture(autouse=True, scope='function')
 def cleanup_extensions(request):
     @request.addfinalizer
-    def cleanup():
+    def cleanup():  # pylint: disable=unused-variable
         extensions.clear_all()
 
 
@@ -56,28 +56,14 @@ def cleanup_extensions(request):
 def forge(request):
     returned = Forge()
     @request.addfinalizer
-    def finalize():
+    def finalize():  # pylint: disable=unused-variable
         returned.restore_all_replacements()
         returned.verify()
     return returned
 
-@pytest.fixture(params=['izbox', 'infinibox'])
-def system_type(request):
-    return request.param
-
 @pytest.fixture
 def system(infinibox):
     return infinibox
-
-@pytest.fixture
-def simulator(izbox_simulator, infinibox_simulator, system_type):
-    if system_type == 'izbox':
-        return izbox_simulator
-    return infinibox_simulator
-
-@pytest.fixture
-def izbox(izbox_simulator):
-    return IZBox(izbox_simulator)
 
 def validate_unittest_compatibility_with_infinibox_version(system, **kwargs):
     from_version = kwargs.pop('from_version', None)
@@ -104,15 +90,6 @@ def infinibox(request, infinibox_simulator):
         infinibox.compat.set_feature_as_supported('nas', 2)
     return infinibox
 
-
-@pytest.fixture
-def izbox_simulator(request):
-    returned = IZBoxSimulator()
-    returned.activate()
-    request.addfinalizer(returned.deactivate)
-    return returned
-
-
 @pytest.fixture
 def infinibox_simulator(request):
     returned = InfiniboxSimulator()
@@ -122,7 +99,7 @@ def infinibox_simulator(request):
     return returned
 
 @pytest.fixture
-def cluster(request, infinibox):
+def cluster(infinibox):
     return infinibox.host_clusters.create()
 
 @pytest.fixture
@@ -131,12 +108,12 @@ def host(infinibox):
 
 
 @contextmanager
-def no_op_context(*args):
+def no_op_context(*args):  # pylint: disable=unused-argument
     yield
 
 
 @pytest.fixture(params=["host", "cluster"])
-def mapping_object_type(request, infinibox):
+def mapping_object_type(request):
     return request.param
 
 @pytest.fixture
@@ -227,7 +204,7 @@ def data_entity_type(request):
 def data_entity(infinibox, volume, filesystem, data_entity_type):
     if data_entity_type == 'volume':
         return volume
-    if infinibox.compat.get_version_as_float() < 2.2:
+    if not infinibox.filesystems.is_supported():
         pytest.skip('System does not have NAS')
     return filesystem
 
@@ -242,7 +219,7 @@ def create_network_space(infinibox, **kwargs):
     if not kwargs.get('network_config'):
         kwargs['network_config'] = {'netmask': 19, 'network': '127.0.0.1', 'default_gateway': '127.0.0.1'}
     if not kwargs.get('interfaces'):
-        kwargs['interfaces'] = [create_network_interface(infinibox, node_id=index) for index in xrange(1,4)]
+        kwargs['interfaces'] = [create_network_interface(infinibox, node_id=index) for index in xrange(1, 4)]
     return infinibox.network_spaces.create(**kwargs)
 
 
@@ -253,7 +230,8 @@ def network_interface(infinibox):
 
 @pytest.fixture
 def network_space(infinibox, network_interface):
-    interfaces = [create_network_interface(infinibox, node_id=index) for index in xrange(1,4) if index != network_interface.get_node().id]
+    interfaces = [create_network_interface(infinibox, node_id=index)
+                  for index in xrange(1, 4) if index != network_interface.get_node().id]
     interfaces.append(network_interface)
     return create_network_space(infinibox, interfaces=interfaces)
 
@@ -290,11 +268,11 @@ def link(infinibox, secondary_infinibox, mocked_ecosystem):
 
 def create_rmr_network_space(system):
     returned = create_network_space(infinibox=system, name='rmr',
-        network_config={
+        network_config={  # pylint: disable=bad-continuation
             'default_gateway': '1.1.1.1',
             'netmask': '255.0.0.0',
             'network': '1.0.0.0',})
-    assert not system.get_simulator().networking._allocated
+    assert not system.get_simulator().networking._allocated  # pylint: disable=protected-access
     returned.add_ip_address(str(system.get_simulator().networking.allocate_ip_address('rmr')))
     return returned
 
@@ -308,6 +286,7 @@ def mocked_ecosystem(request):
 
 @pytest.fixture
 def secondary_infinibox(request):
+    # pylint: disable=unused-variable
     returned = infinibox(request=request, infinibox_simulator=infinibox_simulator(request=request))
     unused = returned.get_simulator().hosts.create('unused_host') # make sure ids are not aligned
     return returned

@@ -448,7 +448,7 @@ class API(object):
                                 raise CommandNotApproved(e.response, reason)
                         raise
                 return returned
-        assert False, "Should never get here!"
+        assert False, "Should never get here!"  # pragma: no cover
 
     def _with_approved(self, path):
         return path.set_query_param('approved', 'true')

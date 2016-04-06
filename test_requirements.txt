@@ -1,4 +1,3 @@
-izsim>=19
 pytest
 pytest-xdist
 pyforge

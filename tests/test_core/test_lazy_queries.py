@@ -1,6 +1,7 @@
 import pytest
 import logbook
 
+# pylint: disable=redefined-outer-name
 
 @pytest.mark.parametrize('operation', [
     lambda infinibox: list(infinibox.volumes.find(name='nonexistent')),
@@ -11,23 +12,22 @@ def test_len_caching_on_empty_lists(infinibox, operation):
         result = operation(infinibox)
         assert not result
 
-    [r] = [record for record in handler.records if '<-- GET http://' in record.message]
+    [r] = [record for record in handler.records if '<-- GET http://' in record.message] # pylint: disable=unused-variable
 
 
 def test_lazy_query_out_of_bounds_with_first_checking_length(result, page_size):
     assert len(result) > page_size
     with pytest.raises(IndexError):
-        result[len(result) + 1]
+        result[len(result) + 1]  # pylint: disable=expression-not-assigned
 
 
-def test_lazy_query_out_of_bounds_without_first_checking_length(result, page_size):
+def test_lazy_query_out_of_bounds_without_first_checking_length(result):
     with pytest.raises(IndexError):
-        result[len(result) + 1]
+        result[len(result) + 1]  # pylint: disable=expression-not-assigned
 
 
 def test_lazy_query(result, page_size):
-    page_size = 10
-    pages_total = (len(result) // page_size)
+    pages_total = (len(result) // page_size)  # pylint: disable=unused-variable
     if float(len(result)) / page_size != 0:
         pages_total += 1
 
@@ -41,6 +41,7 @@ def test_lazy_query(result, page_size):
 
 
 def assert_fetched(result, pages, page_size):
+    # pylint: disable=protected-access
     for i in range(0, len(result), page_size):
         if i // page_size in pages:
             assert result._fetched[
@@ -52,9 +53,9 @@ def assert_fetched(result, pages, page_size):
 
 @pytest.fixture
 def page_size():
-    return 10
+    return 2
 
 
 @pytest.fixture
-def result(izbox, page_size):
-    return izbox.components.find().page_size(page_size)
+def result(infinibox, page_size):
+    return infinibox.users.find().page_size(page_size)

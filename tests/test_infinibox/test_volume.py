@@ -1,6 +1,8 @@
 import pytest
 from infinisdk._compat import xrange  # pylint: disable=redefined-builtin
 from capacity import Capacity, TB
+
+from infinisdk.core.exceptions import APICommandFailed
 from infinisdk.infinibox.volume import Volume
 from infinisdk.infinibox.pool import Pool
 from infinisdk.infinibox.scsi_serial import SCSISerial
@@ -52,6 +54,22 @@ def test_field_types():
     # pylint: disable=no-member
     assert Volume.fields.parent.type.type is Volume
     assert Volume.fields.pool.type.type is Pool
+
+
+def test_is_supported(infinibox):
+    # Testing Volume.is_supported because this binder exist on all infinibox versions
+    assert Volume.is_supported(infinibox)
+    assert infinibox.volumes.is_supported()
+
+
+def test_delete_delted_object(volume):
+    # Testing Volume.is_supported because this binder exist on all infinibox versions
+    volume.delete()
+    assert not volume.is_in_system()
+    with pytest.raises(APICommandFailed):
+        volume.delete()
+    volume.safe_delete()
+
 
 
 @pytest.mark.parametrize('with_capacity', [True, False])
