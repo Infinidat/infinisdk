@@ -69,18 +69,18 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
         return True
 
     @staticmethod
-    def requires_cache_invalidation(*fields):
-        invalidate_fields = fields
+    def requires_refresh(*fields):
+        refresh_fields = fields
         if len(fields) == 1 and callable(fields[0]):
-            invalidate_fields = []
+            refresh_fields = []
 
         def wraps(func, *args, **kwargs):
             @functools.wraps(func)
-            def invalidates(self, *args, **kwargs):
+            def refreshes(self, *args, **kwargs):
                 returned = func(self, *args, **kwargs)
-                self.invalidate_cache(*invalidate_fields)
+                self.refresh(*refresh_fields)
                 return returned
-            return invalidates
+            return refreshes
         if len(fields) == 1 and callable(fields[0]):
             return wraps(fields[0])
         return wraps

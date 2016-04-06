@@ -268,20 +268,16 @@ class Rack(InfiniBoxSystemComponent):
     def get_this_url_path(self):
         return self.get_specific_rack_url(self.get_index())
 
-    def invalidate_cache_without_enclosures(self):
+    def refresh_without_enclosures(self):
         url = self.get_this_url_path().add_query_param('fields','enclosures_number,rack,nodes')
         self.system.components.mark_fetched_nodes()
         data = self.system.api.get(url).get_result()
         data['enclosures'] = []
         self.construct(self.system, data, self.get_parent_id())
 
-    @deprecated(message='Use invalidate_cache_without_enclosures')
-    def refresh_cache_without_enclosures(self):
-        self.invalidate_cache_without_enclosures()
-
-    def invalidate_cache(self):
+    def refresh(self):
         self.system.components.mark_fetched_all()
-        super(Rack, self).invalidate_cache()
+        super(Rack, self).refresh()
 
 
 @InfiniBoxSystemComponents.install_component_type

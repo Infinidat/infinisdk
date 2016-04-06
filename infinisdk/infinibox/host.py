@@ -61,7 +61,7 @@ class Host(InfiniBoxLURelatedObject):
         Field("updated_at", type=MillisecondsDatetimeType, is_sortable=True, is_filterable=True),
     ]
 
-    @InfiniBoxLURelatedObject.requires_cache_invalidation("ports")
+    @InfiniBoxLURelatedObject.requires_refresh("ports")
     def add_port(self, address):
         """
         Adds a port address to this host
@@ -72,7 +72,7 @@ class Host(InfiniBoxLURelatedObject):
         data = host_port_to_api(address)
         self.system.api.post(self.get_this_url_path().add_path('ports'), data=data)
 
-    @InfiniBoxLURelatedObject.requires_cache_invalidation("ports")
+    @InfiniBoxLURelatedObject.requires_refresh("ports")
     def remove_port(self, address):
         """
         Removes a port address to this host

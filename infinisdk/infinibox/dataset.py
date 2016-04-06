@@ -58,7 +58,7 @@ class Dataset(InfiniBoxObject):
         return self.update_field('size', self.get_size() + delta)
 
     def create_child(self, name=None):
-        self.invalidate_cache('has_children')
+        self.refresh('has_children')
         self.trigger_begin_fork()
         if not name:
             name = self.fields.name.generate_default().generate()
@@ -163,7 +163,7 @@ class Dataset(InfiniBoxObject):
     def calculate_reclaimable_space(self):
         return self.system.api.post(URL(self.get_url_path(self.system)).add_path('delete_simulation'), data=dict(entities=[self.id])).get_result()['space_reclaimable']*byte
 
-    @InfiniBoxObject.requires_cache_invalidation("pool")
+    @InfiniBoxObject.requires_refresh("pool")
     def move_pool(self, target_pool, with_capacity=False):
         """Moves this entity to a new pool, optionally along with its needed capacity
         """

@@ -105,7 +105,7 @@ def test_clones_and_snapshots(infinibox, data_entity):
         obj.delete()
         assert not obj.is_in_system()
         assert data_entity.is_in_system()
-    data_entity.invalidate_cache()
+    data_entity.refresh()
     assert (not data_entity.has_children())
 
 

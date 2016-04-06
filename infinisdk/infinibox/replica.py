@@ -258,7 +258,7 @@ class Replica(InfiniBoxObject):
         """Suspends this replica
         """
         self.system.api.post(self.get_this_url_path().add_path('suspend'))
-        self.invalidate_cache('state')
+        self.refresh('state')
 
     def sync(self):
         """Starts a sync job
@@ -270,7 +270,7 @@ class Replica(InfiniBoxObject):
         """Resumes this replica
         """
         self.system.api.post(self.get_this_url_path().add_path('resume'))
-        self.invalidate_cache('state')
+        self.refresh('state')
 
     def _validate_can_check_state(self):
         if self.is_target():
@@ -314,7 +314,7 @@ class Replica(InfiniBoxObject):
         data = {'entity_pairs': entity_pairs} if entity_pairs is not OMIT else None
         self.system.api.post(self.get_this_url_path()
                                  .add_path('change_role'), data=data)
-        self.invalidate_cache()
+        self.refresh()
         gossip.trigger_with_tags('infinidat.sdk.replica_after_change_role', {'replica': self}, tags=['infinibox'])
 
     def is_source(self, *args, **kwargs):

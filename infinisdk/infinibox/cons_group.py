@@ -53,7 +53,7 @@ class ConsGroup(InfiniBoxObject):
     get_snapgroups = get_children
 
     def create_snapgroup(self, name=None, prefix=None, suffix=None):
-        self.invalidate_cache('members_count')
+        self.refresh('members_count')
         if not name:
             name = self.fields.name.generate_default().generate()
         if not prefix and not suffix:
@@ -112,7 +112,7 @@ class ConsGroup(InfiniBoxObject):
         _trigger('infinidat.sdk.pre_cons_group_add_member')
         self.system.api.post(self._get_members_url(), data=data)
         _trigger('infinidat.sdk.post_cons_group_add_member')
-        self.invalidate_cache('members_count')
+        self.refresh('members_count')
 
     def remove_member(self, member, retain_staging_area=False, create_replica=False, replica_name=OMIT, force_if_no_remote_credentials=False, force_if_remote_error=False, force_on_target=False):
 
@@ -133,7 +133,7 @@ class ConsGroup(InfiniBoxObject):
             path = path.set_query_param('replica_name', replica_name)
 
         self.system.api.delete(path)
-        self.invalidate_cache('members_count')
+        self.refresh('members_count')
 
     def restore(self, snap_group):
         """Restores this consistency group from the specified sg
@@ -158,4 +158,4 @@ class ConsGroup(InfiniBoxObject):
         """
         data = dict(pool_id=target_pool.get_id(), with_capacity=with_capacity)
         self.system.api.post(self.get_this_url_path().add_path('move'), data=data)
-        self.invalidate_cache('pool')
+        self.refresh('pool')
