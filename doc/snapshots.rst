@@ -1,18 +1,18 @@
-Snapshots and Clones
-====================
+Snapshots
+=========
 
-Creating Snapshots and Clones
+Creating Snapshots
 -----------------------------
 
-Use the :meth:`.create_snapshot` and :meth:`.create_clone` methods:
+Use the :meth:`.create_child`
 
 .. code-block:: python
-	
-		>>> snap = volume.create_snapshot()
+
+		>>> snap = volume.create_child()
 		>>> snap.id
 		1008
-		>>> clone = snap.create_clone()
-		>>> clone.id
+		>>> snap_of_snap = snap.create_child()
+		>>> snap_of_snap.id
 		1009
 
 Creating Group Snapshots
@@ -21,21 +21,21 @@ Creating Group Snapshots
 You can create a group of snapshots (not to be confused with :ref:`Consistency Groups <cons_groups>`) using :meth:`.create_group_snapshot`:
 
 .. code-block:: python
-       
+
        >>> v1, v2, v3 = volumes = [system.volumes.create(pool=pool) for i in range(3)]
        >>> s1, s2, s3 = system.volumes.create_group_snapshot(volumes)
-       
 
-Querying Snapshots and Clones
------------------------------
 
-The parent of a snapshot or a clone is accessed through the :meth:`.Volume.get_parent` method:
+Querying Snapshots
+------------------
+
+The parent of a snapshot is accessed through the :meth:`.Volume.get_parent` method:
 
 .. code-block:: python
 
 		>>> snap.get_parent() == volume
 		True
-		
+
 		>>> volume.get_parent() is None
 		True
 
@@ -56,7 +56,7 @@ Example: Deleting Snapshots by Creation Time
 --------------------------------------------
 
 .. code-block:: python
-		
+
 		>>> cutoff = current_time.replace(days=-10)
 		>>> for snapshot in system.volumes.find(system.volumes.fields.created_at < cutoff, parent_id=volume.id):
 		...     print("Deleting snapshot with id:", snapshot.id)
