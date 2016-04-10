@@ -35,8 +35,8 @@ def test_filesystem_with_exports_deletion(filesystem):
 
 @new_to_version('2.0')
 def test_filesystem_children_deletion_without_approval(filesystem):
-    snap = filesystem.create_snapshot()
-    clone = snap.create_clone()
+    snap = filesystem.create_child()
+    clone = snap.create_child()
     with filesystem.system.api.get_unapproved_context():
         with pytest.raises(APICommandFailed) as caught:
             filesystem.delete()

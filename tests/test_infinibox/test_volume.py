@@ -17,7 +17,7 @@ def test_unmapping(infinibox, mapped_volume):
 
 def test_has_children(infinibox, volume):
     assert not volume.has_children()
-    s = volume.create_snapshot()
+    s = volume.create_child()
     assert volume.has_children()
 
     assert not hasattr(volume, 'is_has_children')

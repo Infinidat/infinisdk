@@ -12,6 +12,7 @@ from infinisdk.infinibox.dataset import (_BEGIN_FORK_HOOK, _CANCEL_FORK_HOOK,
                                          _FINISH_FORK_HOOK)
 
 from ..conftest import create_pool, new_to_version
+from tests.conftest import data_entity
 
 
 
@@ -75,13 +76,12 @@ def test_get_pool(data_entity, pool):
 
 
 def test_snapshot_creation_time(infinibox, data_entity):
-    snap = data_entity.create_snapshot()
+    snap = data_entity.create_child()
     assert isinstance(snap.get_creation_time(), arrow.Arrow)
 
 
 def _create_and_validate_children(parent_obj, child_type):
-    creation_func = getattr(parent_obj, 'create_' + child_type)
-    children = [creation_func(name) for name in ['test_' + child_type, None]]
+    children = [parent_obj.create_child(name) for name in ['test_{}_{}'.format(child_type, parent_obj.get_id()), None]]
     is_right_type = lambda child: getattr(child, 'is_' + child_type)()
     validate_child = lambda child: is_right_type(child) and child.get_parent() == parent_obj
     assert all(map(validate_child, children))
@@ -98,7 +98,8 @@ def test_clones_and_snapshots(infinibox, data_entity):
 
     snapshots = _create_and_validate_children(data_entity, 'snapshot')
     snap = snapshots[-1]
-    clones = _create_and_validate_children(snap, 'clone')
+    child_type = 'snapshot' if  infinibox.compat.has_writable_snapshots() else 'clone'
+    clones = _create_and_validate_children(snap, child_type)
     assert data_entity.has_children()
 
     for obj in clones + snapshots:
@@ -130,7 +131,7 @@ def test_created_at_field_type_conversion(current_time):
 def test_snapshot_creation_time_filtering(data_entity):
     flux.current_timeline.sleep(1) # set a differentiator between filesystem creation time and snapshot time
     data_entity_binder = data_entity.get_collection()
-    snap = data_entity.create_snapshot()
+    snap = data_entity.create_child()
     query = data_entity_binder.find(data_entity_binder.fields.created_at < snap.get_creation_time())
 
     for fs in query:
@@ -145,13 +146,26 @@ def test_get_not_exist_attribute(data_entity):
     assert isinstance(received_error, dict)
 
 def test_invalid_child_operation(data_entity):
+    if data_entity.get_system().compat.has_writable_snapshots():
+        pytest.skip("Test required for backwards compatibility")
     with pytest.raises(InvalidOperationException):
         data_entity.create_clone()
 
     flux.current_timeline.sleep(5)
-    snapshot = data_entity.create_snapshot()
+    snapshot = data_entity.create_child()
     with pytest.raises(InvalidOperationException):
         snapshot.create_snapshot()
+
+@new_to_version("3.0")
+def test_clones_no_longer_supported(data_entity):
+    with pytest.raises(AssertionError):
+        data_entity.create_clone()
+    snap = data_entity.create_snapshot()
+    with pytest.raises(AssertionError):
+        snap.create_clone()
+    with pytest.raises(AssertionError):
+        snap.is_clone()
+    assert snap.is_snapshot()
 
 def test_object_creation_hooks_for_child_entities(data_entity):
     hook_ident = 'unittest_ident'
@@ -178,21 +192,21 @@ def test_object_creation_hooks_for_child_entities(data_entity):
     for fork_hook in [_BEGIN_FORK_HOOK, _FINISH_FORK_HOOK, _CANCEL_FORK_HOOK]:
         gossip.register(partial(save_fork_callback, fork_hook), fork_hook)
 
-    snapshot = data_entity.create_snapshot('a_snap')
+    snapshot = data_entity.create_child('a_snap')
     assert l == ['pre_a_snap', 'post_a_snap']
     assert fork_callbacks == [_BEGIN_FORK_HOOK, _FINISH_FORK_HOOK]
 
-    snapshot.create_clone('a_clone')
+    snapshot.create_child('a_clone')
     assert l == ['pre_a_snap', 'post_a_snap', 'pre_a_clone', 'post_a_clone']
     assert fork_callbacks == [_BEGIN_FORK_HOOK, _FINISH_FORK_HOOK]*2
 
     with data_entity.system.api.get_auth_context(username, password):
         with pytest.raises(APICommandFailed):
-            data_entity.create_snapshot('failed_snap')
+            data_entity.create_child('failed_snap')
 
     with data_entity.system.api.get_auth_context(username, password):
         with pytest.raises(APICommandFailed):
-            snapshot.create_clone('failed_clone')
+            snapshot.create_child('failed_clone')
 
     assert l == ['pre_a_snap', 'post_a_snap',
                  'pre_a_clone', 'post_a_clone',
@@ -222,7 +236,7 @@ def test_data_restore(data_entity):
     def restore_failure(source, target, exc):
         callbacks.append("restore_failure_{0}_from_{1}".format(target.id, source.id))
 
-    snapshot = data_entity.create_snapshot('some_snapshot_to_restore_from')
+    snapshot = data_entity.create_child('some_snapshot_to_restore_from')
     assert callbacks == []
 
     data_entity.restore(snapshot)
@@ -250,17 +264,19 @@ def test_data_restore(data_entity):
 
 
 def test_get_children_snapshots_and_clones(data_entity):
-    snap = data_entity.create_snapshot()
-    clone = snap.create_clone()
-    snap2 = clone.create_snapshot()
+    snap = data_entity.create_child()
+    clone = snap.create_child()
+    snap2 = clone.create_child()
 
     assert set(data_entity.get_children()) == set(data_entity.get_snapshots()) == set([snap])
-    assert set(snap.get_clones()) == set(snap.get_children()) == set([clone])
+    if not data_entity.get_system().compat.has_writable_snapshots():
+        assert set(snap.get_clones()) == set(snap.get_children()) == set([clone])
+        assert set(clone.get_clones()) == set()
+        assert set(snap.get_snapshots()) == set()
+    else:
+        assert set(snap.get_snapshots()) == set(snap.get_children()) == set([clone])
+
     assert set(clone.get_children()) == set(clone.get_snapshots()) == set([snap2])
-
-    assert set(snap.get_snapshots()) == set()
-    assert set(clone.get_clones()) == set()
-
 
 def test_get_capacity_field_with_null_value(data_entity):
     assert isinstance(data_entity.get_size(), Capacity)
