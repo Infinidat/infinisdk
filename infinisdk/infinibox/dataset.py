@@ -4,11 +4,33 @@ from urlobject import URLObject as URL
 from collections import namedtuple
 from ..core.utils import deprecated
 from ..core.exceptions import InvalidOperationException
+from ..core.type_binder import TypeBinder
 from .system_object import InfiniBoxObject
 
 _BEGIN_FORK_HOOK = "infinidat.sdk.begin_fork"
 _CANCEL_FORK_HOOK = "infinidat.sdk.cancel_fork"
 _FINISH_FORK_HOOK = "infinidat.sdk.finish_fork"
+
+
+class DatasetBinder(TypeBinder):
+    def create_many(self, *args, **kwargs):
+        """
+        Creates multiple volumes with a single call. Parameters are just like ``volumes.create``, only with the
+        addition of the ``count`` parameter
+
+        Returns: list of volumes
+
+        :param count: number of volumes to create. Defaults to 1.
+        """
+        name = kwargs.pop('name', None)
+        if name is None:
+            name = Autogenerate('vol_{uuid}').generate()
+        count = kwargs.pop('count', 1)
+        return [self.create(*args, name='{0}_{1}'.format(name, i), **kwargs)
+                for i in range(1, count + 1)]
+
+    def calculate_reclaimable_space(self, *entities):
+        return self.object_type.calculate_entities_reclaimable_space(self.system, *entities)
 
 
 class Dataset(InfiniBoxObject):
@@ -161,7 +183,11 @@ class Dataset(InfiniBoxObject):
         return self.get_field("created_at", from_cache=True)
 
     def calculate_reclaimable_space(self):
-        return self.system.api.post(URL(self.get_url_path(self.system)).add_path('delete_simulation'), data=dict(entities=[self.id])).get_result()['space_reclaimable']*byte
+        return self.calculate_entities_reclaimable_space(self.system, self)
+
+    @classmethod
+    def calculate_entities_reclaimable_space(cls, system, *entities):
+        return system.api.post(URL(cls.get_url_path(system)).add_path('delete_simulation'), data=dict(entities=[entity.id for entity in entities])).get_result()['space_reclaimable'] * byte
 
     @InfiniBoxObject.requires_cache_invalidation("pool")
     def move_pool(self, target_pool, with_capacity=False):

@@ -6,29 +6,12 @@ from ..core.exceptions import InfiniSDKException, ObjectNotFound, TooManyObjects
 from ..core.api.special_values import Autogenerate, SpecialValue, OMIT
 from ..core.bindings import RelatedObjectBinding
 from ..core.utils import DONT_CARE
-from .dataset import Dataset
+from .dataset import Dataset, DatasetBinder
 from .lun import LogicalUnit, LogicalUnitContainer
 from .scsi_serial import SCSISerial
 
 
-class VolumesBinder(TypeBinder):
-
-    def create_many(self, *args, **kwargs):
-        """
-        Creates multiple volumes with a single call. Parameters are just like ``volumes.create``, only with the
-        addition of the ``count`` parameter
-
-        Returns: list of volumes
-
-        :param count: number of volumes to create. Defaults to 1.
-        """
-        name = kwargs.pop('name', None)
-        if name is None:
-            name = Autogenerate('vol_{uuid}').generate()
-        count = kwargs.pop('count', 1)
-        return [self.create(*args, name='{0}_{1}'.format(name, i), **kwargs)
-                for i in range(1, count + 1)]
-
+class VolumesBinder(DatasetBinder):
     def create_group_snapshot(self, volumes, snap_prefix=Autogenerate('{ordinal}'), snap_suffix=OMIT):
         """
         Creates multiple snapshots with a single consistent point-in-time, returning the snapshots

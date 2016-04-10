@@ -12,8 +12,6 @@ from infinisdk.infinibox.dataset import (_BEGIN_FORK_HOOK, _CANCEL_FORK_HOOK,
                                          _FINISH_FORK_HOOK)
 
 from ..conftest import create_pool, new_to_version
-from tests.conftest import data_entity
-
 
 
 def test_creation(pool, data_entity):
@@ -139,11 +137,13 @@ def test_snapshot_creation_time_filtering(data_entity):
         assert fs != snap
     assert found
 
+
 def test_get_not_exist_attribute(data_entity):
     with pytest.raises(APICommandFailed) as caught:
         data_entity.system.api.get(data_entity.get_this_url_path().add_path('bla'))
     received_error = caught.value.response.get_error()
     assert isinstance(received_error, dict)
+
 
 def test_invalid_child_operation(data_entity):
     if data_entity.get_system().compat.has_writable_snapshots():
@@ -156,6 +156,7 @@ def test_invalid_child_operation(data_entity):
     with pytest.raises(InvalidOperationException):
         snapshot.create_snapshot()
 
+
 @new_to_version("3.0")
 def test_clones_no_longer_supported(data_entity):
     with pytest.raises(AssertionError):
@@ -166,6 +167,7 @@ def test_clones_no_longer_supported(data_entity):
     with pytest.raises(AssertionError):
         snap.is_clone()
     assert snap.is_snapshot()
+
 
 def test_object_creation_hooks_for_child_entities(data_entity):
     hook_ident = 'unittest_ident'
@@ -286,6 +288,12 @@ def test_get_capacity_field_with_null_value(data_entity):
 
 def test_calculate_reclaimable_space(data_entity):
     assert isinstance(data_entity.calculate_reclaimable_space(), Capacity)
+
+
+@new_to_version('3.0')
+def test_calculate_entities_reclaimable_space(data_entity):
+    snap = data_entity.create_child()
+    assert isinstance(data_entity.get_collection().calculate_reclaimable_space(data_entity, snap), Capacity)
 
 
 @new_to_version('3.0')
