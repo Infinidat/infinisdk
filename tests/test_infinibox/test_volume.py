@@ -54,17 +54,6 @@ def test_field_types():
     assert Volume.fields.pool.type.type is Pool
 
 
-def test_create_many(infinibox, pool):
-
-    name = 'some_name'
-    vols = infinibox.volumes.create_many(pool=pool, count=5, name=name)
-
-    assert len(vols) == 5
-
-    for index, vol in enumerate(vols, start=1):
-        assert vol.get_name() == '{0}_{1}'.format(name, index)
-
-
 @pytest.mark.parametrize('with_capacity', [True, False])
 def test_move_volume(infinibox, with_capacity):
     if with_capacity and int(infinibox.compat.get_version_major()) < 2:
