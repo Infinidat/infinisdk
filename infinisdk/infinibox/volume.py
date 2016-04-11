@@ -1,6 +1,6 @@
+import logbook
 from capacity import GB
 from storage_interfaces.scsi.abstracts import ScsiVolume
-from ..core.type_binder import TypeBinder
 from ..core import Field, CapacityType, MillisecondsDatetimeType
 from ..core.exceptions import InfiniSDKException, ObjectNotFound, TooManyObjectsFound
 from ..core.api.special_values import Autogenerate, SpecialValue, OMIT
@@ -9,6 +9,8 @@ from ..core.utils import DONT_CARE
 from .dataset import Dataset, DatasetBinder
 from .lun import LogicalUnit, LogicalUnitContainer
 from .scsi_serial import SCSISerial
+
+_logger = logbook.Logger(__name__)
 
 
 class VolumesBinder(DatasetBinder):

@@ -311,3 +311,10 @@ def test_compression_enabled(data_entity):
     assert data_entity.is_compression_enabled()
     data_entity.disable_compression()
     assert not data_entity.is_compression_enabled()
+
+
+def test_create_multiple_datasets(data_entity):
+    count = 3
+    binder = data_entity.get_binder()
+    objs = binder.create_many(count=count, pool=data_entity.get_pool())
+    assert len(objs) == count

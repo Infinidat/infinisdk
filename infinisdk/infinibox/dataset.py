@@ -2,6 +2,7 @@ import gossip
 from capacity import Capacity, byte
 from urlobject import URLObject as URL
 from collections import namedtuple
+from ..core.api.special_values import Autogenerate
 from ..core.utils import deprecated
 from ..core.exceptions import InvalidOperationException
 from ..core.type_binder import TypeBinder
