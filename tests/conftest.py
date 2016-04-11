@@ -204,7 +204,7 @@ def data_entity_type(request):
 def data_entity(infinibox, volume, filesystem, data_entity_type):
     if data_entity_type == 'volume':
         return volume
-    if not infinibox.filesystems.is_supported():
+    if infinibox.compat.get_version_as_float() < 2.2:
         pytest.skip('System does not have NAS')
     return filesystem
 

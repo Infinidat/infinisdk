@@ -1,4 +1,5 @@
 import pytest
+from ..conftest import new_to_version
 from infinisdk.core import Field, SystemObject
 from infinisdk.core.exceptions import (AttributeAlreadyExists, CacheMiss,
                                        MissingFields)
@@ -152,6 +153,8 @@ def test__equality(system):
     diff_type1 = SampleDerivedObject(system1, {"id": 100})
     assert NotImplemented == diff_type1.__eq__(diff_type2)
 
+
+@new_to_version('2.2')
 def test_get_fields_without_field_names(infinibox):
     user = infinibox.users.choose()
     fields = user.get_fields()

@@ -58,4 +58,5 @@ def page_size():
 
 @pytest.fixture
 def result(infinibox, page_size):
+    infinibox.users.create()
     return infinibox.users.find().page_size(page_size)
