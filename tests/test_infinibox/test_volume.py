@@ -1,13 +1,12 @@
 import pytest
-from ..conftest import new_to_version
-from infinisdk._compat import xrange
+from infinisdk._compat import xrange  # pylint: disable=redefined-builtin
 from capacity import Capacity, TB
 from infinisdk.infinibox.volume import Volume
 from infinisdk.infinibox.pool import Pool
 from infinisdk.infinibox.scsi_serial import SCSISerial
 
 
-def test_unmapping(infinibox, mapped_volume):
+def test_unmapping(mapped_volume):
     assert mapped_volume.is_mapped()
     assert mapped_volume.get_logical_units()
     mapped_volume.unmap()
@@ -15,9 +14,10 @@ def test_unmapping(infinibox, mapped_volume):
     assert not mapped_volume.get_logical_units()
 
 
-def test_has_children(infinibox, volume):
+def test_has_children(volume):
     assert not volume.has_children()
-    s = volume.create_child()
+    child = volume.create_child()
+    assert child.get_parent() == volume
     assert volume.has_children()
 
     assert not hasattr(volume, 'is_has_children')
@@ -40,15 +40,16 @@ def test_unmap_volume_which_mapped_to_multiple_hosts(infinibox, volume):
     assert not volume.is_mapped()
 
 
-def test_serial(infinibox, volume):
+def test_serial(volume):
     assert isinstance(volume.get_serial(), SCSISerial)
 
 
-def test_allocated(infinibox, volume):
+def test_allocated(volume):
     assert isinstance(volume.get_allocated(), Capacity)
 
 
 def test_field_types():
+    # pylint: disable=no-member
     assert Volume.fields.parent.type.type is Volume
     assert Volume.fields.pool.type.type is Pool
 
