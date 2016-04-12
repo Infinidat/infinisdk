@@ -52,9 +52,13 @@ MunchListType = TypeInfo(type=list, api_type=list, translator=MunchListTraslator
 class MillisecondsDatetimeTranslator(ValueTranslator):
 
     def _to_api(self, value):
+        if value is None:
+            return None
         return int(round(value.float_timestamp * 1000.0))
 
     def _from_api(self, value):
+        if value is None:
+            return None
         return arrow.get(value / 1000.0)
 
 
