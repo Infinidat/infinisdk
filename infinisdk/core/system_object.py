@@ -1,4 +1,3 @@
-import itertools
 import gossip
 import functools
 import sys
@@ -13,9 +12,6 @@ from .._compat import with_metaclass, iteritems, httplib, reraise, string_types 
 from .exceptions import MissingFields, CacheMiss
 from api_object_schema import FieldsMeta as FieldsMetaBase
 from .field import Field
-from .field_filter import FieldFilter
-from .q import QField
-from .object_query import ObjectQuery
 from .type_binder import TypeBinder
 from .bindings import PassthroughBinding
 from .api.special_values import translate_special_values
@@ -305,20 +301,11 @@ class SystemObject(BaseSystemObject):
     """
     System object, that has query methods, creation and deletion
     """
+
     @classmethod
     def find(cls, system, *predicates, **kw):
-        url = URL(cls.get_url_path(system))
-        if kw:
-            predicates = itertools.chain(
-                predicates,
-                (cls.fields.get_or_fabricate(key) == value for key, value in iteritems(kw)))
-        for pred in predicates:
-            if isinstance(pred.field, QField):
-                pred = FieldFilter(cls.fields.get_or_fabricate(
-                    pred.field.name), pred.operator_name, pred.value)
-            url = pred.add_to_url(url)
-
-        return ObjectQuery(system, url, cls)
+        binder = system.objects[cls.get_plural_name()]
+        return binder.find(*predicates, **kw)
 
     def get_binder(self):
         return self.system.objects[self.get_plural_name()]

@@ -2,6 +2,7 @@ from collections import OrderedDict
 from .._compat import itervalues, iterkeys
 from .type_binder import TypeBinder
 
+
 class SystemComponentsBinder(TypeBinder):
 
     _COMPONENTS_BY_TYPE_NAME = None
@@ -61,6 +62,7 @@ class SystemComponentsBinder(TypeBinder):
         except AttributeError:
             raise KeyError(attr)
 
+
 class SpecificComponentBinderGetter(object):
 
     def __init__(self, object_type):
@@ -75,6 +77,7 @@ class SpecificComponentBinderGetter(object):
             setattr(components_binder, self.cached_name, returned)
         return returned
 
+
 class SpecificComponentBinder(TypeBinder):
 
     def get_by_id_lazy(self, id):
@@ -83,6 +86,7 @@ class SpecificComponentBinder(TypeBinder):
             returned = self.object_type(self.system, {"id": id, "type": self.object_type.get_type_name()})
             self.system.components.cache_component(returned)
         return returned
+
 
 class TypeContainer(object):
     pass

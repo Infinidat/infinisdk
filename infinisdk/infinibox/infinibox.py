@@ -12,12 +12,12 @@ from ..core.api import APITarget
 from ..core.config import config, get_ini_option
 from ..core.exceptions import CacheMiss, VersionNotSupported
 from ..core.object_query import LazyQuery
-from ..core.utils import deprecated
 from ..core.utils.environment import get_hostname, get_logged_in_username
 from .capacities import InfiniBoxSystemCapacity
 from .compatibility import Compatibility
 from .components import InfiniBoxSystemComponents
 from .cons_group import ConsGroup
+from .dataset import Datasets
 from .events import Events
 from .export import Export
 from .filesystem import Filesystem
@@ -59,6 +59,7 @@ class InfiniBox(APITarget):
         self.metrics = Metrics(self)
         self.system_metadata = SystemMetadata(self)
         self._related_systems = []
+        self.datasets = Datasets(self)
 
     def check_version(self):
         if not self.compat.can_run_on_system():

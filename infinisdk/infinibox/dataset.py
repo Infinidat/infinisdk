@@ -5,7 +5,7 @@ from collections import namedtuple
 from ..core.api.special_values import Autogenerate
 from ..core.utils import deprecated
 from ..core.exceptions import InvalidOperationException
-from ..core.type_binder import TypeBinder
+from ..core.type_binder import TypeBinder, PolymorphicBinder
 from .system_object import InfiniBoxObject
 
 _BEGIN_FORK_HOOK = "infinidat.sdk.begin_fork"
@@ -13,7 +13,23 @@ _CANCEL_FORK_HOOK = "infinidat.sdk.cancel_fork"
 _FINISH_FORK_HOOK = "infinidat.sdk.finish_fork"
 
 
-class DatasetBinder(TypeBinder):
+class Datasets(PolymorphicBinder):
+
+    def __init__(self, system):
+        object_types = (system.volumes.object_type, system.filesystems.object_type)
+        super(Datasets, self).__init__(URL('datasets'), object_types, factory=self._dataset_factory, system=system)
+
+    def is_supported(self):
+        return self.system.filesystems.is_supported()
+
+    def _dataset_factory(self, system, received_item):
+        dataset_type_str = received_item['dataset_type']
+        assert dataset_type_str in ('VOLUME', 'FILESYSTEM'), 'Unsupported dataset type {}'.format(dataset_type_str)
+        dataset_binder = system.objects.get_binder_by_type_name(dataset_type_str.lower())
+        return dataset_binder.object_type.construct(system, received_item)
+
+
+class DatasetTypeBinder(TypeBinder):
     def create_many(self, *args, **kwargs):
         """
         Creates multiple volumes with a single call. Parameters are just like ``volumes.create``, only with the

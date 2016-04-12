@@ -69,11 +69,13 @@ class InfiniBoxSystemComponents(SystemComponentsBinder):
     def get_rack_1(self):
         return self._rack_1
 
-    def find(self,component_type = None, *predicates, **kw):
-        if component_type == None:
+    def find(self, component_type=None, *predicates, **kw):
+        # component_type is the name of the component
+        if component_type is None:
             return InfiniBoxGenericComponentQuery(self.system, *predicates, **kw)
         component_type = self._COMPONENTS_BY_TYPE_NAME[component_type]
-        return component_type.find(self.system, *predicates, **kw)
+        component_collection = self.system.components[component_type]
+        return component_collection.find(*predicates, **kw)
 
 
 class ComputedIDBinding(InfiniSDKBinding):
@@ -119,6 +121,9 @@ class InfiniBoxComponentBinder(TypeBinder):
         if returned is None:
             raise NotImplementedError("Initializing infinibox components lazily is not yet supported") # pragma: no cover
         return returned
+
+    def find(self, *predicates, **kw):
+        return InfiniBoxComponentQuery(self.system, self.object_type, *predicates, **kw)
 
     @deprecated(message="Use to_list/count instead")
     def __len__(self):
@@ -217,10 +222,6 @@ class InfiniBoxSystemComponent(BaseSystemObject):
         # Currently there is no url, in infinibox, to get all instances of specific component
         raise NotImplementedError()  # pragma: no cover
 
-    @classmethod
-    def find(cls, system, *predicates, **kw):
-        return InfiniBoxComponentQuery(system, cls, *predicates, **kw)
-
     def get_sub_components(self):
         return self.system.components.find(parent_id=self.id)
 
@@ -253,6 +254,7 @@ class InfiniBoxSystemComponent(BaseSystemObject):
                     if not allow_partial_fields:
                         raise
         return returned
+
 
 
 @InfiniBoxSystemComponents.install_component_type

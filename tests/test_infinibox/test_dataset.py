@@ -326,3 +326,10 @@ def test_create_multiple_datasets(data_entity, name):
     for index, vol in enumerate(objs, start=1):
         assert vol.get_name() == '{0}_{1}'.format(name, index)
         assert vol.is_master()
+
+
+@new_to_version('2.2')
+def test_datasets_queries(infinibox, volume, filesystem):
+    dataset_list = [volume, volume.create_child(), filesystem, filesystem.create_child()]
+    assert set(infinibox.datasets.to_list()) == set(dataset_list)
+    assert set(infinibox.datasets.find(type='MASTER').to_list()) == set([volume, filesystem])

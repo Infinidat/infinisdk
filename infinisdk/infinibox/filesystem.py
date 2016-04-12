@@ -3,10 +3,10 @@ from ..core.q import Q
 from ..core import Field, CapacityType, MillisecondsDatetimeType
 from ..core.api.special_values import Autogenerate
 from ..core.bindings import RelatedObjectBinding
-from .dataset import Dataset,DatasetBinder
+from .dataset import Dataset,DatasetTypeBinder
 
 
-class FilesystemBinder(DatasetBinder):
+class FilesystemBinder(DatasetTypeBinder):
     pass
 
 

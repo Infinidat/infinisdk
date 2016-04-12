@@ -6,14 +6,14 @@ from ..core.exceptions import InfiniSDKException, ObjectNotFound, TooManyObjects
 from ..core.api.special_values import Autogenerate, SpecialValue, OMIT
 from ..core.bindings import RelatedObjectBinding
 from ..core.utils import DONT_CARE
-from .dataset import Dataset, DatasetBinder
+from .dataset import Dataset, DatasetTypeBinder
 from .lun import LogicalUnit, LogicalUnitContainer
 from .scsi_serial import SCSISerial
 
 _logger = logbook.Logger(__name__)
 
 
-class VolumesBinder(DatasetBinder):
+class VolumesBinder(DatasetTypeBinder):
     def create_group_snapshot(self, volumes, snap_prefix=Autogenerate('{ordinal}'), snap_suffix=OMIT):
         """
         Creates multiple snapshots with a single consistent point-in-time, returning the snapshots

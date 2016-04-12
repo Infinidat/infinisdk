@@ -1,6 +1,10 @@
+import itertools
+from urlobject import URLObject as URL
 from numbers import Number
-from .._compat import xrange
+from .._compat import xrange  # pylint: disable=redefined-builtin
 from .field import Field
+from .field_filter import FieldFilter
+from .q import QField
 
 _DEFAULT_SYSTEM_PAGE_SIZE = 50
 _DEFAULT_PAGE_SIZE = 1000
@@ -141,6 +145,26 @@ class PolymorphicQuery(LazyQuery):
         if isinstance(received_item, dict):
             self._fetched[item_index] = self.factory(self.system, received_item)
 
+    def _get_or_fabricate_field(self, field_name):
+        for obj_type in self.object_types:
+            field = obj_type.fields.get(field_name)
+            if field is not None:
+                return field
+        self.object_types[0].fields.get_or_fabricate(field_name)
+
+    def extend_url(self, *predicates, **kw):
+        url = URL(self.query)
+        if kw:
+            predicates = itertools.chain(predicates, (self._get_or_fabricate_field(key) == value
+                                                      for key, value in kw.items()))
+
+        for pred in predicates:
+            if isinstance(pred.field, QField):
+                pred = FieldFilter(self._get_or_fabricate_field(pred.field.name), pred.operator_name, pred.value)
+            url = pred.add_to_url(url)
+        self.query = url
+        return self
+
     ### Modifiers
 
     def sort(self, *criteria):
@@ -179,3 +203,6 @@ class ObjectQuery(PolymorphicQuery):
     def __init__(self, system, url, object_type):
         super(ObjectQuery, self).__init__(system, url, (object_type, ), object_type.construct)
         self.object_type = object_type
+
+    def _get_or_fabricate_field(self, field_name):
+        return self.object_type.fields.get_or_fabricate(field_name)

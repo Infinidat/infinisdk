@@ -133,7 +133,9 @@ class InfiniBoxGenericComponentQuery(ComponentQueryBase):
                 for component_type in self.system.components.get_component_types():
                     if not fields.issubset(set(field.name for field in component_type.fields)):
                         continue
-                    query = component_type.find(self.system, *self.predicates, **self.kw)
+                    assert component_type
+                    collection = self.system.components[component_type]
+                    query = collection.find(*self.predicates, **self.kw)
                     if self._force_fetch:
                         query.force_fetching_objects()
                     for item in query:
