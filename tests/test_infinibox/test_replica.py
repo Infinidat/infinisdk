@@ -184,7 +184,7 @@ def test_remote_replica_without_remote_system(replica, secondary_infinibox):
     remote_replica = replica.get_remote_replica()
     replica.system._related_systems.pop()
     remote_replica.system._related_systems.pop()
-    assert replica.is_active()
+    assert replica.is_idle()
     with pytest.raises(InfiniSDKException):
         replica.get_remote_replica()
     with pytest.raises(InfiniSDKException):
