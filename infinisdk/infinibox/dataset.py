@@ -60,7 +60,14 @@ class Dataset(InfiniBoxObject):
         """
         if parent_id is None:
             parent_id = self.get_field('parent_id', from_cache=True)
-        self.system.api.post(self.get_this_url_path().add_path('refresh'), data={'source_id': parent_id})
+        parent = self.get_binder().get_by_id_lazy(parent_id)
+        parent.trigger_begin_fork()
+        try:
+            self.system.api.post(self.get_this_url_path().add_path('refresh'), data={'source_id': parent_id})
+        except Exception:
+            parent.trigger_cancel_fork()
+            raise
+        parent.trigger_finish_fork(self)
 
     def is_snapshot(self):
         """Returns whether or not this entity is a snapshot
