@@ -50,7 +50,7 @@ class Host(InfiniBoxLURelatedObject):
         Field("ports", type=HostPortListType, add_updater=False),
         Field("cluster", api_name="host_cluster_id", type='infinisdk.infinibox.host_cluster:HostCluster', is_filterable=True, binding=RelatedObjectBinding('host_clusters')),
         Field("host_type", creation_parameter=True, optional=True, mutable=True),
-        Field("security_method", creation_parameter=True, optional=True, mutable=True),
+        Field("security_method", feature_name='iscsi', creation_parameter=True, optional=True, mutable=True),
         Field("security_chap_inbound_username", creation_parameter=True, feature_name='iscsi', optional=True, mutable=True),
         Field("security_chap_inbound_secret", creation_parameter=True, feature_name='iscsi', add_getter=False, optional=True, mutable=True),
         Field("security_chap_has_inbound_secret", type=bool, feature_name='iscsi'),
