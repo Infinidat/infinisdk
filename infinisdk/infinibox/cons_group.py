@@ -76,7 +76,38 @@ class ConsGroup(InfiniBoxObject):
 
     create_snapshot = create_snapgroup
 
-    def delete(self, delete_members=None):
+    def refresh_snapgroup(self, parent_id=None):
+        """Refresh a snapshot group with the most recent data from the parent consistency group
+
+        :param parent_id: the id of the CG to refresh from. Defaults to the parent id of the SG.
+
+        .. note:: parent_id can be provided only if the system supports specifying it
+        """
+        if parent_id is not None:
+            raise NotImplementedError("Specifying parent_id to SG.refresh_snapshot is not supported yet") # pragma: no cover
+
+        parent = self.get_parent()
+
+        sg_members_by_parent_id = dict((s.get_field('parent_id', from_cache=True), s) for s in self.get_members())
+        cg_members_by_id = dict((m.id, m) for m in parent.get_members() if m.id in sg_members_by_parent_id)
+
+        began_fork = []
+
+        try:
+            for member in cg_members_by_id.values():
+                member.trigger_begin_fork()
+                began_fork.append(member)
+            self.system.api.post(self.get_this_url_path().add_path('refresh'), data={'source_id': parent.id})
+        except Exception:
+            for member in began_fork:
+                member.trigger_cancel_fork()
+            raise
+        for member in cg_members_by_id.values():
+            member.trigger_finish_fork(sg_members_by_parent_id[member.id])
+
+    refresh_snapshot = refresh_snapgroup
+
+    def delete(self, delete_members=None): # pylint: disable=arguments-differ
         path = self.get_this_url_path()
         if delete_members is not None:
             path = path.add_query_param('delete_members', str(delete_members).lower())
