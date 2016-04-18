@@ -47,7 +47,7 @@ class DatasetTypeBinder(TypeBinder):
                 for i in range(1, count + 1)]
 
     def calculate_reclaimable_space(self, *entities):
-        return self.object_type.calculate_entities_reclaimable_space(self.system, *entities)
+        return self.system.api.post(URL(self.object_type.get_url_path(self.system)).add_path('delete_simulation'), data=dict(entities=[entity.id for entity in entities])).get_result()['space_reclaimable'] * byte
 
 
 class Dataset(InfiniBoxObject):
@@ -207,11 +207,7 @@ class Dataset(InfiniBoxObject):
         return self.get_field("created_at", from_cache=True)
 
     def calculate_reclaimable_space(self):
-        return self.calculate_entities_reclaimable_space(self.system, self)
-
-    @classmethod
-    def calculate_entities_reclaimable_space(cls, system, *entities):
-        return system.api.post(URL(cls.get_url_path(system)).add_path('delete_simulation'), data=dict(entities=[entity.id for entity in entities])).get_result()['space_reclaimable'] * byte
+        return self.system.api.post(URL(self.get_url_path(self.system)).add_path('delete_simulation'), data=dict(entities=[self.id])).get_result()['space_reclaimable'] * byte
 
     @InfiniBoxObject.requires_cache_invalidation("pool")
     def move_pool(self, target_pool, with_capacity=False):
