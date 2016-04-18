@@ -46,7 +46,7 @@ class DatasetTypeBinder(TypeBinder):
         return [self.create(*args, name='{0}_{1}'.format(name, i), **kwargs)
                 for i in range(1, count + 1)]
 
-    def calculate_reclaimable_space(self, *entities):
+    def calculate_reclaimable_space(self, entities):
         return self.system.api.post(URL(self.object_type.get_url_path(self.system)).add_path('delete_simulation'), data=dict(entities=[entity.id for entity in entities])).get_result()['space_reclaimable'] * byte
 
 

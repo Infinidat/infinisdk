@@ -293,7 +293,7 @@ def test_calculate_reclaimable_space(data_entity):
 @new_to_version('3.0')
 def test_calculate_entities_reclaimable_space(data_entity):
     snap = data_entity.create_child()
-    assert isinstance(data_entity.get_collection().calculate_reclaimable_space(data_entity, snap), Capacity)
+    assert isinstance(data_entity.get_collection().calculate_reclaimable_space([data_entity, snap]), Capacity)
 
 
 @new_to_version('3.0')
