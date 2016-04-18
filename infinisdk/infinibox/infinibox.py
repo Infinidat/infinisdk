@@ -18,6 +18,7 @@ from .compatibility import Compatibility
 from .components import InfiniBoxSystemComponents
 from .cons_group import ConsGroup
 from .dataset import Datasets
+from .san_client import SanClients
 from .events import Events
 from .export import Export
 from .filesystem import Filesystem
@@ -60,6 +61,7 @@ class InfiniBox(APITarget):
         self.system_metadata = SystemMetadata(self)
         self._related_systems = []
         self.datasets = Datasets(self)
+        self.san_clients = SanClients(self)
 
     def check_version(self):
         if not self.compat.can_run_on_system():
