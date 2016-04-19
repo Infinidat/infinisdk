@@ -3,13 +3,13 @@ import functools
 import sys
 from contextlib import contextmanager
 
-from sentinels import NOTHING
 from mitba import cached_method
 from urlobject import URLObject as URL
 
 from .exceptions import APICommandFailed, APITransportFailure
+from .system_object_utils import get_data_for_object_creation
 from .._compat import with_metaclass, iteritems, httplib, reraise, string_types  # pylint: disable=no-name-in-module
-from .exceptions import MissingFields, CacheMiss
+from .exceptions import CacheMiss
 from api_object_schema import FieldsMeta as FieldsMetaBase
 from .field import Field
 from .type_binder import TypeBinder
@@ -352,40 +352,8 @@ class SystemObject(BaseSystemObject):
         """
         gossip.trigger_with_tags('infinidat.sdk.pre_creation_data_validation', {
                                  'fields': fields, 'system': system, 'cls': cls})
-        data = cls._get_data_for_post(system, fields)
+        data = get_data_for_object_creation(cls, system, fields)
         return cls._create(system, cls.get_url_path(system), data)
-
-    @classmethod
-    def _get_data_for_post(cls, system, fields):
-        returned = {}
-        missing_fields = set()
-        extra_fields = fields.copy()
-        for field in cls.fields:
-            if field.name not in fields:
-                if not field.creation_parameter or field.optional:
-                    continue
-
-            field_value = extra_fields.get(field.name, NOTHING)
-            extra_fields.pop(field.name, None)
-            field_api_value = extra_fields.get(field.api_name, NOTHING)
-            extra_fields.pop(field.api_name, None)
-            if field_value is NOTHING and field_api_value is NOTHING:
-                field_value = field.generate_default()
-            if field_value is not NOTHING and field_api_value is not NOTHING:
-                raise ValueError("Multiple colliding arguments: {0} and {1}".format(field.name, field.api_name))
-            if field_value is NOTHING and field_api_value is NOTHING and system.is_field_supported(field):
-                missing_fields.add(field.name)
-            if field_value is not NOTHING:
-                returned[field.api_name] = field.binding.get_api_value_from_value(
-                    system, cls, None, field_value)
-            else:
-                returned[field.api_name] = field_api_value
-
-        if missing_fields:
-            raise MissingFields("Following fields were not specified: {0}".format(
-                ", ".join(sorted(missing_fields))))
-        returned.update(extra_fields)
-        return returned
 
     @classmethod
     def get_creation_defaults(cls):

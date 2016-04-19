@@ -1,4 +1,5 @@
 from api_object_schema import ObjectAPIBinding
+from sentinels import NOTHING
 
 from .api.special_values import SpecialValue,RawValue
 
@@ -83,10 +84,11 @@ class ListOfRelatedObjectIDsBinding(RelatedObjectBinding):
 
 class RelatedComponentBinding(InfiniSDKBinding):
 
-    def __init__(self, collection_name=None, api_index_name=None):
+    def __init__(self, collection_name=None, api_index_name=None, value_for_none=NOTHING):
         super(RelatedComponentBinding, self).__init__()
         self._collection_name = collection_name
         self._api_index_name = api_index_name
+        self._value_for_none = value_for_none
 
     def set_field(self, field):
         super(RelatedComponentBinding, self).set_field(field)
@@ -96,9 +98,13 @@ class RelatedComponentBinding(InfiniSDKBinding):
             self._api_index_name = 'index'
 
     def get_api_value_from_value(self, system, objtype, obj, value):
+        if value is None:
+            return self._value_for_none
         return value.get_field(self._api_index_name)
 
     def get_value_from_api_value(self, system, objtype, obj, value):
+        if value == self._value_for_none or value is None:
+            return None
         kwargs = {self._api_index_name: value}
         return system.components[self._collection_name].get(**kwargs)
 

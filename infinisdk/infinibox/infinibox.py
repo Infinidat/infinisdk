@@ -18,6 +18,8 @@ from .compatibility import Compatibility
 from .components import InfiniBoxSystemComponents
 from .cons_group import ConsGroup
 from .dataset import Datasets
+from .fc_switch import FcSwitch
+from .fc_soft_target import FcSoftTarget
 from .san_client import SanClients
 from .events import Events
 from .export import Export
@@ -47,7 +49,8 @@ except ImportError:
 class InfiniBox(APITarget):
     OBJECT_TYPES = [Volume, Pool, Host, HostCluster, User, Filesystem, Export,
                     NetworkSpace, NetworkInterface, Link, Replica, LDAPConfig,
-                    NotificationTarget, NotificationRule, ConsGroup, Initiator]
+                    NotificationTarget, NotificationRule, ConsGroup, Initiator,
+                    FcSwitch, FcSoftTarget]
     SYSTEM_EVENTS_TYPE = Events
     SYSTEM_COMPONENTS_TYPE = InfiniBoxSystemComponents
 
