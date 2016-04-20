@@ -67,8 +67,9 @@ class Compatibility(object):
         else:
             resp.assert_success()
             features_list = resp.get_result()
-        self._features = dict((feature_info['name'], feature_info[
-                              'version']) for feature_info in features_list)
+        self._features = dict((feature_info['name'], feature_info['version'])
+                              for feature_info in features_list
+                              if feature_info.get('enabled', True))
 
     def _get_feature_version(self, feature_key, default_version=NOTHING):
         if self._features is None:
