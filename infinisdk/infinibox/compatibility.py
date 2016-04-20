@@ -85,7 +85,7 @@ class Compatibility(object):
         self._features[feature_key] = version
 
     def has_npiv(self):
-        return self._has_feature("fc/soft_targets")
+        return self._has_feature('fc_soft_targets') or self._has_feature('fc/soft_targets')
 
     def has_replication(self):
         return int(self.get_version_major()) >= 2
