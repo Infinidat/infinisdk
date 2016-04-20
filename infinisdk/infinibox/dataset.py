@@ -67,19 +67,13 @@ class Dataset(InfiniBoxObject):
         """
         return self.get_type() == 'MASTER'
 
-    def refresh_snapshot(self, parent_id=None):
+    def refresh_snapshot(self):
         """Refresh a snapshot with the most recent data from the parent
-
-        :param parent_id: the id of the volume to refresh from. Defaults to the parent id of the snapshot.
-
-        .. note:: parent_id can be provided only if the system supports specifying it
         """
-        if parent_id is None:
-            parent_id = self.get_field('parent_id', from_cache=True)
-        parent = self.get_binder().get_by_id_lazy(parent_id)
+        parent = self.get_parent()
         parent.trigger_begin_fork()
         try:
-            self.system.api.post(self.get_this_url_path().add_path('refresh'), data={'source_id': parent_id})
+            self.system.api.post(self.get_this_url_path().add_path('refresh'), data={'source_id': parent.id})
         except Exception:
             parent.trigger_cancel_fork()
             raise
@@ -121,7 +115,6 @@ class Dataset(InfiniBoxObject):
     def trigger_begin_fork(self):
         hook_tags = self._get_tags_for_object_operations(self.system)
         gossip.trigger_with_tags(_BEGIN_FORK_HOOK, {'obj': self}, tags=hook_tags)
-
 
     def trigger_cancel_fork(self):
         hook_tags = self._get_tags_for_object_operations(self.system)

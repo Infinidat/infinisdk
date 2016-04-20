@@ -76,16 +76,9 @@ class ConsGroup(InfiniBoxObject):
 
     create_snapshot = create_snapgroup
 
-    def refresh_snapgroup(self, parent_id=None):
+    def refresh_snapgroup(self):
         """Refresh a snapshot group with the most recent data from the parent consistency group
-
-        :param parent_id: the id of the CG to refresh from. Defaults to the parent id of the SG.
-
-        .. note:: parent_id can be provided only if the system supports specifying it
         """
-        if parent_id is not None:
-            raise NotImplementedError("Specifying parent_id to SG.refresh_snapshot is not supported yet") # pragma: no cover
-
         parent = self.get_parent()
 
         sg_members_by_parent_id = dict((s.get_field('parent_id', from_cache=True), s) for s in self.get_members())
