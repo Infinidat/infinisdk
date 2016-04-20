@@ -4,7 +4,7 @@ import sys
 from contextlib import contextmanager
 
 from sentinels import NOTHING
-from infi.pyutils.lazy import cached_method
+from mitba import cached_method
 from urlobject import URLObject as URL
 
 from .exceptions import APICommandFailed, APITransportFailure

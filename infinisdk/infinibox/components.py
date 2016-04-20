@@ -7,7 +7,7 @@ from ..core.system_object import BaseSystemObject
 from ..core.exceptions import ObjectNotFound
 from ..core.type_binder import TypeBinder
 from ..core.translators_and_types import WWNType, CapacityType
-from infi.pyutils.lazy import cached_method
+from mitba import cached_method
 from .component_query import InfiniBoxComponentQuery, InfiniBoxGenericComponentQuery
 from ..core.bindings import InfiniSDKBinding, ListOfRelatedComponentBinding, RelatedComponentBinding
 

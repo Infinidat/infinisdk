@@ -1,6 +1,6 @@
 import os
 
-from infi.pyutils.lazy import cached_function
+from mitba import cached_function
 
 
 @cached_function

@@ -1,6 +1,6 @@
 
 from capacity import Capacity
-from infi.pyutils.lazy import cached_method
+from mitba import cached_method
 from urlobject import URLObject as URL
 from api_object_schema.binding import ConstBinding
 from api_object_schema import TypeInfo
