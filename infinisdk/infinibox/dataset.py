@@ -71,6 +71,7 @@ class Dataset(InfiniBoxObject):
         """Refresh a snapshot with the most recent data from the parent
         """
         parent = self.get_parent()
+        assert parent, "Cannot refresh_snapshot on master volume"
         parent.trigger_begin_fork()
         try:
             self.system.api.post(self.get_this_url_path().add_path('refresh'), data={'source_id': parent.id})

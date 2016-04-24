@@ -333,3 +333,12 @@ def test_datasets_queries(infinibox, volume, filesystem):
     dataset_list = [volume, volume.create_child(), filesystem, filesystem.create_child()]
     assert set(infinibox.datasets.to_list()) == set(dataset_list)
     assert set(infinibox.datasets.find(type='MASTER').to_list()) == set([volume, filesystem])
+
+
+@new_to_version('3.0')
+def test_refresh_snapshot(data_entity):
+    assert data_entity.is_master()
+    child = data_entity.create_child()
+    with pytest.raises(AssertionError):
+        data_entity.refresh_snapshot()
+    child.refresh_snapshot()
