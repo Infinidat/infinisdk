@@ -11,6 +11,7 @@ def test_field_cached():
 
 
 def test_identity_field_caching():
+    # pylint: disable=expression-not-assigned
     assert Field('testing_field', is_identity=True).cached is True
     assert Field('testing_field', is_identity=True, cached=True).cached is True
     with pytest.raises(AssertionError):

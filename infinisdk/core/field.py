@@ -14,6 +14,7 @@ class Field(FieldBase):
     This class represents a single field exposed by a schema
     """
     def __repr__(self):
+        # pylint: disable=no-member
         extra = []
         if self.creation_parameter:
             extra.append('Creation param')
@@ -33,7 +34,7 @@ class Field(FieldBase):
         toggle_name = kwargs.pop("toggle_name", None)
         super(Field, self).__init__(*args, **kwargs)
 
-        if self.is_identity:
+        if self.is_identity:  # pylint: disable=no-member
             assert cached in (NOTHING, True), "Identity field must be cached"
             cached = True
         elif cached is NOTHING:
@@ -43,18 +44,18 @@ class Field(FieldBase):
         #:Specifies if this field needs to have get function
         self.add_getter = add_getter
         #:Specifies if this field needs to have update function
-        self.add_updater = add_updater and self.mutable
+        self.add_updater = add_updater and self.mutable  # pylint: disable=no-member
         #:Specifies that the object's __repr__ method should use this field to describe the object
         self.use_in_repr = use_in_repr
         #:Specifies the feature this field depended on (new/deprecated since version)
         self.feature_name = feature_name
         #:Specifies the name for auto-updater: enable_toggle_name & disable_toggle_name will be added to the object
         if toggle_name:
-            assert self.type.type is bool
-            assert self.mutable
+            assert self.type.type is bool  # pylint: disable=no-member
+            assert self.mutable  # pylint: disable=no-member
         else:
             if self.add_updater:
-                toggle_name = self.name
+                toggle_name = self.name  # pylint: disable=no-member
         self.toggle_name = toggle_name
 
     def notify_added_to_class(self, cls):
@@ -82,6 +83,7 @@ class Field(FieldBase):
         return FieldSorting(self)
 
     def extract_from_json(self, obj_class, json):  # pylint: disable=unused-argument
+        # pylint: disable=no-member
         return json[self.api_name]  #TODO: Use api_object_schema.binding instead
 
 def _install_filter_factory(operator_name, operator_function_name):
