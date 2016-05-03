@@ -68,6 +68,10 @@ class InfiniBox(APITarget):
             raise VersionNotSupported(self.get_version())
 
     def is_field_supported(self, field):
+        if field.new_to_version and self.compat.get_parsed_system_version() < field.new_to_version:
+            return False
+        if field.until_version and self.compat.get_parsed_system_version() > field.until_version:
+            return False
         return self.compat.is_feature_supported(field.feature_name)
 
     def _get_api_auth(self):

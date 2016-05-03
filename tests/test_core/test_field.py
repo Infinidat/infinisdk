@@ -28,3 +28,13 @@ def test_updater_toggle_name():
         assert Field('testing_field', toggle_name='my_toggle', type=str, mutable=True)
     with pytest.raises(AssertionError):
         assert Field('testing_field', toggle_name='my_toggle', type=bool, mutable=False)
+
+
+def test_field_versioning(infinibox):
+    curr_version = infinibox.get_version()
+    field = Field("some_field", new_to=curr_version, until=curr_version)
+    new_field = Field("new_field", new_to="30.0.0.0")
+    deprecated_field = Field("old_field", until="1.0")
+    assert infinibox.is_field_supported(field)
+    assert not infinibox.is_field_supported(new_field)
+    assert not infinibox.is_field_supported(deprecated_field)

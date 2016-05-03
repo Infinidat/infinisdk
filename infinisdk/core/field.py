@@ -31,6 +31,8 @@ class Field(FieldBase):
         add_updater = kwargs.pop("add_updater", True)
         use_in_repr = kwargs.pop("use_in_repr", False)
         feature_name = kwargs.pop("feature_name", NOTHING)
+        new_to_version = kwargs.pop("new_to", None)
+        until_version = kwargs.pop("until", None)
         toggle_name = kwargs.pop("toggle_name", None)
         super(Field, self).__init__(*args, **kwargs)
 
@@ -49,6 +51,10 @@ class Field(FieldBase):
         self.use_in_repr = use_in_repr
         #:Specifies the feature this field depended on (new/deprecated since version)
         self.feature_name = feature_name
+        #:Specifies the version this field was added
+        self.new_to_version = new_to_version
+        #:Specifies the version this field is deprecated since
+        self.until_version = until_version
         #:Specifies the name for auto-updater: enable_toggle_name & disable_toggle_name will be added to the object
         if toggle_name:
             assert self.type.type is bool  # pylint: disable=no-member
