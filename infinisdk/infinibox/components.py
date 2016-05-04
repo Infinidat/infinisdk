@@ -1,5 +1,4 @@
-
-from .._compat import ExitStack, zip
+from .._compat import ExitStack, zip  # pylint: disable=redefined-builtin
 from ..core.field import Field
 from ..core.utils import deprecated
 from ..core.system_component import SystemComponentsBinder
@@ -17,6 +16,7 @@ from logbook import Logger
 from pact import Pact
 from urlobject import URLObject as URL
 
+# pylint: disable=attribute-defined-outside-init,no-member,super-on-old-class,no-init
 _logger = Logger(__name__)
 
 
@@ -29,8 +29,8 @@ class InfiniBoxSystemComponents(SystemComponentsBinder):
     def _initialize(self):
         self.system_component = System(self.system, {'parent_id': "", 'id': 0})
         self.cache_component(self.system_component)
-        Rack = self.racks.object_type
-        self._rack_1 = Rack(self.system, {'parent_id': self.system_component.id, 'rack': 1})
+        RackType = self.racks.object_type
+        self._rack_1 = RackType(self.system, {'parent_id': self.system_component.id, 'rack': 1})
         self.cache_component(self._rack_1)
         self._fetched_nodes = False
         self._fetched_others = False
@@ -94,21 +94,6 @@ class ComputedIDBinding(InfiniSDKBinding):
         raise NotImplementedError() # pragma: no cover
 
 
-class NotExistsSupportBinding(InfiniSDKBinding):
-    # Prior to 2.0 not all services have all the fields. For now, return None if missing.
-    # TODO: Check that system version <= 1.7
-    def __init__(self, value_for_non_exists=None):
-        super(NotExistsSupportBinding, self).__init__()
-        self._value_for_non_exists = value_for_non_exists
-        pass
-
-    def get_value_from_api_object(self, system, objtype, obj, api_obj):
-        try:
-            return super(NotExistsSupportBinding, self).get_value_from_api_object(system, objtype, obj, api_obj)
-        except KeyError:
-            return self._value_for_non_exists
-
-
 class InfiniBoxComponentBinder(TypeBinder):
 
     _force_fetching_from_cache = False
@@ -116,7 +101,7 @@ class InfiniBoxComponentBinder(TypeBinder):
     def should_force_fetching_from_cache(self):
         return self._force_fetching_from_cache
 
-    def get_by_id_lazy(self, id):
+    def get_by_id_lazy(self, id):  # pylint: disable=redefined-builtin
         returned = self.safe_get_by_id(id)
         if returned is None:
             raise NotImplementedError("Initializing infinibox components lazily is not yet supported") # pragma: no cover
@@ -166,13 +151,12 @@ class InfiniBoxComponentBinder(TypeBinder):
 
     def _fetch_tree(self, force_fetch):
         components = self.system.components
-        if self.object_type in [
-                components.nodes.object_type,
-                components.services.object_type,
-                components.fc_ports.object_type,
-                components.eth_ports.object_type,
-                components.local_drives.object_type,
-                ]:
+        if self.object_type in [components.nodes.object_type,
+                                components.services.object_type,
+                                components.fc_ports.object_type,
+                                components.eth_ports.object_type,
+                                components.local_drives.object_type,
+                               ]:
             if force_fetch or components.should_fetch_nodes():
                 rack_1 = components.get_rack_1()
                 rack_1.refresh_without_enclosures()
@@ -234,7 +218,8 @@ class InfiniBoxSystemComponent(BaseSystemObject):
         self.refresh_cache()
 
     @classmethod
-    def construct(cls, system, data, parent_id, allow_partial_fields=False):
+    def construct(cls, system, data, parent_id, allow_partial_fields=False):    # pylint: disable=arguments-differ
+        # pylint: disable=protected-access
         data['parent_id'] = parent_id
         component_id = cls.fields.id.binding.get_value_from_api_object(system, cls, None, data)
         returned = system.components.try_get_component_by_id(component_id)
@@ -399,8 +384,8 @@ class LocalDrive(InfiniBoxSystemComponent):
 class EthPort(InfiniBoxSystemComponent):
     FIELDS = [
         Field("hw_addr", is_identity=True),
-        Field("connection_speed", type = int),
-        Field("max_speed", type=int, feature_name = "max_speed"),
+        Field("connection_speed", type=int),
+        Field("max_speed", type=int, feature_name="max_speed"),
         Field("device_name", api_name="name"),
         Field("port_number", type=int, cached=True),
         Field("index", api_name="id", type=int, cached=True),
@@ -409,7 +394,7 @@ class EthPort(InfiniBoxSystemComponent):
         Field("name", cached=True),
         Field("system_interface_port_number", type=int),
         Field("state", cached=False),
-        Field("link_state", cached=False, binding=NotExistsSupportBinding()),
+        Field("link_state", cached=False),
         Field("ip_v4_addr"),
         Field("ip_v4_broadcast"),
         Field("ip_v4_netmask"),
@@ -448,7 +433,7 @@ class FcPort(InfiniBoxSystemComponent):
         Field("role", cached=True),
         Field("soft_target_addresses", type=list, cached=True),
         Field("switch_vendor", cached=True),
-        Field("enabled", type=bool, binding=NotExistsSupportBinding(True)),
+        Field("enabled", type=bool),
     ]
 
     def is_link_up(self):
@@ -502,7 +487,7 @@ class Service(InfiniBoxSystemComponent):
     FIELDS = [
         Field("index", api_name="name", cached=True),
         Field("name", is_identity=True, cached=True),
-        Field("role", binding=NotExistsSupportBinding(), cached=False),
+        Field("role", cached=False),
         Field("state", cached=False),
     ]
 
@@ -524,7 +509,8 @@ class Service(InfiniBoxSystemComponent):
         return self.get_state() == 'ACTIVE'
 
     def is_inactive(self):
-        return self.get_state() in ('INACTIVE', 'PROCESS_FINISHED', 'SHUTDOWN', 'INVALID')  # Workaround for INFINIBOX-18309 & INFINIBOX-18308 & INFINIBOX-18647 & INFINIBOX-17256
+        # Workaround for INFINIBOX-18309 & INFINIBOX-18308 & INFINIBOX-18647 & INFINIBOX-17256
+        return self.get_state() in ('INACTIVE', 'PROCESS_FINISHED', 'SHUTDOWN', 'INVALID')
 
     def is_master(self):
         return self.get_role() == 'MASTER'
@@ -611,7 +597,7 @@ class System(InfiniBoxSystemComponent):
     def safe_get_state(self):
         try:
             return self.get_state()
-        except:
+        except:  # pylint: disable=bare-except
             return None
 
     def is_active(self):
