@@ -301,4 +301,7 @@ def type_binder(request, infinibox):
     elif object_type.get_type_name() == 'ldapconfig' and \
         infinibox.compat.get_version_major() == '1':
         pytest.skip('not supported by infinisim')
+    elif object_type.get_type_name() == 'fc_soft_target' and \
+        infinibox.compat.get_version_major() < '3':
+        pytest.skip('not supported by infinisim')
     return infinibox.objects[request.param]
