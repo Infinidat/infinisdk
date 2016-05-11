@@ -6,7 +6,6 @@ from ..core.api.special_values import Autogenerate
 from .system_object import InfiniBoxObject
 from ..core.bindings import ListOfRelatedObjectIDsBinding, InfiniSDKBindingWithSpecialFlags
 from ..core.object_query import ObjectQuery
-from ..core.utils import deprecated
 
 from urlobject import URLObject
 
@@ -44,6 +43,11 @@ class Pool(InfiniBoxObject):
         Field("capacity_savings", type=CapacityType, feature_name='compression'),
         Field("max_extend", type=CapacityType, mutable=True, creation_parameter=True, optional=True, binding=InfiniSDKBindingWithSpecialFlags([-1])),
         Field("state", cached=False),
+        Field("volumes_count", type=int),
+        Field("snapshots_count", type=int),
+        Field("filesystems_count", type=int),
+        Field("filesystem_snapshots_count", type=int),
+        Field("entities_count", type=int),
     ]
 
     @classmethod
