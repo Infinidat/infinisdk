@@ -20,6 +20,8 @@ class Filesystem(Dataset):
         Field(
             "name", creation_parameter=True, mutable=True, is_filterable=True,
             is_sortable=True, default=Autogenerate("fs_{uuid}")),
+        Field("dataset_type"),
+        Field("num_blocks", type=int),
         Field("size", creation_parameter=True, mutable=True,
               is_filterable=True, is_sortable=True, default=GB, type=CapacityType),
         Field("used_size", api_name="used", type=CapacityType),

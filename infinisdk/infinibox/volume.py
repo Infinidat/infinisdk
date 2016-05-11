@@ -64,6 +64,8 @@ class Volume(Dataset):
               is_filterable=True, is_sortable=True),
         Field("name", creation_parameter=True, mutable=True, is_filterable=True,
             is_sortable=True, default=Autogenerate("vol_{uuid}")),
+        Field("dataset_type"),
+        Field("num_blocks", type=int),
         Field("size", creation_parameter=True, mutable=True,
               is_filterable=True, is_sortable=True, default=GB, type=CapacityType),
         Field("used_size", api_name="used", type=CapacityType),
@@ -93,6 +95,7 @@ class Volume(Dataset):
         Field("has_children", type=bool, add_getter=False),
         Field('rmr_source', type=bool),
         Field('rmr_target', type=bool),
+        Field('rmr_snapshot_guid'),
     ]
 
     @classmethod
