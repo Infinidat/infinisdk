@@ -288,7 +288,7 @@ class Replica(InfiniBoxObject):
         """
         self._validate_can_check_state()
         if self.system.compat.has_sync_job_states():
-            return all(sync_job['state'].lower() == 'done' for sync_job in self._get_jobs())
+            return all(sync_job['state'].lower() == 'done' or sync_job['state'].lower() == 'pending' for sync_job in self._get_jobs())
         return self.get_state(*args, **kwargs).lower() == 'idle'
 
     def is_auto_suspended(self, *args, **kwargs):
