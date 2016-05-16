@@ -85,7 +85,11 @@ class ConsGroup(InfiniBoxObject):
         cg_members_by_id = dict((m.id, m) for m in parent.get_members() if m.id in sg_members_by_parent_id)
 
         began_fork = []
+        trigger_hook = functools.partial(gossip.trigger_with_tags,
+                                         kwargs={'source': parent, 'target': self},
+                                         tags=self._get_tags_for_object_operations(self.system))
 
+        trigger_hook('infinidat.sdk.pre_refresh_snapshot')
         try:
             for member in cg_members_by_id.values():
                 member.trigger_begin_fork()
@@ -94,9 +98,11 @@ class ConsGroup(InfiniBoxObject):
         except Exception:
             for member in began_fork:
                 member.trigger_cancel_fork()
+            trigger_hook('infinidat.sdk.refresh_snapshot_failure')
             raise
         for member in cg_members_by_id.values():
             member.trigger_finish_fork(sg_members_by_parent_id[member.id])
+        trigger_hook('infinidat.sdk.post_refresh_snapshot')
 
     refresh_snapshot = refresh_snapgroup
 
@@ -132,10 +138,12 @@ class ConsGroup(InfiniBoxObject):
                 'remote_base_action': 'NO_BASE_DATA',
                 'remote_entity_id': remote_entity.id
             }
-        _trigger = functools.partial(gossip.trigger_with_tags, kwargs={'cons_group': self, 'member': member, 'request': data}, tags=['infinibox'])
-        _trigger('infinidat.sdk.pre_cons_group_add_member')
+        trigger_hook = functools.partial(gossip.trigger_with_tags,
+                                         kwargs={'cons_group': self, 'member': member, 'request': data},
+                                         tags=['infinibox'])
+        trigger_hook('infinidat.sdk.pre_cons_group_add_member')
         self.system.api.post(self._get_members_url(), data=data)
-        _trigger('infinidat.sdk.post_cons_group_add_member')
+        trigger_hook('infinidat.sdk.post_cons_group_add_member')
         self.invalidate_cache('members_count')
 
     def remove_member(self, member, retain_staging_area=False, create_replica=False, replica_name=OMIT, force_if_no_remote_credentials=False, force_if_remote_error=False, force_on_target=False):

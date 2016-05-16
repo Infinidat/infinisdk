@@ -1,3 +1,4 @@
+import functools
 import gossip
 from capacity import Capacity, byte
 from urlobject import URLObject as URL
@@ -72,13 +73,19 @@ class Dataset(InfiniBoxObject):
         """
         parent = self.get_parent()
         assert parent, "Cannot refresh_snapshot on master volume"
+        trigger_hook = functools.partial(gossip.trigger_with_tags,
+                                         kwargs={'source': parent, 'target': self},
+                                         tags=self._get_tags_for_object_operations(self.system))
+        trigger_hook('infinidat.sdk.pre_refresh_snapshot')
         parent.trigger_begin_fork()
         try:
             self.system.api.post(self.get_this_url_path().add_path('refresh'), data={'source_id': parent.id})
         except Exception:
             parent.trigger_cancel_fork()
+            trigger_hook('infinidat.sdk.refresh_snapshot_failure')
             raise
         parent.trigger_finish_fork(self)
+        trigger_hook('infinidat.sdk.post_refresh_snapshot')
 
     def is_snapshot(self):
         """Returns whether or not this entity is a snapshot

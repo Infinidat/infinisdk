@@ -35,6 +35,10 @@ def _install_hooks():
     gossip.define(_SDK_HOOK('replica_snapshot_created'), tags=['infinibox'])
     gossip.define(_SDK_HOOK('replica_after_change_role'), tags=['infinibox'])
 
+    gossip.define(_SDK_HOOK('pre_refresh_snapshot'), tags=['infinibox', 'volume', 'filesystem', 'cons_group'])
+    gossip.define(_SDK_HOOK('post_refresh_snapshot'), tags=['infinibox', 'volume', 'filesystem', 'cons_group'])
+    gossip.define(_SDK_HOOK('refresh_snapshot_failure'), tags=['infinibox', 'volume', 'filesystem', 'cons_group'])
+
     gossip.define(_SDK_HOOK('before_api_request'))
     gossip.define(_SDK_HOOK('after_api_request'))
 
