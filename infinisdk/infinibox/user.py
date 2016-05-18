@@ -9,8 +9,8 @@ class User(SystemObject):
         Field("type"),
         Field("role", creation_parameter=True, mutable=True, is_filterable=True, is_sortable=True, default="PoolAdmin"), # For backwards compatibility
         Field("roles", type=list, mutable=True),
-        Field("email", creation_parameter=True, mutable=True, default=Autogenerate("user_{timestamp}@infinidat.com")),
-        Field("name", creation_parameter=True, mutable=True, is_filterable=True, is_sortable=True, default=Autogenerate("user_{timestamp}")),
+        Field("email", creation_parameter=True, mutable=True, default=Autogenerate("user_{uuid}@infinidat.com")),
+        Field("name", creation_parameter=True, mutable=True, is_filterable=True, is_sortable=True, default=Autogenerate("user_{uuid}")),
         Field("password", creation_parameter=True, add_getter=False, mutable=True, default="12345678"),
         Field("enabled", type=bool, mutable=True, feature_name='user_disabling')
     ]
