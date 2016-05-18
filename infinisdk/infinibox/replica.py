@@ -165,6 +165,7 @@ class Replica(InfiniBoxObject):
         Field('remote_replica_id', type=int),
         Field('role', type=str),
         Field('progress', type=int),
+        Field('jobs', type=list),
         Field('restore_point', type=MillisecondsDatetimeType),
         Field('last_synchronized', type=int),
         Field('last_replicated_guid', api_name='_consistent_guid'),
@@ -287,7 +288,7 @@ class Replica(InfiniBoxObject):
         """
         self._validate_can_check_state()
         if self.system.compat.has_sync_job_states():
-            return all(sync_job['state'].lower() == 'done' for sync_job in self._get_jobs())
+            return all(sync_job['state'].lower() == 'done' or sync_job['state'].lower() == 'pending' for sync_job in self._get_jobs())
         return self.get_state(*args, **kwargs).lower() == 'idle'
 
     def is_auto_suspended(self, *args, **kwargs):
