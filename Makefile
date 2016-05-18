@@ -7,7 +7,7 @@ docs: env
 	.env/bin/sphinx-build -a -E ./doc ./build/sphinx/html
 
 test: env
-	.env/bin/py.test tests -n 4
+	.env/bin/py.test tests
 
 coverage: env
 	.env/bin/pip install pytest-cov
@@ -24,10 +24,9 @@ env: .env/.up-to-date
 	touch .env/.up-to-date
 
 .develop_deps:
-	virtualenv .env
 	.env/bin/pip install --pre -i https://pypi.infinidat.com/simple -e ../ecosystem -e ../infinibox_sysdefs -e ../infinisim
 
-develop_env: .develop_deps env
+develop_env: env .develop_deps
 
 
 jenkins-docker-test:
