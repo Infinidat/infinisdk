@@ -123,6 +123,7 @@ def _get_last_mailboxer_msg(simulator, mail_address):
 
 def test_reset_password(infinibox, infinibox_simulator, user):
     user_email = user.get_email()
+    user.update_name(user.get_name()[-30:])
     user.request_reset_password()
     token = _get_token_from_mail(infinibox_simulator, user_email)
     user.reset_password(token)
