@@ -7,6 +7,7 @@ from infinisdk.core.exceptions import (CannotGetReplicaState,
 
 from ..conftest import secondary_infinibox as secondary_infinibox_fx
 from ..conftest import new_to_version
+import flux
 
 SECOND = SECONDS = timedelta(seconds=1)
 
@@ -56,6 +57,7 @@ def test_replica_get_local_entity_more_than_one(replica, volume, method_name):
 @pytest.mark.parametrize('force_params', [True, False])
 @pytest.mark.parametrize('retain_staging_area', [True, False])
 def test_replica_deletion(replica, retain_staging_area, force_params):
+    flux.current_timeline.sleep_wait_all_scheduled()
     kwargs = {}
     if force_params:
         kwargs.update(force_on_target=True, force_if_remote_error=True,
@@ -184,6 +186,7 @@ def test_remote_replica_without_remote_system(replica, secondary_infinibox):
     remote_replica = replica.get_remote_replica()
     replica.system._related_systems.pop()
     remote_replica.system._related_systems.pop()
+    flux.current_timeline.sleep_wait_all_scheduled()
     assert replica.is_idle()
     with pytest.raises(InfiniSDKException):
         replica.get_remote_replica()
