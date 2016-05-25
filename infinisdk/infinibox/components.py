@@ -125,8 +125,8 @@ class InfiniBoxComponentBinder(TypeBinder):
 
     @contextmanager
     def _force_fetching_tree_from_cache_context(self):
-        with ExitStack() as stack:
-            stack.enter_context(self.force_fetching_from_cache_context())
+        # Don't add the second context to the ExitStack. For more information see INFRADEV-5884
+        with ExitStack() as stack, self.force_fetching_from_cache_context():
             for obj_type in self.system.components.get_depended_components_type(self.object_type):
                 obj_collection = self.system.components[obj_type]
                 stack.enter_context(obj_collection.force_fetching_from_cache_context())
