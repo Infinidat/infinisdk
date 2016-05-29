@@ -63,7 +63,7 @@ class Metrics(object):
             path = path.set_query_param('collector_id', 'in:{}'.format(
                 ','.join(str(c.id) for c in collectors)))
             resp = self.system.api.get(path).get_result()
-            for collector_data in resp['collectors']:
+            for collector_data in resp.get('collectors', []):
                 collector = collectors_by_id[collector_data['id']]
                 interval = collector_data['interval_milliseconds'] / 1000.0
                 end_timestamp = arrow.Arrow.fromtimestamp(
