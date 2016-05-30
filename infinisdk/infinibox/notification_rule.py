@@ -1,4 +1,5 @@
 from urlobject import URLObject as URL
+from ..core.utils import DONT_CARE
 from ..core.bindings import RelatedObjectBinding
 from ..core import Field, SystemObject
 
@@ -24,15 +25,15 @@ class NotificationRule(SystemObject):
     def get_type_name(cls):
         return 'notification_rule'
 
-    def does_match_event(self, event):
-        if self.get_event_code() is not None:
-            return self.get_event_code() == event.get_code()
+    def does_match_event(self, event, from_cache=DONT_CARE):
+        if self.get_event_code(from_cache=from_cache) is not None:
+            return self.get_event_code(from_cache=from_cache) == event.get_code()
 
-        to_exclude = self.get_exclude_events()
+        to_exclude = self.get_exclude_events(from_cache=from_cache)
         if event.get_code() in to_exclude:
             return False
 
-        if event.get_level in self.get_event_level():
+        if event.get_level in self.get_event_level(from_cache=from_cache):
             return True
 
-        return event.get_code() in self.get_include_events()
+        return event.get_code() in self.get_include_events(from_cache=from_cache)
