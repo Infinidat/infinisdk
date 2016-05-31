@@ -29,11 +29,10 @@ class NotificationRule(SystemObject):
         if self.get_event_code(from_cache=from_cache) is not None:
             return self.get_event_code(from_cache=from_cache) == event.get_code()
 
-        to_exclude = self.get_exclude_events(from_cache=from_cache)
-        if event.get_code() in to_exclude:
+        if event.get_code() in self.get_exclude_events(from_cache=from_cache):
             return False
 
-        if event.get_level in self.get_event_level(from_cache=from_cache):
+        if event.get_level() in self.get_event_level(from_cache=from_cache):
             return True
 
         return event.get_code() in self.get_include_events(from_cache=from_cache)
