@@ -63,20 +63,21 @@ class Metrics(object):
             path = path.set_query_param('collector_id', 'in:{}'.format(
                 ','.join(str(c.id) for c in collectors)))
             resp = self.system.api.get(path).get_result()
-            for collector_data in resp.get('collectors', []):
-                collector = collectors_by_id[collector_data['id']]
-                interval = collector_data['interval_milliseconds'] / 1000.0
-                end_timestamp = arrow.Arrow.fromtimestamp(
-                    collector_data['end_timestamp_milliseconds'] / 1000.0)
+            if resp is not None:
+                for collector_data in resp.get('collectors', []):
+                    collector = collectors_by_id[collector_data['id']]
+                    interval = collector_data['interval_milliseconds'] / 1000.0
+                    end_timestamp = arrow.Arrow.fromtimestamp(
+                        collector_data['end_timestamp_milliseconds'] / 1000.0)
 
-                series = collector_data['data']
-                for index, sample in enumerate(series):
-                    timestamp = end_timestamp - \
-                                timedelta(seconds=interval * (len(series) - index + 1))
-                    if collector_data['collector_type'] == "HISTOGRAM":
-                        returned.append(HistogramSample(collector_data['histogram_field'], collector_data['ranges'], collector, sample, timestamp, interval))
-                    else:
-                        returned.append(Sample(collector, sample, timestamp, interval))
+                    series = collector_data['data']
+                    for index, sample in enumerate(series):
+                        timestamp = end_timestamp - \
+                                    timedelta(seconds=interval * (len(series) - index + 1))
+                        if collector_data['collector_type'] == "HISTOGRAM":
+                            returned.append(HistogramSample(collector_data['histogram_field'], collector_data['ranges'], collector, sample, timestamp, interval))
+                        else:
+                            returned.append(Sample(collector, sample, timestamp, interval))
 
         return returned
 
