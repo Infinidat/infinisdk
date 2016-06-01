@@ -26,13 +26,15 @@ class NotificationRule(SystemObject):
         return 'notification_rule'
 
     def does_match_event(self, event, from_cache=DONT_CARE):
-        if self.get_event_code(from_cache=from_cache) is not None:
-            return self.get_event_code(from_cache=from_cache) == event.get_code()
-
-        if event.get_code() in self.get_exclude_events(from_cache=from_cache):
+        if event.get_visibility() == 'INFINIDAT' and event.get_visibility() != self.get_target(from_cache=from_cache).get_visibility(from_cache=from_cache):
             return False
 
-        if event.get_level() in self.get_event_level(from_cache=from_cache):
+        if self.get_event_code(from_cache=from_cache) is not None and self.get_event_code(from_cache=from_cache) == event.get_code():
             return True
 
-        return event.get_code() in self.get_include_events(from_cache=from_cache)
+        if event.get_code() in self.get_include_events(from_cache=from_cache):
+            return True
+        
+        return (event.get_visibility() in self.get_event_visibility(from_cache=from_cache) and
+                event.get_level() in self.get_event_level(from_cache=from_cache) and
+                event.get_code() not in self.get_exclude_events(from_cache=from_cache))
