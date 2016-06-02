@@ -26,9 +26,12 @@ class Pool(InfiniBoxObject):
 
     FIELDS = [
         Field("id", type=int, is_identity=True, is_filterable=True, is_sortable=True),
-        Field("name", creation_parameter=True, mutable=True, is_filterable=True, is_sortable=True, default=Autogenerate("pool_{uuid}")),
-        Field("virtual_capacity", creation_parameter=True, mutable=True, default=TB, type=CapacityType, is_filterable=True, is_sortable=True),
-        Field("physical_capacity", creation_parameter=True, mutable=True, default=TB, type=CapacityType, is_filterable=True, is_sortable=True),
+        Field("name", creation_parameter=True, mutable=True, is_filterable=True, is_sortable=True,
+              default=Autogenerate("pool_{uuid}")),
+        Field("virtual_capacity", creation_parameter=True, mutable=True, default=TB, type=CapacityType,
+              is_filterable=True, is_sortable=True),
+        Field("physical_capacity", creation_parameter=True, mutable=True, default=TB, type=CapacityType,
+              is_filterable=True, is_sortable=True),
         Field("owners", mutable=True, type=list, add_updater=False, binding=ListOfRelatedObjectIDsBinding('users')),
         Field("allocated_physical_capacity", api_name="allocated_physical_space", type=CapacityType),
         Field("free_physical_capacity", api_name="free_physical_space", type=CapacityType),
@@ -38,10 +41,12 @@ class Pool(InfiniBoxObject):
         Field("reserved_capacity", type=CapacityType),
         Field("created_at", type=MillisecondsDatetimeType, is_sortable=True, is_filterable=True),
         Field("updated_at", type=MillisecondsDatetimeType, is_sortable=True, is_filterable=True),
-        Field("ssd_enabled", type=bool, mutable=True, creation_parameter=True, is_filterable=True, is_sortable=True, optional=True, toggle_name='ssd'),
+        Field("ssd_enabled", type=bool, mutable=True, creation_parameter=True, is_filterable=True, is_sortable=True,
+              optional=True, toggle_name='ssd'),
         Field("compression_enabled", type=bool, mutable=True, feature_name='compression', toggle_name='compression'),
         Field("capacity_savings", type=CapacityType, feature_name='compression'),
-        Field("max_extend", type=CapacityType, mutable=True, creation_parameter=True, optional=True, binding=InfiniSDKBindingWithSpecialFlags([-1])),
+        Field("max_extend", type=CapacityType, mutable=True, creation_parameter=True, optional=True,
+              binding=InfiniSDKBindingWithSpecialFlags([-1])),
         Field("state", cached=False),
         Field("volumes_count", type=int),
         Field("snapshots_count", type=int),
@@ -77,9 +82,11 @@ class Pool(InfiniBoxObject):
         self.update_field('owners', users)
 
     def is_locked(self, *args, **kwargs):
+        # pylint: disable=no-member
         return self.get_state(*args, **kwargs) == 'LOCKED'
 
     def is_limited(self, *args, **kwargs):
+        # pylint: disable=no-member
         return self.get_state(*args, **kwargs) == 'LIMITED'
 
     def lock(self):
@@ -89,6 +96,7 @@ class Pool(InfiniBoxObject):
         self.system.api.post(self.get_this_url_path().add_path('unlock'))
 
     def _is_over_threshold(self, threshold):
+        # pylint: disable=no-member
         return (self.get_allocated_physical_capacity() * 100) >= (self.get_physical_capacity() * threshold)
 
     def is_over_warning_threshold(self):
