@@ -64,7 +64,7 @@ class Volume(Dataset):
               is_filterable=True, is_sortable=True),
         Field("name", creation_parameter=True, mutable=True, is_filterable=True,
               is_sortable=True, default=Autogenerate("vol_{uuid}")),
-        Field("dataset_type"),
+        Field("dataset_type", is_filterable=True, is_sortable=True),
         Field("num_blocks", type=int),
         Field("size", creation_parameter=True, mutable=True,
               is_filterable=True, is_sortable=True, default=GB, type=CapacityType),
@@ -88,7 +88,8 @@ class Volume(Dataset):
               is_filterable=True, is_sortable=True, optional=True, toggle_name='ssd'),
         Field("write_protected", type=bool, mutable=True, creation_parameter=True, optional=True,
               is_filterable=True, is_sortable=True, toggle_name='write_protection'),
-        Field("compression_enabled", type=bool, mutable=True, creation_parameter=True, optional=True, feature_name='compression', toggle_name='compression'),
+        Field("compression_enabled", type=bool, mutable=True, creation_parameter=True, optional=True,
+              is_filterable=True, is_sortable=True, feature_name='compression', toggle_name='compression'),
         Field("compression_suppressed", type=bool, feature_name='compression'),
         Field("capacity_savings", type=CapacityType, feature_name='compression'),
         Field("depth", cached=True, type=int, is_sortable=True, is_filterable=True),
@@ -96,7 +97,7 @@ class Volume(Dataset):
         Field("has_children", type=bool, add_getter=False),
         Field('rmr_source', type=bool),
         Field('rmr_target', type=bool),
-        Field('rmr_snapshot_guid'),
+        Field('rmr_snapshot_guid', is_filterable=True, is_sortable=True),
     ]
 
     @classmethod
