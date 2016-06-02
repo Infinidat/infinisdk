@@ -21,6 +21,13 @@ class SampleDerivedObject(SampleBaseObject):
     ]
 
 
+class SampleObjectWithStringID(SystemObject):
+
+    FIELDS = [
+        Field(name='id', type=str),
+    ]
+
+
 class FakeSystem(object):
 
     def is_caching_enabled(self):
@@ -210,6 +217,18 @@ def test_update_field_does_not_update_other_fields_cache(user):
     user.update_field_cache({'email': some_email})
     user.update_name('some_new_name')
     assert user.get_email(from_cache=True) == some_email
+
+
+def test_string_id_escaping(system):
+    """Make sure that objects with string-based ids properly encode their url path
+    """
+    obj = SampleObjectWithStringID(system, {'id': 'some:text'})
+    with pytest.raises(APICommandFailed) as caught:
+        field = obj.get_field('x')
+
+    url = caught.value.response.response.request.url
+    assert url.endswith(
+        '/api/rest/sampleobjectwithstringids/some%3Atext?fields=x')
 
 
 @pytest.fixture(params=[SampleBaseObject, SampleDerivedObject])

@@ -13,7 +13,7 @@ from urlobject import URLObject as URL
 import colorama
 
 from ... import _compat
-from ..._compat import httplib, iteritems, requests, RequestException, ProtocolError
+from ..._compat import httplib, iteritems, requests, RequestException, ProtocolError, unquote_url
 from ..config import config
 from ..exceptions import (APICommandFailed, APITransportFailure,
                           CommandNotApproved, SystemNotFoundException)
@@ -36,7 +36,7 @@ def _join_path(url, path):
     _url = URL(url)
     path = URL(path)
     if path.path:
-        _url = _url.add_path(path.path)
+        _url = _url.add_path(unquote_url(path.path))
     if path.query:
         _url = _url.with_query(path.query)
     return _url

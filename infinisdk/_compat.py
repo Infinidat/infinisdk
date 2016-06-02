@@ -47,6 +47,8 @@ if PY2:
 
     from contextlib2 import ExitStack
 
+    from urllib import unquote as unquote_url
+
 else:
 
     import functools
@@ -89,6 +91,8 @@ else:
         return 0
 
     from contextlib import ExitStack
+
+    from urllib.parse import unquote as unquote_url
 
 if PY2:
     #Yucky, but apparently that's the only way to do this
