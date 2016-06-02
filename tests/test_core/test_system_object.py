@@ -1,8 +1,10 @@
 import pytest
-from ..conftest import new_to_version
 from infinisdk.core import Field, SystemObject
-from infinisdk.core.exceptions import (AttributeAlreadyExists, CacheMiss,
+from infinisdk.core.exceptions import (APICommandFailed,
+                                       AttributeAlreadyExists, CacheMiss,
                                        MissingFields)
+
+from ..conftest import new_to_version
 
 
 class SampleBaseObject(SystemObject):
@@ -10,6 +12,7 @@ class SampleBaseObject(SystemObject):
         Field("id", type=int),
         Field(name="name"),
     ]
+
 
 class SampleDerivedObject(SampleBaseObject):
     FIELDS = [
@@ -31,10 +34,12 @@ def test_num_fields(system):
     assert len(SampleBaseObject.fields) == 2
     assert len(SampleDerivedObject.fields) == 4
 
+
 def test_querying_fields_by_name(system):
     assert SampleBaseObject.fields.name.type.type is str
     assert SampleDerivedObject.fields.name.type.type is str
     assert SampleDerivedObject.fields.number.type.type is int
+
 
 def test_no_fields(system):
     class EmptyObject(SystemObject):
@@ -42,8 +47,10 @@ def test_no_fields(system):
 
     assert len(EmptyObject.fields) == 0
 
+
 def test_nonexistent_field(system):
     assert not hasattr(SampleDerivedObject.fields, "fake_field")
+
 
 def test_get_from_cache_miss(system):
     obj = SampleDerivedObject(system, {"id": 1})
@@ -51,37 +58,48 @@ def test_get_from_cache_miss(system):
     with pytest.raises(CacheMiss):
         obj.get_field("number", from_cache=True, fetch_if_not_cached=False)
 
+
 def test_get_from_cache_hit(system):
     obj = SampleDerivedObject(FakeSystem(), {"id": 1, "number": 2})
     assert obj.id == 1
     assert 2 == obj.get_field('number', from_cache=True)
 
+
 def test_get_from_cache_by_default(system):
     value = "some_value_here"
-    obj = SampleDerivedObject(FakeSystem(), {"id": 1, "cached_by_default": value})
+    obj = SampleDerivedObject(
+        FakeSystem(), {"id": 1, "cached_by_default": value})
     assert obj.get_field('cached_by_default') == value
+
 
 def _attach_method(instance, function):
     import types
     setattr(instance, function.__name__, types.MethodType(function, instance))
 
+
 @pytest.mark.parametrize("with_fields", [True, False])
 def test_requires_cache_invalidation_decorator(system, with_fields):
     obj = SampleDerivedObject(system, {"id": 1, "number": 2, "string": "asdf"})
+
     @SystemObject.requires_cache_invalidation("number", "string")
-    def get_meaning_of_life(self, *args, **kwargs):
+    def get_meaning_of_life(self, *args, **kwargs): # pylint: disable=unused-argument
         return 42
     if with_fields:
-        get_meaning_of_life = SystemObject.requires_cache_invalidation("number", "string")(get_meaning_of_life)
+        get_meaning_of_life = SystemObject.requires_cache_invalidation(
+            "number", "string")(get_meaning_of_life)
     else:
-        get_meaning_of_life = SystemObject.requires_cache_invalidation(get_meaning_of_life)
+        get_meaning_of_life = SystemObject.requires_cache_invalidation(
+            get_meaning_of_life)
     _attach_method(obj, get_meaning_of_life)
     assert 1 == obj.get_field('id', from_cache=True, fetch_if_not_cached=False)
-    assert 2 == obj.get_field('number', from_cache=True, fetch_if_not_cached=False)
-    assert "asdf" == obj.get_field('string', from_cache=True, fetch_if_not_cached=False)
+    assert 2 == obj.get_field(
+        'number', from_cache=True, fetch_if_not_cached=False)
+    assert "asdf" == obj.get_field(
+        'string', from_cache=True, fetch_if_not_cached=False)
     assert 42 == obj.get_meaning_of_life("Douglas", last_name="Adams")
     if with_fields:
-        assert 1 == obj.get_field('id', from_cache=True, fetch_if_not_cached=False)
+        assert 1 == obj.get_field(
+            'id', from_cache=True, fetch_if_not_cached=False)
     else:
         with pytest.raises(CacheMiss):
             obj.get_field("id", from_cache=True, fetch_if_not_cached=False)
@@ -89,6 +107,7 @@ def test_requires_cache_invalidation_decorator(system, with_fields):
         obj.get_field("number", from_cache=True, fetch_if_not_cached=False)
     with pytest.raises(CacheMiss):
         obj.get_field("string", from_cache=True, fetch_if_not_cached=False)
+
 
 def test_auto_getter_attribute_already_exists_in_same_class(system):
     with pytest.raises(AttributeAlreadyExists):
@@ -100,7 +119,9 @@ def test_auto_getter_attribute_already_exists_in_same_class(system):
         class SomeObjectForUpdater(SystemObject):
             FIELDS = [Field("id", type=int, mutable=True)]
             _id = 'my id'
+
             def update_id(self, value): self._id = value
+
 
 def test_auto_getter_attribute_already_exists_in_base_class1(system):
     class SomeObject(SystemObject):
@@ -108,7 +129,9 @@ def test_auto_getter_attribute_already_exists_in_base_class1(system):
 
     class SomeDerivedObject(SomeObject):
         _id = 'other id'
+
         def get_id(self): return self._id
+
         def update_id(self, value): self._id = value
 
     some_derived_obj = SomeDerivedObject(FakeSystem(), {"id": 1})
@@ -116,10 +139,13 @@ def test_auto_getter_attribute_already_exists_in_base_class1(system):
     some_derived_obj.update_id('bla bla')
     assert some_derived_obj.get_id() == 'bla bla'
 
+
 def test_auto_getter_attribute_already_exists_in_base_class2(system):
     class SomeObject(SystemObject):
         _id = 'my id'
+
         def get_id(self): return self._id
+
         def update_id(self, value): self._id = value
 
     class SomeDerivedObject(SomeObject):
@@ -144,7 +170,7 @@ def test__equality(system):
     for unequal1, unequal2 in [
             (Obj(system1, {"id": 100}), Obj(system2, {"id": 100})),
             (Obj(system1, {"id": 100}), Obj(system1, {"id": 101})),
-            ]:
+    ]:
         assert unequal1 != unequal2
         assert not (unequal1 == unequal2)
         assert hash(unequal1) != hash(unequal2)
