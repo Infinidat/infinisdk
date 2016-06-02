@@ -1,8 +1,10 @@
 from api_object_schema import ObjectAPIBinding
 from sentinels import NOTHING
-
+from munch import Munch
+from infi.dtypes.iqn import IQN
+from infi.dtypes.wwn import WWN
 from .api.special_values import SpecialValue,RawValue
-
+from .translators_and_types import address_type_factory, host_port_from_api
 
 class InfiniSDKBinding(ObjectAPIBinding):
 
@@ -167,7 +169,7 @@ class PassthroughBinding(InfiniSDKBinding):
 
 class ListToDictBinding(InfiniSDKBinding):
     """
-    Binding for simple api quircks, where api expects the following:
+    Binding for simple api quirks, where api expects the following:
     [ { "name" : value1 }, { "name" : value2 } ]
     InfiniSDK will use a simple list of strings:
     [ value1, value2 ]
@@ -185,3 +187,22 @@ class ListToDictBinding(InfiniSDKBinding):
                 return value.generate()
             return value
         return [{self.key:val} for val in value]
+
+
+class InitiatorAddressBinding(InfiniSDKBinding):
+    def get_value_from_api_object(self, system, objtype, obj, api_obj): # pylint: disable=unused-argument, no-self-use
+        return host_port_from_api(api_obj)
+
+
+class InitiatorTargetsBinding(InfiniSDKBinding):
+    def get_value_from_api_object(self, system, objtype, obj, api_obj): # pylint: disable=unused-argument
+        initiator_type = api_obj.get('type') or obj.get_type(from_cache=True)
+        target_type = address_type_factory(initiator_type)
+        result = []
+        for target_info in api_obj[self._field.api_name]:
+            target = Munch(address=target_type(target_info.pop('address')))
+            if system.compat.has_iscsi():
+                target.node = system.components.nodes.get(index=target_info.pop('node_id'))
+            target.update(target_info)
+            result.append(target)
+        return result

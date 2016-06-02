@@ -87,16 +87,6 @@ MillisecondsDeltaType = TypeInfo(type=timedelta,
 WWNType = TypeInfo(type=WWN, api_type=str)
 
 
-class WWNListTranslator(ValueTranslator):
-    def _to_api(self, value):
-        return [str(wwpn) for wwpn in value]
-
-    def _from_api(self, value):
-        return [WWN(wwpn) for wwpn in value]
-
-WWNListType = TypeInfo(type=list, api_type=list, translator=WWNListTranslator())
-
-
 def host_port_to_api(value):
     if isinstance(value, WWN):
         port_type = 'fc'
@@ -110,9 +100,13 @@ def host_port_to_api(value):
     return {'type': port_type, 'address': str(value)}
 
 
+def address_type_factory(type_):
+    _TYPES = {'fc': WWN, 'iscsi': IQN}
+    return _TYPES[type_.lower()]
+
+
 def host_port_from_api(value):
-    _PORT_TYPES = {'fc': WWN, 'iscsi': IQN}
-    return _PORT_TYPES[value['type'].lower()](value['address'])
+    return address_type_factory(value['type'])(value['address'])
 
 
 class HostPortListTranslator(ValueTranslator):
