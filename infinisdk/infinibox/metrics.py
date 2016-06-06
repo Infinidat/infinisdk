@@ -158,9 +158,9 @@ class FilterField(object):
         #: type of the filter field
         self.type = info['type']
         #: possible filter values
-        self.predefined_values = info.get('predefined_values', None)
-        if self.predefined_values is not None:
-            self.predefined_values = set(self.predefined_values)
+        self.values = info.get('values', None)
+        if self.values is not None:
+            self.values = set(self.values)
 
     def __repr__(self):
         return '<{0.__class__.__name__} {0.name}>'.format(self)
