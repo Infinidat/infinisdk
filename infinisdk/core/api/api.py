@@ -66,7 +66,7 @@ class API(object):
         self._urls = [self._url_from_address(address, use_ssl) for address in target.get_api_addresses()]
         self._active_url = None
         self._checked_version = False
-        self._no_reponse_logs = False
+        self._no_reponse_logs = 0 # Use counter instead of bool, improves support for coroutines
         self._use_pretty_json = config.root.api.log.pretty_json
         self._login_refresh_enabled = True
 
@@ -365,12 +365,11 @@ class API(object):
 
     @contextmanager
     def get_no_response_logs_context(self):
-        prev = self._no_reponse_logs
-        self._no_reponse_logs = True
+        self._no_reponse_logs += 1
         try:
             yield
         finally:
-            self._no_reponse_logs = prev
+            self._no_reponse_logs -= 1
 
     @deprecated(message="Use get_no_response_logs_context instead")
     def no_response_logs_context(self):
