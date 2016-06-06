@@ -578,6 +578,8 @@ class _AutoRetryContext(object):
         for retry_predicate, retries_left in iteritems(self._retries_dict):
             if retries_left < 1:
                 return None
+            if retry_predicate not in self._global_retries_dict:
+                return None
             if retry_predicate(exc):
                 max_retries, retry_sleep_seconds = self._global_retries_dict[retry_predicate]
                 retried_count = max_retries - retries_left + 1
