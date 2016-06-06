@@ -200,9 +200,13 @@ class InitiatorTargetsBinding(InfiniSDKBinding):
         target_type = address_type_factory(initiator_type)
         result = []
         for target_info in api_obj[self._field.api_name]:
-            target = Munch(address=target_type(target_info.pop('address')))
+            target = Munch()
             if system.compat.has_iscsi():
+                target_address = target_info.pop('address')
                 target.node = system.components.nodes.get(index=target_info.pop('node_id'))
-            target.update(target_info)
+                target.update(target_info)
+            else:
+                target_address = target_info
+            target.address = target_type(target_address)
             result.append(target)
         return result
