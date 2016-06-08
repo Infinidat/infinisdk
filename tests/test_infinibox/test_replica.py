@@ -118,6 +118,7 @@ def test_replica_change_role(replica):
 
 @new_to_version('2.0')
 def test_replica_change_role_with_entity_pairs(replica):
+    pytest.skip('wait for sync before changing role')
     replica.get_remote_replica().change_role(entity_pairs=replica.get_entity_pairs())
 
 
