@@ -312,6 +312,13 @@ class Replica(InfiniBoxObject):
         returned = self.get_field('jobs')
         if not returned:
             returned = []
+        global_job_state = None
+        for j in returned:
+            if j.get('state') is None:
+                # workaround for several cases where state isn't reported
+                if global_job_state is None:
+                    global_job_state = self.get_field('job_state')
+                j['state'] = global_job_state
         return returned
 
     def is_replicating(self, *args, **kwargs):
