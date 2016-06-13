@@ -20,6 +20,8 @@ def hooks(forge, request):
         name="pre_hook")
     returned.post_object_creation_hook = forge.create_wildcard_function_stub(
         name="post_hook")
+    returned.object_creation_failure_hook = forge.create_wildcard_function_stub(
+        name='creation_failure_hook')
     returned.object_operation_failure_hook = forge.create_wildcard_function_stub(
         name="fail_hook")
 
@@ -27,6 +29,9 @@ def hooks(forge, request):
                     'infinidat.sdk.pre_object_creation', identifier)
     gossip.register(returned.post_object_creation_hook,
                     'infinidat.sdk.post_object_creation', identifier)
+    gossip.register(returned.object_creation_failure_hook,
+                    'infinidat.sdk.object_creation_failure', identifier)
+
     gossip.register(returned.object_operation_failure_hook,
                     'infinidat.sdk.object_operation_failure', identifier)
 
@@ -54,7 +59,7 @@ def test_creation_hook(hooks, forge, infinibox):
     infinibox.pools.create(name="test_pool")
 
 
-def test_creation_hook_failure(hooks, forge, infinibox):
+def test_creation_failure_hook(hooks, forge, infinibox):
     failure_hook_kwargs = {}
 
     hooks.pre_object_creation_hook(
@@ -64,6 +69,13 @@ def test_creation_hook_failure(hooks, forge, infinibox):
     )
     hooks.object_operation_failure_hook(exception=IsA(APICommandFailed)).\
         and_call_with_args(failure_hook_kwargs.update)
+    hooks.object_creation_failure_hook(
+        data=HasKeyValue("name", "test_pool"),
+        exception=IsA(APICommandFailed),
+        system=Is(infinibox),
+        cls=infinibox.pools.object_type
+    )
+
 
     forge.replay()
     with pytest.raises(APICommandFailed) as caught:
