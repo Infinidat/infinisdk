@@ -6,7 +6,7 @@ from contextlib import contextmanager
 from mitba import cached_method
 from urlobject import URLObject as URL
 
-from .exceptions import APICommandFailed, APITransportFailure
+from .exceptions import APICommandFailed
 from .system_object_utils import get_data_for_object_creation
 from .._compat import with_metaclass, iteritems, httplib, reraise, string_types  # pylint: disable=no-name-in-module
 from .exceptions import CacheMiss
@@ -61,7 +61,7 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
         return self.invalidate_cache(*field_names)
 
     @classmethod
-    def is_supported(cls, system):
+    def is_supported(cls, system): # pylint: disable=unused-argument
         return True
 
     @staticmethod
@@ -70,7 +70,7 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
         if len(fields) == 1 and callable(fields[0]):
             invalidate_fields = []
 
-        def wraps(func, *args, **kwargs):
+        def wraps(func, *args, **kwargs): # pylint: disable=unused-argument
             @functools.wraps(func)
             def invalidates(self, *args, **kwargs):
                 returned = func(self, *args, **kwargs)
@@ -88,17 +88,13 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
         return self.system == other.system and self.id == other.id
 
     def __ne__(self, other):
-        return not (self == other)
+        return not (self == other) # pylint: disable=superfluous-parens
 
     def __hash__(self):
         return hash(self.get_unique_key())
 
     def get_unique_key(self):
         return (self.system, type(self).__name__, self.id)
-
-    @classmethod
-    def is_supported(cls, system):
-        return True
 
     @classmethod
     def construct(cls, system, data):
@@ -122,7 +118,7 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
         return "{0}s".format(cls.get_type_name())
 
     @classmethod
-    def get_url_path(cls, system):
+    def get_url_path(cls, system): # pylint: disable=unused-argument
         url_path = cls.URL_PATH
         if url_path is None:
             url_path = "/api/rest/{0}".format(cls.get_plural_name())
