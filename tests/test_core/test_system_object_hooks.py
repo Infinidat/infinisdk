@@ -2,6 +2,7 @@ from forge import And, HasKeyValue, Is, IsA, HasAttributeValue
 
 import gossip
 import pytest
+from munch import Munch
 from infinisdk.core.api import OMIT
 from infinisdk.core.exceptions import APICommandFailed
 
@@ -36,7 +37,7 @@ def hooks(forge, request):
                     'infinidat.sdk.object_operation_failure', identifier)
 
     @request.addfinalizer
-    def cleanup():
+    def cleanup():              # pylint: disable=unused-variable
         gossip.unregister_token(identifier)
 
     return returned
@@ -82,3 +83,23 @@ def test_creation_failure_hook(hooks, forge, infinibox):
         infinibox.pools.create(name="test_pool", capacity=OMIT)
 
     assert caught.value is failure_hook_kwargs['exception']
+
+
+def test_deletion_failure_hook(request, volume):
+    pool = volume.get_pool()
+    status = Munch(called=False)
+
+    @gossip.register('infinidat.sdk.object_deletion_failure')
+    def object_deletion_failure(exception, obj): # pylint: disable=unused-variable
+        assert obj is pool
+        assert isinstance(exception, APICommandFailed)
+        status.exception = exception
+        status.called = True
+
+    request.addfinalizer(object_deletion_failure.gossip.unregister)
+
+
+    with pytest.raises(APICommandFailed) as caught:
+        pool.delete()
+    assert caught.value is status.exception
+    assert status.called

@@ -16,6 +16,7 @@ def _install_hooks():
             gossip.define(full_hook_name, tags=obj_type_name)
     gossip.define(_SDK_HOOK('object_operation_failure'), tags=obj_type_name)
     gossip.define(_SDK_HOOK('object_creation_failure'), tags=obj_type_name)
+    gossip.define(_SDK_HOOK('object_deletion_failure'), tags=obj_type_name)
 
     gossip.define(_SDK_HOOK("begin_fork"),  tags=['infinibox', 'volume', 'filesystem'])
     gossip.define(_SDK_HOOK("cancel_fork"), tags=['infinibox', 'volume', 'filesystem'])

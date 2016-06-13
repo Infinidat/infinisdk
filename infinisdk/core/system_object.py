@@ -388,8 +388,13 @@ class SystemObject(BaseSystemObject):
         hook_tags = self._get_tags_for_object_operations(self.system)
         gossip.trigger_with_tags('infinidat.sdk.pre_object_deletion', {
                                  'obj': self}, tags=hook_tags)
-        with _possible_api_failure_context(hook_tags):
-            yield
+        try:
+            with _possible_api_failure_context(hook_tags):
+                yield
+        except Exception as e:       # pylint: disable=broad-except
+            gossip.trigger_with_tags('infinidat.sdk.object_deletion_failure', {
+                'obj': self, 'exception': e}, tags=hook_tags)
+            raise
         gossip.trigger_with_tags('infinidat.sdk.post_object_deletion', {
                                  'obj': self}, tags=hook_tags)
 
