@@ -588,7 +588,7 @@ class ServiceCluster(InfiniBoxSystemComponent):
         return self.get_state() == 'ACTIVE'
 
     def is_inactive(self):
-        return self.get_state() == 'INACTIVE'
+        return self.get_state() in ('INACTIVE', 'SHUTDOWN')
 
 
 @InfiniBoxSystemComponents.install_component_type
