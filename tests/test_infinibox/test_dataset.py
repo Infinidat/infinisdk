@@ -306,11 +306,11 @@ def test_get_family_master(data_entity):
 
 @new_to_version('3.0')
 def test_compression_enabled(data_entity):
-    assert not data_entity.is_compression_enabled()
-    data_entity.enable_compression()
     assert data_entity.is_compression_enabled()
     data_entity.disable_compression()
     assert not data_entity.is_compression_enabled()
+    data_entity.enable_compression()
+    assert data_entity.is_compression_enabled()
 
 
 @pytest.mark.parametrize("name", [None, 'some_name'])

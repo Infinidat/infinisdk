@@ -118,11 +118,11 @@ def test_pool_thresholds(infinibox):
 
 @new_to_version('3.0')
 def test_compression_enabled(data_entity):
-    assert not data_entity.is_compression_enabled()
-    data_entity.enable_compression()
     assert data_entity.is_compression_enabled()
     data_entity.disable_compression()
     assert not data_entity.is_compression_enabled()
+    data_entity.enable_compression()
+    assert data_entity.is_compression_enabled()
 
 
 def test_forbid_multiple_capacity_for_creation(infinibox):
