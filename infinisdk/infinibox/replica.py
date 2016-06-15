@@ -95,6 +95,8 @@ class ReplicaBinder(TypeBinder):
             returned['local_cg_id'] = self._parent_or_entity_id(entity)
             if remote_entity is not None:
                 returned['remote_cg_id'] = self._parent_or_entity_id(remote_entity)
+        elif isinstance(entity, entity.system.filesystems.object_type):
+            returned['entity_type'] = 'FILESYSTEM'
         else:
             returned['entity_type'] = 'VOLUME'
         return returned
@@ -184,7 +186,9 @@ class Replica(InfiniBoxObject):
         return system.compat.has_replication()
 
     def _get_entity_collection(self):
-        if self.get_entity_type(from_cache=True) == 'VOLUME':
+        if self.is_filesystem():
+            return self.system.filesystems
+        if self.is_volume():
             return self.system.volumes
         return self.system.cons_groups
 
@@ -192,13 +196,16 @@ class Replica(InfiniBoxObject):
         """Returns the local entity used for replication, be it a volume or a consistency group.
         """
         if self.is_consistency_group():
-            return self.system.cons_groups.get_by_id_lazy(self.get_field('local_cg_id', from_cache=True))
+            return self.system.cons_groups.get_by_id_lazy(self.get_field('local_cg_id'))
 
         pairs = self.get_entity_pairs(from_cache=True)
         if len(pairs) > 1:
             raise TooManyObjectsFound('Entity pairs for {}'.format(self))
         [pair] = pairs
-        return self.system.volumes.get_by_id_lazy(pair['local_entity_id'])
+        if self.is_filesystem():
+            return self.system.filesystems.get_by_id_lazy(pair['local_entity_id'])
+        else:
+            return self.system.volumes.get_by_id_lazy(pair['local_entity_id'])
 
     def expose_last_consistent_snapshot(self):
         resp = self.system.api.post(self.get_this_url_path().add_path('expose_last_consistent_snapshot')).get_result()
@@ -247,12 +254,19 @@ class Replica(InfiniBoxObject):
     def is_consistency_group(self):
         """Returns whether this replica is configured with a consistency group as a local entity
         """
-        return self.get_field('entity_type', from_cache=True).lower() == 'consistency_group'
+        return self.get_entity_type(from_cache=True).lower() == 'consistency_group'
+
 
     def is_volume(self):
         """Returns True if this replica replicates a single volume entity
         """
-        return not self.is_consistency_group()
+        return self.get_entity_type(from_cache=True).lower() == 'volume'
+
+
+    def is_filesystem(self):
+        """Returns True if this replica replicates a single volume entity
+        """
+        return self.get_entity_type(from_cache=True).lower() == 'filesystem'
 
 
     def suspend(self):
@@ -413,7 +427,7 @@ class Replica(InfiniBoxObject):
 
         [entity_pair] = result.get('entity_pairs', [None])
         if entity_pair is not None:
-            return self._get_local_remote_snapshots(entity_pair, 'volumes', remote_replica, '_{0}_reclaimed_snapshot_id')
+            return self._get_local_remote_snapshots(entity_pair, 'volumes' if result['entity_type'] != 'FILESYSTEM' else 'filesystems', remote_replica, '_{0}_reclaimed_snapshot_id')
         return None, None
 
     def _get_local_remote_snapshots(self, result, collection_name, remote_replica, field_name_template):

@@ -5,7 +5,6 @@ from ..core import Field, CapacityType, MillisecondsDatetimeType
 from ..core.exceptions import InfiniSDKException, ObjectNotFound, TooManyObjectsFound
 from ..core.api.special_values import Autogenerate, SpecialValue, OMIT
 from ..core.bindings import RelatedObjectBinding
-from ..core.utils import DONT_CARE
 from .dataset import Dataset, DatasetTypeBinder
 from .lun import LogicalUnit, LogicalUnitContainer
 from .scsi_serial import SCSISerial
@@ -137,23 +136,6 @@ class Volume(Dataset):
 
     def get_logical_units(self):
         return LogicalUnitContainer.from_dict_list(self.system, self._get_luns_data_from_url())
-
-    def get_replicas(self):
-        pairs = self.system.api.get(self.get_this_url_path().add_path('replication_pairs')).response.json()['result']
-        return [self.system.replicas.get_by_id_lazy(pair['replica_id']) for pair in pairs]
-
-    def get_replica(self):
-        returned = self.get_replicas()
-        if len(returned) > 1:
-            raise TooManyObjectsFound('Replicas of {}'.format(self))
-        elif len(returned) == 0:
-            raise ObjectNotFound('Replicas of {}'.format(self))
-        return returned[0]
-
-    def is_replicated(self, from_cache=DONT_CARE):
-        """Returns True if this volume is a part of a replica, whether as source or as target
-        """
-        return any(self.get_fields(['rmr_source', 'rmr_target'], from_cache=from_cache).values())
 
     def unmap(self):
         """Unmaps a volume from its hosts

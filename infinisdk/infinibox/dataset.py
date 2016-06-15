@@ -4,8 +4,8 @@ from capacity import Capacity, byte
 from urlobject import URLObject as URL
 from collections import namedtuple
 from ..core.api.special_values import Autogenerate
-from ..core.utils import deprecated, end_reraise_context
-from ..core.exceptions import InvalidOperationException
+from ..core.utils import deprecated, end_reraise_context, DONT_CARE
+from ..core.exceptions import InvalidOperationException, ObjectNotFound, TooManyObjectsFound
 from ..core.type_binder import TypeBinder, PolymorphicBinder
 from .system_object import InfiniBoxObject
 
@@ -238,3 +238,20 @@ class Dataset(InfiniBoxObject):
             {'obj': self, 'with_capacity': with_capacity, 'system': self.system,
              'target_pool': target_pool, 'source_pool': source_pool},
             tags=hook_tags)
+
+    def get_replicas(self):
+        pairs = self.system.api.get(self.get_this_url_path().add_path('replication_pairs')).response.json()['result']
+        return [self.system.replicas.get_by_id_lazy(pair['replica_id']) for pair in pairs]
+
+    def get_replica(self):
+        returned = self.get_replicas()
+        if len(returned) > 1:
+            raise TooManyObjectsFound('Replicas of {}'.format(self))
+        elif len(returned) == 0:
+            raise ObjectNotFound('Replicas of {}'.format(self))
+        return returned[0]
+
+    def is_replicated(self, from_cache=DONT_CARE):
+        """Returns True if this volume is a part of a replica, whether as source or as target
+        """
+        return any(self.get_fields(['rmr_source', 'rmr_target'], from_cache=from_cache).values())

@@ -1,8 +1,10 @@
 from capacity import GB
 from ..core.q import Q
 from ..core import Field, CapacityType, MillisecondsDatetimeType
+from ..core.exceptions import ObjectNotFound, TooManyObjectsFound
 from ..core.api.special_values import Autogenerate
 from ..core.bindings import RelatedObjectBinding
+from ..core.utils import DONT_CARE
 from .dataset import Dataset, DatasetTypeBinder
 
 
@@ -49,6 +51,9 @@ class Filesystem(Dataset):
         Field("has_children", type=bool, add_getter=False),
         Field("root_mode", creation_parameter=True, optional=True, is_filterable=True, is_sortable=True),
         Field("atime_mode", is_filterable=True, is_sortable=True),
+        Field('rmr_source', type=bool),
+        Field('rmr_target', type=bool),
+        Field('rmr_snapshot_guid', is_filterable=True, is_sortable=True)
     ]
 
     @classmethod
