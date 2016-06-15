@@ -224,8 +224,7 @@ class Dataset(InfiniBoxObject):
             tags=hook_tags)
 
         try:
-            with self._possible_api_failure_context(tags=hook_tags):
-                self.system.api.post(self.get_this_url_path().add_path('move'), data=data)
+            self.system.api.post(self.get_this_url_path().add_path('move'), data=data)
         except Exception as e:
             gossip.trigger_with_tags(
                 'infinidat.sdk.pool_move_failure',

@@ -189,5 +189,23 @@ class ConsGroup(InfiniBoxObject):
         """Moves this entity to a new pool, optionally along with its needed capacity
         """
         data = dict(pool_id=target_pool.get_id(), with_capacity=with_capacity)
-        self.system.api.post(self.get_this_url_path().add_path('move'), data=data)
+        hook_tags = self._get_tags_for_object_operations(self.system)
+        source_pool = self.get_pool()
+
+        try:
+            self.system.api.post(self.get_this_url_path().add_path('move'), data=data)
+        except Exception as e:
+            gossip.trigger_with_tags(
+                'infinidat.sdk.pool_move_failure',
+                {'obj': self, 'with_capacity': with_capacity, 'system': self.system, 'exception': e,
+                 'target_pool': target_pool, 'source_pool': source_pool},
+                tags=hook_tags)
+            raise
+
+        gossip.trigger_with_tags(
+            'infinidat.sdk.post_pool_move',
+            {'obj': self, 'with_capacity': with_capacity, 'system': self.system,
+             'target_pool': target_pool, 'source_pool': source_pool},
+            tags=hook_tags)
+
         self.invalidate_cache('pool')

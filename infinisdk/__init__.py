@@ -26,9 +26,9 @@ def _install_hooks():
     gossip.define(_SDK_HOOK('post_data_restore'), tags=['infinibox', 'volume', 'filesystem'])
     gossip.define(_SDK_HOOK('data_restore_failure'), tags=['infinibox', 'volume', 'filesystem'])
 
-    gossip.define(_SDK_HOOK('pre_pool_move'), tags=['infinibox', 'volume', 'filesystem'])
-    gossip.define(_SDK_HOOK('post_pool_move'), tags=['infinibox', 'volume', 'filesystem'])
-    gossip.define(_SDK_HOOK('pool_move_failure'), tags=['infinibox', 'volume', 'filesystem'])
+    gossip.define(_SDK_HOOK('pre_pool_move'), tags=['infinibox', 'volume', 'filesystem', 'cons_group'])
+    gossip.define(_SDK_HOOK('post_pool_move'), tags=['infinibox', 'volume', 'filesystem', 'cons_group'])
+    gossip.define(_SDK_HOOK('pool_move_failure'), tags=['infinibox', 'volume', 'filesystem', 'cons_group'])
 
     gossip.define(_SDK_HOOK('pre_creation_data_validation'), tags=['infinibox', 'volume', 'filesystem'])
 
