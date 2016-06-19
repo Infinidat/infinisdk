@@ -169,7 +169,7 @@ class Replica(InfiniBoxObject):
         Field('restore_point', type=MillisecondsDatetimeType),
         Field('last_synchronized', type=int),
         Field('last_replicated_guid', api_name='_consistent_guid'),
-        Field('state', type=str),
+        Field('state', type=str, cached=False),
         Field('sync_interval', api_name='sync_interval', type=MillisecondsDeltaType,
               mutable=True,
               creation_parameter=True, default=timedelta(seconds=4)),
