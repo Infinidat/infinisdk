@@ -163,7 +163,7 @@ class Replica(InfiniBoxObject):
         Field('remote_pool_id', type=int,
               creation_parameter=True, optional=True),
         Field('remote_replica_id', type=int),
-        Field('role', type=str),
+        Field('role', type=str, cached=False),
         Field('progress', type=int),
         Field('jobs', type=list, cached=False),
         Field('restore_point', type=MillisecondsDatetimeType),
