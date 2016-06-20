@@ -18,7 +18,7 @@ class APITarget(with_metaclass(abc.ABCMeta)):
         :param address: Either a tuple of (host, port), or a list of such tuples for multiple addresses
         """
         if self._is_simulator(address):
-            address = self._get_simulator_address(address)
+            address = self._get_simulator_address(address, use_ssl=use_ssl)
         self._addresses = self._normalize_addresses(address, use_ssl)
 
         self.objects = TypeBinderContainer(self)
@@ -110,7 +110,7 @@ class APITarget(with_metaclass(abc.ABCMeta)):
     def _is_simulator(self, address):
         raise NotImplementedError() # pragma: no cover
 
-    def _get_simulator_address(self, address):
+    def _get_simulator_address(self, address, use_ssl):
         raise NotImplementedError() # pragma: no cover
 
     def _get_api_timeout(self):

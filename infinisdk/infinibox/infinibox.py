@@ -107,9 +107,9 @@ class InfiniBox(APITarget):
     def _is_simulator(self, address):
         return type(address).__name__ == "Infinibox"
 
-    def _get_simulator_address(self, address):
+    def _get_simulator_address(self, address, use_ssl):
         simulator_address = address.get_floating_addresses()[0]
-        return (simulator_address, 80)
+        return (simulator_address, 443 if use_ssl else 80)
 
     def get_approval_failure_codes(self):
         d = config.get_path('infinibox.approval_required_codes')
