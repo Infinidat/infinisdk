@@ -4,7 +4,7 @@ from capacity import Capacity, byte
 from urlobject import URLObject as URL
 from collections import namedtuple
 from ..core.api.special_values import Autogenerate
-from ..core.utils import deprecated
+from ..core.utils import deprecated, end_reraise_context
 from ..core.exceptions import InvalidOperationException
 from ..core.type_binder import TypeBinder, PolymorphicBinder
 from .system_object import InfiniBoxObject
@@ -81,9 +81,9 @@ class Dataset(InfiniBoxObject):
         try:
             self.system.api.post(self.get_this_url_path().add_path('refresh'), data={'source_id': parent.id})
         except Exception:
-            parent.trigger_cancel_fork()
-            trigger_hook('infinidat.sdk.refresh_snapshot_failure')
-            raise
+            with end_reraise_context():
+                parent.trigger_cancel_fork()
+                trigger_hook('infinidat.sdk.refresh_snapshot_failure')
         parent.trigger_finish_fork(self)
         trigger_hook('infinidat.sdk.post_refresh_snapshot')
 
