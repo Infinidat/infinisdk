@@ -71,10 +71,3 @@ def test_network_configuration_type(infinibox, network_config_type):
 def test_create_network_space_with_no_service(infinibox, service_value):
     network_space = create_network_space(infinibox, service=service_value)
     assert network_space.get_service() is None
-
-
-@new_to_version('2.0')
-def test_setting_service_to_special_value(infinibox):
-    network_space = create_network_space(infinibox, service=RawValue('NAS_SERVICE'))
-    network_space.update_service(RawValue(None))
-    assert network_space.get_service() is None
