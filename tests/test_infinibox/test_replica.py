@@ -116,6 +116,15 @@ def test_replica_change_role(replica):
     assert replica.is_target()
 
 
+@new_to_version('3.0')
+def test_replica_user_suspended(replica):
+    assert not replica.is_user_suspended()
+    replica.suspend()
+    assert replica.is_user_suspended()
+    replica.resume()
+    assert not replica.is_user_suspended()
+
+
 @new_to_version('2.0')
 def test_replica_change_role_with_entity_pairs(replica):
     pytest.skip('wait for sync before changing role')

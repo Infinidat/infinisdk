@@ -278,10 +278,16 @@ class Replica(InfiniBoxObject):
             raise CannotGetReplicaState('Replica state cannot be checked on target replica')
 
     def is_suspended(self, *args, **kwargs):
-        """Returns whether or not this replica is in suspended state
+        """Returns whether or not this replica is currently suspended
         """
         self._validate_can_check_state()
         return self.get_state(*args, **kwargs).lower() in ['suspended', 'auto_suspended']
+
+    def is_user_suspended(self, *args, **kwargs):
+        """Returns whether or not this replica is currently suspended due to a user request
+        """
+        self._validate_can_check_state()
+        return self.get_state(*args, **kwargs).lower() == 'suspended'
 
     def is_idle(self, *args, **kwargs):
         """Returns whether or not this replica is in idle state
