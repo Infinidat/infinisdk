@@ -80,7 +80,7 @@ class Dataset(InfiniBoxObject):
         parent.trigger_begin_fork()
         try:
             self.system.api.post(self.get_this_url_path().add_path('refresh'), data={'source_id': parent.id})
-        except Exception:
+        except Exception:       # pylint: disable=broad-except
             with end_reraise_context():
                 parent.trigger_cancel_fork()
                 trigger_hook('infinidat.sdk.refresh_snapshot_failure')
