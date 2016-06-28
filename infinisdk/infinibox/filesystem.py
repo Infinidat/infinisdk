@@ -1,6 +1,5 @@
-from capacity import GB
 from ..core.q import Q
-from ..core import Field, CapacityType, MillisecondsDatetimeType
+from ..core import Field
 from ..core.exceptions import ObjectNotFound, TooManyObjectsFound
 from ..core.api.special_values import Autogenerate
 from ..core.bindings import RelatedObjectBinding
@@ -13,48 +12,16 @@ class FilesystemBinder(DatasetTypeBinder):
 
 
 class Filesystem(Dataset):
-
-    BINDER_CLASS = FilesystemBinder
-
     FIELDS = [
-        Field("id", type=int, is_identity=True,
-              is_filterable=True, is_sortable=True),
-        Field("name", creation_parameter=True, mutable=True, is_filterable=True,
-              is_sortable=True, default=Autogenerate("fs_{uuid}")),
-        Field("dataset_type", is_filterable=True, is_sortable=True),
-        Field("num_blocks", type=int),
-        Field("size", creation_parameter=True, mutable=True,
-              is_filterable=True, is_sortable=True, default=GB, type=CapacityType),
-        Field("used_size", api_name="used", type=CapacityType),
-        Field("allocated", type=CapacityType, is_sortable=True, is_filterable=True),
-        Field("tree_allocated", type=CapacityType),
-        Field("pool", type='infinisdk.infinibox.pool:Pool', api_name="pool_id", creation_parameter=True,
-              is_filterable=True, is_sortable=True, binding=RelatedObjectBinding()),
-        Field("type", cached=True, is_filterable=True, is_sortable=True),
         Field("parent", type='infinisdk.infinibox.filesystem:Filesystem', cached=True, api_name="parent_id",
               binding=RelatedObjectBinding('filesystems'), is_filterable=True),
-        Field("family_id", type=int, cached=True, is_filterable=True, is_sortable=True),
-        Field("provisioning", api_name="provtype", mutable=True, creation_parameter=True,
-              is_filterable=True, is_sortable=True, default="THICK"),
-        Field("created_at", cached=True, type=MillisecondsDatetimeType, is_sortable=True, is_filterable=True),
-        Field("updated_at", type=MillisecondsDatetimeType, is_sortable=True, is_filterable=True),
-        Field("ssd_enabled", type=bool, mutable=True, toggle_name='ssd', creation_parameter=True,
-              is_filterable=True, is_sortable=True, optional=True),
-        Field("write_protected", type=bool, mutable=True, creation_parameter=True, optional=True,
-              is_filterable=True, is_sortable=True, toggle_name='write_protection'),
-        Field("compression_enabled", type=bool, mutable=True, creation_parameter=True, optional=True,
-              is_filterable=True, is_sortable=True, feature_name='compression', toggle_name='compression'),
-        Field("compression_suppressed", type=bool, feature_name='compression'),
-        Field("capacity_savings", type=CapacityType, feature_name='compression'),
-        Field("depth", cached=True, type=int, is_sortable=True, is_filterable=True),
-        Field("mapped", type=bool, is_sortable=True, is_filterable=True),
-        Field("has_children", type=bool, add_getter=False),
+        Field("name", creation_parameter=True, mutable=True, is_filterable=True,
+              is_sortable=True, default=Autogenerate("fs_{uuid}")),
         Field("root_mode", creation_parameter=True, optional=True, is_filterable=True, is_sortable=True),
         Field("atime_mode", is_filterable=True, is_sortable=True),
-        Field('rmr_source', type=bool),
-        Field('rmr_target', type=bool),
-        Field('rmr_snapshot_guid', is_filterable=True, is_sortable=True)
     ]
+
+    BINDER_CLASS = FilesystemBinder
 
     @classmethod
     def is_supported(cls, system):
