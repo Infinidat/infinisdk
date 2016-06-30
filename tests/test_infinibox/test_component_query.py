@@ -125,6 +125,9 @@ def test_system_component_find_with_params(infinibox):
 def test_system_component_find_no_type(infinibox):
     fetched_types = set(type(component) for component in infinibox.components.find())
     for component_type in infinibox.components.get_component_types():
+        if component_type.get_type_name() == 'ib_port':
+            if infinibox.compat.normalize_version_string('3.0') > infinibox.compat.get_parsed_system_version():
+                continue
         assert(component_type in fetched_types)
 
 def test_component_not_found(infinibox):
