@@ -207,6 +207,10 @@ class InfiniBoxSystemComponent(BaseSystemObject):
         # Currently there is no url, in infinibox, to get all instances of specific component
         raise NotImplementedError()  # pragma: no cover
 
+    def get_binder(self):
+        return self.system.components[self.get_plural_name()]
+    get_collection = get_binder
+
     def get_sub_components(self):
         return self.system.components.find(parent_id=self.id)
 
