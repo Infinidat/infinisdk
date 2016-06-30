@@ -153,6 +153,7 @@ class InfiniBoxComponentBinder(TypeBinder):
         components = self.system.components
         if self.object_type in [components.nodes.object_type,
                                 components.services.object_type,
+                                components.ib_ports.object_type,
                                 components.fc_ports.object_type,
                                 components.eth_ports.object_type,
                                 components.local_drives.object_type,
@@ -309,6 +310,7 @@ class Node(InfiniBoxSystemComponent):
         Field("index", api_name="id", type=int, cached=True),
         Field("name", cached=True),
         Field("model", cached=True),
+        Field("ib_ports", type=list, binding=ListOfRelatedComponentBinding()),
         Field("fc_ports", type=list, binding=ListOfRelatedComponentBinding()),
         Field("eth_ports", type=list, binding=ListOfRelatedComponentBinding()),
         Field("drives", type=list, binding=ListOfRelatedComponentBinding("local_drives")),
@@ -382,6 +384,7 @@ class LocalDrive(InfiniBoxSystemComponent):
     def is_ssd(self):
         return self.get_type() == 'SSD'
 
+
 @InfiniBoxSystemComponents.install_component_type
 class EthPort(InfiniBoxSystemComponent):
     FIELDS = [
@@ -412,6 +415,31 @@ class EthPort(InfiniBoxSystemComponent):
         if self.get_state() != 'OK':
             return False
         return self.get_link_state().lower() in ("link up", "up")
+
+
+@InfiniBoxSystemComponents.install_component_type
+class IbPort(InfiniBoxSystemComponent):
+    FIELDS = [
+        Field("index", api_name="id", type=int, cached=True),
+        Field("firmware"),
+        Field("last_probe_timestamp", type=int),
+        Field("link_state", cached=False),
+        Field("model", cached=True),
+        Field("node_index", type=int, cached=True),
+        Field("probe_ttl", type=int),
+        Field("state", cached=False),
+        Field("state_description", cached=False),
+        Field("vendor", cached=True),
+    ]
+
+    @classmethod
+    def get_type_name(cls):
+        return "ib_port"
+
+    def is_link_up(self):
+        if self.get_state() != 'OK':
+            return False
+        return self.get_link_state().lower() == "up"
 
 
 class FcPorts(InfiniBoxComponentBinder):
