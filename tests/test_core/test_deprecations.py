@@ -46,18 +46,24 @@ def _no_decorator(func):
     return func
 
 
-@pytest.mark.parametrize('decorator', [_no_decorator, classmethod])
-def test_class_deprecation(capture, decorator):
+@pytest.mark.parametrize('use_classmethod', [True, False])
+def test_class_deprecation(capture, use_classmethod):
+
+    decorator = classmethod if use_classmethod else _no_decorator
 
     class Bla(object):
 
         @deprecated('reason')
-        @classmethod
+        @decorator
         def func(self, a, b):
-            assert isinstance(self, Bla)
+            if use_classmethod:
+                assert issubclass(self, Bla)
+            else:
+                assert isinstance(self, Bla)
+
             return a + b
 
-    assert Bla().func(2, 4) == 6
+    assert (Bla if use_classmethod else Bla()).func(2, 4) == 6
 
     [record] = capture.records
     assert 'Bla.func is deprecated' in record.message
