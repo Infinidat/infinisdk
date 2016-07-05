@@ -38,7 +38,7 @@ class Metrics(object):
             'filters': filters})
 
         created_filter = Filter(self.system, resp.get_result()['filter_id'])
-        return Collector(self.system, created_filter, collected_fields, resp.get_result()['id'])
+        return Collector(self.system, created_filter, collected_fields, resp.get_result()['id'], type_=type)
 
     def get_available_fields(self):
         resp = self.system.api.get(_METRICS_URL.add_path('available_fields'))
@@ -135,10 +135,10 @@ class Filter(object):
             'type': type,
             'filter_id': self.id}
         data.update(kwargs)
-        
+
         resp = self.system.api.post(_METRICS_URL.add_path('collectors'), data=data)
 
-        return Collector(self.system, self, collected_fields, resp.get_result()['id'])
+        return Collector(self.system, self, collected_fields, resp.get_result()['id'], type_=type)
 
     def get_this_url_path(self):
         return _METRICS_URL.add_path('filters').add_path(str(self.id))
@@ -188,12 +188,16 @@ class Collector(object):
     """Represents a single collector that can be polled for data
     """
 
-    def __init__(self, system, filter, field_names, id):
+    def __init__(self, system, filter, field_names, id, type_):
         super(Collector, self).__init__()
         self.system = system
         self.filter = filter
         self.field_names = field_names
         self.id = id
+        self._type = type_
+
+    def get_type(self):
+        return self._type
 
     def get_samples(self, wait=False):
         """Get all samples which are ready for collection
