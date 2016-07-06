@@ -22,6 +22,7 @@ Contents:
    capacities
    pools
    volumes
+   filesystems
    mappings
    snapshots
    cons_groups
