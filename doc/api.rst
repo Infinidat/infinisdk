@@ -34,8 +34,8 @@ infinibox.volumes
    :members:
    :inherited-members:
 
-infinibox.volumes
-~~~~~~~~~~~~~~~~~
+infinibox.filesystems
+~~~~~~~~~~~~~~~~~~~~~
 
 .. automodule:: infinisdk.infinibox.filesystem
 
