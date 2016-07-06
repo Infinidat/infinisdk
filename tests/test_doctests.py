@@ -10,8 +10,6 @@ _DOCS_ROOT = os.path.abspath(os.path.join(_HERE, "..", "doc"))
 
 
 def test_sphinx_doctest(doctest_path):
-    if doctest_path.endswith('/doc/filesystems.rst'):
-        pytest.skip('Filesystems docs are broken')
     context_filename = doctest_path + ".doctest_context"
     context = {}
     if os.path.exists(context_filename):

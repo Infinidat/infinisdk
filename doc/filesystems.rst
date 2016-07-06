@@ -141,9 +141,6 @@ Like other infinidat collections, InfiniSDK provides iteration and filtering abi
 		>>> system.exports.count()
 		1
 
-		>>> system.exports.to_list()
-		[]
-
 
 Export Permissions
 --------------------
@@ -154,18 +151,21 @@ Export Permissions
 | To preserve current permission settings, first use :meth:`.Export.get_permissions`, then update accordingly.
 
 .. code-block:: python
-
+		>>> from munch import Munch
 		>>> permissions = export.get_permissions()
-		>>> permissions
-		[Munch({'access': 'RW', 'client': '*', 'no_root_squash': True})]
+		>>> permissions[0] ==  Munch({'access': 'RW', 'no_root_squash': True, 'client': '*'})
+		True
 		>>> export.update_permissions(permissions +
 		...   [{'access': 'RO', 'client': '1.1.1.1', 'no_root_squash': True}])
-		>>> export.get_permissions()
-		[Munch({u'access': u'RW', u'no_root_squash': True, u'client': u'*'}), Munch({u'access': u'RW', u'no_root_squash': True, u'client': u'1.1.1.1'})]
+		>>> permissions = export.get_permissions()
+		>>> permissions[0] == Munch({'access': 'RW', 'no_root_squash': True, 'client': '*'})
+		True
+		>>> permissions[1] == Munch({'access': 'RO', 'no_root_squash': True, 'client': '1.1.1.1'})
+		True
 		>>> export.update_permissions([{'access': 'RW', 'client': '2.2.2.2', 'no_root_squash': True}])
-		>>> export.get_permissions()
-		[Munch({u'access': u'RW', u'no_root_squash': True, u'client': u'2.2.2.2'})]
-
+		>>> permissions = export.get_permissions()
+		>>> permissions[0] == Munch({'access': 'RW', 'no_root_squash': True, 'client': '2.2.2.2'})
+		True
 
 Deleting an Export
 --------------------
