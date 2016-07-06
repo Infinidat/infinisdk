@@ -8,13 +8,13 @@ Creating filesystems is done with the ``create`` method:
 
 .. code-block:: python
 
-		>>> fs = system.filesystems.create(pool=pool, name='my_fs')
+		>>> from capacity import GiB, GB
+		>>> my_fs = system.filesystems.create(pool=pool, name='my_fs', size=GiB)
 
 .. note:: When a size isn't explicitly stated, a default of 1 GiB is used. You can also provide the size explicitly:
 
 	  .. code-block:: python
 
-			  >>> from capacity import GiB
 			  >>> fs = system.filesystems.create(pool=pool, size=1*GiB)
 
 It is also possible to create multiple filesystems with a single line, by calling :meth:`.create_many`:
@@ -37,10 +37,10 @@ We can now access various attributes of the filesystem:
 
 .. code-block:: python
 
-		>>> print(fs.get_name())
+		>>> print(my_fs.get_name())
 		my_fs
-		>>> fs.get_size()
-		1*GB
+		>>> my_fs.get_size()
+		1*GiB
 
 
 Moving Between Pools
@@ -103,10 +103,10 @@ We can now access and modify various attributes of the export:
 .. code-block:: python
 		>>> from capacity import MiB
 		>>> export.get_max_read()
-		1*MB
+		1*MiB
 		>>> export.update_max_read(2*MiB)
 		>>> export.get_max_read()
-		2*MB
+		2*MiB
 
 
 Disabling an Export
@@ -139,21 +139,10 @@ Like other infinidat collections, InfiniSDK provides iteration and filtering abi
 .. code-block:: python
 
 		>>> system.exports.count()
-		0
+		1
 
 		>>> system.exports.to_list()
 		[]
-
-
-Deleting an Export
---------------------
-
-Deleting an export is done with :meth:`.Export.delete`:
-
-.. code-block:: python
-
-		>>> export.delete()
-
 
 
 Export Permissions
@@ -168,11 +157,21 @@ Export Permissions
 
 		>>> permissions = export.get_permissions()
 		>>> permissions
-		[Munch({u'access': u'RW', u'no_root_squash': True, u'client': u'*'})]
+		[Munch({'access': 'RW', 'client': '*', 'no_root_squash': True})]
 		>>> export.update_permissions(permissions +
 		...   [{'access': 'RO', 'client': '1.1.1.1', 'no_root_squash': True}])
 		>>> export.get_permissions()
-		[Munch({u'access': u'RW', u'no_root_squash': True, u'client': u'*'}),
-		 Munch({u'access': u'RW', u'no_root_squash': True, u'client': u'1.1.1.1'})]
-		>>> permissions.update_permissions([{'access': 'RW', 'client': '2.2.2.2', 'no_root_squash': True})
+		[Munch({u'access': u'RW', u'no_root_squash': True, u'client': u'*'}), Munch({u'access': u'RW', u'no_root_squash': True, u'client': u'1.1.1.1'})]
+		>>> export.update_permissions([{'access': 'RW', 'client': '2.2.2.2', 'no_root_squash': True}])
+		>>> export.get_permissions()
 		[Munch({u'access': u'RW', u'no_root_squash': True, u'client': u'2.2.2.2'})]
+
+
+Deleting an Export
+--------------------
+
+Deleting an export is done with :meth:`.Export.delete`:
+
+.. code-block:: python
+
+		>>> export.delete()
