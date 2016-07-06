@@ -141,7 +141,7 @@ Like other infinidat collections, InfiniSDK provides iteration and filtering abi
 		>>> system.exports.count()
 		0
 
-		>>> system.volumes.to_list()
+		>>> system.exports.to_list()
 		[]
 
 

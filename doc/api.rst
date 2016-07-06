@@ -34,6 +34,16 @@ infinibox.volumes
    :members:
    :inherited-members:
 
+infinibox.volumes
+~~~~~~~~~~~~~~~~~
+
+.. automodule:: infinisdk.infinibox.filesystem
+
+.. autoclass:: Filesystem
+   :members:
+   :inherited-members:
+
+
 infinibox.pools
 ~~~~~~~~~~~~~~~
 
