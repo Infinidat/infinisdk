@@ -1,3 +1,4 @@
+from uuid import uuid4
 import logbook
 import pytest
 from infinisdk.core.api import Autogenerate, OMIT
@@ -219,3 +220,15 @@ def test_delete_cookie(infinibox):
     infinibox.api.set_cookie('x', 'y')
     infinibox.api.delete_cookie('x')
     assert 'x' not in infinibox.api._session.cookies
+
+
+def test_added_headers_context(infinibox):
+    # pylint: disable=protected-access
+    header_name = 'X-some-header'
+    header_value = str(uuid4())
+    prev_headers = dict(infinibox.api._session.headers)
+    expected_headers = dict(prev_headers)
+    expected_headers[header_name] = header_value
+    with infinibox.api.added_headers_context({header_name: header_value}):
+        assert infinibox.api._session.headers == expected_headers
+    assert infinibox.api._session.headers == prev_headers

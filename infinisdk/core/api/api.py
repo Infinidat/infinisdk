@@ -92,6 +92,18 @@ class API(object):
             self._check_version_compatibility = prev
 
     @contextmanager
+    def added_headers_context(self, headers):
+        prev = self._session.headers.copy()
+        try:
+            for k, v in headers.items():
+                self._session.headers[k] = v
+            yield
+        finally:
+            self._session.headers.clear()
+            for k, v in prev.items():
+                self._session.headers[k] = v
+
+    @contextmanager
     def use_basic_auth_context(self):
         """Causes API requests to send auth through Basic authorization
         """
