@@ -658,7 +658,7 @@ class System(InfiniBoxSystemComponent):
     def safe_get_state(self):
         try:
             return self.get_state()
-        except:  # pylint: disable=bare-except
+        except Exception:  # pylint: disable=broad-except
             return None
 
     def is_active(self):

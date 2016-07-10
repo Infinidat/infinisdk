@@ -33,7 +33,7 @@ class VolumesBinder(DatasetTypeBinder):
                     for v in volumes
                 ]
             })
-        except:
+        except Exception:
             for v in volumes:
                 v.trigger_cancel_fork()
             raise
