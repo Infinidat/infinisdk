@@ -76,6 +76,8 @@ class Metrics(object):
                                     timedelta(seconds=interval * (len(series) - index + 1))
                         if collector_data['collector_type'] == "HISTOGRAM":
                             returned.append(HistogramSample(collector_data['histogram_field'], collector_data['ranges'], collector, sample, timestamp, interval))
+                        elif collector_data['collector_type'] == "TOP":
+                            returned.append(TopSample(collector, sample, timestamp, interval))
                         else:
                             returned.append(Sample(collector, sample, timestamp, interval))
 
@@ -295,3 +297,7 @@ class HistogramSample(Sample):
             item = '{}: {}'.format(range, bucket_str)
             returned.append(item)
         return ', '.join(returned)
+
+class TopSample(Sample):
+    def _get_values(self):
+         return Munch(izip_longest(self.collector.field_names, self.value_list[0] if self.value_list else []))
