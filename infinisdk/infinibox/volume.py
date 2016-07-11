@@ -1,8 +1,7 @@
 import logbook
-from capacity import GB
 from storage_interfaces.scsi.abstracts import ScsiVolume
-from ..core import Field, CapacityType, MillisecondsDatetimeType
-from ..core.exceptions import InfiniSDKException, ObjectNotFound, TooManyObjectsFound
+from ..core import Field
+from ..core.exceptions import InfiniSDKException
 from ..core.api.special_values import Autogenerate, SpecialValue, OMIT
 from ..core.bindings import RelatedObjectBinding
 from .dataset import Dataset, DatasetTypeBinder

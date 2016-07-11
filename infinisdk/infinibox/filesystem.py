@@ -1,9 +1,7 @@
 from ..core.q import Q
 from ..core import Field
-from ..core.exceptions import ObjectNotFound, TooManyObjectsFound
 from ..core.api.special_values import Autogenerate
 from ..core.bindings import RelatedObjectBinding
-from ..core.utils import DONT_CARE
 from .dataset import Dataset, DatasetTypeBinder
 
 
