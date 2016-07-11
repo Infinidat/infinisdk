@@ -16,7 +16,7 @@ def test_create_cg(infinibox, pool):
 @pytest.mark.parametrize('field', ConsGroup.FIELDS)
 def test_get_cg_fields(cg, field):
     field_value = cg.get_field(field.name)
-    if field.name == 'parent':
+    if field.name in {'parent', 'rmr_snapshot_guid'}:
         assert field_value is None
     else:
         assert loose_isinstance(field_value, field.type.type)
@@ -34,6 +34,12 @@ def test_get_members(cg, volume):
     cg.remove_member(volume)
     assert cg.get_members_count() == 0
     assert len(cg.get_members()) == 0
+
+
+@new_to_version('2.2')
+def test_get_rmr_snapshot_guid(cg):
+    assert cg.get_rmr_snapshot_guid() is None
+
 
 
 @pytest.fixture
