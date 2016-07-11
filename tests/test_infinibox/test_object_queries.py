@@ -18,3 +18,7 @@ def test_type_binder_to_list(type_binder):
 
 def test_query_count(type_binder):
     assert type_binder.count() == type_binder.find().count()
+
+def test_null_checking_with_equality(infinibox, volume):
+    query = infinibox.volumes.find(Q.cons_group == None)
+    assert str(query).endswith('cg_id=eq%3Anull')

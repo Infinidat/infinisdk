@@ -24,6 +24,9 @@ class FieldFilter(object):
         else:
             value = self._translate(self.value)
 
+        if value is None:
+            value = 'null'
+
         return urlobj.add_query_param(self.field.api_name,
                                       "{0}:{1}".format(self.operator_name, value))
 
