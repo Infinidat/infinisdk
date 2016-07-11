@@ -25,7 +25,7 @@ class LazyQuery(object):
             self._fetch()
         if self._requested_page is not None:
             start = (self._requested_page - 1) * self._requested_page_size
-            end = start + self._requested_page_size
+            end = min(start + self._requested_page_size, len(self))
         else:
             start = 0
             end = len(self)
