@@ -87,11 +87,6 @@ class Compatibility(object):
     def has_feature(self, feature_key):
         return self._get_feature_version(feature_key, NOTHING) is not NOTHING
 
-    def set_feature_as_supported(self, feature_key, version=0):
-        assert self._get_feature_version(
-            feature_key, 0) <= version, "Cannot downgrade feature's supported version"
-        self._features[feature_key] = version
-
     def has_npiv(self):
         return self.has_feature('fc_soft_targets') or self.has_feature('fc/soft_targets')
 
@@ -104,11 +99,8 @@ class Compatibility(object):
     def has_compression(self):
         return self.has_feature('compression')
 
-    def get_nas_version(self):
-        return self._get_feature_version('nas', 0)
-
     def has_nas(self):
-        return self.get_nas_version() >= 2
+        return self._get_feature_version('nas', 0) >= 2
 
     def has_network_configuration(self):
         return int(self.get_version_major()) >= 2

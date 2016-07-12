@@ -86,8 +86,6 @@ def infinibox(request, infinibox_simulator):
     infinibox.login()
     required_version_kwargs = getattr(request.function, 'required_version', _DEFAULT_REQUIRED_VERSION).kwargs
     validate_unittest_compatibility_with_infinibox_version(infinibox, **required_version_kwargs)
-    if infinibox.compat.get_nas_version() == 1:
-        infinibox.compat.set_feature_as_supported('nas', 2)
     return infinibox
 
 @pytest.fixture
