@@ -6,6 +6,12 @@ from .._compat import httplib
 from ..core.config import config
 from ..core.utils import deprecated
 
+class Feature(object):
+    def __init__(self, name, version, enabled):
+        self.name = name
+        self.version = version
+        self.enabled = enabled
+
 
 class Compatibility(object):
 
@@ -67,16 +73,18 @@ class Compatibility(object):
         else:
             resp.assert_success()
             features_list = resp.get_result()
-        self._features = dict((feature_info['name'], feature_info['version'])
-                              for feature_info in features_list
-                              if feature_info.get('enabled', True))
+        self._features = dict((feature_info['name'], Feature(feature_info['name'], feature_info['version'], feature_info.get('enabled', True)))
+                              for feature_info in features_list)
 
     def _get_feature_version(self, feature_key, default_version=NOTHING):
         if self._features is None:
             self._init_features()
-        return self._features.get(feature_key, default_version)
+        feature = self._features.get(feature_key, None)
+        if feature is None or not feature.enabled:
+            return default_version
+        return feature.version
 
-    def _has_feature(self, feature_key):
+    def has_feature(self, feature_key):
         return self._get_feature_version(feature_key, NOTHING) is not NOTHING
 
     def set_feature_as_supported(self, feature_key, version=0):
@@ -85,16 +93,16 @@ class Compatibility(object):
         self._features[feature_key] = version
 
     def has_npiv(self):
-        return self._has_feature('fc_soft_targets') or self._has_feature('fc/soft_targets')
+        return self.has_feature('fc_soft_targets') or self.has_feature('fc/soft_targets')
 
     def has_replication(self):
         return int(self.get_version_major()) >= 2
 
     def has_iscsi(self):
-        return self._has_feature('iscsi')
+        return self.has_feature('iscsi')
 
     def has_compression(self):
-        return self._has_feature('compression')
+        return self.has_feature('compression')
 
     def get_nas_version(self):
         return self._get_feature_version('nas', 0)
@@ -118,13 +126,13 @@ class Compatibility(object):
         return self._get_feature_version("user_management", 0) >= 1
 
     def has_auth_sessions(self):
-        return self._has_feature('api_auth_sessions') or self._has_feature('api/auth_sessions')
+        return self.has_feature('api_auth_sessions') or self.has_feature('api/auth_sessions')
 
     def has_max_speed(self):
         return self.get_version_as_float() > 2.2
 
     def has_writable_snapshots(self):
-        return self._has_feature('snapshots')
+        return self.has_feature('snapshots')
 
     @deprecated('Use has_writable_snapshots instead')
     def has_snapclones(self):
@@ -134,7 +142,7 @@ class Compatibility(object):
         return self.get_version_as_float() >= 3.0
 
     def has_nas_replication(self):
-        return self._has_feature('filesystem_replicas')
+        return self.has_feature('filesystem_replicas')
 
 _VERSION_TUPLE_LEN = 5
 
