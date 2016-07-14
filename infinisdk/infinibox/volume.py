@@ -4,6 +4,7 @@ from ..core import Field
 from ..core.exceptions import InfiniSDKException
 from ..core.api.special_values import Autogenerate, SpecialValue, OMIT
 from ..core.bindings import RelatedObjectBinding
+from ..core.utils import end_reraise_context
 from .dataset import Dataset, DatasetTypeBinder
 from .lun import LogicalUnit, LogicalUnitContainer
 from .scsi_serial import SCSISerial
@@ -32,10 +33,10 @@ class VolumesBinder(DatasetTypeBinder):
                     for v in volumes
                 ]
             })
-        except Exception:
-            for v in volumes:
-                v.trigger_cancel_fork()
-            raise
+        except Exception as e:  # pylint: disable=broad-except, unused-variable
+            with end_reraise_context():
+                for v in volumes:
+                    v.trigger_cancel_fork()
         else:
             snaps_by_parent_id = {}
             for entity in resp.get_result():

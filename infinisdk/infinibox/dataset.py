@@ -118,7 +118,7 @@ class Dataset(InfiniBoxObject):
         parent.trigger_begin_fork()
         try:
             self.system.api.post(self.get_this_url_path().add_path('refresh'), data={'source_id': parent.id})
-        except Exception:       # pylint: disable=broad-except
+        except Exception:  # pylint: disable=broad-except
             with end_reraise_context():
                 parent.trigger_cancel_fork()
                 trigger_hook('infinidat.sdk.refresh_snapshot_failure')
@@ -151,9 +151,9 @@ class Dataset(InfiniBoxObject):
         data = {'name': name, 'parent_id': self.get_id()}
         try:
             child = self._create(self.system, self.get_url_path(self.system), data=data, tags=self._get_tags_for_object_operations(self.system))
-        except Exception:
-            self.trigger_cancel_fork()
-            raise
+        except Exception:  # pylint: disable=broad-except
+            with end_reraise_context():
+                self.trigger_cancel_fork()
         self.trigger_finish_fork(child)
         self._handle_possible_replication_snapshot(child)
         return child
@@ -200,9 +200,9 @@ class Dataset(InfiniBoxObject):
         self.trigger_before_restore(snapshot)
         try:
             self.system.api.post(restore_url, data=snapshot_id)
-        except Exception as e:
-            self.trigger_data_restore_failure(snapshot, e)
-            raise
+        except Exception as e:  # pylint: disable=broad-except
+            with end_reraise_context():
+                self.trigger_data_restore_failure(snapshot, e)
         self.trigger_after_restore(snapshot)
 
     def trigger_before_restore(self, source):
@@ -263,13 +263,15 @@ class Dataset(InfiniBoxObject):
 
         try:
             self.system.api.post(self.get_this_url_path().add_path('move'), data=data)
-        except Exception as e:
-            gossip.trigger_with_tags(
-                'infinidat.sdk.pool_move_failure',
-                {'obj': self, 'with_capacity': with_capacity, 'system': self.system, 'exception': e,
-                 'target_pool': target_pool, 'source_pool': source_pool},
-                tags=hook_tags)
-            raise
+        except Exception as e:  # pylint: disable=broad-except
+            with end_reraise_context():
+                gossip.trigger_with_tags('infinidat.sdk.pool_move_failure', {
+                    'obj': self,
+                    'with_capacity': with_capacity,
+                    'system': self.system,
+                    'exception': e,
+                    'target_pool': target_pool,
+                    'source_pool': source_pool}, tags=hook_tags)
 
         gossip.trigger_with_tags(
             'infinidat.sdk.post_pool_move',

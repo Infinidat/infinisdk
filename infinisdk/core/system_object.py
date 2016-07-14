@@ -15,7 +15,7 @@ from .field import Field
 from .type_binder import TypeBinder
 from .bindings import PassthroughBinding
 from .api.special_values import translate_special_values
-from .utils import DONT_CARE, deprecated
+from .utils import DONT_CARE, deprecated, end_reraise_context
 
 
 class FieldsMeta(FieldsMetaBase):
@@ -333,10 +333,11 @@ class SystemObject(BaseSystemObject):
             with cls._possible_api_failure_context(tags=hook_tags):
                 returned = system.api.post(url, data=data).get_result()
             obj = cls(system, returned)
-        except Exception as e:
-            gossip.trigger_with_tags('infinidat.sdk.object_creation_failure',
-                                     {'cls': cls, 'system': system, 'data': data, 'exception': e}, tags=hook_tags)
-            raise
+        except Exception as e:  # pylint: disable=broad-except
+            with end_reraise_context():
+                gossip.trigger_with_tags('infinidat.sdk.object_creation_failure',
+                                         {'cls': cls, 'system': system, 'data': data, 'exception': e},
+                                         tags=hook_tags)
         gossip.trigger_with_tags('infinidat.sdk.post_object_creation',
                                  {'obj': obj, 'data': data, 'response_dict': returned}, tags=hook_tags)
         return obj
@@ -387,9 +388,9 @@ class SystemObject(BaseSystemObject):
         try:
             yield
         except Exception as e:       # pylint: disable=broad-except
-            gossip.trigger_with_tags('infinidat.sdk.object_deletion_failure', {
-                'obj': self, 'exception': e}, tags=hook_tags)
-            raise
+            with end_reraise_context():
+                gossip.trigger_with_tags('infinidat.sdk.object_deletion_failure',
+                                         {'obj': self, 'exception': e}, tags=hook_tags)
         gossip.trigger_with_tags('infinidat.sdk.post_object_deletion', {
                                  'obj': self}, tags=hook_tags)
 

@@ -7,6 +7,7 @@ from ..core.api.special_values import OMIT
 from ..core.object_query import PolymorphicQuery
 from ..core.bindings import RelatedObjectBinding
 from ..core.api.special_values import Autogenerate
+from ..core.utils import end_reraise_context
 from .system_object import InfiniBoxObject
 
 _CG_SUFFIX = Autogenerate('_{timestamp}')
@@ -65,10 +66,10 @@ class ConsGroup(InfiniBoxObject):
             member.trigger_begin_fork()
         try:
             child = self._create(self.system, self.get_url_path(self.system), data=data, tags=None)
-        except Exception:
-            for member in members:
-                member.trigger_cancel_fork()
-            raise
+        except Exception:  # pylint: disable=broad-except
+            with end_reraise_context():
+                for member in members:
+                    member.trigger_cancel_fork()
         child_members = dict((s.get_parent(from_cache=True).id, child) for s in child.get_members())
         for member in members:
             snap = child_members[member.id]
@@ -96,11 +97,11 @@ class ConsGroup(InfiniBoxObject):
                 member.trigger_begin_fork()
                 began_fork.append(member)
             self.system.api.post(self.get_this_url_path().add_path('refresh'), data={'source_id': parent.id})
-        except Exception:
-            for member in began_fork:
-                member.trigger_cancel_fork()
-            trigger_hook('infinidat.sdk.refresh_snapshot_failure')
-            raise
+        except Exception:  # pylint: disable=broad-except
+            with end_reraise_context():
+                for member in began_fork:
+                    member.trigger_cancel_fork()
+                trigger_hook('infinidat.sdk.refresh_snapshot_failure')
         for member in cg_members_by_id.values():
             member.trigger_finish_fork(sg_members_by_parent_id[member.id])
         trigger_hook('infinidat.sdk.post_refresh_snapshot')
@@ -178,10 +179,10 @@ class ConsGroup(InfiniBoxObject):
         try:
             self.system.api.post(self.get_this_url_path().add_path('restore'),
                                  data={'source_id': snap_group.id})
-        except Exception as e:
-            for parent_id, snap in sg_members_by_parent_id.items():
-                members_by_id[parent_id].trigger_data_restore_failure(snap, e)
-            raise
+        except Exception as e:  # pylint: disable=broad-except
+            with end_reraise_context():
+                for parent_id, snap in sg_members_by_parent_id.items():
+                    members_by_id[parent_id].trigger_data_restore_failure(snap, e)
         for parent_id, snap in sg_members_by_parent_id.items():
             members_by_id[parent_id].trigger_after_restore(snap)
 
