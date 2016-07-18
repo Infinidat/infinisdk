@@ -25,6 +25,7 @@ def test_disable_enable_network_space_ip(infinibox, network_space):
     assert network_space.get_ips() == [{'enabled': False, 'ip_address': ip_address, 'reserved': False, 'vlan_id': 1, 'interface_id': None}]
     network_space.enable_ip_address(ip_address)
     assert network_space.get_ips() == [{'enabled': True, 'ip_address': ip_address, 'reserved': False, 'vlan_id': 1, 'interface_id': interface_id}]
+    network_space.disable_ip_address(ip_address)
     network_space.remove_ip_address(ip_address)
     assert network_space.get_ips() == []
 
