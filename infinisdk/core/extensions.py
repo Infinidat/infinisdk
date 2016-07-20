@@ -15,17 +15,25 @@ from sentinels import NOTHING
 active = []
 
 
-def add_method(objtype, name=None):
+def _extend_method(objtype, name, wrap):
     def decorator(func):
         method_name = name
         if method_name is None:
             method_name = func.__name__
 
-        extension = Method(objtype, method_name, func)
+        extension = Method(objtype, method_name, func, wrap)
         extension.activate()
         func.__extension_deactivate__ = extension.deactivate
         return func
     return decorator
+
+
+def add_method(objtype, name=None):
+    return _extend_method(objtype, name, False)
+
+
+def wrap_method(objtype, name=None):
+    return _extend_method(objtype, name, True)
 
 
 def add_attribute(objtype, name=None):
@@ -49,20 +57,23 @@ def clear_all():
 
 class Attachment(object):
 
-    def __init__(self, objtype, name, func):
+    def __init__(self, objtype, name, func, wrap=False):
         super(Attachment, self).__init__()
         assert isinstance(objtype, type)
-        if name in objtype.__dict__:
+        if wrap and not hasattr(objtype, name):
             raise RuntimeError(
-                '{0.__name__} already has a method named {1!r}. Cannot attach as extension.'.format(objtype, name))
-        assert name not in objtype.__dict__
+                'You asked to wrap {1!r} in {0.__name__}, but it doesn\'t have such a method'.format(objtype, name))
         self._objtype = objtype
         self._name = name
         self._func = func
         self._active = False
+        self._wrap = wrap
+        self._original = None
 
     def activate(self):
         assert self not in active
+        if self._wrap:
+            self._original = getattr(self._objtype, self._name)
         setattr(self._objtype, self._name, self)
         self._active = True
         active.append(self)
@@ -71,10 +82,13 @@ class Attachment(object):
         if not self._active:
             return
         assert self._objtype.__dict__[self._name] is self
-        delattr(self._objtype, self._name)
+        if self._wrap:
+            setattr(self._objtype, self._name, self._original)
+        else:
+            delattr(self._objtype, self._name)
+            assert self._name not in self._objtype.__dict__
         self._active = False
         active.remove(self)
-        assert self._name not in self._objtype.__dict__
 
     def __repr__(self):
         return "<{0}:{1}>".format(self._objtype.__name__, self._name)
@@ -83,7 +97,12 @@ class Attachment(object):
 class Method(Attachment):
 
     def __get__(self, obj, objclass):
-        method = _BoundMethod(self._func, obj)
+        kwargs = {}
+        if self._wrap:
+            assert self._original
+            kwargs['_wrapped'] = self._original
+
+        method = _BoundMethod(self._func, obj, **kwargs)
         method.__name__ = self._name
         method.__self__ = method.im_self = obj
         method.im_class = objclass

@@ -1,6 +1,7 @@
 import itertools
 
 import pytest
+from infinisdk._compat import PY2
 from infinisdk.core import extensions
 from infinisdk.infinibox import InfiniBox
 from infinisdk.infinibox.system_object import SystemObject
@@ -36,12 +37,49 @@ def test_extending(infinibox, different_name):
         assert infinibox.new_method.im_func is new_method
 
 
-def test_cannot_attach_existing_methods(infinibox, volume):
-    assert hasattr(volume, 'update_name')
+@pytest.mark.parametrize('different_name', [True, False])
+def test_overriding(infinibox, different_name):
+    original = type(infinibox).get_version
+    if different_name:
+        @extensions.wrap_method(InfiniBox, 'get_version')
+        def some_other_name(self, _wrapped):
+            if PY2:
+                assert _wrapped == original
+            else:
+                assert _wrapped is original
+            return 9999
+    else:
+        @extensions.wrap_method(InfiniBox)
+        def get_version(self, _wrapped):
+            if PY2:
+                assert _wrapped == original
+            else:
+                assert _wrapped is original
+            return 9999
+
+    assert infinibox.get_version() == 9999
+    assert infinibox.get_version.__self__ is infinibox
+    assert infinibox.get_version.im_self is infinibox
+    assert infinibox.get_version.im_class is type(infinibox)
+    if different_name:
+        assert infinibox.get_version.im_func is some_other_name
+    else:
+        assert infinibox.get_version.im_func is get_version
+
+
+@pytest.mark.parametrize('different_name', [True, False])
+def test_overriding_non_exiting(infinibox, different_name):
     with pytest.raises(RuntimeError):
-        @extensions.add_method(type(volume), 'update_name')
-        def set_name(self, new_name):
-            raise NotImplementedError()  # pragma: no cover
+        if different_name:
+            @extensions.wrap_method(InfiniBox, 'get_version_ex')
+            def some_other_name(self, _wrapped):
+                assert _wrapped
+                return 9999
+        else:
+            @extensions.wrap_method(InfiniBox)
+            def get_version_ex(self, _wrapped):
+                assert _wrapped
+                return 9999
 
 
 def test_add_attribute(infinibox):
