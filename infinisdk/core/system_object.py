@@ -229,6 +229,10 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
 
         return returned
 
+    def is_field_supported(self, field_name):
+        field = self.fields.get_or_fabricate(field_name)
+        return self.system.is_field_supported(field)
+
     def update_field_cache(self, api_obj):
         assert all(isinstance(key, string_types) for key in api_obj.keys())
         self._cache.update(api_obj)

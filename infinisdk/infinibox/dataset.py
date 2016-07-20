@@ -3,6 +3,7 @@ import gossip
 from capacity import Capacity, byte
 from urlobject import URLObject as URL
 from collections import namedtuple
+from mitba import cached_method
 from ..core.api.special_values import Autogenerate
 from ..core.utils import deprecated, end_reraise_context, DONT_CARE
 from ..core.exceptions import InvalidOperationException, ObjectNotFound, TooManyObjectsFound
@@ -69,7 +70,7 @@ class Dataset(InfiniBoxObject):
         Field("pool", type='infinisdk.infinibox.pool:Pool', api_name="pool_id", creation_parameter=True,
               is_filterable=True, is_sortable=True, binding=RelatedObjectBinding()),
         Field("type", cached=True, is_filterable=True, is_sortable=True),
-        Field("family_id", type=int, cached=True, is_filterable=True, is_sortable=True),
+        Field("family_id", type=int, cached=True, is_filterable=True, is_sortable=True, new_to="3.0"),
         Field("provisioning", api_name="provtype", mutable=True, creation_parameter=True,
               is_filterable=True, is_sortable=True, default="THICK"),
         Field("created_at", cached=True, type=MillisecondsDatetimeType, is_sortable=True, is_filterable=True),
@@ -96,10 +97,22 @@ class Dataset(InfiniBoxObject):
     def _get_snapshot_type(self):
         return 'SNAPSHOT' if self.system.compat.has_writable_snapshots() else 'SNAP'
 
+    @cached_method
+    def _get_family_master_id(self):
+        assert not self.is_field_supported('family_id'), "Use self.get_family_id(), which adheres to cache policies"
+        if self.is_master():
+            return self.get_id()
+        return self.get_parent()._get_family_master_id()
+
     def get_family_master(self):
         if self.is_master():
             return self
-        return self.get_binder().get_by_id_lazy(self.get_family_id())
+
+        if self.is_field_supported('family_id'):
+            family_master_id = self.get_family_id()
+        else:
+            family_master_id = self._get_family_master_id()
+        return self.get_binder().get_by_id_lazy(family_master_id)
 
     def is_master(self):
         """Returns whether or not this entity is a master entity (not a snapshot and not a clone)
