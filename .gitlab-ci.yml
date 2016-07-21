@@ -26,11 +26,12 @@ py35:
     - py.test tests/
 
 pypi:
-  image: python:2.7
+  image: python:3
   tags:
     - infradev
   stage: deploy
   only:
     - master
+    - tags
   script:
     - curl -sL http://goto/pypi_register | python - -v ./
