@@ -290,7 +290,9 @@ class Enclosure(InfiniBoxSystemComponent):
 class Nodes(InfiniBoxComponentBinder):
 
     def get_by_wwpn(self, wwpn):
-        return self.system.components.fc_ports.get(wwpn=wwpn).get_node()
+        fc_port = self.system.components.fc_ports.safe_get(wwpn=wwpn)
+        if fc_port is not None:
+            return fc_port.get_node()
 
     def get_by_ip(self, ip_address):
         for ns in self.system.network_spaces.get_all():
