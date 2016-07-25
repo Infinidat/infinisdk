@@ -156,26 +156,23 @@ class Replica(InfiniBoxObject):
 
     FIELDS = [
 
-        Field('id', type=int, is_identity=True),
-        Field('link', api_name='link_id', binding=RelatedObjectBinding(
-            'links'), type='infinisdk.infinibox.link:Link', creation_parameter=True),
+        Field('id', type=int, is_identity=True, is_filterable=True),
+        Field('link', api_name='link_id', binding=RelatedObjectBinding('links'),
+              type='infinisdk.infinibox.link:Link', creation_parameter=True),
         Field('entity_pairs', type=list, creation_parameter=True),
-        Field('entity_type', type=str,
-              creation_parameter=True, default='VOLUME'),
-        Field('remote_pool_id', type=int,
-              creation_parameter=True, optional=True),
-        Field('remote_replica_id', type=int),
-        Field('role', type=str, cached=False),
+        Field('entity_type', type=str, creation_parameter=True, default='VOLUME', is_filterable=True),
+        Field('remote_pool_id', type=int, creation_parameter=True, optional=True, is_filterable=True),
+        Field('remote_replica_id', type=int, is_filterable=True),
+        Field('role', type=str, cached=False, is_filterable=True),
         Field('progress', type=int),
         Field('jobs', type=list, cached=False),
-        Field('restore_point', type=MillisecondsDatetimeType),
+        Field('restore_point', type=MillisecondsDatetimeType, is_filterable=True),
         Field('last_synchronized', type=int),
-        Field('last_replicated_guid', api_name='_consistent_guid'),
+        Field('last_replicated_guid', api_name='_consistent_guid', is_filterable=True),
         Field('state', type=str, cached=False),
         Field('sync_interval', api_name='sync_interval', type=MillisecondsDeltaType,
-              mutable=True,
-              creation_parameter=True, default=timedelta(seconds=4)),
-        Field('rpo', api_name='rpo_value', type=MillisecondsDeltaType, mutable=True),
+              mutable=True, creation_parameter=True, default=timedelta(seconds=4), is_filterable=True),
+        Field('rpo', api_name='rpo_value', type=MillisecondsDeltaType, mutable=True, is_filterable=True),
         Field('rpo_state'),
 
     ]
