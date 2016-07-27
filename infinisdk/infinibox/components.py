@@ -1,3 +1,5 @@
+import copy
+
 from .._compat import ExitStack, zip  # pylint: disable=redefined-builtin
 from ..core.field import Field
 from ..core.utils import deprecated
@@ -186,6 +188,9 @@ class InfiniBoxSystemComponent(BaseSystemObject):
         Field("id", binding=ComputedIDBinding(), is_identity=True, cached=True),
         Field("parent_id", cached=True, add_updater=False, is_identity=True),
     ]
+
+    def __deepcopy__(self, memo):
+        return self.construct(self.system, copy.deepcopy(self._cache, memo), self.get_parent_id())
 
     def _deduce_from_cache(self, *args, **kwargs):
         collection = self.system.components[self.get_plural_name()]

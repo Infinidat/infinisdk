@@ -1,3 +1,4 @@
+import copy
 import pytest
 
 from capacity import Capacity
@@ -214,6 +215,12 @@ def test_get_components_sorted_by_index_and_parent_index(infinibox, component_bi
     ordered_list = sorted(comp_binder.get_all(), key=sorting_lambda)
     regular_list = list(comp_binder.get_all())
     assert regular_list == ordered_list
+
+def test_deepcopy(component):
+    new_component = copy.deepcopy(component)
+    assert new_component is component
+    assert new_component.system is component.system
+    assert new_component._cache is component._cache # pylint: disable=protected-access
 
 @pytest.fixture(params=['racks', 'nodes', 'enclosures'])
 def component_collection(request, infinibox):
