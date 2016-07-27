@@ -1,3 +1,4 @@
+import copy
 import pytest
 from infinisdk.core import Field, SystemObject
 from infinisdk.core.exceptions import (APICommandFailed,
@@ -229,6 +230,13 @@ def test_string_id_escaping(system):
     url = caught.value.response.response.request.url
     assert url.endswith(
         '/api/rest/sampleobjectwithstringids/some%3Atext?fields=x')
+
+
+def test_deepcopy(system_object):
+    new_system_object = copy.deepcopy(system_object)
+    assert new_system_object is not system_object
+    assert new_system_object.system is system_object.system
+    assert new_system_object._cache is not system_object._cache # pylint: disable=protected-access
 
 
 @pytest.fixture(params=[SampleBaseObject, SampleDerivedObject])

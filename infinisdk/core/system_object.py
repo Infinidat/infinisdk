@@ -1,3 +1,4 @@
+import copy
 import gossip
 import functools
 import sys
@@ -95,6 +96,9 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
 
     def get_unique_key(self):
         return (self.system, type(self).__name__, self.id)
+
+    def __deepcopy__(self, memo):
+        return self.construct(self.system, copy.deepcopy(self._cache, memo))
 
     @classmethod
     def construct(cls, system, data):
