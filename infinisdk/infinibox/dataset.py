@@ -156,12 +156,15 @@ class Dataset(InfiniBoxObject):
         assert isinstance(delta, Capacity), "Delta must be an instance of Capacity"
         return self.update_field('size', self.get_size() + delta)
 
-    def create_child(self, name=None):
+    def create_child(self, name=None, write_protected=None):
         self.invalidate_cache('has_children')
         self.trigger_begin_fork()
         if not name:
             name = self.fields.name.generate_default().generate()
         data = {'name': name, 'parent_id': self.get_id()}
+        if write_protected is not None:
+            assert self.system.compat.has_writable_snapshots(), 'write_protected parameter is not supported for this version'
+            data['write_protected'] = write_protected
         try:
             child = self._create(self.system, self.get_url_path(self.system), data=data, tags=self._get_tags_for_object_operations(self.system))
         except Exception:  # pylint: disable=broad-except
@@ -198,12 +201,12 @@ class Dataset(InfiniBoxObject):
             return self.create_child(name)
         raise InvalidOperationException('Cannot create clone for volume/clone')
 
-    def create_snapshot(self, name=None):
+    def create_snapshot(self, name=None, write_protected=None):
         """Creates a snapshot from this entity, if supported by the system
         """
         if not self.system.compat.has_writable_snapshots() and self.is_snapshot():
             raise InvalidOperationException('Cannot create snapshot for snapshot')
-        return self.create_child(name)
+        return self.create_child(name, write_protected)
 
     def restore(self, snapshot):
         """Restores this entity from a given snapshot object

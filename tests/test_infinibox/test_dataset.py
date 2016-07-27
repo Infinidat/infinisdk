@@ -115,6 +115,14 @@ def test_create_child(infinibox, data_entity):
     child2 = child1.create_child()
     assert child2.get_parent() == child1
 
+    if infinibox.compat.has_writable_snapshots():
+        child3 = data_entity.create_child(write_protected=False)
+        assert not child3.get_field('write_protected')
+        child4 = data_entity.create_child(write_protected=True)
+        assert child4.get_field('write_protected')
+    else:
+        with pytest.raises(AssertionError):
+            child3 = data_entity.create_child(write_protected=True)
 
 @pytest.mark.parametrize('current_time', [1406113997.675789, 1406114887.452333])
 def test_created_at_field_type_conversion(current_time):
