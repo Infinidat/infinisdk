@@ -436,6 +436,7 @@ class IbPort(InfiniBoxSystemComponent):
         Field("last_probe_timestamp", type=int),
         Field("link_state", cached=False),
         Field("model", cached=True),
+        Field("node", api_name="node_index", type=int, cached=True, binding=RelatedComponentBinding()),
         Field("node_index", type=int, cached=True),
         Field("probe_ttl", type=int),
         Field("state", cached=False),
