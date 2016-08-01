@@ -107,13 +107,13 @@ def test_replicate_volume_shortcut(infinibox, secondary_infinibox, link, create_
 
 
 @new_to_version('2.0')
-def test_replica_change_role(replica):
-    replica.suspend()
-    assert replica.is_source()
-    assert not replica.is_target()
-    replica.change_role()
-    assert not replica.is_source()
-    assert replica.is_target()
+def test_replica_change_role(synced_replica):
+    synced_replica.suspend()
+    assert synced_replica.is_source()
+    assert not synced_replica.is_target()
+    synced_replica.change_role()
+    assert not synced_replica.is_source()
+    assert synced_replica.is_target()
 
 
 @new_to_version('3.0')
@@ -244,6 +244,14 @@ def replica(infinibox, secondary_infinibox, link, replica_creation_kwargs):
     return infinibox.replicas.create(
         link=link, **replica_creation_kwargs)
 
+@pytest.fixture
+def synced_replica(infinibox, secondary_infinibox, link, replica_creation_kwargs):
+    infinibox.register_related_system(secondary_infinibox)
+    secondary_infinibox.register_related_system(infinibox)
+    replica = infinibox.replicas.create(
+        link=link, **replica_creation_kwargs)
+    flux.current_timeline.sleep_wait_all_scheduled()
+    return replica
 
 @pytest.fixture
 def remote_replica(replica, secondary_infinibox):
