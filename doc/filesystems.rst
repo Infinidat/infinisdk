@@ -75,7 +75,7 @@ Deleting a filesystem is done with :meth:`.Filesystem.delete`:
 
 
 Example: Deleting All Filesystems with Specific Name Prefix
--------------------------------------------------------
+-----------------------------------------------------------
 
 .. code-block:: python
 
@@ -91,7 +91,7 @@ Exports
 =======
 
 Creating a Filesystem Export
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 
 A filesystem export is created with default settings and advanced setting. For a detailed documentation of these settings,
 Read more `Here <https://support.infinidat.com/hc/en-us/articles/205711721-Exporting-a-filesystem>`_.
@@ -101,6 +101,7 @@ Read more `Here <https://support.infinidat.com/hc/en-us/articles/205711721-Expor
 We can now access and modify various attributes of the export:
 
 .. code-block:: python
+
 		>>> from capacity import MiB
 		>>> export.get_max_read()
 		1*MiB
@@ -122,7 +123,7 @@ Following this operation, the filesystem is not accessible by the user. The expo
 
 
 Enabling an Export
--------------------
+------------------
 
 .. code-block:: python
 
@@ -151,6 +152,7 @@ Export Permissions
 | To preserve current permission settings, first use :meth:`.Export.get_permissions`, then update accordingly.
 
 .. code-block:: python
+
 		>>> from munch import Munch
 		>>> permissions = export.get_permissions()
 		>>> permissions[0] ==  Munch({'access': 'RW', 'no_root_squash': True, 'client': '*'})
