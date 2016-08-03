@@ -1,3 +1,5 @@
+import functools
+import requests
 from uuid import uuid4
 import logbook
 import pytest
@@ -232,3 +234,19 @@ def test_added_headers_context(infinibox):
     with infinibox.api.added_headers_context({header_name: header_value}):
         assert infinibox.api._session.headers == expected_headers
     assert infinibox.api._session.headers == prev_headers
+
+
+def test_serialize_credentials(infinibox):
+    creds = infinibox.api.save_credentials()
+    assert creds
+    infinibox.api.clear_cookies()
+
+    _get = functools.partial(infinibox.api.get, '/api/rest/system')
+
+    with pytest.raises(APICommandFailed) as exception:
+        _get()
+
+    assert exception.value.status_code == requests.codes.unauthorized
+
+    infinibox.api.load_credentials(creds)
+    _get() # should work

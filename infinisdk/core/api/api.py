@@ -70,6 +70,20 @@ class API(object):
         self._use_pretty_json = config.root.api.log.pretty_json
         self._login_refresh_enabled = True
 
+    def save_credentials(self):
+        """Returns a copy of the current credentials, useful for loading them later
+        """
+        return dict(self._session.cookies)
+
+    def load_credentials(self, creds):
+        """Loads credentials from the given credentials
+
+        :param creds: the result of a previous :meth:`API.save_credentials` call
+        """
+        self._session.cookies.clear()
+        self._session.cookies.update(creds)
+
+
     @contextmanager
     def disabled_login_refresh_context(self):
         """Inside this context, InfiniSDK will not attempt to refresh login cookies
