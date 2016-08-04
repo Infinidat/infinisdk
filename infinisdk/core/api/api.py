@@ -227,6 +227,7 @@ class API(object):
                 username = username_or_auth
             self._auth = (username, password)
         self.clear_cookies()
+        self.system.mark_not_logged_in()
         if login:
             self.system.login()
 

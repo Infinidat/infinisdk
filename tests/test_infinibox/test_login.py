@@ -18,6 +18,14 @@ def test_is_logged_in(infinibox):
     infinibox.login()
     assert infinibox.is_logged_in()
 
+@new_to_version('3.0')
+def test_is_logged_in_with_set_auth(infinibox):
+    assert infinibox.is_logged_in()
+    infinibox.api.set_auth('admin', '123456', login=False)
+    assert not infinibox.is_logged_in()
+    infinibox.api.set_auth('admin', '123456', login=True)
+    assert infinibox.is_logged_in()
+
 def test_passwords_are_not_logged(infinibox):
     with logbook.TestHandler() as handler:
         password = '12345678'
