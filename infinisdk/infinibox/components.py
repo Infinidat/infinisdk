@@ -434,7 +434,7 @@ class IbPort(InfiniBoxSystemComponent):
         Field("index", api_name="id", type=int, cached=True),
         Field("firmware"),
         Field("last_probe_timestamp", type=int),
-        Field("link_state", cached=False),
+        Field("link_state", cached=False, new_to="3.0"),
         Field("model", cached=True),
         Field("node", api_name="node_index", type=int, cached=True, binding=RelatedComponentBinding()),
         Field("node_index", type=int, cached=True),
@@ -449,9 +449,8 @@ class IbPort(InfiniBoxSystemComponent):
         return "ib_port"
 
     def is_link_up(self):
-        if self.get_state() != 'OK':
-            return False
-        return self.get_link_state().lower() == "up"
+        return (self.get_state() == 'OK' and
+                (not self.is_field_supported('link_state') or self.get_link_state().lower() == "up"))
 
 
 class FcPorts(InfiniBoxComponentBinder):
@@ -526,6 +525,7 @@ class Drive(InfiniBoxSystemComponent):
     def is_active(self):
         return self.get_state() == 'ACTIVE'
 
+
 @InfiniBoxSystemComponents.install_component_type
 class Service(InfiniBoxSystemComponent):
     FIELDS = [
@@ -567,6 +567,7 @@ class Service(InfiniBoxSystemComponent):
 
     def get_node(self):
         return self.get_parent()
+
 
 @InfiniBoxSystemComponents.install_component_type
 class ServiceCluster(InfiniBoxSystemComponent):
