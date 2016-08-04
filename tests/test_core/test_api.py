@@ -10,6 +10,8 @@ from infinisdk._compat import httplib
 from ..conftest import no_op_context
 
 from urlobject import URLObject as URL
+from ..conftest import new_to_version
+
 
 # pylint: disable=redefined-outer-name
 
@@ -235,7 +237,7 @@ def test_added_headers_context(infinibox):
         assert infinibox.api._session.headers == expected_headers
     assert infinibox.api._session.headers == prev_headers
 
-
+@new_to_version('2.2.8')
 def test_serialize_credentials(infinibox):
     creds = infinibox.api.save_credentials()
     assert creds
