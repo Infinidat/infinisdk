@@ -237,6 +237,15 @@ def test_added_headers_context(infinibox):
         assert infinibox.api._session.headers == expected_headers
     assert infinibox.api._session.headers == prev_headers
 
+def test_deprecated_api(infinibox, capture):
+    pool = infinibox.pools.create()
+    user = infinibox.users.create(role='POOL_ADMIN')
+    infinibox.api.post('pools/{0}/owners/{1}'.format(pool.get_id(), user.get_id()))
+    assert capture.has_warnings
+    infinibox.api.delete('pools/{0}/owners/{1}'.format(pool.get_id(), user.get_id()))
+    user.delete()
+    pool.delete()
+
 @new_to_version('2.2.8')
 def test_serialize_credentials(infinibox):
     creds = infinibox.api.save_credentials()

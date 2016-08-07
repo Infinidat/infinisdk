@@ -7,6 +7,7 @@ from contextlib import contextmanager
 
 import gossip
 from logbook import Logger
+from logbook.utils import log_deprecation_message
 from sentinels import NOTHING
 from urlobject import URLObject as URL
 
@@ -473,6 +474,8 @@ class API(object):
                                     continue
                                 raise CommandNotApproved(e.response, reason)
                         raise
+                if 'x-infinidat-deprecated-api' in returned.response.headers:
+                    log_deprecation_message('Deprecation warning: {}'.format(returned.response.headers['x-infinidat-deprecated-api']), frame_correction=2)
                 return returned
         assert False, "Should never get here!"  # pragma: no cover
 
