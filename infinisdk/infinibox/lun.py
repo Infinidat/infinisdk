@@ -80,7 +80,7 @@ class LogicalUnit(object):
         return "<LUN {0}: {1}->{2}>".format(self.get_lun(), self.get_mapping_object(), self.get_volume())
 
     def __eq__(self, other):
-        return type(other) == type(self) and other.id == self.id
+        return type(other) == type(self) and other.get_unique_key() == self.get_unique_key()
 
     def get_unique_key(self):
         return (self.system, self.host_cluster_id, self.host_id, self.volume_id, self.lun)
