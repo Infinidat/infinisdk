@@ -237,6 +237,7 @@ def test_added_headers_context(infinibox):
         assert infinibox.api._session.headers == expected_headers
     assert infinibox.api._session.headers == prev_headers
 
+@new_to_version('3.0')
 def test_deprecated_api(infinibox, capture):
     pool = infinibox.pools.create()
     user = infinibox.users.create(role='POOL_ADMIN')
