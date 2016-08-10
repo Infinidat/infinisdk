@@ -79,6 +79,14 @@ class InfiniBoxSystemComponents(SystemComponentsBinder):
         component_collection = self.system.components[component_type]
         return component_collection.find(*predicates, **kw)
 
+    @contextmanager
+    def fetch_all_components_once(self):
+        component_roots = [self.racks, self.service_clusters, self.systems]
+        with ExitStack() as ctx:
+            for component_binder in component_roots:
+                ctx.enter_context(component_binder.fetch_tree_once_context())
+            yield
+
 
 class ComputedIDBinding(InfiniSDKBinding):
 
