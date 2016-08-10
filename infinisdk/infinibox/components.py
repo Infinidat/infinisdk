@@ -80,7 +80,7 @@ class InfiniBoxSystemComponents(SystemComponentsBinder):
         return component_collection.find(*predicates, **kw)
 
     @contextmanager
-    def fetch_all_components_once(self):
+    def fetch_tree_once_context(self):
         component_roots = [self.racks, self.service_clusters, self.systems]
         with ExitStack() as ctx:
             for component_binder in component_roots:

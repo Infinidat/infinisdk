@@ -151,7 +151,7 @@ def test_using_from_cache_context_multiple_times(infinibox):
     assert not fc_ports._force_fetching_from_cache
 
 def test_fetch_all_components_using_cache(infinibox):
-    with infinibox.components.fetch_all_components_once():
+    with infinibox.components.fetch_tree_once_context():
         infinibox.api = None
         assert infinibox.components.nodes.should_force_fetching_from_cache()
         assert infinibox.components.service_clusters.should_force_fetching_from_cache()
