@@ -53,6 +53,7 @@ class API(object):
     def __init__(self, target, auth, use_ssl, ssl_cert):
         super(API, self).__init__()
         self._auth = None
+        self._is_logged_in = False
         self._preprocessors = []
         self.system = target
         self._use_ssl = use_ssl
@@ -138,6 +139,7 @@ class API(object):
             prev_cookies = self._session.cookies.copy()
         else:
             prev_cookies = None
+        was_logged_in = self.is_logged_in()
         self._session = requests.Session()
 
         assert self._session.cert is None
@@ -148,6 +150,8 @@ class API(object):
 
         if prev_auth == auth and prev_cookies is not None:
             self._session.cookies.update(prev_cookies)
+            if was_logged_in:
+                self.mark_logged_in()
 
 
     @property
@@ -205,6 +209,15 @@ class API(object):
     def set_request_default_timeout(self, timeout_seconds):
         self._default_request_timeout = timeout_seconds
 
+    def is_logged_in(self):
+        return self._is_logged_in
+
+    def mark_logged_in(self):
+        self._is_logged_in = True
+
+    def mark_not_logged_in(self):
+        self._is_logged_in = False
+
     def set_auth(self, username_or_auth, password=NOTHING, login=True):
         """
         Sets the username and password under which operations will be performed
@@ -228,7 +241,7 @@ class API(object):
                 username = username_or_auth
             self._auth = (username, password)
         self.clear_cookies()
-        self.system.mark_not_logged_in()
+        self.mark_not_logged_in()
         if login:
             self.system.login()
 
@@ -456,7 +469,7 @@ class API(object):
                    'login' not in path:
 
                     _logger.trace('Performing login again due to expired cookie ({})', self._session.cookies)
-                    self.system.mark_not_logged_in()
+                    self.mark_not_logged_in()
                     self.system.login()
                     did_login = True
                     continue
