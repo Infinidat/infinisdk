@@ -65,8 +65,10 @@ def test_reinitialize_session_keeps_cookies(infinibox):
     # pylint: disable=protected-access
     cookies = infinibox.api._session.cookies.copy()
     assert cookies
+    assert infinibox.is_logged_in()
     infinibox.api.reinitialize_session()
     assert infinibox.api._session.cookies == cookies
+    assert infinibox.is_logged_in()
 
 @new_to_version('3.0')
 def test_set_auth_no_login_doesnt_send_basic_auth(infinibox, infinibox_simulator):

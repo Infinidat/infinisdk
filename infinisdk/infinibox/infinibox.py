@@ -56,7 +56,6 @@ class InfiniBox(APITarget):
 
     def _initialize(self):
         super(InfiniBox, self)._initialize()
-        self._is_logged_in = False
         self.current_user = _CurrentUserProxy(self)
         self.compat = Compatibility(self)
         self.capacities = InfiniBoxSystemCapacity(self)
@@ -230,24 +229,27 @@ class InfiniBox(APITarget):
         if self.compat.has_auth_sessions():
             login_data['clientid'] = self._get_client_id()
         res = self.api.post("users/login", data=login_data)
-        self._is_logged_in = True
+        self.api.mark_logged_in()
         self._after_login()
         return res
 
     def is_logged_in(self):
         """Returns True if login() was called on this system, and logout() hasn't been called yet
         """
-        return self._is_logged_in
+        return self.api.is_logged_in()
+
+    def mark_logged_in(self):
+        self.api.mark_logged_in()
 
     def mark_not_logged_in(self):
-        self._is_logged_in = False
+        self.api.mark_not_logged_in()
 
     def logout(self):
         """
         Logs out the current user
         """
         returned = self.api.post('users/logout', data={})
-        self._is_logged_in = False
+        self.api.mark_not_logged_in()
         self.api.clear_cookies()
         return returned
 
