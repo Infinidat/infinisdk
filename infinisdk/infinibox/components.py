@@ -227,7 +227,7 @@ class InfiniBoxSystemComponent(BaseSystemObject):
     def get_sub_components(self):
         for field in self.fields:
             if isinstance(field.binding, ListOfRelatedComponentBinding):
-                for component in self.get_field(field.name):
+                for component in self.system.components[field.name].find(parent_id=self.id):
                     yield component
 
     def refresh_cache(self):
