@@ -127,8 +127,7 @@ class InfiniBoxGenericComponentQuery(ComponentQueryBase):
         if self._fetched_items is not None:
             return self._fetched_items
         items = []
-        with self.system.components.racks.fetch_tree_once_context():
-            with self.system.components.service_clusters.fetch_tree_once_context():
+        with self.system.components.fetch_tree_once_context(force_fetch=self._force_fetch, with_logging=False):
                 fields = set(predicate.field.name for predicate in self.predicates) | set(self.kw)
                 for component_type in self.system.components.get_component_types():
                     if not fields.issubset(set(field.name for field in component_type.fields)):
