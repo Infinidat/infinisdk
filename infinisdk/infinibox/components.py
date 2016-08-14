@@ -226,7 +226,10 @@ class InfiniBoxSystemComponent(BaseSystemObject):
     get_collection = get_binder
 
     def get_sub_components(self):
-        return self.system.components.find(parent_id=self.id)
+        for field in self.fields:
+            if isinstance(field.binding, ListOfRelatedComponentBinding):
+                for component in self.get_field(field.name):
+                    yield component
 
     def refresh_cache(self):
         data = self.system.api.get(self.get_this_url_path()).get_result()
