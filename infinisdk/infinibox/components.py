@@ -458,8 +458,12 @@ class IbPort(InfiniBoxSystemComponent):
         return "ib_port"
 
     def is_link_up(self):
-        return (self.get_state() == 'OK' and
-                (not self.is_field_supported('link_state') or self.get_link_state().lower() == "up"))
+        if self.get_state() != 'OK':
+            return False
+        if not self.is_field_supported('link_state'):
+            return True
+        link_state = self.get_link_state()
+        return link_state and link_state.lower() == "up"
 
 
 class FcPorts(InfiniBoxComponentBinder):
