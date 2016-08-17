@@ -126,7 +126,7 @@ class Dataset(InfiniBoxObject):
         assert parent, "Cannot refresh_snapshot on master volume"
         trigger_hook = functools.partial(gossip.trigger_with_tags,
                                          kwargs={'source': parent, 'target': self},
-                                         tags=self._get_tags_for_object_operations(self.system))
+                                         tags=self.get_tags_for_object_operations(self.system))
         trigger_hook('infinidat.sdk.pre_refresh_snapshot')
         parent.trigger_begin_fork()
         try:
@@ -166,7 +166,8 @@ class Dataset(InfiniBoxObject):
             assert self.system.compat.has_writable_snapshots(), 'write_protected parameter is not supported for this version'
             data['write_protected'] = write_protected
         try:
-            child = self._create(self.system, self.get_url_path(self.system), data=data, tags=self._get_tags_for_object_operations(self.system))
+            child = self._create(self.system, self.get_url_path(self.system), data=data,
+                                 tags=self.get_tags_for_object_operations(self.system))
         except Exception:  # pylint: disable=broad-except
             with end_reraise_context():
                 self.trigger_cancel_fork()
@@ -175,15 +176,15 @@ class Dataset(InfiniBoxObject):
         return child
 
     def trigger_begin_fork(self):
-        hook_tags = self._get_tags_for_object_operations(self.system)
+        hook_tags = self.get_tags_for_object_operations(self.system)
         gossip.trigger_with_tags(_BEGIN_FORK_HOOK, {'obj': self}, tags=hook_tags)
 
     def trigger_cancel_fork(self):
-        hook_tags = self._get_tags_for_object_operations(self.system)
+        hook_tags = self.get_tags_for_object_operations(self.system)
         gossip.trigger_with_tags(_CANCEL_FORK_HOOK, {'obj': self}, tags=hook_tags)
 
     def trigger_finish_fork(self, child):
-        hook_tags = self._get_tags_for_object_operations(self.system)
+        hook_tags = self.get_tags_for_object_operations(self.system)
         gossip.trigger_with_tags(_FINISH_FORK_HOOK, {'obj': self, 'child': child}, tags=hook_tags)
 
     def _handle_possible_replication_snapshot(self, snapshot):
@@ -222,15 +223,15 @@ class Dataset(InfiniBoxObject):
         self.trigger_after_restore(snapshot)
 
     def trigger_before_restore(self, source):
-        hook_tags = self._get_tags_for_object_operations(self.system)
+        hook_tags = self.get_tags_for_object_operations(self.system)
         gossip.trigger_with_tags('infinidat.sdk.pre_data_restore', {'source': source, 'target': self}, tags=hook_tags)
 
     def trigger_data_restore_failure(self, source, e):
-        hook_tags = self._get_tags_for_object_operations(self.system)
+        hook_tags = self.get_tags_for_object_operations(self.system)
         gossip.trigger_with_tags('infinidat.sdk.data_restore_failure', {'source': source, 'target': self, 'exc': e}, tags=hook_tags)
 
     def trigger_after_restore(self, source):
-        hook_tags = self._get_tags_for_object_operations(self.system)
+        hook_tags = self.get_tags_for_object_operations(self.system)
         gossip.trigger_with_tags('infinidat.sdk.post_data_restore', {'source': source, 'target': self}, tags=hook_tags)
 
     def get_snapshots(self):
@@ -269,7 +270,7 @@ class Dataset(InfiniBoxObject):
         """Moves this entity to a new pool, optionally along with its needed capacity
         """
         data = dict(pool_id=target_pool.get_id(), with_capacity=with_capacity)
-        hook_tags = self._get_tags_for_object_operations(self.system)
+        hook_tags = self.get_tags_for_object_operations(self.system)
         source_pool = self.get_pool()
         gossip.trigger_with_tags(
             'infinidat.sdk.pre_pool_move',

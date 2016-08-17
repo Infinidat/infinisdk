@@ -268,7 +268,7 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
             if field.api_name != field_name:
                 update_dict.pop(field_name)
 
-        hook_tags = self._get_tags_for_object_operations(self.system)
+        hook_tags = self.get_tags_for_object_operations(self.system)
         gossip.trigger_with_tags('infinidat.sdk.pre_object_update', {
                                  'obj': self, 'data': update_dict}, tags=hook_tags)
         with self._possible_api_failure_context(tags=hook_tags):
@@ -329,12 +329,12 @@ class SystemObject(BaseSystemObject):
             return True
 
     @classmethod
-    def _get_tags_for_object_operations(cls, system):
+    def get_tags_for_object_operations(cls, system):
         return [cls.get_type_name().lower(), system.get_type_name().lower()]
 
     @classmethod
     def _create(cls, system, url, data, tags=None):
-        hook_tags = tags or cls._get_tags_for_object_operations(system)
+        hook_tags = tags or cls.get_tags_for_object_operations(system)
         gossip.trigger_with_tags('infinidat.sdk.pre_object_creation', {
                                  'data': data, 'system': system, 'cls': cls}, tags=hook_tags)
         try:
@@ -390,7 +390,7 @@ class SystemObject(BaseSystemObject):
 
     @contextmanager
     def _get_delete_context(self):
-        hook_tags = self._get_tags_for_object_operations(self.system)
+        hook_tags = self.get_tags_for_object_operations(self.system)
         gossip.trigger_with_tags('infinidat.sdk.pre_object_deletion', {
                                  'obj': self}, tags=hook_tags)
         try:

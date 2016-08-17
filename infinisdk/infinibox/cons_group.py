@@ -89,7 +89,7 @@ class ConsGroup(InfiniBoxObject):
         began_fork = []
         trigger_hook = functools.partial(gossip.trigger_with_tags,
                                          kwargs={'source': parent, 'target': self},
-                                         tags=self._get_tags_for_object_operations(self.system))
+                                         tags=self.get_tags_for_object_operations(self.system))
 
         trigger_hook('infinidat.sdk.pre_refresh_snapshot')
         try:
@@ -191,7 +191,7 @@ class ConsGroup(InfiniBoxObject):
         """Moves this entity to a new pool, optionally along with its needed capacity
         """
         data = dict(pool_id=target_pool.get_id(), with_capacity=with_capacity)
-        hook_tags = self._get_tags_for_object_operations(self.system)
+        hook_tags = self.get_tags_for_object_operations(self.system)
         source_pool = self.get_pool()
 
         try:
