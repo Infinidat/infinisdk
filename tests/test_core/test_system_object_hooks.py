@@ -90,9 +90,10 @@ def test_deletion_failure_hook(request, volume):
     status = Munch(called=False)
 
     @gossip.register('infinidat.sdk.object_deletion_failure')
-    def object_deletion_failure(exception, obj): # pylint: disable=unused-variable
+    def object_deletion_failure(exception, obj, system): # pylint: disable=unused-variable
         assert obj is pool
         assert isinstance(exception, APICommandFailed)
+        assert system is volume.system
         status.exception = exception
         status.called = True
 

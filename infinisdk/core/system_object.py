@@ -271,9 +271,13 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
         hook_tags = self.get_tags_for_object_operations(self.system)
         gossip.trigger_with_tags('infinidat.sdk.pre_object_update', {
                                  'obj': self, 'data': update_dict}, tags=hook_tags)
-        with self._possible_api_failure_context(tags=hook_tags):
-            res = self.system.api.put(
-                self.get_this_url_path(), data=update_dict)
+        try:
+            res = self.system.api.put(self.get_this_url_path(), data=update_dict)
+        except Exception as e:  # pylint: disable=broad-except
+            with end_reraise_context():
+                gossip.trigger_with_tags('infinidat.sdk.object_update_failure',
+                                         {'obj': self, 'exception': e, 'system': self.system},
+                                         tags=hook_tags)
         response_dict = res.get_result()
         if len(update_dict) == 1 and not isinstance(response_dict, dict):
             [key] = update_dict.keys()
@@ -338,8 +342,7 @@ class SystemObject(BaseSystemObject):
         gossip.trigger_with_tags('infinidat.sdk.pre_object_creation', {
                                  'data': data, 'system': system, 'cls': cls}, tags=hook_tags)
         try:
-            with cls._possible_api_failure_context(tags=hook_tags):
-                returned = system.api.post(url, data=data).get_result()
+            returned = system.api.post(url, data=data).get_result()
             obj = cls(system, returned)
         except Exception as e:  # pylint: disable=broad-except
             with end_reraise_context():
@@ -398,17 +401,16 @@ class SystemObject(BaseSystemObject):
         except Exception as e:       # pylint: disable=broad-except
             with end_reraise_context():
                 gossip.trigger_with_tags('infinidat.sdk.object_deletion_failure',
-                                         {'obj': self, 'exception': e}, tags=hook_tags)
+                                         {'obj': self, 'exception': e, 'system': self.system},
+                                         tags=hook_tags)
         gossip.trigger_with_tags('infinidat.sdk.post_object_deletion', {
                                  'obj': self}, tags=hook_tags)
 
-    @staticmethod
-    @contextmanager
-    def _possible_api_failure_context(tags):
-        try:
-            yield
-        except APICommandFailed as e:
-            exc_type, exc_value, exc_tb = sys.exc_info()
-            gossip.trigger_with_tags('infinidat.sdk.object_operation_failure', {
-                                    'exception': e}, tags=tags)
-            reraise(exc_type, exc_value, exc_tb)
+
+@gossip.register('infinidat.sdk.object_creation_failure')
+@gossip.register('infinidat.sdk.object_deletion_failure')
+@gossip.register('infinidat.sdk.object_update_failure')
+def _notify_operation_failed(system, exception, **kwargs):
+    cls = kwargs.pop('cls', None) or type(kwargs.pop('obj'))
+    tags = cls.get_tags_for_object_operations(system)
+    gossip.trigger_with_tags('infinidat.sdk.object_operation_failure', {'exception': exception}, tags=tags)
