@@ -1,4 +1,5 @@
 from functools import partial
+import copy
 import flux
 import json
 import sys
@@ -75,7 +76,7 @@ class API(object):
     def save_credentials(self):
         """Returns a copy of the current credentials, useful for loading them later
         """
-        return dict(self._session.cookies)
+        return [copy.deepcopy(c) for c in self._session.cookies]
 
     def load_credentials(self, creds):
         """Loads credentials from the given credentials
@@ -83,7 +84,8 @@ class API(object):
         :param creds: the result of a previous :meth:`API.save_credentials` call
         """
         self._session.cookies.clear()
-        self._session.cookies.update(creds)
+        for c in creds:
+            self._session.cookies.set_cookie(c)
 
 
     @contextmanager

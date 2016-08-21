@@ -248,7 +248,7 @@ def test_deprecated_api(infinibox, capture):
     pool.delete()
 
 @new_to_version('2.2.8')
-def test_serialize_credentials(infinibox):
+def test_save_load_credentials(infinibox):
     creds = infinibox.api.save_credentials()
     assert creds
     infinibox.api.clear_cookies()
@@ -262,3 +262,17 @@ def test_serialize_credentials(infinibox):
 
     infinibox.api.load_credentials(creds)
     _get() # should work
+
+
+@new_to_version('2.2.8')
+def test_save_credentials_preserves_domain(infinibox):
+    [cookie] = infinibox.api._session.cookies # pylint: disable=protected-access
+    domain = cookie.domain
+    assert domain
+    creds = infinibox.api.save_credentials()
+    infinibox.api.clear_cookies()
+
+    infinibox.api.load_credentials(creds)
+    [cookie] = infinibox.api._session.cookies # pylint: disable=protected-access
+    new_domain = cookie.domain
+    assert new_domain == domain
