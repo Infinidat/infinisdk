@@ -5,7 +5,7 @@ import logbook
 import pytest
 from infinisdk.core.api import Autogenerate, OMIT
 from infinisdk.core.config import config
-from infinisdk.core.exceptions import APICommandFailed, ObjectNotFound, SystemNotFoundException
+from infinisdk.core.exceptions import APICommandFailed, ObjectNotFound, SystemNotFoundException, MethodDisabled
 from infinisdk._compat import httplib
 from ..conftest import no_op_context
 
@@ -41,6 +41,19 @@ def test_no_response_logs(toggle_pretty_response, infinibox, capture):  # pylint
     assert '--> 200 OK' in capture.records[1].message  # Response status log message
     assert capture.records[2].message.endswith('...')  # Response data log message
 
+def test_limited_interaction_context(infinibox):
+    with infinibox.api.disable_api_context():
+        assert len(infinibox.api._disabled_http_methods) == 5 # pylint: disable=protected-access
+        with pytest.raises(MethodDisabled):
+            _ = len(infinibox.filesystems.get_all())
+
+    with infinibox.api.read_only_context():
+        assert len(infinibox.api._disabled_http_methods) == 4 # pylint: disable=protected-access
+        with pytest.raises(MethodDisabled):
+            infinibox.api.post("/api/infinisim/echo", data={"a": "b"})
+
+    assert not infinibox.api._disabled_http_methods # pylint: disable=protected-access
+    _ = len(infinibox.filesystems.get_all())
 
 def test_omit_fields(infinibox):
     resp = infinibox.api.post("/api/infinisim/echo", data={"a": "b"})

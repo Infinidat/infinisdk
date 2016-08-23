@@ -18,7 +18,7 @@ from ... import _compat
 from ..._compat import httplib, iteritems, requests, RequestException, ProtocolError, unquote_url
 from ..config import config
 from ..exceptions import (APICommandFailed, APITransportFailure,
-                          CommandNotApproved, SystemNotFoundException)
+                          CommandNotApproved, SystemNotFoundException, MethodDisabled)
 from ..utils import deprecated
 from .special_values import translate_special_values
 
@@ -72,6 +72,7 @@ class API(object):
         self._no_reponse_logs = 0 # Use counter instead of bool, improves support for coroutines
         self._use_pretty_json = config.root.api.log.pretty_json
         self._login_refresh_enabled = True
+        self._disabled_http_methods = set()
 
     def save_credentials(self):
         """Returns a copy of the current credentials, useful for loading them later
@@ -407,6 +408,33 @@ class API(object):
         _logger.trace("{0} <-- DATA: {1}" , hostname, data)
 
     @contextmanager
+    def limited_interaction_context(self, disable_post=False, disable_get=False,
+                                    disable_put=False, disable_patch=False, disable_delete=False):
+        disabled_http_methods = set(self._disabled_http_methods)
+        if disable_post:
+            self._disabled_http_methods.add("post")
+        if disable_get:
+            self._disabled_http_methods.add("get")
+        if disable_put:
+            self._disabled_http_methods.add("put")
+        if disable_patch:
+            self._disabled_http_methods.add("patch")
+        if disable_delete:
+            self._disabled_http_methods.add("delete")
+        try:
+            yield
+        finally:
+            self._disabled_http_methods = disabled_http_methods
+
+    def read_only_context(self):
+        return self.limited_interaction_context(disable_post=True, disable_put=True,
+                                                disable_patch=True, disable_delete=True)
+
+    def disable_api_context(self):
+        return self.limited_interaction_context(disable_post=True, disable_get=True,
+                                                disable_put=True, disable_patch=True, disable_delete=True)
+
+    @contextmanager
     def get_no_response_logs_context(self):
         self._no_reponse_logs += 1
         try:
@@ -447,6 +475,8 @@ class API(object):
     def request(self, http_method, path, assert_success=True, **kwargs):
         """Sends HTTP API request to the remote system
         """
+        if http_method in self._disabled_http_methods:
+            raise MethodDisabled("Request \"{0} {1}\" aborted, method is disabled".format(http_method.upper(), path))
         did_interactive_confirmation = False
         did_login = False
         had_cookies = bool(self._session.cookies)

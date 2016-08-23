@@ -160,3 +160,7 @@ class VersionNotSupported(InfiniSDKException):
     def __init__(self, version):
         msg = "System version '{0}' is not supported by this version of InfiniSDK".format(version)
         super(VersionNotSupported, self).__init__(msg)
+
+class MethodDisabled(InfiniSDKException):
+    """Thrown when attempting to use an HTTP method, which has been explicitly disabled"""
+    pass
