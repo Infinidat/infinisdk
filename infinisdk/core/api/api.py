@@ -293,7 +293,7 @@ class API(object):
     patch = _get_request_delegate("patch")
     delete = _get_request_delegate("delete")
 
-    def _request(self, http_method, path, assert_success=True, **kwargs):
+    def _request(self, http_method, path, **kwargs):
         """
         Sends a request to the system API interface
 
@@ -371,17 +371,21 @@ class API(object):
             start_time = flux.current_timeline.time()
             try:
                 response = self._session.send(prepared, **kwargs)
-            except Exception as e:
-                e.api_request_obj = api_request
-                raise
+            except _RETRY_REQUESTS_EXCEPTION_TYPES as e:  # pylint: disable=catching-non-exception
+                request_kwargs = dict(url=path, method=http_method, **kwargs)
+                _logger.debug('Exception while sending API command to {0}: {1}', self.system, e)
+                error_str = str(e)
+                if 'gaierror' in error_str or 'nodename nor servname' in error_str or \
+                    'Name or service not known' in error_str:
+                    raise SystemNotFoundException(e, api_request, start_time)
+                raise APITransportFailure(self.system, request_kwargs, e, api_request, start_time)
+
             end_time = flux.current_timeline.time()
             gossip.trigger('infinidat.sdk.after_api_request', request=prepared, response=response)
-            response.start_time = start_time
-            response.end_time = end_time
 
             elapsed = response.elapsed.total_seconds()
             _logger.trace("{0} --> {1} {2} (took {3:.04f}s)", hostname, response.status_code, response.reason, elapsed)
-            returned = Response(response, data)
+            returned = Response(response, data, start_time, end_time)
             resp_data = returned.get_json()
             if self._no_reponse_logs:
                 logged_response_data = "..."
@@ -483,16 +487,7 @@ class API(object):
         auto_retries_context = self._get_auto_retries_context()
         while True:
             with auto_retries_context:
-                try:
-                    returned = self._request(http_method, path, **kwargs)
-                except _RETRY_REQUESTS_EXCEPTION_TYPES as e:
-                    request_kwargs = dict(url=path, method=http_method, **kwargs)
-                    _logger.debug('Exception while sending API command to {0}: {1}', self.system, e)
-                    error_str = str(e)
-                    if 'gaierror' in error_str or 'nodename nor servname' in error_str or \
-                       'Name or service not known' in error_str:
-                        raise SystemNotFoundException(e)
-                    raise APITransportFailure(self.system, request_kwargs, e)
+                returned = self._request(http_method, path, **kwargs)
 
                 if returned.status_code == requests.codes.unauthorized and \
                    self._login_refresh_enabled and \
@@ -571,7 +566,7 @@ class Response(object):
     """
     System API request response
     """
-    def __init__(self, resp, data):
+    def __init__(self, resp, data, start_timestamp, end_timestamp):
         super(Response, self).__init__()
         self.method = resp.request.method
         #: Response object as returned from ``requests``
@@ -581,6 +576,8 @@ class Response(object):
         #: Data sent to on
         self.sent_data = data
         self._cached_json = NOTHING
+        self.start_time = start_timestamp
+        self.end_time = end_timestamp
 
     @property
     def status_code(self):

@@ -28,22 +28,32 @@ class CannotGetReplicaState(InfiniSDKException):
     pass
 
 class SystemNotFoundException(APICommandException):
-    def __init__(self, err):
-        self.address = URL(err.api_request_obj.url).hostname
+    def __init__(self, err, api_request, start_timestamp):
+        self.start_timestamp = start_timestamp
+        self.err = err
+        self.api_request = api_request
+        self.address = URL(api_request.url).hostname
         super(SystemNotFoundException, self).__init__("Cannot connect {0}".format(self.address))
 
 class APITransportFailure(APICommandException):
-    def __init__(self, system, request_kwargs, err):
+    def __init__(self, system, request_kwargs, err, api_request, start_timestamp):
         super(APITransportFailure, self).__init__('APITransportFailure: {0}'.format(err))
+        self.start_timestamp = start_timestamp
         self.err = err
+        self.api_request = api_request
         self.system = system
-        self.address = URL(err.api_request_obj.url).hostname
+        self.address = URL(api_request.url).hostname
         self.attrs = munchify(request_kwargs)
         self.error_desc = str(err)
 
+    @property
+    def request_timestamp(self):
+        return arrow.Arrow.fromtimestamp(self.start_timestamp)
+
     def __repr__(self):
         return ("API Transport Failure on {system_name}\n\t"
-                "Request: {e.attrs.method} {e.err.api_request_obj.url}\n\t"
+                "Request: {e.attrs.method} {e.api_request.url}\n\t"
+                "Request Timestamp: {e.request_timestamp}\n\t"
                 "Error Description: {e.error_desc}".format(e=self, system_name=self.system.get_name()))
 
     __str__ = __repr__
@@ -99,11 +109,11 @@ class APICommandFailed(APICommandException):
 
     @property
     def request_timestamp(self):
-        return arrow.Arrow.fromtimestamp(self.response.response.start_time)
+        return arrow.Arrow.fromtimestamp(self.response.start_time)
 
     @property
     def response_timestamp(self):
-        return arrow.Arrow.fromtimestamp(self.response.response.end_time)
+        return arrow.Arrow.fromtimestamp(self.response.end_time)
 
     def __str__(self):
         return repr(self)
