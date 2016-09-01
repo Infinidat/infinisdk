@@ -23,6 +23,7 @@ _INSTALL_REQUIRES = [
     "sentinels",
     "storage_interfaces",
     "URLObject",
+    "vintage>=0.3.0",
 ]
 
 if sys.version_info < (3, 0):

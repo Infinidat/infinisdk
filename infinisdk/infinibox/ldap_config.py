@@ -1,9 +1,9 @@
 from urlobject import URLObject as URL
+from vintage import deprecated
 
 from .._compat import iteritems
 from ..core.type_binder import TypeBinder
 from ..core import Field, SystemObject
-from ..core.utils import deprecated
 from .user import User
 
 

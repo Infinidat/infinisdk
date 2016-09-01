@@ -2,7 +2,6 @@ import copy
 
 from .._compat import ExitStack, zip  # pylint: disable=redefined-builtin
 from ..core.field import Field
-from ..core.utils import deprecated
 from ..core.system_component import SystemComponentsBinder
 from ..core.system_object import BaseSystemObject
 from ..core.exceptions import ObjectNotFound
@@ -17,6 +16,7 @@ from contextlib import contextmanager
 from logbook import Logger
 from pact import Pact
 from urlobject import URLObject as URL
+from vintage import deprecated
 
 # pylint: disable=attribute-defined-outside-init,no-member,super-on-old-class,no-init
 _logger = Logger(__name__)

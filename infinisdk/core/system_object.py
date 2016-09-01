@@ -5,6 +5,7 @@ import sys
 from contextlib import contextmanager
 
 from mitba import cached_method
+from vintage import deprecated
 from urlobject import URLObject as URL
 
 from .exceptions import APICommandFailed
@@ -16,7 +17,7 @@ from .field import Field
 from .type_binder import TypeBinder
 from .bindings import PassthroughBinding
 from .api.special_values import translate_special_values
-from .utils import DONT_CARE, deprecated, end_reraise_context
+from .utils import DONT_CARE, end_reraise_context
 
 
 class FieldsMeta(FieldsMetaBase):

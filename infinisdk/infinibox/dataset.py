@@ -4,8 +4,9 @@ from capacity import Capacity, byte
 from urlobject import URLObject as URL
 from collections import namedtuple
 from mitba import cached_method
+from vintage import deprecated
 from ..core.api.special_values import Autogenerate
-from ..core.utils import deprecated, end_reraise_context, DONT_CARE
+from ..core.utils import end_reraise_context, DONT_CARE
 from ..core.exceptions import InvalidOperationException, ObjectNotFound, TooManyObjectsFound
 from ..core.type_binder import TypeBinder, PolymorphicBinder
 from ..core import Field, CapacityType, MillisecondsDatetimeType

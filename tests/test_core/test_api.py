@@ -3,6 +3,7 @@ import requests
 from uuid import uuid4
 import logbook
 import pytest
+import warnings
 from infinisdk.core.api import Autogenerate, OMIT
 from infinisdk.core.config import config
 from infinisdk.core.exceptions import APICommandFailed, ObjectNotFound, SystemNotFoundException, MethodDisabled
@@ -250,12 +251,17 @@ def test_added_headers_context(infinibox):
         assert infinibox.api._session.headers == expected_headers
     assert infinibox.api._session.headers == prev_headers
 
+
 @new_to_version('3.0')
-def test_deprecated_api(infinibox, capture):
+def test_deprecated_api(infinibox):
     pool = infinibox.pools.create()
     user = infinibox.users.create(role='POOL_ADMIN')
-    infinibox.api.post('pools/{0}/owners/{1}'.format(pool.get_id(), user.get_id()))
-    assert capture.has_warnings
+    warnings.simplefilter('always')
+    with warnings.catch_warnings(record=True) as recorded:
+        infinibox.api.post('pools/{0}/owners/{1}'.format(pool.get_id(), user.get_id()))
+    assert len(recorded) == 1
+    assert recorded[0].category == DeprecationWarning
+    assert 'Deprecation warning' in str(recorded[0].message)
     infinibox.api.delete('pools/{0}/owners/{1}'.format(pool.get_id(), user.get_id()))
     user.delete()
     pool.delete()

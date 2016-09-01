@@ -8,9 +8,9 @@ from contextlib import contextmanager
 
 import gossip
 from logbook import Logger
-from logbook.utils import log_deprecation_message
 from sentinels import NOTHING
 from urlobject import URLObject as URL
+from vintage import deprecated, warn_deprecation
 
 import colorama
 
@@ -19,7 +19,6 @@ from ..._compat import httplib, iteritems, requests, RequestException, ProtocolE
 from ..config import config
 from ..exceptions import (APICommandFailed, APITransportFailure,
                           CommandNotApproved, SystemNotFoundException, MethodDisabled)
-from ..utils import deprecated
 from .special_values import translate_special_values
 
 
@@ -514,8 +513,9 @@ class API(object):
                                     continue
                                 raise CommandNotApproved(e.response, reason)
                         raise
-                if 'x-infinidat-deprecated-api' in returned.response.headers:
-                    log_deprecation_message('Deprecation warning: {}'.format(returned.response.headers['x-infinidat-deprecated-api']), frame_correction=2)
+                deprecation_header = returned.response.headers.get('x-infinidat-deprecated-api')
+                if deprecation_header:
+                    warn_deprecation('Deprecation warning: {}'.format(deprecation_header), frame_correction=2)
                 return returned
         assert False, "Should never get here!"  # pragma: no cover
 

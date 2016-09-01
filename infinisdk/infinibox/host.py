@@ -1,3 +1,5 @@
+from vintage import deprecated
+
 from .._compat import requests
 
 from ..core import Field, MillisecondsDatetimeType
@@ -6,7 +8,6 @@ from ..core.bindings import RelatedObjectBinding
 from ..core.exceptions import APICommandFailed
 from ..core.translators_and_types import host_port_to_api, HostPortListType
 from ..core.type_binder import TypeBinder
-from ..core.utils import deprecated
 from .system_object import InfiniBoxLURelatedObject
 from infi.dtypes.wwn import WWN
 

@@ -1,9 +1,9 @@
 from capacity import Capacity
 from sentinels import NOTHING
+from vintage import deprecated
 
 from .._compat import string_types
 from .exceptions import MissingFields
-from .utils import deprecated
 
 
 def _make_getter(field, name_template):

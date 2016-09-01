@@ -1,10 +1,11 @@
 import operator
 
 from sentinels import NOTHING
+from vintage import deprecated
 
 from .._compat import httplib
 from ..core.config import config
-from ..core.utils import deprecated
+
 
 class Feature(object):
     def __init__(self, name, version, enabled):
