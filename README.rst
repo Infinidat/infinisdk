@@ -1,8 +1,6 @@
 
 
-.. image:: https://pypip.in/d/infinisdk/badge.png
-
-.. image:: https://pypip.in/v/infinisdk/badge.png
+.. image:: https://img.shields.io/pypi/v/infinisdk.svg
 
 Overview
 ========
