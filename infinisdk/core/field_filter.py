@@ -1,3 +1,6 @@
+from collections import Iterable
+from .._compat import string_types
+
 _operator_name_to_sign_str = {
     "eq": '=',
     "gt": '>',
@@ -18,7 +21,7 @@ class FieldFilter(object):
         return self.field.binding.get_api_value_from_value(None, None, None, value)
 
     def add_to_url(self, urlobj):
-        if isinstance(self.value, (list, tuple)):
+        if isinstance(self.value, Iterable) and not isinstance(self.value, string_types):
             value = "({0})".format(",".join(str(self._translate(val))
                                             for val in self.value))
         else:
