@@ -1,6 +1,6 @@
 import functools
 import gossip
-from capacity import Capacity, byte
+from capacity import Capacity, byte, GB
 from urlobject import URLObject as URL
 from collections import namedtuple
 from mitba import cached_method
@@ -11,7 +11,6 @@ from ..core.exceptions import InvalidOperationException, ObjectNotFound, TooMany
 from ..core.type_binder import TypeBinder, PolymorphicBinder
 from ..core import Field, CapacityType, MillisecondsDatetimeType
 from ..core.bindings import RelatedObjectBinding
-from capacity import GB
 from .system_object import InfiniBoxObject
 
 _BEGIN_FORK_HOOK = "infinidat.sdk.begin_fork"
