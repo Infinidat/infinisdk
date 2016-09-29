@@ -184,6 +184,7 @@ class Replica(InfiniBoxObject):
         Field('last_synchronized', type=int),
         Field('last_replicated_guid', api_name='_consistent_guid', is_filterable=True),
         Field('state', type=str, cached=False),
+        Field('initial', api_name='is_initial', type=bool, cached=False),
         Field('sync_interval', api_name='sync_interval', type=MillisecondsDeltaType,
               mutable=True, creation_parameter=True, default=timedelta(seconds=4), is_filterable=True),
         Field('rpo', api_name='rpo_value', type=MillisecondsDeltaType, mutable=True, is_filterable=True),
@@ -333,10 +334,7 @@ class Replica(InfiniBoxObject):
         """
         self._validate_can_check_state()
         if self.system.compat.has_sync_job_states():
-            for job in self._get_jobs():
-                if job['is_initial'] and job['state'].lower() != 'done':
-                    return True
-            return False
+            return self.is_initial()
         return 'initial' in self.get_state(*args, **kwargs).lower()
 
     def _get_jobs(self):
