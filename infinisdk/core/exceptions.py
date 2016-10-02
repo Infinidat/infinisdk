@@ -90,13 +90,13 @@ class APICommandFailed(APICommandException):
 
     def __repr__(self):
         returned = ("API Command Failed\n\t"
-                "Request: {e.response.method} {e.response.url}\n\t"
-                "Request Timestamp: {e.request_timestamp}\n\t"
-                "Response Timestamp: {e.response_timestamp}\n\t"
-                "Data: {e.response.sent_data}\n\t"
-                "Status: {e.status_code}\n\t"
-                "Code: {e.error_code}\n\t"
-                "Message: {e.message}".format(e=self))
+                    "Request: {e.response.method} {e.response.url}\n\t"
+                    "Request Timestamp: {e.request_timestamp}\n\t"
+                    "Response Timestamp: {e.response_timestamp}\n\t"
+                    "Data: {e.response.sent_data}\n\t"
+                    "Status: {e.status_code}\n\t"
+                    "Code: {e.error_code}\n\t"
+                    "Message: {e.message}".format(e=self))
 
         cookies = self.response.response.request.headers.get('cookie')
         if cookies:

@@ -24,7 +24,7 @@ def test_filesystem_exporting(infinibox, filesystem):
 def test_filesystem_with_exports_deletion(filesystem):
     filesystem.add_export()
     filesystem.add_export()
-    with pytest.raises(APICommandFailed) as caught:
+    with pytest.raises(APICommandFailed) as caught:  # pylint: disable=unused-variable
         filesystem.delete()
     filesystem.get_exports()[0].delete()
     with pytest.raises(APICommandFailed) as caught:
@@ -50,5 +50,5 @@ def test_filesystem_children_deletion_without_approval(filesystem):
 
 @relevant_from_version('2.0')
 def test_field_types():
-    assert Filesystem.fields.parent.type.type is Filesystem
-    assert Filesystem.fields.pool.type.type is Pool
+    assert Filesystem.fields.parent.type.type is Filesystem  # pylint: disable=no-member
+    assert Filesystem.fields.pool.type.type is Pool  # pylint: disable=no-member

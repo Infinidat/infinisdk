@@ -42,10 +42,10 @@ class MunchListTraslator(ValueTranslator):
         self._translator = MunchTranslator()
 
     def _to_api(self, value):
-        return [self._translator._to_api(single_value) for single_value in value]
+        return [self._translator._to_api(single_value) for single_value in value]  # pylint: disable=protected-access
 
     def _from_api(self, value):
-        return [self._translator._from_api(single_value) for single_value in value]
+        return [self._translator._from_api(single_value) for single_value in value]  # pylint: disable=protected-access
 
 MunchType = TypeInfo(type=munch.Munch, api_type=dict, translator=MunchTranslator())
 MunchListType = TypeInfo(type=list, api_type=list, translator=MunchListTraslator())
@@ -77,11 +77,10 @@ class MillisecondsDeltaTranslator(ValueTranslator):
 
     def _from_api(self, value):
         value /= 1000.0
-        return timedelta(seconds=int(value), microseconds = int((value - int(value)) * 1000))
+        return timedelta(seconds=int(value), microseconds=int((value - int(value)) * 1000))
 
 
-MillisecondsDeltaType = TypeInfo(type=timedelta,
-                                  api_type=int, translator=MillisecondsDeltaTranslator())
+MillisecondsDeltaType = TypeInfo(type=timedelta, api_type=int, translator=MillisecondsDeltaTranslator())
 
 
 WWNType = TypeInfo(type=WWN, api_type=str)

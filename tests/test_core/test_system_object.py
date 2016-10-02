@@ -7,6 +7,7 @@ from infinisdk.core.exceptions import (APICommandFailed,
 
 from ..conftest import relevant_from_version
 
+# pylint: disable=misplaced-comparison-constant, unused-argument
 
 class SampleBaseObject(SystemObject):
     FIELDS = [
@@ -34,16 +35,18 @@ class FakeSystem(object):
     def is_caching_enabled(self):
         return False
 
-    def is_field_supported(self, field):
+    def is_field_supported(self, field):  # pylint: disable=unused-argument
         return True
 
 
 def test_num_fields(system):
+    # pylint: disable=no-member
     assert len(SampleBaseObject.fields) == 2
     assert len(SampleDerivedObject.fields) == 4
 
 
 def test_querying_fields_by_name(system):
+    # pylint: disable=no-member
     assert SampleBaseObject.fields.name.type.type is str
     assert SampleDerivedObject.fields.name.type.type is str
     assert SampleDerivedObject.fields.number.type.type is int
@@ -53,11 +56,11 @@ def test_no_fields(system):
     class EmptyObject(SystemObject):
         pass
 
-    assert len(EmptyObject.fields) == 0
+    assert len(EmptyObject.fields) == 0  # pylint: disable=no-member
 
 
 def test_nonexistent_field(system):
-    assert not hasattr(SampleDerivedObject.fields, "fake_field")
+    assert not hasattr(SampleDerivedObject.fields, "fake_field")  # pylint: disable=no-member
 
 
 def test_get_from_cache_miss(system):
@@ -119,16 +122,16 @@ def test_requires_cache_invalidation_decorator(system, with_fields):
 
 def test_auto_getter_attribute_already_exists_in_same_class(system):
     with pytest.raises(AttributeAlreadyExists):
-        class SomeObjectForGetter(SystemObject):
+        class SomeObjectForGetter(SystemObject):  # pylint: disable=unused-variable
             FIELDS = [Field("id", type=int)]
             get_id = lambda self: 'my id'
 
     with pytest.raises(AttributeAlreadyExists):
-        class SomeObjectForUpdater(SystemObject):
+        class SomeObjectForUpdater(SystemObject):  # pylint: disable=unused-variable
             FIELDS = [Field("id", type=int, mutable=True)]
             _id = 'my id'
 
-            def update_id(self, value): self._id = value
+            def update_id(self, value): self._id = value  # pylint: disable=multiple-statements
 
 
 def test_auto_getter_attribute_already_exists_in_base_class1(system):
@@ -138,9 +141,9 @@ def test_auto_getter_attribute_already_exists_in_base_class1(system):
     class SomeDerivedObject(SomeObject):
         _id = 'other id'
 
-        def get_id(self): return self._id
+        def get_id(self): return self._id  # pylint: disable=multiple-statements
 
-        def update_id(self, value): self._id = value
+        def update_id(self, value): self._id = value  # pylint: disable=multiple-statements
 
     some_derived_obj = SomeDerivedObject(FakeSystem(), {"id": 1})
     assert some_derived_obj.get_id() == 'other id'
@@ -152,9 +155,9 @@ def test_auto_getter_attribute_already_exists_in_base_class2(system):
     class SomeObject(SystemObject):
         _id = 'my id'
 
-        def get_id(self): return self._id
+        def get_id(self): return self._id  # pylint: disable=multiple-statements
 
-        def update_id(self, value): self._id = value
+        def update_id(self, value): self._id = value  # pylint: disable=multiple-statements
 
     class SomeDerivedObject(SomeObject):
         FIELDS = [Field("id", type=int, cached=True, mutable=True)]
@@ -169,7 +172,7 @@ def test__equality(system):
     Obj = SampleDerivedObject
     equal1, equal2 = [
         Obj(system1, {"id": 100})
-        for i in range(2)
+        for _ in range(2)
     ]
     assert equal1 == equal2
     assert (not equal1 != equal2)
@@ -225,7 +228,7 @@ def test_string_id_escaping(system):
     """
     obj = SampleObjectWithStringID(system, {'id': 'some:text'})
     with pytest.raises(APICommandFailed) as caught:
-        field = obj.get_field('x')
+        field = obj.get_field('x')  # pylint: disable=unused-variable
 
     url = caught.value.response.response.request.url
     assert url.endswith(

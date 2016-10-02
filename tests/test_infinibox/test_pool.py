@@ -1,5 +1,5 @@
 import pytest
-from infinisdk._compat import xrange, iteritems
+from infinisdk._compat import iteritems
 from infinisdk.core import CapacityType
 from capacity import TB, GB, KiB, Capacity, TiB
 from ..conftest import create_volume, create_pool, create_filesystem, relevant_from_version
@@ -20,6 +20,7 @@ def test_creation(infinibox, pool):
 
     update_all_capacities_in_dict_to_api(kwargs)
 
+    # pylint: disable=protected-access
     assert pool._cache['name'] == kwargs['name']
     assert pool._cache['physical_capacity'] == kwargs['physical_capacity']
     assert pool._cache['virtual_capacity'] == kwargs['virtual_capacity']
@@ -44,7 +45,7 @@ def test_get_name(infinibox, pool):
     assert (not pool.is_in_system())
 
 
-def test_update_name(infinibox, pool):
+def test_update_name(pool):
     new_name = 'some_pool_name'
     pool.update_name(new_name)
     assert pool.get_name() == new_name
@@ -65,22 +66,22 @@ def test_get_all(infinibox, pool):
 
 
 def test_get_volumes(infinibox, pool):
-    volumes = [create_volume(infinibox, pool_id=pool.id) for i in xrange(5)]
+    volumes = [create_volume(infinibox, pool_id=pool.id) for _ in range(5)]
     assert list(pool.get_volumes()) == volumes
 
 def test_get_filesystems(infinibox, pool):
-    filesystems = [create_filesystem(infinibox, pool_id=pool.id) for i in xrange(5)]
+    filesystems = [create_filesystem(infinibox, pool_id=pool.id) for _ in range(5)]
     assert list(pool.get_filesystems()) == filesystems
 
 def test_get_master_volumes(infinibox, pool):
-    volumes = [create_volume(infinibox, pool_id=pool.id) for i in xrange(5)]
+    volumes = [create_volume(infinibox, pool_id=pool.id) for _ in range(5)]
     snapshots = [vol.create_child() for vol in volumes]
     MasterType = 'MASTER'
     assert list(pool.get_volumes()) == volumes + snapshots
     assert list(pool.get_volumes(type=MasterType)) == volumes
 
 def test_get_master_filesystems(infinibox, pool):
-    filesystems = [create_filesystem(infinibox, pool_id=pool.id) for i in xrange(5)]
+    filesystems = [create_filesystem(infinibox, pool_id=pool.id) for _ in range(5)]
     snapshots = [fs.create_child() for fs in filesystems]
     MasterType = 'MASTER'
     assert list(pool.get_filesystems()) == filesystems + snapshots

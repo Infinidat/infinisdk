@@ -1,10 +1,10 @@
 from api_object_schema import ObjectAPIBinding
 from sentinels import NOTHING
 from munch import Munch
-from infi.dtypes.iqn import IQN
-from infi.dtypes.wwn import WWN
-from .api.special_values import SpecialValue,RawValue
+from .api.special_values import SpecialValue, RawValue
 from .translators_and_types import address_type_factory, host_port_from_api
+
+# pylint: disable=abstract-method
 
 class InfiniSDKBinding(ObjectAPIBinding):
 
@@ -133,7 +133,7 @@ class ListOfRelatedObjectBinding(InfiniSDKBinding):
     def _get_collection(self, system):
         return getattr(system, self._collection_name)
 
-    def _get_related_obj(self, system, related_obj_info, obj):
+    def _get_related_obj(self, system, related_obj_info, obj):  # pylint: disable=unused-argument
         return self._get_collection(system).object_type.construct(system, related_obj_info)
 
     def get_value_from_api_value(self, system, objtype, obj, value):

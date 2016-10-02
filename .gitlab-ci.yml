@@ -5,7 +5,7 @@ py27:
   script:
     - pip install -U --pre -i https://pypi.infinidat.com/simple -e .
     - pip install -U --pre -i https://pypi.infinidat.com/simple -r test_requirements.txt infinisim
-    - py.test tests/
+    - py.test
 
 py34:
   image: python:3.4
@@ -14,7 +14,7 @@ py34:
   script:
     - pip install -U --pre -i https://pypi.infinidat.com/simple -e .
     - pip install -U --pre -i https://pypi.infinidat.com/simple -r test_requirements.txt infinisim
-    - py.test tests/
+    - py.test
 
 py35:
   image: python:3.5
@@ -23,7 +23,7 @@ py35:
   script:
     - pip install -U --pre -i https://pypi.infinidat.com/simple -e .
     - pip install -U --pre -i https://pypi.infinidat.com/simple -r test_requirements.txt infinisim
-    - py.test tests/
+    - py.test
 
 pypi:
   image: python:3

@@ -73,7 +73,7 @@ def test_get_pool(data_entity, pool):
     assert pool == data_entity.get_pool()
 
 
-def test_snapshot_creation_time(infinibox, data_entity):
+def test_snapshot_creation_time(data_entity):
     snap = data_entity.create_child()
     assert isinstance(snap.get_creation_time(), arrow.Arrow)
 
@@ -82,7 +82,7 @@ def _create_and_validate_children(parent_obj, child_type):
     children = [parent_obj.create_child(name) for name in ['test_{}_{}'.format(child_type, parent_obj.get_id()), None]]
     is_right_type = lambda child: getattr(child, 'is_' + child_type)()
     validate_child = lambda child: is_right_type(child) and child.get_parent() == parent_obj
-    assert all(map(validate_child, children))
+    assert all(validate_child(child) for child in  children)
     get_children_func = getattr(parent_obj, "get_{0}s".format(child_type))
     assert set(children) == set(get_children_func())
     assert set(child.get_parent() for child in children) == set([parent_obj])
@@ -184,14 +184,14 @@ def test_object_creation_hooks_for_child_entities(data_entity):
     password = 'some_password'
     username = data_entity.system.users.create(role='ReadOnly', password=password).get_name()
 
-    def save_fork_callback(hook_name, **kwargs):
+    def save_fork_callback(hook_name, **kwargs):  # pylint: disable=unused-argument
         fork_callbacks.append(hook_name)
 
     def hook_callback(hook_type, **kwargs):
         obj_name = kwargs['data']['name']
         l.append('{0}_{1}'.format(hook_type, obj_name))
 
-    def hook_failure_callback(**kwargs):
+    def hook_failure_callback(**kwargs):  # pylint: disable=unused-argument
         l.append('failure')
 
     gossip.register(partial(hook_callback, 'pre'),
@@ -235,15 +235,15 @@ def test_data_restore(data_entity):
     username = data_entity.system.users.create(role='ReadOnly', password=password).get_name()
 
     @gossip.register('infinidat.sdk.pre_data_restore', token=hook_ident)
-    def pre_restore(source, target):
+    def pre_restore(source, target):  # pylint: disable=unused-variable
         callbacks.append("pre_restore_{0}_from_{1}".format(target.id, source.id))
 
     @gossip.register('infinidat.sdk.post_data_restore', token=hook_ident)
-    def post_restore(source, target):
+    def post_restore(source, target):  # pylint: disable=unused-variable
         callbacks.append("post_restore_{0}_from_{1}".format(target.id, source.id))
 
     @gossip.register('infinidat.sdk.data_restore_failure', token=hook_ident)
-    def restore_failure(source, target, exc):
+    def restore_failure(source, target, exc):  # pylint: disable=unused-variable,unused-argument
         callbacks.append("restore_failure_{0}_from_{1}".format(target.id, source.id))
 
     snapshot = data_entity.create_child('some_snapshot_to_restore_from')
@@ -255,7 +255,8 @@ def test_data_restore(data_entity):
     found_restore_event = False
     for last_event in last_events:
         if "{0}_RESTORE".format(data_entity.get_type_name().upper()) in last_event['code']:
-            # Either VOLUME_RESTORE/FILESYSTEM_RESTORE for older versions, or VOLUME_RESTORED/FILESYSTEM_RESTORED for 2.0
+            # Either VOLUME_RESTORE/FILESYSTEM_RESTORE for older versions,
+            # or VOLUME_RESTORED/FILESYSTEM_RESTORED for 2.0
             found_restore_event = True
             break
     assert found_restore_event

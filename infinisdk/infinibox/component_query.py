@@ -1,7 +1,7 @@
 import operator
 from numbers import Number
 
-from .._compat import cmp, iteritems, itervalues, sorted
+from .._compat import cmp, iteritems, itervalues, sorted  # pylint: disable=redefined-builtin
 
 
 class ComponentQueryBase(object):
@@ -70,12 +70,11 @@ class InfiniBoxComponentQuery(ComponentQueryBase):
                     res = cmp(x_val, y_val)
                     if res != 0:
                         return sign_func(res)
-                else:
-                    return 0
+                return 0
 
             with self._get_binder().fetch_tree_once_context(force_fetch=self._force_fetch, with_logging=False):
-                returned = [item for item in itervalues(self.system.components._components_by_id)
-                                 if self.passed_filtering(item)]
+                all_components = itervalues(self.system.components._components_by_id)  # pylint: disable=protected-access
+                returned = [item for item in all_components if self.passed_filtering(item)]
 
             if self.sort_criteria:
                 returned = sorted(returned, cmp=_sort_cmp_items)
@@ -88,8 +87,7 @@ class InfiniBoxComponentQuery(ComponentQueryBase):
         return self.system.components[self.object_type]
 
     def passed_filtering(self, item):
-        if (self.object_type != self.system.components.object_type and
-            self.object_type != type(item)):
+        if self.object_type != self.system.components.object_type and self.object_type != type(item):
             return False
         for predicate in self.predicates:
             try:
@@ -108,7 +106,7 @@ class InfiniBoxComponentQuery(ComponentQueryBase):
         assert page_index == 1 # pragma: no cover
         return self
 
-    def page_size(self, page_size):
+    def page_size(self, page_size):  # pylint: disable=unused-argument
         return self # pragma: no cover
 
     def sort(self, *criteria):
@@ -128,16 +126,16 @@ class InfiniBoxGenericComponentQuery(ComponentQueryBase):
             return self._fetched_items
         items = []
         with self.system.components.fetch_tree_once_context(force_fetch=self._force_fetch, with_logging=False):
-                fields = set(predicate.field.name for predicate in self.predicates) | set(self.kw)
-                for component_type in self.system.components.get_component_types():
-                    if not fields.issubset(set(field.name for field in component_type.fields)):
-                        continue
-                    assert component_type
-                    collection = self.system.components[component_type]
-                    query = collection.find(*self.predicates, **self.kw)
-                    if self._force_fetch:
-                        query.force_fetching_objects()
-                    for item in query:
-                        items.append(item)
+            fields = set(predicate.field.name for predicate in self.predicates) | set(self.kw)
+            for component_type in self.system.components.get_component_types():
+                if not fields.issubset(set(field.name for field in component_type.fields)):
+                    continue
+                assert component_type
+                collection = self.system.components[component_type]
+                query = collection.find(*self.predicates, **self.kw)
+                if self._force_fetch:
+                    query.force_fetching_objects()
+                for item in query:
+                    items.append(item)
         self._fetched_items = items
         return self._fetched_items

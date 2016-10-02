@@ -1,5 +1,5 @@
 import pytest
-from infinisdk._compat import iteritems, cmp, sorted
+from infinisdk._compat import iteritems, cmp, sorted  # pylint: disable=redefined-builtin
 from infinisdk.core import object_query
 from infinisdk.core.exceptions import APICommandFailed
 
@@ -35,7 +35,7 @@ def test_multiple_metadata_creation(volume):
     assert volume.get_all_metadata() == metadata_d
 
 
-def test_metadata_creation(infinibox, volume):
+def test_metadata_creation(volume):
     metadata_d = {'some_key':  'some_value',
                   'other_key': 'other_value',
                   'last_key':  'last_value'}

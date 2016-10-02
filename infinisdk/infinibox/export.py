@@ -5,27 +5,32 @@ from .system_object import InfiniBoxObject
 from ..core.bindings import RelatedObjectBinding
 
 
+class _Field(Field):
+    def __init__(self, *args, **kwargs):
+        super(_Field, self).__init__(*args, is_filterable=True, is_sortable=True, **kwargs)
+
 class Export(InfiniBoxObject):
     FIELDS = [
-        Field("id", is_identity=True, type=int, is_filterable=True, is_sortable=True),
-        Field("export_path", creation_parameter=True, default=Autogenerate("/{prefix}export_{uuid}"), is_filterable=True, is_sortable=True),
-        Field("inner_path", creation_parameter=True, optional=True, is_filterable=True, is_sortable=True),
-        Field("filesystem", api_name = "filesystem_id", creation_parameter = True, cached=True, type=int, binding=RelatedObjectBinding()),
-        Field("enabled", type=bool, mutable=True, creation_parameter=True, optional=True, is_filterable=True, is_sortable=True),
-        Field("make_all_users_anonymous", type=bool, mutable=True, creation_parameter=True, optional=True, is_filterable=True, is_sortable=True),
-        Field("anonymous_gid", type=int, mutable=True, creation_parameter=True, optional=True, is_filterable=True, is_sortable=True),
-        Field("anonymous_uid", type=int, mutable=True, creation_parameter=True, optional=True, is_filterable=True, is_sortable=True),
-        Field("privileged_port", type=bool, mutable=True, creation_parameter=True, optional=True, is_filterable=True, is_sortable=True),
-        Field("transport_protocols", creation_parameter=True, optional=True, mutable=True, is_filterable=True, is_sortable=True),
-        Field("32bit_file_id", type=bool, mutable=True, creation_parameter=True, optional=True, is_filterable=True, is_sortable=True),
-        Field("pref_readdir", creation_parameter=True, optional=True, type=CapacityType, mutable=True, is_filterable=True, is_sortable=True),
-        Field("pref_read", creation_parameter=True, optional=True, type=CapacityType, mutable=True, is_filterable=True, is_sortable=True),
-        Field("pref_write", creation_parameter=True, optional=True, type=CapacityType, mutable=True, is_filterable=True, is_sortable=True),
-        Field("max_read", creation_parameter=True, optional=True, type=CapacityType, mutable=True, is_filterable=True, is_sortable=True),
-        Field("max_write", creation_parameter=True, optional=True, type=CapacityType, mutable=True, is_filterable=True, is_sortable=True),
-        Field("permissions", type=MunchListType, creation_parameter=True, optional=True, mutable=True),
-        Field("created_at", type=MillisecondsDatetimeType, is_sortable=True, is_filterable=True),
-        Field("updated_at", type=MillisecondsDatetimeType, is_sortable=True, is_filterable=True),
+        _Field("id", is_identity=True, type=int),
+        _Field("export_path", creation_parameter=True, default=Autogenerate("/{prefix}export_{uuid}")),
+        _Field("inner_path", creation_parameter=True, optional=True),
+        Field("filesystem", api_name="filesystem_id", creation_parameter=True, cached=True, type=int,
+              binding=RelatedObjectBinding()),
+        _Field("enabled", type=bool, mutable=True, creation_parameter=True, optional=True),
+        _Field("make_all_users_anonymous", type=bool, mutable=True, creation_parameter=True, optional=True),
+        _Field("anonymous_gid", type=int, mutable=True, creation_parameter=True, optional=True),
+        _Field("anonymous_uid", type=int, mutable=True, creation_parameter=True, optional=True),
+        _Field("privileged_port", type=bool, mutable=True, creation_parameter=True, optional=True),
+        _Field("transport_protocols", creation_parameter=True, optional=True, mutable=True),
+        _Field("32bit_file_id", type=bool, mutable=True, creation_parameter=True, optional=True),
+        _Field("pref_readdir", creation_parameter=True, optional=True, type=CapacityType, mutable=True),
+        _Field("pref_read", creation_parameter=True, optional=True, type=CapacityType, mutable=True),
+        _Field("pref_write", creation_parameter=True, optional=True, type=CapacityType, mutable=True),
+        _Field("max_read", creation_parameter=True, optional=True, type=CapacityType, mutable=True),
+        _Field("max_write", creation_parameter=True, optional=True, type=CapacityType, mutable=True),
+        _Field("permissions", type=MunchListType, creation_parameter=True, optional=True, mutable=True),
+        _Field("created_at", type=MillisecondsDatetimeType),
+        _Field("updated_at", type=MillisecondsDatetimeType),
     ]
 
     @classmethod

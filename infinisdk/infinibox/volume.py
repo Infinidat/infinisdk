@@ -72,7 +72,8 @@ class Volume(Dataset):
     def create(cls, system, **fields):
         pool = fields.get('pool')
         if pool and not isinstance(pool, SpecialValue):
-            pool.invalidate_cache('allocated_physical_capacity', 'free_physical_capacity', 'free_virtual_capacity', 'reserved_capacity')
+            pool.invalidate_cache('allocated_physical_capacity', 'free_physical_capacity', 'free_virtual_capacity',
+                                  'reserved_capacity')
         return super(Volume, cls).create(system, **fields)
 
     def own_replication_snapshot(self, name=None):
@@ -116,4 +117,4 @@ class Volume(Dataset):
     def has_children(self):
         return self.get_field("has_children")
 
-ScsiVolume.register(Volume)
+ScsiVolume.register(Volume)  # pylint: disable=no-member

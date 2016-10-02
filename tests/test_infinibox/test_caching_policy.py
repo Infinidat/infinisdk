@@ -2,7 +2,7 @@ import pytest
 
 
 @pytest.mark.parametrize('enable_caching', [True, False])
-def test_caching(infinibox, pool, volume, infinisim_volume, enable_caching):
+def test_caching(infinibox, volume, infinisim_volume, enable_caching):
 
     if enable_caching:
         infinibox.enable_caching()

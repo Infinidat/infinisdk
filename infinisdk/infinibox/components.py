@@ -18,7 +18,7 @@ from pact import Pact
 from urlobject import URLObject as URL
 from vintage import deprecated
 
-# pylint: disable=attribute-defined-outside-init,no-member,super-on-old-class,no-init
+# pylint: disable=attribute-defined-outside-init,no-member,super-on-old-class,no-init,abstract-method
 _logger = Logger(__name__)
 
 
@@ -115,7 +115,8 @@ class InfiniBoxComponentBinder(TypeBinder):
     def get_by_id_lazy(self, id):  # pylint: disable=redefined-builtin
         returned = self.safe_get_by_id(id)
         if returned is None:
-            raise NotImplementedError("Initializing infinibox components lazily is not yet supported") # pragma: no cover
+            raise NotImplementedError(
+                "Initializing infinibox components lazily is not yet supported") # pragma: no cover
         return returned
 
     def find(self, *predicates, **kw):

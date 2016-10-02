@@ -41,6 +41,6 @@ def test_garbage_collection(infinibox):
     del secondary
     assert gc.collect() > 0
 
-    assert len(infinibox._related_systems) == 2
+    assert len(infinibox._related_systems) == 2  # pylint: disable=protected-access
     _assert_expected_systems(infinibox, [third])
-    assert len(infinibox._related_systems) == 1
+    assert len(infinibox._related_systems) == 1  # pylint: disable=protected-access

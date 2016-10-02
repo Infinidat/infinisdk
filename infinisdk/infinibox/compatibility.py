@@ -13,6 +13,10 @@ class Feature(object):
         self.version = version
         self.enabled = enabled
 
+def _get_predicate(opreator_func, value):
+    def predicate(version):
+        return opreator_func(version, value)
+    return predicate
 
 class Compatibility(object):
 
@@ -43,7 +47,7 @@ class Compatibility(object):
         for restriction in restrictions:
             operator_name, value = restriction.split(':', 1)
             op = getattr(operator, operator_name)
-            returned.append(lambda version, op=op: op(version, value))
+            returned.append(_get_predicate(op, value))
         return returned
 
     def is_feature_supported(self, feature_name):
@@ -74,7 +78,8 @@ class Compatibility(object):
         else:
             resp.assert_success()
             features_list = resp.get_result()
-        self._features = dict((feature_info['name'], Feature(feature_info['name'], feature_info['version'], feature_info.get('enabled', True)))
+        self._features = dict((feature_info['name'], Feature(feature_info['name'], feature_info['version'],
+                                                             feature_info.get('enabled', True)))
                               for feature_info in features_list)
 
     def _get_feature_version(self, feature_key, default_version=NOTHING):

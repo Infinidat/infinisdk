@@ -72,9 +72,9 @@ def test_get_length(infinibox):
 def test_get_item_negative_path(infinibox):
     query = infinibox.components.enclosures.find()
     with pytest.raises(NotImplementedError):
-        query[-4]
+        query[-4]  # pylint: disable=pointless-statement
     with pytest.raises(IndexError):
-        query[1000]
+        query[1000]  # pylint: disable=pointless-statement
 
 def test_get_item(infinibox):
     enclosures = infinibox.components.enclosures.get_all()[:]
@@ -87,6 +87,7 @@ def test_get_item(infinibox):
     assert enc1 != enc2
 
 def test_rack_refresh(infinibox):
+    # pylint: disable=protected-access
     components = infinibox.components
     comp_no = len(components._components_by_id)
     rack_1 = components.get_rack_1()
@@ -112,15 +113,16 @@ def test_len_caching_on_empty_lists(infinibox, operation):
         result = operation(infinibox)
         assert not result
 
-    [r] = [record for record in handler.records if '<-- GET http://' in record.message]
+    [r] = [record for record in handler.records if '<-- GET http://' in record.message] # pylint: disable=unused-variable
 
 def test_system_component_find(infinibox):
     for component_type_name in infinibox.components.get_component_type_names():
-        assert(infinibox.components[component_type_name + "s"].find().to_list() == infinibox.components.find(component_type = component_type_name).to_list())
+        assert infinibox.components[component_type_name + "s"].find().to_list() == \
+            infinibox.components.find(component_type=component_type_name).to_list()
 
 def test_system_component_find_with_params(infinibox):
-    for component_type_name in infinibox.components.get_component_type_names():
-        assert(infinibox.components.nodes.find(index = 2).to_list() == infinibox.components.find(component_type = 'node', index = 2).to_list())
+    assert infinibox.components.nodes.find(index=2).to_list() == \
+        infinibox.components.find(component_type='node', index=2).to_list()
 
 def test_system_component_find_no_type(infinibox):
     fetched_types = set(type(component) for component in infinibox.components.find())

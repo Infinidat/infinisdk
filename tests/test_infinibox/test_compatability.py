@@ -46,15 +46,15 @@ def test_comparing_equal_versions(infinibox):
 
 
 @pytest.mark.parametrize("info_tuple", [
-    ("2.2.0.23", (2,2,0,23,'*'), False, False),
-    ("2.2.0.23-a", (2,2,0,23,'a'), False, False),
-    ("2.2.0.23-dev", (2,2,0,23,'*'), True, False),
-    ("2.2.0.23-dev2", (2,2,0,23,'*'), True, False),
-    ("2.2.0.23-bla", (2,2,0,23,'*'), False, True),
+    ("2.2.0.23", (2, 2, 0, 23, '*'), False, False),
+    ("2.2.0.23-a", (2, 2, 0, 23, 'a'), False, False),
+    ("2.2.0.23-dev", (2, 2, 0, 23, '*'), True, False),
+    ("2.2.0.23-dev2", (2, 2, 0, 23, '*'), True, False),
+    ("2.2.0.23-bla", (2, 2, 0, 23, '*'), False, True),
     ])
 def test_version_attributes(infinibox, info_tuple):
     version_str, expected_version, expected_is_dev, expected_is_odd_version = info_tuple
     version = infinibox.compat.normalize_version_string(version_str)
     assert version.version == expected_version
-    assert version._is_dev == expected_is_dev
-    assert version._is_odd_version == expected_is_odd_version
+    assert version._is_dev == expected_is_dev  # pylint: disable=protected-access
+    assert version._is_odd_version == expected_is_odd_version  # pylint: disable=protected-access

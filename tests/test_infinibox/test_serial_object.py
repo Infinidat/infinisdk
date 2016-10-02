@@ -38,13 +38,13 @@ def test_eq():
     s1_2 = SCSISerial(s1_1.serial)
     s2 = SCSISerial('742B0F000004e48000000000000014b')
     assert s1_1 == s1_1.serial
-    assert not (s1_1 != s1_1.serial)
+    assert not (s1_1 != s1_1.serial)  # pylint: disable=superfluous-parens
     assert s1_1 == s1_2
-    assert not (s1_1 != s1_2)
+    assert not (s1_1 != s1_2)  # pylint: disable=superfluous-parens
     assert s2 != s1_1
     assert s2 != s1_2
-    assert not (s2 == s1_1)
-    assert not (s2 == s1_2)
+    assert not (s2 == s1_1)  # pylint: disable=superfluous-parens
+    assert not (s2 == s1_2)  # pylint: disable=superfluous-parens
 
 
 def test_hashing(serial):

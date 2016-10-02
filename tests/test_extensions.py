@@ -7,6 +7,7 @@ from infinisdk.infinibox import InfiniBox
 from infinisdk.infinibox.system_object import SystemObject
 from infinisdk.infinibox.volume import Volume
 
+# pylint: disable=unused-variable, unused-argument
 
 def test_no_extensions_by_default():
     assert len(extensions.active) == 0
@@ -15,7 +16,7 @@ def test_no_extensions_by_default():
 @pytest.mark.parametrize('different_name', [True, False])
 def test_extending(infinibox, different_name):
     with pytest.raises(AttributeError):
-        infinibox.new_method
+        infinibox.new_method  # pylint: disable=pointless-statement
 
     if different_name:
         @extensions.add_method(InfiniBox, 'new_method')
@@ -153,7 +154,7 @@ def test_extending_hierarchy(request, infinibox):
     request.addfinalizer(method1.__extension_deactivate__)
 
     @extensions.add_method(Child, 'method1')
-    def method1(self):
+    def method1(self):  # pylint: disable=function-redefined
         pass
 
     request.addfinalizer(method1.__extension_deactivate__)
@@ -182,7 +183,7 @@ def infinibox_new_method(infinibox, bound):
     if bound:
         return infinibox.some_new_method
     else:
-        return InfiniBox.some_new_method
+        return InfiniBox.some_new_method  # pylint: disable=no-member
 
 
 @pytest.fixture(params=[True, False])

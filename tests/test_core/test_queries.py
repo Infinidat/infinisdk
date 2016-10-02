@@ -54,7 +54,8 @@ def test_unknown_fields(infinibox):
 @pytest.mark.parametrize('operator', [operator.ne, operator.ge, operator.le, operator.gt, operator.lt])
 def test_querying_operation(infinibox, field, operator):
     operand = 123
-    assert_query_equals(infinibox.volumes.find(operator(field, operand)), "id={0}%3A{1}".format(operator.__name__, operand))
+    assert_query_equals(infinibox.volumes.find(operator(field, operand)),
+                        "id={0}%3A{1}".format(operator.__name__, operand))
 
 
 def _get_expectation_with_range(field_name, operator_name, iterable):

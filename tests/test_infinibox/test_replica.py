@@ -13,7 +13,7 @@ SECOND = SECONDS = timedelta(seconds=1)
 
 
 @relevant_from_version('2.0')
-def test_replica_creation(replica):
+def test_replica_creation(replica):  # pylint: disable=unused-argument
     pass
 
 
@@ -35,6 +35,7 @@ def test_get_remote_entity_pairs(replica, remote_replica):
 @relevant_from_version('2.0')
 def test_replica_get_fields(replica):
     fields = replica.get_fields()
+    assert isinstance(fields, dict)
 
 
 @relevant_from_version('2.0')
@@ -46,9 +47,9 @@ def test_replica_get_local_entity(replica, volume, method_name):
 
 @relevant_from_version('2.0')
 @pytest.mark.parametrize('method_name', ['get_local_volume', 'get_local_entity'])
-def test_replica_get_local_entity_more_than_one(replica, volume, method_name):
+def test_replica_get_local_entity_more_than_one(replica, method_name):
     method = getattr(replica, method_name)
-    replica._cache['entity_pairs'].append(replica._cache['entity_pairs'][0])
+    replica._cache['entity_pairs'].append(replica._cache['entity_pairs'][0])  # pylint: disable=protected-access
     with pytest.raises(TooManyObjectsFound):
         method()
 
@@ -148,7 +149,7 @@ def test_volume_get_replica_single(volume, replica):
 
 
 @relevant_from_version('2.0')
-def test_is_rmr_source(volume, replica):
+def test_is_rmr_source(volume, replica):  # pylint: disable=unused-argument
     volume.invalidate_cache()
     assert not volume.is_rmr_target()
     assert volume.is_rmr_source()
@@ -170,7 +171,7 @@ def test_regtulard_volume_is_not_rmr_source_target(volume):
 
 
 @relevant_from_version('2.0')
-def test_is_rmr_target(volume, replica, secondary_volume):
+def test_is_rmr_target(volume, replica, secondary_volume):  # pylint: disable=unused-argument
     secondary_volume.invalidate_cache()
     assert secondary_volume.is_rmr_target()
     assert not secondary_volume.is_rmr_source()
@@ -192,10 +193,10 @@ def test_remote_replica(request, replica, secondary_volume, secondary_infinibox)
 
 
 @relevant_from_version('2.0')
-def test_remote_replica_without_remote_system(replica, secondary_infinibox):
+def test_remote_replica_without_remote_system(replica, secondary_infinibox):  # pylint: disable=unused-argument
     remote_replica = replica.get_remote_replica()
-    replica.system._related_systems.pop()
-    remote_replica.system._related_systems.pop()
+    replica.system._related_systems.pop()  # pylint: disable=protected-access
+    remote_replica.system._related_systems.pop()  # pylint: disable=protected-access
     flux.current_timeline.sleep_wait_all_scheduled()
     assert replica.is_idle()
     with pytest.raises(InfiniSDKException):
@@ -207,16 +208,16 @@ def test_remote_replica_without_remote_system(replica, secondary_infinibox):
         remote_replica.is_suspended()
 
 @pytest.fixture
-def secondary_volume(replica, secondary_infinibox):
+def secondary_volume(replica, secondary_infinibox):  # pylint: disable=unused-argument
     [returned] = secondary_infinibox.volumes
     return returned
 
 
 @relevant_from_version('2.0')
-def test_volume_get_replica_too_many(volume, replica, infinibox, secondary_infinibox):
+def test_volume_get_replica_too_many(volume, replica, secondary_infinibox):
     remote_pool = secondary_infinibox.pools.create()
     remote_volume = secondary_infinibox.volumes.create(pool=remote_pool)
-    replica2 = replica.system.replicas.replicate_entity_existing_target(
+    replica2 = replica.system.replicas.replicate_entity_existing_target(  # pylint: disable=unused-variable
         volume, link=replica.get_link(), remote_entity=remote_volume)
     with pytest.raises(TooManyObjectsFound):
         volume.get_replica()
@@ -254,7 +255,7 @@ def synced_replica(infinibox, secondary_infinibox, link, replica_creation_kwargs
     return replica
 
 @pytest.fixture
-def remote_replica(replica, secondary_infinibox):
+def remote_replica(replica, secondary_infinibox):  # pylint: disable=unused-argument
     [returned] = secondary_infinibox.replicas
     return returned
 

@@ -15,6 +15,7 @@ from .system_object import InfiniBoxObject
 
 _logger = logbook.Logger(__name__)
 
+
 class ReplicaBinder(TypeBinder):
 
     """Implements *system.replicas*
@@ -38,8 +39,10 @@ class ReplicaBinder(TypeBinder):
         """Replicates a entity or CG, creating its remote replica on the specified pool
 
         :param remote_pool: if omitted, ``remote_entity`` must be specified. Otherwise, means creating target entity
-        :param remote_entity: if omitted, ``remote_pool`` must be specified. Otherwise, means creating based on existing entity on target
-        :param member_mappings: required if remote_entity is specified and is a consistency group. This parameter is a dictionary mapping local member entities to remote ones
+        :param remote_entity: if omitted, ``remote_pool`` must be specified. Otherwise, means creating based on
+                              existing entity on target
+        :param member_mappings: required if remote_entity is specified and is a consistency group. This parameter is
+                                a dictionary mapping local member entities to remote ones
         """
         if remote_entity is None:
             assert remote_pool is not None
@@ -59,9 +62,11 @@ class ReplicaBinder(TypeBinder):
         """Replicates an entity, using a formatted/empty entity on the other side
 
         :param remote_entity: Remote entity to use for replication
-        :param member_mappings: required if remote_entity is specified and is a consistency group. This parameter is a dictionary mapping local member entities to remote ones
+        :param member_mappings: required if remote_entity is specified and is a consistency group. This parameter is
+                                a dictionary mapping local member entities to remote ones
         """
-        return self.system.replicas.create(link=link, entity_pairs=self._build_entity_pairs_existing(entity, remote_entity, member_mappings, use_snapshots=False),
+        entity_pairs = self._build_entity_pairs_existing(entity, remote_entity, member_mappings, use_snapshots=False)
+        return self.system.replicas.create(link=link, entity_pairs=entity_pairs,
                                            **self._get_extra_replica_kwargs(kw, entity, remote_entity))
 
     def replicate_entity_use_base(self, entity, link, local_snapshot, remote_snapshot, member_mappings=None, **kw):
@@ -69,20 +74,26 @@ class ReplicaBinder(TypeBinder):
 
         :param local_snapshot: Local base snapshot to use
         :param remote_snapshot: Remote base snapshot to use
-        :param member_mappings: required if remote_entity is specified and is a consistency group. This parameter is a dictionary mapping local member entities to tuples of (local_snapshot, remote_snapshot)
+        :param member_mappings: required if remote_entity is specified and is a consistency group. This parameter is a
+                                dictionary mapping local member entities to tuples of (local_snapshot, remote_snapshot)
         """
-        return self.system.replicas.create(link=link, entity_pairs=self._build_entity_pairs_existing(local_snapshot, remote_snapshot, member_mappings, use_snapshots=True),
-                                           **self._get_extra_replica_kwargs(kw, entity, remote_entity=remote_snapshot.get_parent()))
+        entity_pairs = self._build_entity_pairs_existing(local_snapshot, remote_snapshot, member_mappings,
+                                                         use_snapshots=True)
+        creation_kwargs = self._get_extra_replica_kwargs(kw, entity, remote_entity=remote_snapshot.get_parent())
+        return self.system.replicas.create(link=link, entity_pairs=entity_pairs, **creation_kwargs)
 
     def replicate_entity_take_snap(self, entity, link, remote_entity, member_mappings=None, **kw):
         """Replicates a entity, using the currently found data on both sides as a reference.
 
         :param entity: Local entity to use
         :param remote_entity: Remote entity to use
-        :param member_mappings: required if remote_entity is specified and is a consistency group. This parameter is a dictionary mapping local member entities to tuples of (entity, remote_entity)
+        :param member_mappings: required if remote_entity is specified and is a consistency group. This parameter is
+                                a dictionary mapping local member entities to tuples of (entity, remote_entity)
         """
-        return self.system.replicas.create(link=link, entity_pairs=self._build_entity_pairs_existing(entity, remote_entity, member_mappings, use_snapshots=False, take_snapshot=True),
-                                           **self._get_extra_replica_kwargs(kw, entity, remote_entity=remote_entity.get_parent()))
+        entity_pairs = self._build_entity_pairs_existing(entity, remote_entity, member_mappings, use_snapshots=False,
+                                                         take_snapshot=True)
+        creation_kwargs = self._get_extra_replica_kwargs(kw, entity, remote_entity=remote_entity.get_parent())
+        return self.system.replicas.create(link=link, entity_pairs=entity_pairs, **creation_kwargs)
 
 
     def _get_extra_replica_kwargs(self, kw, entity, remote_entity=None):
@@ -117,11 +128,14 @@ class ReplicaBinder(TypeBinder):
                 })
         return returned
 
-    def _build_entity_pairs_existing(self, local_entity, remote_entity, member_mappings, use_snapshots, take_snapshot=False):
+    def _build_entity_pairs_existing(self, local_entity, remote_entity, member_mappings, use_snapshots,
+                                     take_snapshot=False):
         returned = []
         if not member_mappings:
-            if isinstance(local_entity, local_entity.system.cons_groups.object_type) and len(local_entity.get_members()) > 0:
-                raise InvalidUsageException('Specifying non-empty remote CG requires passing a `member_mappings` argument, mapping local member entities to remote entities')
+            if isinstance(local_entity, local_entity.system.cons_groups.object_type) and \
+               len(local_entity.get_members()) > 0:
+                raise InvalidUsageException('Specifying non-empty remote CG requires passing a `member_mappings` '
+                                            'argument, mapping local member entities to remote entities')
             member_mappings = {local_entity: remote_entity}
 
         for sub_entity in self._get_sub_entities(local_entity):
@@ -212,8 +226,7 @@ class Replica(InfiniBoxObject):
         if snapshot_id is None:
             return None
         returned = self._get_entity_collection().get_by_id_lazy(snapshot_id)
-        gossip.trigger_with_tags(
-                'infinidat.sdk.replica_snapshot_created', {'snapshot': returned}, tags=['infinibox'])
+        gossip.trigger_with_tags('infinidat.sdk.replica_snapshot_created', {'snapshot': returned}, tags=['infinibox'])
 
         return returned
 
@@ -222,7 +235,7 @@ class Replica(InfiniBoxObject):
         """Returns the local volume, assuming there is exactly one
         """
         if self.is_consistency_group():
-            raise NotImplementedError('get_local_volume() is not supported on a consistency group replication') # pragma: no cover
+            raise NotImplementedError('get_local_volume() is not supported on a consistency group replication') # pragma: no cover  # pylint: disable=line-too-long
 
         return self.get_local_entity()
 
@@ -230,7 +243,7 @@ class Replica(InfiniBoxObject):
         """Returns the local cg, assuming this is a consistency group replica
         """
         if not self.is_consistency_group():
-            raise NotImplementedError('get_local_volume() is not supported on a consistency group replication') # pragma: no cover
+            raise NotImplementedError('get_local_volume() is not supported on a consistency group replication') # pragma: no cover  # pylint: disable=line-too-long
 
         return self.get_local_entity()
 
@@ -274,7 +287,8 @@ class Replica(InfiniBoxObject):
     def sync(self):
         """Starts a sync job
         """
-        returned = self.system.api.post(self.get_this_url_path().add_path('sync'), headers={'X-INFINIDAT-RAW-RESPONSE': 'true'})
+        returned = self.system.api.post(self.get_this_url_path().add_path('sync'),
+                                        headers={'X-INFINIDAT-RAW-RESPONSE': 'true'})
         return returned.get_result()
 
     def resume(self):
@@ -304,7 +318,8 @@ class Replica(InfiniBoxObject):
         """
         self._validate_can_check_state()
         if self.system.compat.has_sync_job_states():
-            return all(sync_job['state'].lower() == 'done' or sync_job['state'].lower() == 'pending' for sync_job in self._get_jobs())
+            return all(sync_job['state'].lower() == 'done' or sync_job['state'].lower() == 'pending'
+                       for sync_job in self._get_jobs())
         return self.get_state(*args, **kwargs).lower() == 'idle'
 
     def is_auto_suspended(self, *args, **kwargs):
@@ -359,8 +374,7 @@ class Replica(InfiniBoxObject):
 
     def change_role(self, entity_pairs=OMIT):
         data = {'entity_pairs': entity_pairs} if entity_pairs is not OMIT else None
-        self.system.api.post(self.get_this_url_path()
-                                 .add_path('change_role'), data=data)
+        self.system.api.post(self.get_this_url_path().add_path('change_role'), data=data)
         self.invalidate_cache()
         gossip.trigger_with_tags('infinidat.sdk.replica_after_change_role', {'replica': self}, tags=['infinibox'])
 
@@ -377,7 +391,9 @@ class Replica(InfiniBoxObject):
                 return True
         return False
 
-    def delete(self, retain_staging_area=False, force_if_remote_error=False, force_on_target=False, force_if_no_remote_credentials=False): # pylint: disable=arguments-differ
+    # pylint: disable=arguments-differ
+    def delete(self, retain_staging_area=False, force_if_remote_error=False, force_on_target=False,
+               force_if_no_remote_credentials=False):
         path = self.get_this_url_path()
         if retain_staging_area:
             path = path.add_query_param('retain_staging_area', 'true')
@@ -423,16 +439,20 @@ class Replica(InfiniBoxObject):
 
         [entity_pair] = result.get('entity_pairs', [None])
         if entity_pair is not None:
-            return self._get_local_remote_snapshots(entity_pair, 'volumes' if result['entity_type'] != 'FILESYSTEM' else 'filesystems', remote_replica, '_{0}_reclaimed_snapshot_id')
+            collection_name = 'volumes' if result['entity_type'] != 'FILESYSTEM' else 'filesystems'
+            return self._get_local_remote_snapshots(entity_pair, collection_name, remote_replica,
+                                                    '_{0}_reclaimed_snapshot_id')
         return None, None
 
     def _get_local_remote_snapshots(self, result, collection_name, remote_replica, field_name_template):
         local_reclaimed_id = result.get(field_name_template.format('local'))
         if local_reclaimed_id is None:
-            _logger.debug('Could not get local reclaimed id (missing {0} in {1})', field_name_template.format('local'), result)
+            _logger.debug('Could not get local reclaimed id (missing {0} in {1})',
+                          field_name_template.format('local'), result)
         remote_reclaimed_id = result.get(field_name_template.format('remote'))
         if remote_reclaimed_id is None:
-            _logger.debug('Could not get remote reclaimed id (missing {0} in {1})', field_name_template.format('remote'), result)
+            _logger.debug('Could not get remote reclaimed id (missing {0} in {1})',
+                          field_name_template.format('remote'), result)
 
         local = remote = None
 

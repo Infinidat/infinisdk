@@ -1,7 +1,6 @@
 import copy
 import gossip
 import functools
-import sys
 from contextlib import contextmanager
 
 from mitba import cached_method
@@ -10,7 +9,7 @@ from urlobject import URLObject as URL
 
 from .exceptions import APICommandFailed
 from .system_object_utils import get_data_for_object_creation
-from .._compat import with_metaclass, iteritems, httplib, reraise, string_types  # pylint: disable=no-name-in-module
+from .._compat import with_metaclass, iteritems, httplib, string_types  # pylint: disable=no-name-in-module
 from .exceptions import CacheMiss
 from api_object_schema import FieldsMeta as FieldsMetaBase
 from .field import Field
@@ -23,7 +22,7 @@ from .utils import DONT_CARE, end_reraise_context
 class FieldsMeta(FieldsMetaBase):
 
     @classmethod
-    def FIELD_FACTORY(cls, name):
+    def FIELD_FACTORY(mcs, name):
         return Field(name, binding=PassthroughBinding())
 
 
@@ -49,7 +48,8 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
         return self.system
 
     def invalidate_cache(self, *field_names):
-        """Discards the cached field values of this object, causing the next fetch to retrieve the fresh value from the system
+        """Discards the cached field values of this object, causing the next fetch to retrieve the fresh value from
+        the system
         """
         if field_names:
             for field_name in field_names:
@@ -158,7 +158,6 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
                 if not fetch_if_not_cached:
                     raise
 
-        # TODO: remove unnecessary construction, move to direct getting
         query = self.get_this_url_path()
 
         only_fields = []
@@ -270,8 +269,8 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
                 update_dict.pop(field_name)
 
         hook_tags = self.get_tags_for_object_operations(self.system)
-        gossip.trigger_with_tags('infinidat.sdk.pre_object_update', {
-                                 'obj': self, 'data': update_dict}, tags=hook_tags)
+        gossip.trigger_with_tags('infinidat.sdk.pre_object_update', {'obj': self, 'data': update_dict},
+                                 tags=hook_tags)
         try:
             res = self.system.api.put(self.get_this_url_path(), data=update_dict)
         except Exception as e:  # pylint: disable=broad-except
@@ -340,8 +339,8 @@ class SystemObject(BaseSystemObject):
     @classmethod
     def _create(cls, system, url, data, tags=None):
         hook_tags = tags or cls.get_tags_for_object_operations(system)
-        gossip.trigger_with_tags('infinidat.sdk.pre_object_creation', {
-                                 'data': data, 'system': system, 'cls': cls}, tags=hook_tags)
+        gossip.trigger_with_tags('infinidat.sdk.pre_object_creation', {'data': data, 'system': system, 'cls': cls},
+                                 tags=hook_tags)
         try:
             returned = system.api.post(url, data=data).get_result()
             obj = cls(system, returned)
@@ -359,23 +358,25 @@ class SystemObject(BaseSystemObject):
         """
         Creates a new object of this type
         """
-        gossip.trigger_with_tags('infinidat.sdk.pre_creation_data_validation', {
-                                 'fields': fields, 'system': system, 'cls': cls})
+        gossip.trigger_with_tags('infinidat.sdk.pre_creation_data_validation',
+                                 {'fields': fields, 'system': system, 'cls': cls})
         data = get_data_for_object_creation(cls, system, fields)
         return cls._create(system, cls.get_url_path(system), data)
 
     @classmethod
     def get_creation_defaults(cls):
         """
-        Returns a dict representing the default arguments as implicitly constructed by infinisdk to fulfill a ``create`` call
+        Returns a dict representing the default arguments as implicitly constructed by infinisdk to fulfill
+        a ``create`` call
 
         .. note:: This will cause generation of defaults, which will have side effects if they are special values
 
-        .. note:: This does not necessarily generate all fields that are passable into ``create``, only mandatory fields
+        .. note:: This does not necessarily generate all fields that are passable into ``create``, only mandatory
+        'fields
         """
         return translate_special_values(dict(
             (field.name, field.generate_default())
-            for field in cls.fields
+            for field in cls.fields  # pylint: disable=no-member
             if field.creation_parameter and not field.optional))
 
     def safe_delete(self, *args, **kwargs):
@@ -395,8 +396,7 @@ class SystemObject(BaseSystemObject):
     @contextmanager
     def _get_delete_context(self):
         hook_tags = self.get_tags_for_object_operations(self.system)
-        gossip.trigger_with_tags('infinidat.sdk.pre_object_deletion', {
-                                 'obj': self}, tags=hook_tags)
+        gossip.trigger_with_tags('infinidat.sdk.pre_object_deletion', {'obj': self}, tags=hook_tags)
         try:
             yield
         except Exception as e:       # pylint: disable=broad-except
@@ -404,8 +404,7 @@ class SystemObject(BaseSystemObject):
                 gossip.trigger_with_tags('infinidat.sdk.object_deletion_failure',
                                          {'obj': self, 'exception': e, 'system': self.system},
                                          tags=hook_tags)
-        gossip.trigger_with_tags('infinidat.sdk.post_object_deletion', {
-                                 'obj': self}, tags=hook_tags)
+        gossip.trigger_with_tags('infinidat.sdk.post_object_deletion', {'obj': self}, tags=hook_tags)
 
 
 @gossip.register('infinidat.sdk.object_creation_failure')

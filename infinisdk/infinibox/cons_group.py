@@ -21,10 +21,10 @@ class ConsGroup(InfiniBoxObject):
         Field("id", is_identity=True, type=int, cached=True),
         Field("name", creation_parameter=True, mutable=True, default=Autogenerate("cg_{uuid}")),
         Field("type", cached=True, is_filterable=True, is_sortable=True),
-        Field("pool", type='infinisdk.infinibox.pool:Pool', api_name="pool_id", creation_parameter=True, is_filterable=True,
-            is_sortable=True, binding=RelatedObjectBinding()),
+        Field("pool", type='infinisdk.infinibox.pool:Pool', api_name="pool_id", creation_parameter=True,
+              is_filterable=True, is_sortable=True, binding=RelatedObjectBinding()),
         Field("parent", type='infinisdk.infinibox.cons_group:ConsGroup', cached=True, api_name="parent_id",
-                binding=RelatedObjectBinding('cons_groups'), is_filterable=True, is_sortable=True),
+              binding=RelatedObjectBinding('cons_groups'), is_filterable=True, is_sortable=True),
         Field("replicated", api_name="is_replicated", type=bool, is_filterable=True, is_sortable=True),
         Field("members_count", type=int, is_filterable=True, is_sortable=True),
         Field("created_at", type=MillisecondsDatetimeType, is_sortable=True, is_filterable=True),
@@ -151,7 +151,8 @@ class ConsGroup(InfiniBoxObject):
         trigger_hook('infinidat.sdk.post_cons_group_add_member')
         self.invalidate_cache('members_count')
 
-    def remove_member(self, member, retain_staging_area=False, create_replica=False, replica_name=OMIT, force_if_no_remote_credentials=False, force_if_remote_error=False, force_on_target=False):
+    def remove_member(self, member, retain_staging_area=False, create_replica=False, replica_name=OMIT,
+                      force_if_no_remote_credentials=False, force_if_remote_error=False, force_on_target=False):
 
         path = self._get_members_url().add_path(str(member.id))
 

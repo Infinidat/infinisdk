@@ -6,7 +6,7 @@ from munch import Munch
 from infinisdk.core.api import OMIT
 from infinisdk.core.exceptions import APICommandFailed
 
-# pylint: disable=redefined-outer-name
+# pylint: disable=attribute-defined-outside-init,redefined-outer-name
 
 @pytest.fixture
 def hooks(forge, request):

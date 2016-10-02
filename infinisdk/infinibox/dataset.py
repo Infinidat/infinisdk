@@ -52,7 +52,9 @@ class DatasetTypeBinder(TypeBinder):
                 for i in range(1, count + 1)]
 
     def calculate_reclaimable_space(self, entities):
-        return self.system.api.post(URL(self.object_type.get_url_path(self.system)).add_path('delete_simulation'), data=dict(entities=[entity.id for entity in entities])).get_result()['space_reclaimable'] * byte
+        url = URL(self.object_type.get_url_path(self.system)).add_path('delete_simulation')
+        res = self.system.api.post(url, data=dict(entities=[entity.id for entity in entities]))
+        return res.get_result()['space_reclaimable'] * byte
 
 
 class Dataset(InfiniBoxObject):
@@ -102,7 +104,7 @@ class Dataset(InfiniBoxObject):
         assert not self.is_field_supported('family_id'), "Use self.get_family_id(), which adheres to cache policies"
         if self.is_master():
             return self.get_id()
-        return self.get_parent()._get_family_master_id()
+        return self.get_parent()._get_family_master_id()  # pylint: disable=protected-access
 
     def get_family_master(self):
         if self.is_master():
@@ -163,7 +165,8 @@ class Dataset(InfiniBoxObject):
             name = self.fields.name.generate_default().generate()
         data = {'name': name, 'parent_id': self.get_id()}
         if write_protected is not None:
-            assert self.system.compat.has_writable_snapshots(), 'write_protected parameter is not supported for this version'
+            assert self.system.compat.has_writable_snapshots(), \
+                'write_protected parameter is not supported for this version'
             data['write_protected'] = write_protected
         try:
             child = self._create(self.system, self.get_url_path(self.system), data=data,
@@ -190,14 +193,15 @@ class Dataset(InfiniBoxObject):
     def _handle_possible_replication_snapshot(self, snapshot):
         fields = snapshot.get_fields(from_cache=True, raw_value=True)
         if fields.get('rmr_snapshot_guid', None) is not None:
-            gossip.trigger_with_tags('infinidat.sdk.replica_snapshot_created', {'snapshot': snapshot}, tags=['infinibox'])
+            gossip.trigger_with_tags('infinidat.sdk.replica_snapshot_created', {'snapshot': snapshot},
+                                     tags=['infinibox'])
 
     @deprecated
     def create_clone(self, name=None):
         """Creates a clone from this entity, if supported by the system
         """
-        assert not self.system.compat.has_writable_snapshots(), '{}.create_clone() with snapclones is not supported'.format(
-            self.__class__.__name__)
+        assert not self.system.compat.has_writable_snapshots(), \
+            '{}.create_clone() with snapclones is not supported'.format(self.__class__.__name__)
         if self.is_snapshot():
             return self.create_child(name)
         raise InvalidOperationException('Cannot create clone for volume/clone')
@@ -233,13 +237,16 @@ class Dataset(InfiniBoxObject):
 
     def trigger_restore_failure(self, source, e):
         hook_tags = self.get_tags_for_object_operations(self.system)
-        gossip.trigger_with_tags('infinidat.sdk.data_restore_failure', {'source': source, 'target': self, 'exc': e}, tags=hook_tags)
-        gossip.trigger_with_tags('infinidat.sdk.object_restore_failure', {'source': source, 'target': self, 'exc': e}, tags=hook_tags)
+        gossip.trigger_with_tags('infinidat.sdk.data_restore_failure', {'source': source, 'target': self, 'exc': e},
+                                 tags=hook_tags)
+        gossip.trigger_with_tags('infinidat.sdk.object_restore_failure', {'source': source, 'target': self, 'exc': e},
+                                 tags=hook_tags)
 
     def trigger_after_restore(self, source):
         hook_tags = self.get_tags_for_object_operations(self.system)
         gossip.trigger_with_tags('infinidat.sdk.post_data_restore', {'source': source, 'target': self}, tags=hook_tags)
-        gossip.trigger_with_tags('infinidat.sdk.post_object_restore', {'source': source, 'target': self}, tags=hook_tags)
+        gossip.trigger_with_tags('infinidat.sdk.post_object_restore', {'source': source, 'target': self},
+                                 tags=hook_tags)
 
     def get_snapshots(self):
         """Retrieves all snapshot children of this entity
@@ -250,8 +257,8 @@ class Dataset(InfiniBoxObject):
     def get_clones(self):
         """Retrieves all clone children of this entity
         """
-        assert not self.system.compat.has_writable_snapshots(), '{}.get_clones() with snapclones is not supported'.format(
-            self.__class__.__name__)
+        assert not self.system.compat.has_writable_snapshots(), \
+            '{}.get_clones() with snapclones is not supported'.format(self.__class__.__name__)
         return self.get_children(type='CLONE')
 
     def get_children(self, **kwargs):
@@ -270,7 +277,9 @@ class Dataset(InfiniBoxObject):
         return self.get_field("created_at", from_cache=True)
 
     def calculate_reclaimable_space(self):
-        return self.system.api.post(URL(self.get_url_path(self.system)).add_path('delete_simulation'), data=dict(entities=[self.id])).get_result()['space_reclaimable'] * byte
+        url = URL(self.get_url_path(self.system)).add_path('delete_simulation')
+        res = self.system.api.post(url, data=dict(entities=[self.id]))
+        return res.get_result()['space_reclaimable'] * byte
 
     @InfiniBoxObject.requires_cache_invalidation("pool")
     def move_pool(self, target_pool, with_capacity=False):

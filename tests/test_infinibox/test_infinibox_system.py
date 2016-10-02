@@ -59,7 +59,7 @@ def test_get_simulator(infinibox, infinibox_simulator):
     assert infinibox.get_simulator() is infinibox_simulator
 
 
-def test_multiple_metadata_creation(infinibox, volume):
+def test_multiple_metadata_creation(volume):
     metadata_d = {'some_key':  'some_value',
                   'other_key': 'other_value',
                   'last_key':  'last_value'}

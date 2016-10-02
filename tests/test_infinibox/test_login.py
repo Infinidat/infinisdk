@@ -46,7 +46,7 @@ def test_invalid_login(infinibox):
 
         assert caught.value.status_code in (codes.forbidden, codes.unauthorized)
 
-@pytest.mark.parametrize('user_role',list(latest.enums.users.roles))
+@pytest.mark.parametrize('user_role', list(latest.enums.users.roles))
 def test_after_loging_operations(infinibox, user_role):
     _PASS = '123456'
     infinibox_simulator = infinibox.get_simulator()

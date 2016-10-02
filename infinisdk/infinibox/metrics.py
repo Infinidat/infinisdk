@@ -29,7 +29,7 @@ class Metrics(object):
             _METRICS_URL.add_path('filters'), data=fields)
         return Filter(self.system, resp.get_result()['id'])
 
-    def create_collector(self, collected_fields, filters, type='COUNTER'):
+    def create_collector(self, collected_fields, filters, type='COUNTER'):  # pylint: disable=redefined-builtin
         """Creates a collector from this filter
         """
         resp = self.system.api.post(_METRICS_URL.add_path('collectors'), data={
@@ -75,7 +75,8 @@ class Metrics(object):
                         timestamp = end_timestamp - \
                                     timedelta(seconds=interval * (len(series) - index + 1))
                         if collector_data['collector_type'] == "HISTOGRAM":
-                            returned.append(HistogramSample(collector_data['histogram_field'], collector_data['ranges'], collector, sample, timestamp, interval))
+                            returned.append(HistogramSample(collector_data['histogram_field'], collector_data['ranges'],
+                                                            collector, sample, timestamp, interval))
                         elif collector_data['collector_type'] == "TOP":
                             returned.append(TopSample(collector, sample, timestamp, interval))
                         else:
@@ -103,7 +104,7 @@ class Filter(object):
     """Represents a single filter defined on the system for metric gathering
     """
 
-    def __init__(self, system, id):
+    def __init__(self, system, id):  # pylint: disable=redefined-builtin
         super(Filter, self).__init__()
         self.system = system
         self.id = id
@@ -129,10 +130,10 @@ class Filter(object):
         """
         self.system.api.put(self.get_this_url_path(), data=fields)
 
-    def create_collector(self, collected_fields, type='COUNTER', **kwargs):
+    def create_collector(self, collected_fields, type='COUNTER', **kwargs):  # pylint: disable=redefined-builtin
         """Creates a collector from this filter
         """
-        data={
+        data = {
             'collected_fields': collected_fields,
             'type': type,
             'filter_id': self.id}
@@ -190,7 +191,7 @@ class Collector(object):
     """Represents a single collector that can be polled for data
     """
 
-    def __init__(self, system, filter, field_names, id, type_):
+    def __init__(self, system, filter, field_names, id, type_):  # pylint: disable=redefined-builtin
         super(Collector, self).__init__()
         self.system = system
         self.filter = filter
@@ -289,15 +290,17 @@ class HistogramSample(Sample):
 
     def _get_sample_string(self):
         returned = []
-        for range, bucket in self.values.items():
+        for range_, bucket in self.values.items():
             bucket_str = []
             for value_name, value in bucket.items():
                 item = '{}: {}'.format(value_name, value)
                 bucket_str.append(item)
-            item = '{}: {}'.format(range, bucket_str)
+            item = '{}: {}'.format(range_, bucket_str)
             returned.append(item)
         return ', '.join(returned)
 
+
 class TopSample(Sample):
+
     def _get_values(self):
-         return Munch(izip_longest(self.collector.field_names, self.value_list[0] if self.value_list else []))
+        return Munch(izip_longest(self.collector.field_names, self.value_list[0] if self.value_list else []))

@@ -5,7 +5,6 @@ from ..core.exceptions import UnknownSystem
 from .system_object import InfiniBoxObject
 
 
-
 class Link(InfiniBoxObject):
 
     FIELDS = [
@@ -46,7 +45,7 @@ class Link(InfiniBoxObject):
         url = self.get_this_url_path().add_path('refresh')
         self.system.api.post(url, data=data)
 
-    def delete(self, force_if_remote_error=False, force_if_no_remote_credentials=False):
+    def delete(self, force_if_remote_error=False, force_if_no_remote_credentials=False):  # pylint: disable=arguments-differ
         """Deletes this link
 
         :param force_if_remote_error: forces deletion even if remote side caused an API error

@@ -6,7 +6,7 @@ from infinisdk.core import object_query
 from ..conftest import relevant_from_version
 
 
-def test_name(infinibox, user, user_name_field):
+def test_name(user, user_name_field):
     curr_name = user.get_name()
     new_name = 'other_user_name'
     user.update_field(user_name_field, new_name)
@@ -17,14 +17,14 @@ def test_name(infinibox, user, user_name_field):
 
 
 @relevant_from_version('2.0')
-def test_get_administered_pools_no_pool(infinibox, user):
+def test_get_administered_pools_no_pool(infinibox):
     assert infinibox.pools.get_administered_pools().to_list() == []
 
 
 @relevant_from_version('2.0')
 def test_get_administered_pools_multiple_pages(infinibox, user, forge):
     num_pools = 5
-    for i in range(num_pools):
+    for _ in range(num_pools):
         pool = infinibox.pools.create()
         pool.set_owners([user])
     page_size = num_pools - 1
@@ -53,16 +53,16 @@ def test_creation_deletion(infinibox, user):
     assert user.get_email() == kwargs['email']
     assert user in infinibox.users.get_all()
     user.delete()
-    assert (not user.is_in_system())
+    assert not user.is_in_system()
 
 
-def test_password(infinibox, user):
+def test_password(user):
     with pytest.raises(AttributeError):
         user.get_password()
     user.update_password('some_password')
 
 
-def test_email(infinibox, user):
+def test_email(user):
     orig_email = user.get_email()
     new_email = 'some@email.com'
 
@@ -71,7 +71,7 @@ def test_email(infinibox, user):
     assert user.get_email() == new_email
 
 
-def test_role(infinibox, user):
+def test_role(user):
     orig_role = user.get_role()
     new_role = defs.enums.users.roles.technician.get_name()
 
@@ -117,11 +117,11 @@ def _get_token_from_mail(simulator, mail_address):
 
 
 def _get_last_mailboxer_msg(simulator, mail_address):
-    msg = get_simulated_mail_server(simulator).get_emails(mail_address, unread = True)
+    msg = get_simulated_mail_server(simulator).get_emails(mail_address, unread=True)
     return msg[0]
 
 
-def test_reset_password(infinibox, infinibox_simulator, user):
+def test_reset_password(infinibox_simulator, user):
     user_email = user.get_email()
     user.update_name(user.get_name()[-30:])
     user.request_reset_password()

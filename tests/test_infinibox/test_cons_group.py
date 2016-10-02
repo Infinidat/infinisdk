@@ -43,5 +43,5 @@ def test_get_rmr_snapshot_guid(cg):
 
 
 @pytest.fixture
-def cg(request, pool):
+def cg(pool):
     return pool.system.cons_groups.create(pool=pool)

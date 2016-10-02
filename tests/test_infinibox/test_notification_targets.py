@@ -3,50 +3,49 @@ from ..conftest import relevant_from_version
 
 
 @relevant_from_version('2.0')
-def test_smtp_targets_query(infinibox, smtp_target):
+def test_smtp_targets_query(smtp_target):  # pylint: disable=unused-argument
     pass
 
 
 @relevant_from_version('2.0')
-def test_snmp_define(infinibox, snmp_target):
+def test_snmp_define(snmp_target):  # pylint: disable=unused-argument
     pass
 
 
 @relevant_from_version('2.0')
-def test_snmp_modify(infinibox, snmp_target):
+def test_snmp_modify(snmp_target):  # pylint: disable=unused-argument
     pass
 
 
 @relevant_from_version('2.0')
 def test_snmp_query(infinibox, snmp_target):
-    assert snmp_target in list(
-        infinibox.notification_targets.find(protocol='SNMP'))
+    assert snmp_target in infinibox.notification_targets.find(protocol='SNMP').to_list()
 
 
 @relevant_from_version('2.0')
-def test_snmp_remove(infinibox, snmp_target):
+def test_snmp_remove(snmp_target):
     snmp_target.delete()
     assert not snmp_target.is_in_system()
 
 
 @relevant_from_version('2.0')
-def test_snmp_rename(infinibox, snmp_target):
+def test_snmp_rename(snmp_target):
     snmp_target.update_name('new_name')
     assert snmp_target.get_name() == 'new_name'
 
 
 @relevant_from_version('2.0')
-def test_snmp_test(infinibox, snmp_target):
+def test_snmp_test(snmp_target):
     snmp_target.test()
 
 
 @relevant_from_version('2.0')
-def test_rsyslog_define(infinibox, rsyslog_target):
+def test_rsyslog_define(rsyslog_target):  # pylint: disable=unused-argument
     pass
 
 
 @relevant_from_version('2.0')
-def test_rsyslog_modify(infinibox, rsyslog_target):
+def test_rsyslog_modify(rsyslog_target):  # pylint: disable=unused-argument
     pass
 
 
@@ -57,19 +56,19 @@ def test_rsyslog_query(infinibox, rsyslog_target):
 
 
 @relevant_from_version('2.0')
-def test_rsyslog_remove(infinibox, rsyslog_target):
+def test_rsyslog_remove(rsyslog_target):
     rsyslog_target.delete()
     assert not rsyslog_target.is_in_system()
 
 
 @relevant_from_version('2.0')
-def test_rsyslog_rename(infinibox, rsyslog_target):
+def test_rsyslog_rename(rsyslog_target):
     rsyslog_target.update_name('new_name')
     assert rsyslog_target.get_name() == 'new_name'
 
 
 @relevant_from_version('2.0')
-def test_rsyslog_test(infinibox, rsyslog_target):
+def test_rsyslog_test(rsyslog_target):
     rsyslog_target.test()
 
 
@@ -78,13 +77,13 @@ def test_rsyslog_test(infinibox, rsyslog_target):
     'user@gmail.com',  # we support single recipients
     ['user@gmail.com', 'bla@domain.com'],  # as well as multiples
 ])
-def test_smtp_target_test(infinibox, smtp_target, recipients):
+def test_smtp_target_test(smtp_target, recipients):
     smtp_target.test(recipients=recipients)
 
 
 @pytest.fixture
 def smtp_target(infinibox):
-    return list(infinibox.notification_targets.find(protocol='SMTP'))[0]
+    return infinibox.notification_targets.find(protocol='SMTP').to_list()[0]
 
 
 @pytest.fixture

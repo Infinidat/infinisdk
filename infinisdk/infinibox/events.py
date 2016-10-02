@@ -1,6 +1,4 @@
 from ..core import Events as EventsBase
-from ..core import Field, SystemObject
-from ..core.api.special_values import Autogenerate
 
 
 class Events(EventsBase):

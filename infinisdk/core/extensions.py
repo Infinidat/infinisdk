@@ -102,6 +102,7 @@ class Method(Attachment):
             assert self._original
             kwargs['_wrapped'] = self._original
 
+        # pylint: disable=attribute-defined-outside-init
         method = _BoundMethod(self._func, obj, **kwargs)
         method.__name__ = self._name
         method.__self__ = method.im_self = obj
@@ -110,13 +111,14 @@ class Method(Attachment):
         return method
 
 
-class _BoundMethod(functools.partial):
+class _BoundMethod(functools.partial):  # pylint: disable=inherit-non-class
 
     @property
     def __doc__(self):
         return self.func.__doc__
 
     def __repr__(self):
+        # pylint: disable=missing-format-attribute
         return '<Bound method {0.im_class.__name__}.{0.__name__} of {0.args[0]!r}>'.format(self)
 
 

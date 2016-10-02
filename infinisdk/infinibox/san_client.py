@@ -5,7 +5,8 @@ class SanClients(PolymorphicBinder):
 
     def __init__(self, system):
         object_types = (system.hosts.object_type, system.host_clusters.object_type)
-        super(SanClients, self).__init__(URL('san_clients'), object_types, factory=self._san_client_factory, system=system)
+        super(SanClients, self).__init__(URL('san_clients'), object_types, factory=self._san_client_factory,
+                                         system=system)
 
     def is_supported(self):
         return self.system.compat.get_version_as_float() >= 3.0

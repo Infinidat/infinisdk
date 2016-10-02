@@ -1,5 +1,3 @@
-import re
-
 import pytest
 
 from ..conftest import no_op_context
@@ -22,7 +20,7 @@ def test_incompatible_version(incompatible_system, operator):
     with pytest.raises(VersionNotSupported):
         operator(incompatible_system)
 
-    assert not incompatible_system.api._checked_version
+    assert not incompatible_system.api._checked_version  # pylint: disable=protected-access
 
 
 @pytest.mark.parametrize('should_check_version', [True, False])
@@ -33,12 +31,12 @@ def test_ignore_version_check(incompatible_system, should_check_version):
     with op_context(VersionNotSupported):
         incompatible_system.api.get(
             '/api/rest/system', check_version=should_check_version)
-    assert not incompatible_system.api._checked_version
+    assert not incompatible_system.api._checked_version  # pylint: disable=protected-access
 
 
 def test_incompatible_version_stays_incompatible(incompatible_system):
 
-    for retry in range(3):
+    for _ in range(3):
         with pytest.raises(VersionNotSupported):
             incompatible_system.api.get('name')
 
@@ -50,7 +48,7 @@ def restore_version_checks(request):
     config.root.check_version_compatibility = True
 
     @request.addfinalizer
-    def restore():
+    def restore():  # pylint: disable=unused-variable
         config.root.check_version_compatibility = prev
 
 

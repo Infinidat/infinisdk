@@ -1,6 +1,6 @@
 import abc
 from munch import Munch
-from ..._compat import with_metaclass
+from ..._compat import with_metaclass  # pylint: disable=no-name-in-module
 from .api import API
 from ..type_binder_container import TypeBinderContainer
 
@@ -39,13 +39,13 @@ class APITarget(with_metaclass(abc.ABCMeta)):
             self.objects.install(object_type)
             self.types[object_type.get_type_name()] = self.types[object_type.__name__] = object_type
 
-        self.components = self.SYSTEM_COMPONENTS_TYPE(self)
-        self.events = self.SYSTEM_EVENTS_TYPE(self)
+        self.components = self.SYSTEM_COMPONENTS_TYPE(self)  # pylint: disable=not-callable
+        self.events = self.SYSTEM_EVENTS_TYPE(self)  # pylint: disable=not-callable
 
     def _get_api_auth(self):
         return None
 
-    def is_field_supported(self, field):
+    def is_field_supported(self, field):  # pylint: disable=unused-argument
         return True
 
     def disable_caching(self):

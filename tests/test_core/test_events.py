@@ -1,4 +1,3 @@
-from infinisdk._compat import xrange
 
 
 def test_get_last_events(system):
@@ -53,12 +52,12 @@ def test_between_operator(system):
     range_validator = lambda event: event.id <= max_id and event.id >= min_id
 
     assert len(events) <= ((max_id - min_id) + 1)
-    assert all(map(range_validator, events))
+    assert all(range_validator(event) for event in events)
 
 
 def test_complex_queries(system):
     min_index, max_index = 1, 2
-    events = [system.events.create_custom_event() for i in xrange(5)]
+    events = [system.events.create_custom_event() for _ in range(5)]
 
     id_field = system.events.fields.get('id')
     id_range = (events[min_index]['id'], events[max_index]['id'])
@@ -81,10 +80,9 @@ def test_events_types_caching(system, forge):
     mock().and_return({'codes': [], 'levels': []})
     forge.replay()
 
-    assert system.events._types is None
+    assert system.events._types is None  # pylint: disable=protected-access
     system.events.get_codes()
 
-    assert system.events._types is not None
+    assert system.events._types is not None  # pylint: disable=protected-access
     system.events.get_codes()
     system.events.get_levels()
-

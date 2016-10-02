@@ -90,7 +90,7 @@ class Field(FieldBase):
 
     def extract_from_json(self, obj_class, json):  # pylint: disable=unused-argument
         # pylint: disable=no-member
-        return json[self.api_name]  #TODO: Use api_object_schema.binding instead
+        return json[self.api_name]
 
 def _install_filter_factory(operator_name, operator_function_name):
     def meth(self, other):

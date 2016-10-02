@@ -4,6 +4,7 @@ from infinisdk.core.exceptions import CommandNotApproved
 
 import pytest
 
+# pylint: disable=attribute-defined-outside-init
 
 def test_interactive_approval(infinibox, volume, interactive_approval):
     infinibox.api.set_interactive_approval()
@@ -29,8 +30,8 @@ def interactive_approval(request, approved):
     _compat.raw_input = fake_raw_input
 
     @request.addfinalizer
-    def cleanup():
-        _compat = prev_raw_input
+    def cleanup():  # pylint: disable=unused-variable
+        _compat = prev_raw_input  # pylint: disable=unused-variable
 
     return returned
 

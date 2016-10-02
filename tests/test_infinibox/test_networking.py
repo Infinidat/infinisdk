@@ -2,13 +2,12 @@ import pytest
 import requests
 from munch import Munch
 from ..conftest import create_network_space, relevant_from_version, versioning_requiremnts
-from infinisdk._compat import xrange
-from infinisdk.core.api.special_values import OMIT, RawValue
 from infinisdk.core.exceptions import APICommandFailed
+from infinisdk.core.api.special_values import OMIT
 
 
 @relevant_from_version('2.0')
-def test_disable_enable_network_interface(infinibox, network_interface):
+def test_disable_enable_network_interface(network_interface):
     assert network_interface.is_enabled()
     network_interface.disable()
     assert not network_interface.is_enabled()
@@ -17,23 +16,26 @@ def test_disable_enable_network_interface(infinibox, network_interface):
 
 
 @relevant_from_version('3.0')
-def test_disable_enable_network_space_ip(infinibox, network_space):
+def test_disable_enable_network_space_ip(network_space):
     ip_address = '127.0.0.1'
     assert network_space.get_ips() == []
     interface_id = network_space.get_interfaces()[0].get_id()
     network_space.add_ip_address(ip_address)
-    assert network_space.get_ips() == [{'enabled': True, 'ip_address': ip_address, 'reserved': False, 'vlan_id': 1, 'interface_id': interface_id}]
+    assert network_space.get_ips() == [
+        {'enabled': True, 'ip_address': ip_address, 'reserved': False, 'vlan_id': 1, 'interface_id': interface_id}]
     network_space.disable_ip_address(ip_address)
-    assert network_space.get_ips() == [{'enabled': False, 'ip_address': ip_address, 'reserved': False, 'vlan_id': 1, 'interface_id': None}]
+    assert network_space.get_ips() == [
+        {'enabled': False, 'ip_address': ip_address, 'reserved': False, 'vlan_id': 1, 'interface_id': None}]
     network_space.enable_ip_address(ip_address)
-    assert network_space.get_ips() == [{'enabled': True, 'ip_address': ip_address, 'reserved': False, 'vlan_id': 1, 'interface_id': interface_id}]
+    assert network_space.get_ips() == [
+        {'enabled': True, 'ip_address': ip_address, 'reserved': False, 'vlan_id': 1, 'interface_id': interface_id}]
     network_space.disable_ip_address(ip_address)
     network_space.remove_ip_address(ip_address)
     assert network_space.get_ips() == []
 
 
 @relevant_from_version('2.0')
-def test_network_space_get_links_no_links(infinibox, network_space):
+def test_network_space_get_links_no_links(network_space):
     assert list(network_space.get_links()) == []
 
 
@@ -47,7 +49,7 @@ def test_network_space_get_links_with_links(infinibox, link):
 def test_update_interface_list_of_network_space(infinibox):
     def create_interfaces(port_name):
         return [infinibox.network_interfaces.create(node_id=index, name=port_name, type='PORT')
-                for index in xrange(1,4)]
+                for index in range(1, 4)]
     network_space = create_network_space(infinibox, interfaces=create_interfaces('eth-data1'))
     origin_interfaces = network_space.get_interfaces()
     new_interfaces = create_interfaces('eth-data2')
@@ -60,7 +62,7 @@ def test_update_interface_list_of_network_space(infinibox):
 @pytest.mark.parametrize('network_config_type', [Munch, dict])
 def test_network_configuration_type(infinibox, network_config_type):
     ip_address = '127.0.0.1'
-    conf_for_creation = network_config=network_config_type(netmask=19, network='127.0.0.1', default_gateway='127.0.0.1')
+    conf_for_creation = network_config_type(netmask=19, network='127.0.0.1', default_gateway='127.0.0.1')
     network_space = create_network_space(infinibox, network_config=conf_for_creation)
     network_config = network_space.get_network_config()
     assert network_config.default_gateway == network_config['default_gateway']

@@ -40,7 +40,8 @@ class BaseBinder(object):
 
     def get(self, *predicates, **kw):
         """
-        Finds exactly one object matching criteria. Raises :class:`.ObjectNotFound` if not found, :class:`.TooManyObjectsFound` if more than one is found
+        Finds exactly one object matching criteria. Raises :class:`.ObjectNotFound` if not found,
+        :class:`.TooManyObjectsFound` if more than one is found
         """
         returned = self.find(*predicates, **kw)
         if not returned:

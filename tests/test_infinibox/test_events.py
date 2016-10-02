@@ -4,10 +4,11 @@ from infinisdk import Q
 
 
 def test_filter_by_seq_num(infinibox):
-    for i in range(5):
-        e = infinibox.events.create_custom_event(description='some description')
+    events_no = 5
+    for _ in range(events_no):
+        event = infinibox.events.create_custom_event(description='some description')
 
-    assert len(infinibox.events.find(Q.seq_num>=e['seq_num']-5))
+    assert len(infinibox.events.find(Q.seq_num >= event['seq_num']-events_no))
 
 def test_create_custom_event(infinibox):
     description = 'test events'

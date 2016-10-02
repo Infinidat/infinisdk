@@ -1,10 +1,9 @@
-from .._compat import itervalues, string_types, requests
+from .._compat import string_types, requests
 from ..core.exceptions import APICommandFailed
-from sentinels import NOTHING
 
 
 class LogicalUnit(object):
-    def __init__(self, system, id, lun, clustered, host_cluster_id, volume_id,
+    def __init__(self, system, id, lun, clustered, host_cluster_id, volume_id,  # pylint: disable=redefined-builtin
                  host_id, **kwargs):
         self.system = system
         self.id = id
@@ -64,7 +63,7 @@ class LogicalUnit(object):
             obj = self.get_host()
         self._unmap(obj, self.lun)
 
-    unmap=delete
+    unmap = delete
 
     def get_lun(self):
         """ Returns the logical unit number of this LU
@@ -80,7 +79,7 @@ class LogicalUnit(object):
         return "<LUN {0}: {1}->{2}>".format(self.get_lun(), self.get_mapping_object(), self.get_volume())
 
     def __eq__(self, other):
-        return type(other) == type(self) and other.get_unique_key() == self.get_unique_key()
+        return type(other) == type(self) and other.get_unique_key() == self.get_unique_key()  # pylint: disable=unidiomatic-typecheck
 
     def get_unique_key(self):
         return (self.system, self.host_cluster_id, self.host_id, self.volume_id, self.lun)
@@ -171,4 +170,4 @@ class LogicalUnitContainer(object):
         return item in self.luns
 
     def __repr__(self):
-        return "<LogicalUnitsContainer: [{0}]>".format(", ".join(map(str, self)))
+        return "<LogicalUnitsContainer: [{0}]>".format(", ".join([str(x) for x in self]))

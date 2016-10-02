@@ -5,7 +5,7 @@ from infinisdk.core import SystemObject, TypeBinder
 def test_unknown_attributes_raise_attribute_error(system):
     objects = system.objects
     with pytest.raises(AttributeError):
-        objects.nonexisting
+        objects.nonexisting  # pylint: disable=pointless-statement
 
 def test_get_types(system):
     assert [] != system.objects.get_types()

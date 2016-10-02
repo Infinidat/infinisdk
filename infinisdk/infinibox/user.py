@@ -7,10 +7,12 @@ class User(SystemObject):
     FIELDS = [
         Field("id", type=int, is_identity=True, is_filterable=True, is_sortable=True),
         Field("type"),
-        Field("role", creation_parameter=True, mutable=True, is_filterable=True, is_sortable=True, default="PoolAdmin"), # For backwards compatibility
+        Field("role", creation_parameter=True, mutable=True, is_filterable=True, is_sortable=True,
+              default="PoolAdmin"), # For backwards compatibility
         Field("roles", type=list, mutable=True),
         Field("email", creation_parameter=True, mutable=True, default=Autogenerate("user_{uuid}@infinidat.com")),
-        Field("name", creation_parameter=True, mutable=True, is_filterable=True, is_sortable=True, default=Autogenerate("user_{uuid}")),
+        Field("name", creation_parameter=True, mutable=True, is_filterable=True, is_sortable=True,
+              default=Autogenerate("user_{uuid}")),
         Field("password", creation_parameter=True, add_getter=False, mutable=True, default="12345678"),
         Field("enabled", type=bool, mutable=True, feature_name='user_disabling')
     ]

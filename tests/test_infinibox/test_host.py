@@ -6,11 +6,11 @@ from infinisdk.infinibox import InfiniBox
 from ..conftest import relevant_from_version
 
 
-def test_get_name(infinibox, host):
+def test_get_name(host):
     assert host.get_name().startswith('host_')
 
 
-def test_update_name(infinibox, host):
+def test_update_name(host):
     curr_name = host.get_name()
     new_name = 'some_host_name'
     host.update_name(new_name)
@@ -25,7 +25,7 @@ def test_creation(infinibox, host, request):
     request.addfinalizer(host.delete)
 
     for k, v in iteritems(kwargs):
-        assert host._cache[k] == v
+        assert host._cache[k] == v  # pylint: disable=protected-access
 
     assert host.get_cluster() is None
 
@@ -37,7 +37,7 @@ def test_get_cluster(infinibox, host, request):
     assert host.get_cluster() == cluster
 
 
-def test_fc_port_operations(infinibox, host):
+def test_fc_port_operations(host):
     address1 = "00:01:02:03:04:05:06:07"
     address2 = "07:06:05:04:03:02:01:00"
 
@@ -61,7 +61,7 @@ def test_get_host_by_initiator_address(infinibox, host, registered_port_address)
         registered_port_address) == host
 
 
-def test_get_host_by_initiator_address_no_address(infinibox, host):
+def test_get_host_by_initiator_address_no_address(infinibox, host):  # pylint: disable=unused-argument
     nonexisting_address = '00:01:02:03:04:05:06:07'
     assert infinibox.hosts.get_host_id_by_initiator_address(
         nonexisting_address) is None
@@ -69,7 +69,7 @@ def test_get_host_by_initiator_address_no_address(infinibox, host):
         nonexisting_address) is None
 
 
-def test_has_registered_initiator_address(infinibox, host, registered_port_address):
+def test_has_registered_initiator_address(infinibox, host, registered_port_address):  # pylint: disable=unused-argument
     assert infinibox.hosts.has_registered_initiator_address(
         registered_port_address)
     assert not infinibox.hosts.has_registered_initiator_address(
@@ -77,7 +77,7 @@ def test_has_registered_initiator_address(infinibox, host, registered_port_addre
 
 
 @relevant_from_version('3.0')
-def test_get_host_initiator_without_auth(infinibox_simulator, host, registered_port_address, backup_config):
+def test_get_host_initiator_without_auth(host, registered_port_address, backup_config): # pylint: disable=unused-argument
     config.root.check_version_compatibility = True
     system = InfiniBox(host.system.get_simulator())  # Unauthrozied system instance
     assert system.hosts.has_registered_initiator_address(registered_port_address)

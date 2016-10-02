@@ -26,7 +26,7 @@ def test_invalid_params(infinibox):
     for params in [
             [("a", "b"), "c"],
             ["a"],
-            ]:
+    ]:
         with pytest.raises(TypeError):
             infinibox.api.set_auth(*params, login=False)
 

@@ -119,7 +119,7 @@ class API(object):
         finally:
             self._session.headers.clear()
             for k, v in prev.items():
-                self._session.headers[k] = v
+                self._session.headers[k] = v  # pylint: disable=undefined-loop-variable
 
     @contextmanager
     def use_basic_auth_context(self):
@@ -299,7 +299,8 @@ class API(object):
         :returns: :class:`.Response`
         """
         check_version = kwargs.pop("check_version", True)
-        if check_version and self._check_version_compatibility and not self._checked_version and config.root.check_version_compatibility:
+        if check_version and self._check_version_compatibility and \
+           not self._checked_version and config.root.check_version_compatibility:
             self._checked_version = True
             try:
                 with self.use_basic_auth_context():
@@ -317,7 +318,8 @@ class API(object):
                 if not self.system.compat.is_initialized():
                     with self.disable_version_checking_context():
                         self.system.compat.initialize()
-            if self._use_basic_auth or not self.system.compat.is_initialized() or not self.system.compat.has_auth_sessions():
+            if self._use_basic_auth or not self.system.compat.is_initialized() or \
+               not self.system.compat.has_auth_sessions():
                 auth = self._auth
 
         raw_data = kwargs.pop("raw_data", False)
@@ -354,7 +356,8 @@ class API(object):
                 full_url = self._with_approved(full_url)
 
             hostname = full_url.hostname
-            api_request = requests.Request(http_method, full_url, data=data if data is not NOTHING else None, params=url_params, headers=headers, auth=auth)
+            api_request = requests.Request(http_method, full_url, data=data if data is not NOTHING else None,
+                                           params=url_params, headers=headers, auth=auth)
             for preprocessor in self._preprocessors:
                 preprocessor(api_request)
 
@@ -406,9 +409,9 @@ class API(object):
                 data = json.dumps(
                     dict(sent_json_object, password='*' * len(sent_json_object['password']))
                     )
-        except Exception:
+        except (ValueError, TypeError):
             pass
-        _logger.trace("{0} <-- DATA: {1}" , hostname, data)
+        _logger.trace("{0} <-- DATA: {1}", hostname, data)
 
     @contextmanager
     def limited_interaction_context(self, disable_post=False, disable_get=False,
@@ -633,7 +636,7 @@ class Response(object):
     def assert_success(self):
         try:
             self.response.raise_for_status()
-        except requests.exceptions.HTTPError as e:
+        except requests.exceptions.HTTPError:
             if self.sent_data is not NOTHING  and self.sent_data and 'password' in self.sent_data:
                 self.sent_data = '<HIDDEN>'
             raise APICommandFailed.raise_from_response(self)
@@ -656,7 +659,7 @@ class _AutoRetryContext(object):
                 max_retries, retry_sleep_seconds = self._global_retries_dict[retry_predicate]
                 retried_count = max_retries - retries_left + 1
                 _logger.debug("Auto retry API ({0} of {1}) by {2}: {3}",
-                        retried_count, max_retries, retry_predicate, exc)
+                              retried_count, max_retries, retry_predicate, exc)
                 self._retries_dict[retry_predicate] -= 1
                 return retry_sleep_seconds
         return None
@@ -670,5 +673,3 @@ class _AutoRetryContext(object):
             flux.current_timeline.sleep(sleep_seconds)
             return True
         return None
-
-# TODO : implement async request

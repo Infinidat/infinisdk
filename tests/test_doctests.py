@@ -14,7 +14,7 @@ def test_sphinx_doctest(doctest_path):
     context = {}
     if os.path.exists(context_filename):
         with open(context_filename) as f:
-            exec(f.read(), context)
+            exec(f.read(), context)  # pylint: disable=exec-used
     with context.get("doctest_context", _NO_CONTEXT)() as globs:
         globs = dict(globs, print_function=print_function)
         result = doctest.testfile(doctest_path, module_relative=False, globs=globs)

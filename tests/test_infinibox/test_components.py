@@ -22,7 +22,7 @@ def _change_cached_context(component, field_name, new_value):
     finally:
         component.fields.get(field_name).cached = orig_value
 
-def test_component_id_field(infinibox, component_collection, component):
+def test_component_id_field(component_collection, component):
     assert isinstance(component.id, str)
     assert component.get_field('id') == component.id
     assert component_collection.get_by_id(component.id) is component
@@ -38,8 +38,7 @@ def _basic_check_for_component(infinibox, component_type, parent_type, blacklist
     collection = sys_components[component_type.get_plural_name()]
     component_instances = collection.get_all()
 
-    is_component_instance = lambda obj: isinstance(obj, component_type)
-    assert all(map(is_component_instance, component_instances))
+    assert all(isinstance(comp, component_type) for comp in component_instances)
 
     component_instance = collection.choose()
 
@@ -48,8 +47,7 @@ def _basic_check_for_component(infinibox, component_type, parent_type, blacklist
         assert isinstance(parent_obj, parent_type)
 
     sub_components = component_instance.get_sub_components()
-    is_sub_component = lambda obj: is_component_instance(obj.get_parent())
-    assert all(map(is_sub_component, sub_components))
+    assert all(isinstance(comp.get_parent(), component_type) for comp in sub_components)
 
     assert infinibox.api.get(component_instance.get_this_url_path())
 
@@ -133,6 +131,7 @@ def test_using_from_cache_context_multiple_times(infinibox):
     nodes = infinibox.components.nodes
     fc_ports = infinibox.components.fc_ports
 
+    # pylint: disable=protected-access
     with ExitStack() as stack:
         stack.enter_context(_change_cached_context(nodes, 'state', False))
         stack.enter_context(nodes.fetch_tree_once_context())
@@ -237,5 +236,5 @@ def component_collection(request, infinibox):
     return getattr(infinibox.components, request.param)
 
 @pytest.fixture
-def component(infinibox, component_collection):
+def component(component_collection):
     return list(component_collection)[0]

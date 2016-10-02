@@ -38,12 +38,12 @@ def test_auth_saving(infinibox_simulator, ini_path, use_username, use_password, 
 @pytest.fixture
 def ini_path(request, tmpdir):
     assert hasattr(config, "_cached_ini_parser")
-    config._cached_ini_parser = None
+    config._cached_ini_parser = None  # pylint: disable=protected-access
     prev = config.config.root.ini_file_path
     ini_file_path = tmpdir.join("config.ini")
     config.config.root.ini_file_path = str(ini_file_path)
 
     @request.addfinalizer
-    def cleanup():
+    def cleanup():  # pylint: disable=unused-variable
         config.config.root.ini_file_path = prev
     return ini_file_path

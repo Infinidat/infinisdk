@@ -1,9 +1,8 @@
 import pytest
-from infinisdk._compat import xrange
 from infinisdk.core.exceptions import CacheMiss
 
 
-def test_unmap_clustered_lun(infinibox, host, cluster, volume):
+def test_unmap_clustered_lun(host, cluster, volume):
     cluster.add_host(host)
     vol_lu = cluster.map_volume(volume)
 
@@ -15,7 +14,7 @@ def test_unmap_clustered_lun(infinibox, host, cluster, volume):
     assert not volume.get_logical_units()
 
 def test_unmap_cluster_with_two_hosts(infinibox, cluster, volume):
-    for _ in xrange(2):
+    for _ in range(2):
         host = infinibox.hosts.create()
         cluster.add_host(host)
     cluster.map_volume(volume)
@@ -25,7 +24,7 @@ def test_unmap_cluster_with_two_hosts(infinibox, cluster, volume):
     assert not volume.is_mapped()
 
 
-def test_unmap_lun_twice(infinibox, volume, logical_unit):
+def test_unmap_lun_twice(logical_unit):
     logical_unit.unmap()
     logical_unit.unmap()
 
@@ -45,7 +44,7 @@ def test_system_luns_with_cluster(infinibox, host, cluster, volume):
 
     lu.delete()
 
-def test_no_luns_mapped(infinibox, host, cluster):
+def test_no_luns_mapped(infinibox, host):
     luns = host.get_luns()
     assert len(luns) == 0
 
@@ -53,13 +52,13 @@ def test_no_luns_mapped(infinibox, host, cluster):
     vol = infinibox.volumes.create(pool=pool)
     assert (not host.is_volume_mapped(vol))
 
-def test_mapping_object(infinibox, mapping_object, volume):
+def test_mapping_object(mapping_object, volume):
     lu = mapping_object.map_volume(volume)
     assert volume.get_lun(mapping_object) == lu
     assert lu.mapping_object == lu.get_mapping_object() == mapping_object
     lu.unmap()
 
-def test_map_volume_to_cluster(infinibox, host, cluster, volume):
+def test_map_volume_to_cluster(cluster, volume):
     assert (not volume.is_mapped())
 
     cluster.map_volume(volume)
@@ -87,7 +86,7 @@ def test_map_volume_to_cluster(infinibox, host, cluster, volume):
     assert (not volume.is_mapped())
 
 
-def test_lun_is_clustered(infinibox, host, cluster, volume):
+def test_lun_is_clustered(host, cluster, volume):
     lu = host.map_volume(volume)
     assert not lu.is_clustered()
 
@@ -104,7 +103,7 @@ def test_lun_is_clustered(infinibox, host, cluster, volume):
     lu.unmap()
 
 
-def test_map_volume_to_host(infinibox, host, cluster, volume):
+def test_map_volume_to_host(host, volume):
     assert (not volume.is_mapped())
 
     host.map_volume(volume, 2)
@@ -134,7 +133,7 @@ def test_map_volume_to_host(infinibox, host, cluster, volume):
     assert (not volume.is_mapped())
 
 
-def test_multiple_luns_mapping_objects(infinibox, host, cluster, volume1, volume2):
+def test_multiple_luns_mapping_objects(host, cluster, volume1, volume2):
     host.map_volume(volume1)
 
     cluster.map_volume(volume2)
@@ -152,9 +151,9 @@ def test_multiple_luns_mapping_objects(infinibox, host, cluster, volume1, volume
     assert cluster_lus[volume2] == cluster_lu
 
     with pytest.raises(KeyError):
-        cluster_lus[volume1]
+        cluster_lus[volume1]  # pylint: disable=pointless-statement
 
-    assert cluster_lus.get(host_lu.get_lun(), None) == None
+    assert cluster_lus.get(host_lu.get_lun(), None) is None
     assert host_lus.get(host_lu.get_lun(), None) == host_lu
 
     assert (not cluster_lu in host_lus)
@@ -170,16 +169,16 @@ def test_get_specific_lun(infinibox, mapping_object, volume1, volume2):
         lu_from_getter = mapping_object.get_lun(int(lu_from_post), fetch_if_not_cached=False)
     lu_from_getter = mapping_object.get_lun(int(lu_from_post), fetch_if_not_cached=True)
     assert lu_from_post == lu_from_getter
-    assert mapping_object._cache.get('luns') is None
+    assert mapping_object._cache.get('luns') is None  # pylint: disable=protected-access
     mapping_object.get_luns()
-    assert len(mapping_object._cache.get('luns')) == 1
+    assert len(mapping_object._cache.get('luns')) == 1  # pylint: disable=protected-access
 
     infinibox.enable_caching()
     mapping_object.map_volume(volume2)
 
 
 @pytest.fixture
-def logical_unit(infinibox, volume, mapping_object):
+def logical_unit(volume, mapping_object):
     mapping_object.map_volume(volume)
     [returned] = volume.get_logical_units()
     return returned

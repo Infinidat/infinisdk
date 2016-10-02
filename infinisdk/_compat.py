@@ -2,6 +2,8 @@ import sys
 
 PY2 = sys.version_info[0] == 2
 
+# pylint: disable=exec-used, redefined-builtin, import-error, no-name-in-module, unused-import, undefined-variable
+
 if PY2:
     exec("""def with_metaclass(meta):
     class _WithMetaclassBase(object):
@@ -19,7 +21,7 @@ if PY2:
 
     import httplib
 
-    string_types = (basestring,)
+    string_types = (basestring, )
 
 
     import __builtin__ as builtins
@@ -54,7 +56,7 @@ else:
     import functools
     import http.client as httplib
 
-    string_types = (str,bytes)
+    string_types = (str, bytes)
 
     import builtins
 
@@ -80,7 +82,7 @@ else:
 
     def sorted(iterable, cmp=None, key=None, reverse=False):
         if cmp is not None:
-            key=functools.cmp_to_key(cmp)
+            key = functools.cmp_to_key(cmp)
         return builtins.sorted(iterable, key=key, reverse=reverse)
 
     def cmp(x, y):
@@ -101,7 +103,7 @@ def reraise(tp, value, tb=None):
     raise tp, value, tb
 """, locals(), globals())
 else:
-    def reraise(tp, value, tb=None):
+    def reraise(tp, value, tb=None):  # pylint: disable=unused-argument
         if value.__traceback__ is not tb:
             raise value.with_traceback(tb)
         raise value

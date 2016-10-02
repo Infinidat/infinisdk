@@ -9,15 +9,16 @@ class NetworkSpace(InfiniBoxObject):
     URL_PATH = 'network/spaces'
 
     FIELDS = [
-        Field("id", is_identity=True, type=int, is_filterable=True, is_sortable = True, cached=True),
+        Field("id", is_identity=True, type=int, is_filterable=True, is_sortable=True, cached=True),
         Field("name", creation_parameter=True, mutable=True, default=Autogenerate("network_space_{uuid}")),
         Field("network_config", creation_parameter=True, mutable=True, type=MunchType),
-        Field("interfaces", creation_parameter=True, mutable=True, type=list, binding=ListOfRelatedObjectIDsBinding('network_interfaces')),
+        Field("interfaces", creation_parameter=True, mutable=True, type=list,
+              binding=ListOfRelatedObjectIDsBinding('network_interfaces')),
         Field("service", creation_parameter=True, default="NAS_SERVICE"),
         Field("ips", creation_parameter=False, mutable=False, type=MunchListType),
         Field("properties", creation_parameter=False, mutable=False, type=MunchType),
         Field("automatic_ip_failback", creation_parameter=True, mutable=True, optional=True, type=bool),
-        Field("mtu",  creation_parameter=True, mutable=True, optional=True, type=int),
+        Field("mtu", type=int, creation_parameter=True, mutable=True, optional=True),
         Field("rate_limit", type=int, creation_parameter=True, mutable=True, optional=True),
     ]
 
@@ -34,19 +35,22 @@ class NetworkSpace(InfiniBoxObject):
         self.invalidate_cache('ips')
         return res
 
+    def _get_specific_ip_url(self, ip_address):
+        return self.get_this_url_path().add_path('ips').add_path(ip_address)
+
     def remove_ip_address(self, ip_address):
-        url = self.get_this_url_path().add_path("ips/{0}".format(ip_address))
+        url = self._get_specific_ip_url(ip_address)
         res = self.system.api.delete(url).get_result()
         self.invalidate_cache('ips')
         return res
 
     def disable_ip_address(self, ip_address):
-        returned = self.system.api.post(self.get_this_url_path().add_path('ips').add_path(ip_address).add_path('disable'))
+        returned = self.system.api.post(self._get_specific_ip_url(ip_address).add_path('disable'))
         self.invalidate_cache('ips')
         return returned
 
     def enable_ip_address(self, ip_address):
-        returned = self.system.api.post(self.get_this_url_path().add_path('ips').add_path(ip_address).add_path('enable'))
+        returned = self.system.api.post(self._get_specific_ip_url(ip_address).add_path('enable'))
         self.invalidate_cache('ips')
         return returned
 

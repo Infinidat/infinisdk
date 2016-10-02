@@ -22,7 +22,7 @@ config = confetti.Config(dict(
     ),
     infinibox=dict(
 
-        compatible_versions = [
+        compatible_versions=[
             "ge:2.0",
         ],
 
@@ -45,7 +45,7 @@ config = confetti.Config(dict(
 _cached_ini_parser = None
 
 def get_ini_option(section, option, default=None):
-    global _cached_ini_parser
+    global _cached_ini_parser  # pylint: disable=global-statement
     if _cached_ini_parser is None:
         _cached_ini_parser = ConfigParser()
         _cached_ini_parser.read(os.path.expanduser((config.root.ini_file_path)))

@@ -15,7 +15,8 @@ class NotificationRule(SystemObject):
         Field('event_code', type=str, mutable=True),
         Field('event_level', type=list, mutable=True),
         Field('target_parameters', type=dict, mutable=True),
-        Field('target', api_name='target_id', mutable=True, creation_parameter=True, binding=RelatedObjectBinding('notification_targets')),
+        Field('target', api_name='target_id', mutable=True, creation_parameter=True,
+              binding=RelatedObjectBinding('notification_targets')),
         Field('include_events', type=list, mutable=True),
         Field('exclude_events', type=list, mutable=True),
         Field('event_visibility', type=list),
@@ -24,4 +25,3 @@ class NotificationRule(SystemObject):
     @classmethod
     def get_type_name(cls):
         return 'notification_rule'
-

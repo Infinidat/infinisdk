@@ -16,11 +16,11 @@ def test_object_id_in_default_repr(system_obj, object_id):
     assert str(object_id) in repr(system_obj)
 
 
-def test_repr_field_in_repr(system, name_repr_obj):
+def test_repr_field_in_repr(name_repr_obj):
     assert 'name' in repr(name_repr_obj)
 
 
-def test_uncached_fields_in_repr(system, name_repr_obj):
+def test_uncached_fields_in_repr(name_repr_obj):
     assert 'name=?' in repr(name_repr_obj)
 
 
@@ -30,9 +30,9 @@ def system_obj(system, object_id):
 
 
 @pytest.fixture
-def system(is_caching_enabled):
+def system(is_caching_enabled):  # pylint: disable=unused-argument
     class _System(object):
-        def is_field_supported(self, field):
+        def is_field_supported(self, field):  # pylint: disable=unused-argument
             return True
     return _System()
 
@@ -45,7 +45,7 @@ def is_caching_enabled(request):
 def name_repr_obj(system, object_id):
     returned = _create_object(
         system, object_id, extra_fields=[Field('name', use_in_repr=True)])
-    assert 'name' not in returned._cache
+    assert 'name' not in returned._cache  # pylint: disable=protected-access
     return returned
 
 

@@ -30,7 +30,7 @@ if sys.version_info < (3, 0):
     _INSTALL_REQUIRES.append('contextlib2')
 
 setup(name="infinisdk",
-      classifiers = [
+      classifiers=[
           "Programming Language :: Python :: 2.6",
           "Programming Language :: Python :: 2.7",
           "Programming Language :: Python :: 3.3",
@@ -49,4 +49,4 @@ setup(name="infinisdk",
       install_requires=_INSTALL_REQUIRES,
       scripts=[],
       namespace_packages=[]
-      )
+     )

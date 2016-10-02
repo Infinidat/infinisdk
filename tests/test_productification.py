@@ -1,5 +1,4 @@
 from __future__ import print_function
-import itertools
 import os
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
@@ -71,9 +70,9 @@ def _iter_checked_filenames():
             if filename.endswith(('.py', '.rst', '.md')):
                 yield True, os.path.abspath(os.path.join(path, filename))
 
-def _check_forbidden_strings(entity, s, errors):
-    orig = s
-    s = s.lower()
+def _check_forbidden_strings(entity, str_for_check, errors):
+    orig = str_for_check  # pylint: disable=unused-variable
+    str_for_check = str_for_check.lower()
     for forbidden_str in _FORBIDDEN_STRINGS:
-        if forbidden_str in s:
+        if forbidden_str in str_for_check:
             errors.append("{0}: contains {1}".format(entity, forbidden_str))
