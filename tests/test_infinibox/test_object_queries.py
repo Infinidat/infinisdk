@@ -22,3 +22,10 @@ def test_query_count(type_binder):
 def test_null_checking_with_equality(infinibox, volume):
     query = infinibox.volumes.find(Q.cons_group == None)
     assert str(query).endswith('cg_id=eq%3Anull')
+
+def test_query_with_iterables(infinibox, volume):
+    for iterable in [[volume.get_id()], 
+                     {volume.get_id():volume}.keys(), 
+                     set([volume.get_id()])]:
+        query = infinibox.volumes.find(Q.id.in_(iterable))
+        assert str(query).endswith('id=in%3A%28{}%29'.format(volume.get_id()))
