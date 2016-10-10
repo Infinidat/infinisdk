@@ -1,8 +1,10 @@
 import pytest
+import requests
 from munch import Munch
-from ..conftest import create_network_space, relevant_from_version
+from ..conftest import create_network_space, relevant_from_version, versioning_requiremnts
 from infinisdk._compat import xrange
 from infinisdk.core.api.special_values import OMIT, RawValue
+from infinisdk.core.exceptions import APICommandFailed
 
 
 @relevant_from_version('2.0')
@@ -67,8 +69,16 @@ def test_network_configuration_type(infinibox, network_config_type):
     assert ip_obj.ip_address == ip_obj['ip_address']
 
 
-@relevant_from_version('2.0')
+@versioning_requiremnts(relevant_from='2.0', relevant_up_to='3.0')
 @pytest.mark.parametrize('service_value', [None, OMIT])
-def test_create_network_space_with_no_service(infinibox, service_value):
+def test_create_network_space_with_no_service_until_3_0(infinibox, service_value):
     network_space = create_network_space(infinibox, service=service_value)
     assert network_space.get_service() is None
+
+
+@relevant_from_version('3.0')
+@pytest.mark.parametrize('service_value', [None, OMIT])
+def test_create_network_space_with_no_service(infinibox, service_value):
+    with pytest.raises(APICommandFailed) as exception:
+        create_network_space(infinibox, service=service_value)
+    assert exception.value.status_code == requests.codes.bad_request
