@@ -1,4 +1,4 @@
-from ..conftest import new_to_version
+from ..conftest import relevant_from_version
 from infinisdk import Q
 
 
@@ -16,7 +16,7 @@ def test_query_by_pool(infinibox, pool, volume):
     assert [volume] == list(infinibox.volumes.find(pool=pool))
     assert [] == list(infinibox.volumes.find(pool=None))
 
-@new_to_version('3.0')
+@relevant_from_version('3.0')
 def test_sort_by_multiple_fields(infinibox, pool):
     vol_ab_thin = infinibox.volumes.create(pool=pool, name='ab', provisioning='THIN')
     vol_bb_thin = infinibox.volumes.create(pool=pool, name='bb', provisioning='THIN')

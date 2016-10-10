@@ -11,7 +11,7 @@ from infinisdk.core.translators_and_types import MillisecondsDatetimeTranslator
 from infinisdk.infinibox.dataset import (_BEGIN_FORK_HOOK, _CANCEL_FORK_HOOK,
                                          _FINISH_FORK_HOOK)
 
-from ..conftest import create_pool, new_to_version
+from ..conftest import create_pool, relevant_from_version
 
 
 def test_creation(pool, data_entity):
@@ -165,7 +165,7 @@ def test_invalid_child_operation(data_entity):
         snapshot.create_snapshot()
 
 
-@new_to_version("3.0")
+@relevant_from_version("3.0")
 def test_clones_no_longer_supported(data_entity):
     with pytest.raises(AssertionError):
         data_entity.create_clone()
@@ -298,7 +298,7 @@ def test_calculate_reclaimable_space(data_entity):
     assert isinstance(data_entity.calculate_reclaimable_space(), Capacity)
 
 
-@new_to_version('3.0')
+@relevant_from_version('3.0')
 def test_calculate_entities_reclaimable_space(data_entity):
     snap = data_entity.create_child()
     assert isinstance(data_entity.get_collection().calculate_reclaimable_space([data_entity, snap]), Capacity)
@@ -311,7 +311,7 @@ def test_get_family_master(data_entity):
     assert child.get_family_master().get_id() == data_entity.get_id()
 
 
-@new_to_version('3.0')
+@relevant_from_version('3.0')
 def test_compression_enabled(data_entity):
     assert data_entity.is_compression_enabled()
     data_entity.disable_compression()
@@ -335,14 +335,14 @@ def test_create_multiple_datasets(data_entity, name):
         assert vol.is_master()
 
 
-@new_to_version('2.2')
+@relevant_from_version('2.2')
 def test_datasets_queries(infinibox, volume, filesystem):
     dataset_list = [volume, volume.create_child(), filesystem, filesystem.create_child()]
     assert set(infinibox.datasets.to_list()) == set(dataset_list)
     assert set(infinibox.datasets.find(type='MASTER').to_list()) == set([volume, filesystem])
 
 
-@new_to_version('3.0')
+@relevant_from_version('3.0')
 def test_refresh_snapshot(data_entity):
     assert data_entity.is_master()
     child = data_entity.create_child()

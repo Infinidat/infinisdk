@@ -1,79 +1,79 @@
 import pytest
-from ..conftest import new_to_version
+from ..conftest import relevant_from_version
 
 
-@new_to_version('2.0')
+@relevant_from_version('2.0')
 def test_smtp_targets_query(infinibox, smtp_target):
     pass
 
 
-@new_to_version('2.0')
+@relevant_from_version('2.0')
 def test_snmp_define(infinibox, snmp_target):
     pass
 
 
-@new_to_version('2.0')
+@relevant_from_version('2.0')
 def test_snmp_modify(infinibox, snmp_target):
     pass
 
 
-@new_to_version('2.0')
+@relevant_from_version('2.0')
 def test_snmp_query(infinibox, snmp_target):
     assert snmp_target in list(
         infinibox.notification_targets.find(protocol='SNMP'))
 
 
-@new_to_version('2.0')
+@relevant_from_version('2.0')
 def test_snmp_remove(infinibox, snmp_target):
     snmp_target.delete()
     assert not snmp_target.is_in_system()
 
 
-@new_to_version('2.0')
+@relevant_from_version('2.0')
 def test_snmp_rename(infinibox, snmp_target):
     snmp_target.update_name('new_name')
     assert snmp_target.get_name() == 'new_name'
 
 
-@new_to_version('2.0')
+@relevant_from_version('2.0')
 def test_snmp_test(infinibox, snmp_target):
     snmp_target.test()
 
 
-@new_to_version('2.0')
+@relevant_from_version('2.0')
 def test_rsyslog_define(infinibox, rsyslog_target):
     pass
 
 
-@new_to_version('2.0')
+@relevant_from_version('2.0')
 def test_rsyslog_modify(infinibox, rsyslog_target):
     pass
 
 
-@new_to_version('2.0')
+@relevant_from_version('2.0')
 def test_rsyslog_query(infinibox, rsyslog_target):
     assert rsyslog_target in list(
         infinibox.notification_targets.find(protocol='SYSLOG'))
 
 
-@new_to_version('2.0')
+@relevant_from_version('2.0')
 def test_rsyslog_remove(infinibox, rsyslog_target):
     rsyslog_target.delete()
     assert not rsyslog_target.is_in_system()
 
 
-@new_to_version('2.0')
+@relevant_from_version('2.0')
 def test_rsyslog_rename(infinibox, rsyslog_target):
     rsyslog_target.update_name('new_name')
     assert rsyslog_target.get_name() == 'new_name'
 
 
-@new_to_version('2.0')
+@relevant_from_version('2.0')
 def test_rsyslog_test(infinibox, rsyslog_target):
     rsyslog_target.test()
 
 
-@new_to_version('2.0')
+@relevant_from_version('2.0')
 @pytest.mark.parametrize('recipients', [
     'user@gmail.com',  # we support single recipients
     ['user@gmail.com', 'bla@domain.com'],  # as well as multiples

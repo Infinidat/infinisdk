@@ -1,6 +1,6 @@
-from ..conftest import new_to_version
+from ..conftest import relevant_from_version
 
 
-@new_to_version('2.2')
+@relevant_from_version('2.2')
 def test_initiators_sanity(infinibox):
     assert isinstance(infinibox.initiators.to_list(), list)

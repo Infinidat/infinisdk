@@ -3,7 +3,7 @@ from infinisdk._compat import iteritems, cmp, sorted
 from infinisdk.core import object_query
 from infinisdk.core.exceptions import APICommandFailed
 
-from ..conftest import new_to_version
+from ..conftest import relevant_from_version
 
 
 def test_get_nonexisting_metadata(volume):
@@ -16,7 +16,7 @@ def test_get_nonexisting_metadata_default(volume):
     value = object()
     assert volume.get_metadata_value('key', value) is value
 
-@new_to_version('2.0')
+@relevant_from_version('2.0')
 def test_metadata_paging(infinibox, volume, forge):
     page_size = 3
     infinibox.get_simulator().api.set_default_page_size(page_size)
@@ -74,7 +74,7 @@ def test_get_all_metadata(infinibox, volume, pool):
     assert sorted(expected, cmp=_metadata_cmp) == sorted(actual, cmp=_metadata_cmp)
 
 
-@new_to_version('3.0')
+@relevant_from_version('3.0')
 def test_set_system_metadata(infinibox):
     metadata = {'x': 'y'}
     infinibox.system_metadata.set_metadata_from_dict(metadata)

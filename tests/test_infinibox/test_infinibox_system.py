@@ -5,7 +5,7 @@ from waiting import wait
 
 import pytest
 
-from ..conftest import disable_api_context, new_to_version
+from ..conftest import disable_api_context, relevant_from_version
 from infinibox_sysdefs.defs import latest as defs
 from infinisdk._compat import iteritems, string_types
 from infinisdk.core.exceptions import (APITransportFailure,
@@ -166,7 +166,7 @@ def test_get_field_raw_value(volume, from_cache, invalidate_cache):
         volume.get_size(from_cache=from_cache, raw_value=True), int)
 
 
-@new_to_version('2.0')
+@relevant_from_version('2.0')
 def test_current_user_proxy(infinibox):
     assert isinstance(infinibox.current_user.get_owned_pools().to_list(), list)
 

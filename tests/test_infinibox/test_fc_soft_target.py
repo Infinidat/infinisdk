@@ -1,15 +1,15 @@
 from urlobject import URLObject
-from ..conftest import new_to_version
+from ..conftest import relevant_from_version
 
 
 # Soft targets supported (on simulator) >= 3.0 (altough in real system its supported >= 1.7)
-@new_to_version('3.0')
+@relevant_from_version('3.0')
 def test_fc_soft_target_url_path(infinibox):
     assert isinstance(infinibox.fc_soft_targets.get_url_path(), URLObject)
 
 
 # Soft targets supported (on simulator) >= 3.0 (altough in real system its supported >= 1.7)
-@new_to_version('3.0')
+@relevant_from_version('3.0')
 def test_fc_soft_target_query(infinibox):
     COUNT = 3
     assert infinibox.fc_soft_targets.count() == 0

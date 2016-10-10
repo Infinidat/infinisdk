@@ -3,7 +3,7 @@ import re
 from infinibox_sysdefs import latest as defs
 from ecosystem.mocks.mock_mailboxer import get_simulated_mail_server
 from infinisdk.core import object_query
-from ..conftest import new_to_version
+from ..conftest import relevant_from_version
 
 
 def test_name(infinibox, user, user_name_field):
@@ -16,12 +16,12 @@ def test_name(infinibox, user, user_name_field):
     assert user.get_name() == new_name
 
 
-@new_to_version('2.0')
+@relevant_from_version('2.0')
 def test_get_administered_pools_no_pool(infinibox, user):
     assert infinibox.pools.get_administered_pools().to_list() == []
 
 
-@new_to_version('2.0')
+@relevant_from_version('2.0')
 def test_get_administered_pools_multiple_pages(infinibox, user, forge):
     num_pools = 5
     for i in range(num_pools):
@@ -33,7 +33,7 @@ def test_get_administered_pools_multiple_pages(infinibox, user, forge):
     assert len(list(infinibox.pools.get_administered_pools())) == num_pools
 
 
-@new_to_version('2.0')
+@relevant_from_version('2.0')
 def test_get_administered_pools_with_pools(infinibox, user):
     pool = infinibox.pools.create()
     pool.set_owners([user])
@@ -94,7 +94,7 @@ def test_get_owned_pools(infinibox, user):
     assert user.get_owned_pools() == []
 
 
-@new_to_version('2.0')
+@relevant_from_version('2.0')
 def test_set_users(infinibox):
     user1 = infinibox.users.create(name='user1')
     user2 = infinibox.users.create(name='user2')
@@ -131,7 +131,7 @@ def test_reset_password(infinibox, infinibox_simulator, user):
     assert 'successfully' in msg.content
 
 
-@new_to_version('2.2.8')
+@relevant_from_version('2.2.8')
 def test_enable_disable_user(user):
     assert user.is_enabled()
     user.disable()

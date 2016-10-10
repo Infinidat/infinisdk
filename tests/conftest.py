@@ -15,7 +15,8 @@ from infinisim.infinibox import Infinibox as InfiniboxSimulator
 
 
 # pylint: disable=redefined-outer-name
-new_to_version = lambda version: pytest.mark.required_version(from_version=version)
+versioning_requiremnts = pytest.mark.required_version
+relevant_from_version = lambda version: versioning_requiremnts(relevant_from=version)
 
 
 def pytest_addoption(parser):
@@ -66,15 +67,15 @@ def system(infinibox):
     return infinibox
 
 def validate_unittest_compatibility_with_infinibox_version(system, **kwargs):
-    from_version = kwargs.pop('from_version', None)
-    until_version = kwargs.pop('until_version', None)
+    relevant_from = kwargs.pop('relevant_from', None)
+    relevant_up_to = kwargs.pop('relevant_up_to', None)
     assert not kwargs, "Version marker got unexpected kwargs: {0}".format(list(kwargs))
     sys_version = system.compat.normalize_version_string(system.get_version())
 
-    if from_version is not None and sys_version < from_version:
+    if relevant_from is not None and sys_version < relevant_from:
         pytest.skip("System does not support this unittest (too old)")
 
-    if until_version is not None and sys_version > until_version:
+    if relevant_up_to is not None and sys_version >= relevant_up_to:
         pytest.skip("System does not support this unittest (too new)")
 
 _DEFAULT_REQUIRED_VERSION = Munch(kwargs={})

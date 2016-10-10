@@ -5,12 +5,12 @@ import logbook
 from infinisdk.infinibox.infinibox import InfiniBox
 from infinisdk.core.exceptions import APICommandFailed, CacheMiss
 from infinibox_sysdefs.defs import latest
-from ..conftest import new_to_version
+from ..conftest import relevant_from_version
 
 def test_login(infinibox):
     infinibox.login()
 
-@new_to_version('3.0')
+@relevant_from_version('3.0')
 def test_is_logged_in(infinibox):
     assert infinibox.is_logged_in()
     infinibox.logout()
@@ -18,7 +18,7 @@ def test_is_logged_in(infinibox):
     infinibox.login()
     assert infinibox.is_logged_in()
 
-@new_to_version('3.0')
+@relevant_from_version('3.0')
 def test_is_logged_in_with_set_auth(infinibox):
     assert infinibox.is_logged_in()
     infinibox.api.set_auth('admin', '123456', login=False)
@@ -60,7 +60,7 @@ def test_after_loging_operations(infinibox, user_role):
     infinibox2.components.system_component.get_field('name', from_cache=True, fetch_if_not_cached=False)
 
 
-@new_to_version('3.0')
+@relevant_from_version('3.0')
 def test_reinitialize_session_keeps_cookies(infinibox):
     # pylint: disable=protected-access
     cookies = infinibox.api._session.cookies.copy()
@@ -70,7 +70,7 @@ def test_reinitialize_session_keeps_cookies(infinibox):
     assert infinibox.api._session.cookies == cookies
     assert infinibox.is_logged_in()
 
-@new_to_version('3.0')
+@relevant_from_version('3.0')
 def test_set_auth_no_login_doesnt_send_basic_auth(infinibox, infinibox_simulator):
     infinibox = InfiniBox(infinibox_simulator, auth=('infinidat', '123456'))
     infinibox.api.set_auth('admin', '123456', login=False)

@@ -5,7 +5,7 @@ from infinisdk.core.exceptions import (APICommandFailed,
                                        AttributeAlreadyExists, CacheMiss,
                                        MissingFields)
 
-from ..conftest import new_to_version
+from ..conftest import relevant_from_version
 
 
 class SampleBaseObject(SystemObject):
@@ -188,7 +188,7 @@ def test__equality(system):
     assert NotImplemented == diff_type1.__eq__(diff_type2)
 
 
-@new_to_version('2.2')
+@relevant_from_version('2.2')
 def test_get_fields_without_field_names(infinibox):
     user = infinibox.users.choose()
     fields = user.get_fields()

@@ -5,10 +5,10 @@ from infinisdk.core.exceptions import APICommandFailed
 from infinisdk.infinibox.filesystem import Filesystem
 from infinisdk.infinibox.pool import Pool
 
-from ..conftest import new_to_version
+from ..conftest import relevant_from_version
 
 
-@new_to_version('2.0')
+@relevant_from_version('2.0')
 def test_filesystem_exporting(infinibox, filesystem):
     assert not filesystem.get_exports()
     export = filesystem.add_export()
@@ -20,7 +20,7 @@ def test_filesystem_exporting(infinibox, filesystem):
     assert export not in infinibox.exports.get_all()
 
 
-@new_to_version('2.0')
+@relevant_from_version('2.0')
 def test_filesystem_with_exports_deletion(filesystem):
     filesystem.add_export()
     filesystem.add_export()
@@ -33,7 +33,7 @@ def test_filesystem_with_exports_deletion(filesystem):
     filesystem.delete()
 
 
-@new_to_version('2.0')
+@relevant_from_version('2.0')
 def test_filesystem_children_deletion_without_approval(filesystem):
     snap = filesystem.create_child()
     clone = snap.create_child()
@@ -48,7 +48,7 @@ def test_filesystem_children_deletion_without_approval(filesystem):
     assert not clone.is_in_system()
 
 
-@new_to_version('2.0')
+@relevant_from_version('2.0')
 def test_field_types():
     assert Filesystem.fields.parent.type.type is Filesystem
     assert Filesystem.fields.pool.type.type is Pool

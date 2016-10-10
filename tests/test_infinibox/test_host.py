@@ -3,7 +3,7 @@ from infinisdk._compat import iteritems
 from infinisdk.core.config import config
 from infinisdk.infinibox import InfiniBox
 
-from ..conftest import new_to_version
+from ..conftest import relevant_from_version
 
 
 def test_get_name(infinibox, host):
@@ -76,7 +76,7 @@ def test_has_registered_initiator_address(infinibox, host, registered_port_addre
         '00:01:02:03:04:05:06:08')
 
 
-@new_to_version('3.0')
+@relevant_from_version('3.0')
 def test_get_host_initiator_without_auth(infinibox_simulator, host, registered_port_address, backup_config):
     config.root.check_version_compatibility = True
     system = InfiniBox(host.system.get_simulator())  # Unauthrozied system instance
