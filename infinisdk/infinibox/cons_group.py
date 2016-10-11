@@ -15,7 +15,7 @@ _CG_SUFFIX = Autogenerate('_{timestamp}')
 
 class ConsGroup(InfiniBoxObject):
     URL_PATH = 'cgs'
-    ENTITY_TYPES = namedtuple('VolumeTypes', ['Master', 'Snapshot'])('MASTER', 'SNAP')
+    ENTITY_TYPES = namedtuple('VolumeTypes', ['Master', 'Snapshot'])('MASTER', 'SNAPSHOT')
 
     FIELDS = [
         Field("id", is_identity=True, type=int, cached=True),
@@ -43,8 +43,11 @@ class ConsGroup(InfiniBoxObject):
     def is_master(self):
         return self.get_type() == self.ENTITY_TYPES.Master
 
+    def _get_snapshot_type(self):
+        return 'SNAPSHOT' if self.system.compat.has_writable_snapshots() else 'SNAP'
+
     def is_snapgroup(self):
-        return self.get_type() == self.ENTITY_TYPES.Snapshot
+        return self.get_type() == self._get_snapshot_type()
 
     def get_children(self):
         return self.find(self.system, parent=self)
