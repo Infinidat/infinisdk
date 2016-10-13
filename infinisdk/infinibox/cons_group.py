@@ -185,7 +185,7 @@ class ConsGroup(InfiniBoxObject):
         except Exception as e:  # pylint: disable=broad-except
             with end_reraise_context():
                 for parent_id, snap in sg_members_by_parent_id.items():
-                    members_by_id[parent_id].trigger_data_restore_failure(snap, e)
+                    members_by_id[parent_id].trigger_restore_failure(snap, e)
         for parent_id, snap in sg_members_by_parent_id.items():
             members_by_id[parent_id].trigger_after_restore(snap)
 

@@ -219,20 +219,27 @@ class Dataset(InfiniBoxObject):
             self.system.api.post(restore_url, data=snapshot_id)
         except Exception as e:  # pylint: disable=broad-except
             with end_reraise_context():
-                self.trigger_data_restore_failure(snapshot, e)
+                self.trigger_restore_failure(snapshot, e)
         self.trigger_after_restore(snapshot)
 
     def trigger_before_restore(self, source):
         hook_tags = self.get_tags_for_object_operations(self.system)
+        gossip.trigger_with_tags('infinidat.sdk.pre_object_restore', {'source': source, 'target': self}, tags=hook_tags)
         gossip.trigger_with_tags('infinidat.sdk.pre_data_restore', {'source': source, 'target': self}, tags=hook_tags)
 
+    @deprecated("Use trigger_restore_failure() instead")
     def trigger_data_restore_failure(self, source, e):
+        self.trigger_data_restore_failure(source, e)
+
+    def trigger_restore_failure(self, source, e):
         hook_tags = self.get_tags_for_object_operations(self.system)
         gossip.trigger_with_tags('infinidat.sdk.data_restore_failure', {'source': source, 'target': self, 'exc': e}, tags=hook_tags)
+        gossip.trigger_with_tags('infinidat.sdk.object_restore_failure', {'source': source, 'target': self, 'exc': e}, tags=hook_tags)
 
     def trigger_after_restore(self, source):
         hook_tags = self.get_tags_for_object_operations(self.system)
         gossip.trigger_with_tags('infinidat.sdk.post_data_restore', {'source': source, 'target': self}, tags=hook_tags)
+        gossip.trigger_with_tags('infinidat.sdk.post_object_restore', {'source': source, 'target': self}, tags=hook_tags)
 
     def get_snapshots(self):
         """Retrieves all snapshot children of this entity
