@@ -150,30 +150,6 @@ infinibox.cons_groups
 .. autoclass:: ConsGroup
    :members:
 
-infinibox.metrics
-~~~~~~~~~~~~~~~~~
-
-.. automodule:: infinisdk.infinibox.metrics
-
-.. autoclass:: Metrics
-   :members:
-
-.. autoclass:: Filter
-   :members:
-
-.. autoclass:: FilterField
-   :members:
-
-.. autoclass:: CollectorField
-   :members:
-
-.. autoclass:: Collector
-   :members:
-
-.. autoclass:: Sample
-   :members:
-
-
 
 infinibox.components
 ~~~~~~~~~~~~~~~~~~~~

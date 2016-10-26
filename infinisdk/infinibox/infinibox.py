@@ -37,7 +37,6 @@ from .pool import Pool
 from .replica import Replica
 from .user import User
 from .volume import Volume
-from .metrics import Metrics
 from .metadata import SystemMetadata
 
 try:
@@ -59,7 +58,6 @@ class InfiniBox(APITarget):
         self.current_user = _CurrentUserProxy(self)
         self.compat = Compatibility(self)
         self.capacities = InfiniBoxSystemCapacity(self)
-        self.metrics = Metrics(self)
         self.system_metadata = SystemMetadata(self)
         self._related_systems = []
         self.datasets = Datasets(self)
