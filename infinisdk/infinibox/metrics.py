@@ -64,23 +64,25 @@ class Metrics(object):
                 ','.join(str(c.id) for c in collectors)))
             resp = self.system.api.get(path).get_result()
             if resp is not None:
-                for collector_data in resp.get('collectors', []):
-                    collector = collectors_by_id[collector_data['id']]
-                    interval = collector_data['interval_milliseconds'] / 1000.0
-                    end_timestamp = arrow.Arrow.fromtimestamp(
-                        collector_data['end_timestamp_milliseconds'] / 1000.0)
-
-                    series = collector_data['data']
-                    for index, sample in enumerate(series):
-                        timestamp = end_timestamp - \
-                                    timedelta(seconds=interval * (len(series) - index + 1))
-                        if collector_data['collector_type'] == "HISTOGRAM":
-                            returned.append(HistogramSample(collector_data['histogram_field'], collector_data['ranges'],
-                                                            collector, sample, timestamp, interval))
-                        elif collector_data['collector_type'] == "TOP":
-                            returned.append(TopSample(collector, sample, timestamp, interval))
-                        else:
-                            returned.append(Sample(collector, sample, timestamp, interval))
+                collectors = resp.get('collectors', [])
+                if collectors is not None:
+                    for collector_data in collectors:
+                        collector = collectors_by_id[collector_data['id']]
+                        interval = collector_data['interval_milliseconds'] / 1000.0
+                        end_timestamp = arrow.Arrow.fromtimestamp(
+                            collector_data['end_timestamp_milliseconds'] / 1000.0)
+    
+                        series = collector_data['data']
+                        for index, sample in enumerate(series):
+                            timestamp = end_timestamp - \
+                                        timedelta(seconds=interval * (len(series) - index + 1))
+                            if collector_data['collector_type'] == "HISTOGRAM":
+                                returned.append(HistogramSample(collector_data['histogram_field'], collector_data['ranges'],
+                                                                collector, sample, timestamp, interval))
+                            elif collector_data['collector_type'] == "TOP":
+                                returned.append(TopSample(collector, sample, timestamp, interval))
+                            else:
+                                returned.append(Sample(collector, sample, timestamp, interval))
 
         return returned
 
