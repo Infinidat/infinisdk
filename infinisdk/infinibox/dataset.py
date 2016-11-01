@@ -158,7 +158,7 @@ class Dataset(InfiniBoxObject):
         assert isinstance(delta, Capacity), "Delta must be an instance of Capacity"
         return self.update_field('size', self.get_size() + delta)
 
-    def create_child(self, name=None, write_protected=None):
+    def create_child(self, name=None, write_protected=None, ssd_enabled=None):
         self.invalidate_cache('has_children')
         self.trigger_begin_fork()
         if not name:
@@ -168,6 +168,8 @@ class Dataset(InfiniBoxObject):
             assert self.system.compat.has_writable_snapshots(), \
                 'write_protected parameter is not supported for this version'
             data['write_protected'] = write_protected
+        if ssd_enabled is not None:
+            data['ssd_enabled'] = ssd_enabled
         try:
             child = self._create(self.system, self.get_url_path(self.system), data=data,
                                  tags=self.get_tags_for_object_operations(self.system))
