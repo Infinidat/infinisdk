@@ -25,7 +25,7 @@ class InfiniBoxSystemCapacity(SystemObject):
         Field("free_physical_capacity", api_name="free_physical_space", type=SystemCapacityType),
         Field("free_virtual_capacity", api_name="free_virtual_space", type=SystemCapacityType),
         Field("total_physical_capacity", type=SystemCapacityType),
-        Field("total_virtual_capacity", type=SystemCapacityType, mutable=True)
+        Field("total_virtual_capacity", type=SystemCapacityType)
     ]
 
     def __init__(self, system):
