@@ -74,6 +74,16 @@ def test_error_response(infinibox):
     assert error_keys.issuperset({'code', 'message'})
 
 
+def test_error_response_truncates_data(infinibox):
+    with pytest.raises(APICommandFailed) as caught:
+        infinibox.api.post('/api/infinisim/return_error', data={'a': 'x' * 4096})
+
+    for func in (str, repr):
+        assert len(func(caught.value)) < 1000
+
+
+
+
 def test_url_params(infinibox):
     params = {'a': 'b', 'c': 2, 'd': OMIT, 'e': Autogenerate('param_{ordinal}'), 'f': True}
     expected = {'a': 'b', 'c': '2', 'e': 'param_1', 'f': 'True'}

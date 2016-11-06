@@ -93,7 +93,7 @@ class APICommandFailed(APICommandException):
                     "Request: {e.response.method} {e.response.url}\n\t"
                     "Request Timestamp: {e.request_timestamp}\n\t"
                     "Response Timestamp: {e.response_timestamp}\n\t"
-                    "Data: {e.response.sent_data}\n\t"
+                    "Data: {e.sent_data_truncated}\n\t"
                     "Status: {e.status_code}\n\t"
                     "Code: {e.error_code}\n\t"
                     "Message: {e.message}".format(e=self))
@@ -105,6 +105,14 @@ class APICommandFailed(APICommandException):
             returned += "\n\tReasons:"
             for reason in self.reasons:
                 returned += "\n\t\t{0}".format(reason)
+        return returned
+
+    @property
+    def sent_data_truncated(self):
+        max_length = 500
+        returned = self.response.sent_data
+        if len(returned) > max_length:
+            returned = returned[:max_length - 3 - 1] + '...' + returned[-1:]
         return returned
 
     @property
