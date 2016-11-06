@@ -110,7 +110,7 @@ class APICommandFailed(APICommandException):
     @property
     def sent_data_truncated(self):
         max_length = 500
-        returned = self.response.sent_data
+        returned = repr(self.response.sent_data)
         if len(returned) > max_length:
             returned = returned[:max_length - 3 - 1] + '...' + returned[-1:]
         return returned
