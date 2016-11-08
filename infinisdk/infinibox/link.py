@@ -2,6 +2,7 @@ from ..core.api.special_values import Autogenerate
 from ..core import Field
 from ..core.bindings import RelatedObjectBinding
 from ..core.exceptions import UnknownSystem
+from ..core.utils import DONT_CARE
 from .system_object import InfiniBoxObject
 
 
@@ -21,11 +22,11 @@ class Link(InfiniBoxObject):
         Field('link_state', type=str),
     ]
 
-    def is_up(self):
-        return self.get_link_state().lower() == 'up'
+    def is_up(self, from_cache=DONT_CARE):
+        return self.get_link_state(from_cache=from_cache).lower() == 'up'
 
-    def is_down(self):
-        return self.get_link_state().lower() in ['down', 'unknown']
+    def is_down(self, from_cache=DONT_CARE):
+        return self.get_link_state(from_cache=from_cache).lower() in ['down', 'unknown']
 
     @classmethod
     def is_supported(cls, system):
