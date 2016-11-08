@@ -334,7 +334,7 @@ class Replica(InfiniBoxObject):
         """
         self._validate_can_check_state()
         if self.system.compat.has_sync_job_states():
-            return self.is_initial() and self.is_replicating()
+            return self.is_initial() and self._any_sync_job_state_contains('initializing')
         return 'initial' in self.get_state(*args, **kwargs).lower()
 
     def _get_jobs(self):
