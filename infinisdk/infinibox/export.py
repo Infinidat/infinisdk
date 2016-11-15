@@ -7,7 +7,9 @@ from ..core.bindings import RelatedObjectBinding
 
 class _Field(Field):
     def __init__(self, *args, **kwargs):
-        super(_Field, self).__init__(*args, is_filterable=True, is_sortable=True, **kwargs)
+        kwargs.setdefault('is_sortable', True)
+        kwargs.setdefault('is_filterable', True)
+        super(_Field, self).__init__(*args, **kwargs)
 
 class Export(InfiniBoxObject):
     FIELDS = [
@@ -28,7 +30,7 @@ class Export(InfiniBoxObject):
         _Field("pref_write", creation_parameter=True, optional=True, type=CapacityType, mutable=True),
         _Field("max_read", creation_parameter=True, optional=True, type=CapacityType, mutable=True),
         _Field("max_write", creation_parameter=True, optional=True, type=CapacityType, mutable=True),
-        _Field("permissions", type=MunchListType, creation_parameter=True, optional=True, mutable=True),
+        _Field("permissions", type=MunchListType, creation_parameter=True, optional=True, mutable=True, is_filterable=False, is_sortable=False),
         _Field("created_at", type=MillisecondsDatetimeType),
         _Field("updated_at", type=MillisecondsDatetimeType),
     ]
