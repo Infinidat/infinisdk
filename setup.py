@@ -12,6 +12,7 @@ _INSTALL_REQUIRES = [
     "capacity>=1.3.8",
     "colorama",
     "confetti>=2.1.0",
+    "click",
     "flux",
     'gossip>=1.1.2',
     "infi.dtypes.wwn>=0.0.2",
@@ -49,5 +50,9 @@ setup(name="infinisdk",
 
       install_requires=_INSTALL_REQUIRES,
       scripts=[],
-      namespace_packages=[]
+      namespace_packages=[],
+      entry_points={
+          "console_scripts": [
+              "infinisdk-cli = infinisdk.entry_point:main_entry_point",
+          ]}
      )
