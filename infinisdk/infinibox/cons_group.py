@@ -178,7 +178,7 @@ class ConsGroup(InfiniBoxObject):
         """
         sg_members_by_parent_id = dict((s.get_field('parent_id', from_cache=True), s) for s in snap_group.get_members())
         members_by_id = dict((m.id, m) for m in self.get_members() if m.id in sg_members_by_parent_id)
-        for parent_id, snap in sg_members_by_parent_id.items():
+        for parent_id, snap in reversed(list(sg_members_by_parent_id.items())):
             members_by_id[parent_id].trigger_before_restore(snap)
         try:
             self.system.api.post(self.get_this_url_path().add_path('restore'),
