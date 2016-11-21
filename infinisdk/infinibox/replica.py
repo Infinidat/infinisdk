@@ -274,7 +274,7 @@ class Replica(InfiniBoxObject):
 
 
     def is_filesystem(self):
-        """Returns True if this replica replicates a single volume entity
+        """Returns True if this replica replicates a single filesystem entity
         """
         return self.get_entity_type(from_cache=True).lower() == 'filesystem'
 
