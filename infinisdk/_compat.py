@@ -22,7 +22,7 @@ if PY2:
     import httplib
 
     string_types = (basestring, )
-
+    integer_types = (int, long)
 
     import __builtin__ as builtins
 
@@ -57,6 +57,7 @@ else:
     import http.client as httplib
 
     string_types = (str, bytes)
+    integer_types = (int,)
 
     import builtins
 
