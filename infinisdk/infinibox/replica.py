@@ -336,6 +336,14 @@ class Replica(InfiniBoxObject):
             return self.is_initial() and self._any_sync_job_state_contains('initializing')
         return 'initial' in self.get_state(*args, **kwargs).lower()
 
+    def is_pending(self):
+        """Returns whether or not this replication is waiting to start initializing
+        """
+        self._validate_can_check_state()
+        if not self.system.compat.has_sync_job_states():
+            raise NotImplementedError("This system ({0}) doesn't support replica \"pending\" state".format(self.system))
+        return self.is_active() and self._any_sync_job_state_contains('pending')
+
     def _get_jobs(self):
         returned = self.get_field('jobs')
         if not returned:
