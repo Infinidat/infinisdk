@@ -22,7 +22,8 @@ from ..exceptions import (APICommandFailed, APITransportFailure,
 from .special_values import translate_special_values
 
 
-_RETRY_REQUESTS_EXCEPTION_TYPES = (RequestException, socket.error, ProtocolError)
+_RETRY_REQUESTS_EXCEPTION_TYPES = (RequestException, socket.error, ProtocolError,
+                                   requests.packages.urllib3.exceptions.TimeoutError)
 
 _logger = Logger(__name__)
 
