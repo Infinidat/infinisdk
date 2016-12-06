@@ -15,3 +15,11 @@ def test_virtual_capacity(infinibox):
     assert isinstance(infinibox.capacities.get_free_virtual_capacity(), Capacity)
     assert isinstance(infinibox.capacities.get_total_virtual_capacity(), Capacity)
     assert infinibox.capacities.get_free_virtual_capacity() == infinibox.capacities.get_total_virtual_capacity()
+
+
+def test_get_fields(infinibox):
+    fileds = ['total_virtual_capacity', 'total_physical_capacity']
+    res = infinibox.capacities.get_fields(fileds)
+    assert len(res) == 2
+    assert all([k in fileds for k in res.keys()])
+    assert all([isinstance(v, Capacity) for v in res.values()])
