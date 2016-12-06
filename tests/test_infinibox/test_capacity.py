@@ -1,5 +1,6 @@
 from infinibox_sysdefs import latest as defs
 from capacity import Capacity
+from ..conftest import versioning_requiremnts
 
 
 def test_physical_capacity(infinibox):
@@ -17,6 +18,7 @@ def test_virtual_capacity(infinibox):
     assert infinibox.capacities.get_free_virtual_capacity() == infinibox.capacities.get_total_virtual_capacity()
 
 
+@versioning_requiremnts(relevant_from='3.0')
 def test_get_fields(infinibox):
     fileds = ['total_virtual_capacity', 'total_physical_capacity']
     res = infinibox.capacities.get_fields(fileds)
