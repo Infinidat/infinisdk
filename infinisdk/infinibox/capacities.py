@@ -3,7 +3,7 @@ from capacity import Capacity
 from ..core.exceptions import CapacityUnavailable
 from .._compat import integer_types
 from ..core.translators_and_types import CapacityTranslator
-
+CAPACITY_SUFFIX = ['space', 'capacity', 'bytes']
 
 class SystemCapacityTranslator(CapacityTranslator):
     def _from_api(self, value):
@@ -25,6 +25,21 @@ class InfiniBoxSystemCapacity(object):
         response = self.system.api.get(query)
         result = response.get_result()
         return result.get(field_name, None)
+
+    def get_fields(self, field_names=()):
+        query = self.URL_PATH
+        if field_names:
+            query = query.add_query_param("fields", ",".join(field_names))
+        response = self.system.api.get(query)
+        result = response.get_result()
+        translated_result = {}
+        for key, value in result.items():
+            if any(key.endswith(s) for s in CAPACITY_SUFFIX):
+                translated_result[key] = self.capacity_translator.from_api(value)
+            else:
+                translated_result[key] = value
+
+        return translated_result
 
     def _get_capacity_field(self, field_name):
         value = self._get_field(field_name)
