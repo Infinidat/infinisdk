@@ -14,6 +14,8 @@ class CapacityTranslator(ValueTranslator):
     def _to_api(self, value):
         if value is None:
             return value
+        if not isinstance(value, Capacity):
+            raise TypeError('Capacity must be specified using a Capacity object')
         return int(value // byte)
 
     def _from_api(self, value):
