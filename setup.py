@@ -6,6 +6,7 @@ with open(os.path.join(os.path.dirname(__file__), "infinisdk", "__version__.py")
     exec(version_file.read()) # pylint: disable=W0122
 
 _INSTALL_REQUIRES = [
+    "gadget-python>=0.1.5",
     "api_object_schema>=1.5.1",
     "arrow>=0.6.0",
     "capacity>=1.3.8",

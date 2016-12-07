@@ -1,6 +1,7 @@
 import copy
 import gossip
 import functools
+import gadget
 from contextlib import contextmanager
 
 from mitba import cached_method
@@ -351,6 +352,7 @@ class SystemObject(BaseSystemObject):
                                          tags=hook_tags)
         gossip.trigger_with_tags('infinidat.sdk.post_object_creation',
                                  {'obj': obj, 'data': data, 'response_dict': returned}, tags=hook_tags)
+        gadget.log_entity_creation(entity=obj, params=data)
         return obj
 
     @classmethod
