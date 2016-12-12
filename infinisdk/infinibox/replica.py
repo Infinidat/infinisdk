@@ -427,10 +427,10 @@ class Replica(InfiniBoxObject):
                     'infinidat.sdk.replica_snapshot_created', {'snapshot': snap}, tags=['infinibox'])
         return local, remote
 
-    def _any_sync_job_state_contains(self, substr):
-        substr = substr.lower()
+    def _any_sync_job_state_contains(self, state):
+        state = state.lower()
         for sync_job in self._get_jobs():
-            if substr in sync_job['state'].lower():
+            if sync_job['state'] is not None and state == sync_job['state'].lower():
                 return True
         return False
 
