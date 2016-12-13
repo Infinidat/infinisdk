@@ -33,6 +33,22 @@ def test_choose_not_found(infinibox):
     assert infinibox.objects.volumes.safe_choose(name="nonexisting") is None
 
 
+def test_sample_too_small(infinibox):
+    with pytest.raises(ValueError):
+        infinibox.volumes.sample(sample_count=1)
+    with pytest.raises(ValueError):
+        infinibox.volumes.sample(sample_count=0)
+
+
+def test_sample(infinibox):
+    total_count = 4
+    pools = [infinibox.pools.create() for _ in range(total_count)]
+    sample_count = total_count // 2
+    sampled_objects = infinibox.pools.sample(sample_count=sample_count)
+    assert len(sampled_objects) == sample_count
+    assert set(sampled_objects).issubset(pools)
+
+
 @pytest.fixture
 def field(infinibox):
     return infinibox.objects.volumes.fields.id

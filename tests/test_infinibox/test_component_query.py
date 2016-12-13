@@ -139,3 +139,8 @@ def test_component_not_found(infinibox):
     exc_msg = str(caught.value)
     assert '(id=fake_id)' in exc_msg
     assert '(parent_id={})'.format(rack_id) in exc_msg
+
+
+def test_component_sample(infinibox):
+    nodes = infinibox.components.nodes.sample(Q.index != 1, sample_count=2)
+    assert set(node.get_index() for node in nodes) == set([2, 3])

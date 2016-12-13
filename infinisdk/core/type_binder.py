@@ -60,6 +60,13 @@ class BaseBinder(object):
         except ObjectNotFound:
             return None
 
+    def sample(self, *predicates, **kw):
+        """
+        Chooses a random sample out of those returned. Raises ValueError if there are not enough items
+        """
+        sample_count = kw.pop('sample_count', 1)
+        return self.find(*predicates, **kw).sample(sample_count)
+
     def choose(self, *predicates, **kw):
         """
         Chooses a random element out of those returned. Raises ObjectNotFound if none were returned

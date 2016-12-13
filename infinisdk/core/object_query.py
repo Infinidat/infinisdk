@@ -1,4 +1,5 @@
 import itertools
+import random
 from urlobject import URLObject as URL
 from numbers import Number
 from .._compat import xrange  # pylint: disable=redefined-builtin
@@ -10,7 +11,39 @@ _DEFAULT_SYSTEM_PAGE_SIZE = 50
 _DEFAULT_PAGE_SIZE = 1000
 
 
-class LazyQuery(object):
+class QueryBase(object):
+
+    def count(self):
+        return len(self)
+
+    def __nonzero__(self):
+        return len(self) != 0
+
+    __bool__ = __nonzero__
+
+    def to_list(self):
+        """Returns the entire set of objects as a Python list
+
+        .. caution:: Queries are lazy by default to avoid heavy API calls and repetitive page
+          requests. Using ``to_list`` will forcibly iterate and fetch all objects, which might
+          be a very big collection. This can cause issues like slowness and memory exhaustion
+        """
+        return list(self)
+
+    def sample(self, sample_count):
+        """
+        Chooses a random sample out of the query's objects.
+        Raises ValueError if there are not enough items
+        """
+        if sample_count <= 0:
+            raise ValueError('Illegal sample size ({})'.format(sample_count))
+        query_size = self.count()
+        if query_size < sample_count:
+            raise ValueError('Sample larger than returned items ({} > {})'.format(sample_count, query_size))
+        indexes = random.sample(xrange(query_size), sample_count)
+        return [self[index] for index in indexes]
+
+class LazyQuery(QueryBase):
     def __init__(self, system, url):
         super(LazyQuery, self).__init__()
         self.system = system
@@ -42,14 +75,6 @@ class LazyQuery(object):
         if self._requested_page is None:
             return self._total_num_objects
         return self._get_requested_page_size()
-
-    def count(self):
-        return len(self)
-
-    def __nonzero__(self):
-        return len(self) != 0
-
-    __bool__ = __nonzero__
 
     def _get_requested_page_size(self):
         if self._total_num_objects >= self._requested_page * self._requested_page_size:
@@ -122,15 +147,6 @@ class LazyQuery(object):
         """
         self._requested_page_size = page_size
         return self
-
-    def to_list(self):
-        """Returns the entire set of objects as a Python list
-
-        .. caution:: Queries are lazy by default to avoid heavy API calls and repetitive page
-          requests. Using ``to_list`` will forcibly iterate and fetch all objects, which might
-          be a very big collection. This can cause issues like slowness and memory exhaustion
-        """
-        return list(self)
 
 
 class PolymorphicQuery(LazyQuery):

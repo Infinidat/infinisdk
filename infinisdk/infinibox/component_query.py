@@ -2,9 +2,10 @@ import operator
 from numbers import Number
 
 from .._compat import cmp, iteritems, itervalues, sorted  # pylint: disable=redefined-builtin
+from ..core.object_query import QueryBase
 
 
-class ComponentQueryBase(object):
+class ComponentQueryBase(QueryBase):
     def __init__(self, system, query_objects_str, *predicates, **kw):
         self.system = system
         self.predicates = predicates
@@ -41,12 +42,6 @@ class ComponentQueryBase(object):
 
     def __repr__(self):
         return "<ComponentsQuery: {}>".format(self._str)
-
-    def count(self):
-        return len(self)
-
-    def to_list(self):
-        return list(self)
 
 
 class InfiniBoxComponentQuery(ComponentQueryBase):
