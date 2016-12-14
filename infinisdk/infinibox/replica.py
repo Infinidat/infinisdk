@@ -4,6 +4,7 @@ from datetime import timedelta
 import logbook
 
 import gossip
+import gadget
 
 from ..core import Field, MillisecondsDatetimeType
 from ..core.api.special_values import OMIT
@@ -228,7 +229,7 @@ class Replica(InfiniBoxObject):
             return None
         returned = self._get_entity_collection().get_by_id_lazy(snapshot_id)
         gossip.trigger_with_tags('infinidat.sdk.replica_snapshot_created', {'snapshot': returned}, tags=['infinibox'])
-
+        gadget.log_operation(self, "expose last consistent snapshot")
         return returned
 
 
@@ -284,12 +285,14 @@ class Replica(InfiniBoxObject):
         """
         self.system.api.post(self.get_this_url_path().add_path('suspend'))
         self.invalidate_cache('state')
+        gadget.log_operation(self, "suspend")
 
     def sync(self):
         """Starts a sync job
         """
         returned = self.system.api.post(self.get_this_url_path().add_path('sync'),
                                         headers={'X-INFINIDAT-RAW-RESPONSE': 'true'})
+        gadget.log_operation(self, "sync")
         return returned.get_result()
 
     def resume(self):
@@ -297,6 +300,7 @@ class Replica(InfiniBoxObject):
         """
         self.system.api.post(self.get_this_url_path().add_path('resume'))
         self.invalidate_cache('state')
+        gadget.log_operation(self, "resume")
 
     def _validate_can_check_state(self):
         if self.is_target():
@@ -381,6 +385,7 @@ class Replica(InfiniBoxObject):
         data = {'entity_pairs': entity_pairs} if entity_pairs is not OMIT else None
         self.system.api.post(self.get_this_url_path().add_path('change_role'), data=data)
         self.invalidate_cache()
+        gadget.log_operation(self, "change role")
         gossip.trigger_with_tags('infinidat.sdk.replica_after_change_role', {'replica': self}, tags=['infinibox'])
 
     def is_source(self, *args, **kwargs):
