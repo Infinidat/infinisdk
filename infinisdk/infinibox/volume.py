@@ -13,7 +13,7 @@ _logger = logbook.Logger(__name__)
 
 
 class VolumesBinder(DatasetTypeBinder):
-    def create_group_snapshot(self, volumes, snap_prefix=Autogenerate('{ordinal}_'), snap_suffix=OMIT):
+    def create_group_snapshot(self, volumes, snap_prefix=Autogenerate('{short_uuid}_'), snap_suffix=OMIT):
         """
         Creates multiple snapshots with a single consistent point-in-time, returning the snapshots
         in respective order to parent volumes
