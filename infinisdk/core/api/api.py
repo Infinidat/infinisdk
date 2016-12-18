@@ -638,8 +638,13 @@ class Response(object):
         try:
             self.response.raise_for_status()
         except requests.exceptions.HTTPError:
-            if self.sent_data is not NOTHING  and self.sent_data and 'password' in self.sent_data:
-                self.sent_data = '<HIDDEN>'
+            if self.sent_data is not NOTHING and self.sent_data:
+                if isinstance(self.sent_data, bytes):
+                    if b'password' in self.sent_data:
+                        self.sent_data = '<HIDDEN>'
+                else:
+                    if 'password' in self.sent_data:
+                        self.sent_data = '<HIDDEN>'
             raise APICommandFailed.raise_from_response(self)
 
 
