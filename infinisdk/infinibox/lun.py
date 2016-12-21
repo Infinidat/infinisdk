@@ -20,14 +20,14 @@ class LogicalUnit(object):
         return self.system.volumes.get_by_id_lazy(self.volume_id)
 
     def get_host(self):
-        """ Returns the host to which this LU belongs
+        """ Returns the host to which this LUN belongs
         """
         if not self.host_id:
             return None
         return self.system.hosts.get_by_id_lazy(self.host_id)
 
     def get_cluster(self):
-        """ Returns the cluster to which this LU belongs
+        """ Returns the cluster to which this LUN belongs
         """
         if not self.host_cluster_id:
             return None

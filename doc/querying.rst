@@ -3,7 +3,7 @@
 Querying Objects
 ================
 
-The InfiniBox API layer allows its users to query and sort objects according to various criteria. InfiniSDK offers a clean Pythonic syntax to perform such queries
+The InfiniBox API layer allows its users to query and sort objects according to various criteria. InfiniSDK offers a clean Pythonic syntax to perform such queries.
 
 Querying All Objects
 --------------------
@@ -70,7 +70,7 @@ There is also ``safe_get``, returning ``None`` instead of raising an exception i
 Advanced Queries
 ----------------
 
-Object fields can be used to perform more complex queries, using operators. For instance, here is a query for all volumes which are not named 'vol1'
+Object fields can be used to perform more complex queries, using operators. For instance, here is a query for all volumes whose name is not 'vol1'.
 
 .. code-block:: python
 		

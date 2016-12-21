@@ -11,10 +11,10 @@ Creating filesystems is done with the ``create`` method:
 		>>> from capacity import GiB, GB
 		>>> my_fs = system.filesystems.create(pool=pool, name='my_fs', size=GiB)
 
-.. note:: When a size isn't explicitly stated, a default of 1 GiB is used. You can also provide the size explicitly:
+.. note:: When a size is not explicitly stated, a default of 1 GiB is used. You can also provide the size explicitly:
 
-	  .. code-block:: python
-
+          .. code-block:: python
+             
 			  >>> fs = system.filesystems.create(pool=pool, size=1*GiB)
 
 It is also possible to create multiple filesystems with a single line, by calling :meth:`.create_many`:
@@ -135,7 +135,7 @@ Enabling an Export
 Querying for Filesystem Exports
 -------------------------------
 
-Like other infinidat collections, InfiniSDK provides iteration and filtering abilty for exports.
+Like other InfiniBox collections, InfiniSDK provides iteration and filtering abilty for exports.
 
 .. code-block:: python
 

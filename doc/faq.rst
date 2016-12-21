@@ -33,7 +33,7 @@ Another example is determining which volume is mapped to each host. A naive appr
 
 This would work, of course, but will be relatively slow. There are two reasons for this:
 
-1. ``get_logical_units()`` fetches a field that is not cached by default, due to implementation constraints
+1. ``get_logical_units()`` fetches a field that is not cached by default, due to implementation constraints.
 2. ``get_host().get_name()`` suffers from the same issue we saw above, fetching the host multiple times.
 
 Here's a more efficient version of the above code, focusing on fetching each object type as few times as possible:

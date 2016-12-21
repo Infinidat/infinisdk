@@ -88,7 +88,7 @@ class Volume(Dataset):
         return res.get_result()
 
     def get_lun(self, mapping_object):
-        """Given either a host or a host cluster object, returns the single LU object mapped to this volume.
+        """Given either a host or a host cluster object, returns the single LUN object mapped to this volume.
 
         An exception is raised if multiple matching LUs are found
 

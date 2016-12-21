@@ -29,7 +29,7 @@ You can create a group of snapshots (not to be confused with :ref:`Consistency G
 Querying Snapshots
 ------------------
 
-The parent of a snapshot is accessed through the :meth:`.Volume.get_parent` method:
+The parent of a snapshot is accessed through the :meth:`snap.get_parent/vol.get_parent <.Volume.get_parent>` method:
 
 .. code-block:: python
 

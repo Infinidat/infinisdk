@@ -11,9 +11,9 @@ Installing InfiniSDK is done by using ``pip``::
 .. note:: Depending on your Python installation, the above command might require root privileges
 
 
-.. seealso:: for more information on pip and how to use it to install Python packages, see https://pip.pypa.io/en/stable/
+.. seealso:: For more information on pip and how to use it to install Python packages, see https://pip.pypa.io/en/stable/
 
-Creating the Infinibox Object
+Creating the InfiniBox Object
 -----------------------------
 
 In your Python interpreter, import the :class:`infinisdk.InfiniBox <infinisdk.infinibox.InfiniBox>` class, and initialize it with your system address:

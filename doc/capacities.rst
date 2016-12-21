@@ -1,7 +1,7 @@
 System Capacity
-==================
+===============
 
-InfiniSDK allows inspecting the capacity parameters of the system
+InfiniSDK allows inspecting the capacity parameters of the system.
 
 ``system.capacities`` is a container for the different system capacity attributes
 

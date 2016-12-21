@@ -16,20 +16,34 @@ Creating hosts is the same like creating any other management object through Inf
 		>>> print(host.get_name())
 		production01
 
-Adding/Removing Ports
----------------------
+Adding/Removing FC Ports
+------------------------
 
-Adding and removing FC ports can be done with :func:`infinisdk.infinibox.host.Host.add_fc_port` and :func:`infinisdk.infinibox.host.Host.remove_fc_port`:
+Adding and removing FC ports can be done with :func:`infinisdk.infinibox.host.Host.add_port` and :func:`infinisdk.infinibox.host.Host.remove_port`. The address should be an instance of the ``infi.dtypes.wwn.WWN`` class to denote an FC address:
 
 .. code-block:: python
 
-		>>> address = '00:01:02:03:04:05:06:07'
-		>>> host.add_fc_port(address)
-		>>> host.remove_fc_port(address)
+                >>> from infi.dtypes.wwn import WWN
+		>>> address = WWN('00:01:02:03:04:05:06:07')
+		>>> host.add_port(address)
+		>>> host.remove_port(address)
+
+Adding/Removing iSCSI IQNs
+--------------------------
+
+Adding and removing iSCSI IQNs is done in a fashion similar to FC ports, only that the address in this case should be an instance of the ``infi.dtypes.iqn.IQN class``:
+
+.. code-block:: python
+
+                >>> from infi.dtypes.iqn import IQN
+		>>> address = IQN('iqn.1994-05.com.redhat:8f8dcc647276')
+		>>> host.add_port(address)
+		>>> host.remove_port(address)
 
 
-Querying Host by Defined FC Port
---------------------------------
+
+Querying Host by a Defined Port
+-------------------------------
 
 You can quickly check if a system has a host :func:`system.hosts.get_host_id_by_initiator_address <infinisdk.infinibox.host.HostBinder.get_host_id_by_initiator_address>`, :func:`system.hosts.get_host_by_initiator_address <infinisdk.infinibox.host.HostBinder.get_host_by_initiator_address>` and :func:`system.hosts.has_registered_initiator_address <infinisdk.infinibox.host.HostBinder.has_registered_initiator_address>`:
 
@@ -37,7 +51,7 @@ You can quickly check if a system has a host :func:`system.hosts.get_host_id_by_
 
 		>>> system.hosts.has_registered_initiator_address(address)
 		False
-		>>> host.add_fc_port(address)
+		>>> host.add_port(address)
 		>>> system.hosts.get_host_by_initiator_address(address) == host
 		True
 
@@ -149,7 +163,7 @@ Manipulating clusters is done with the :class:`infinisdk.infinibox.host_cluster.
 		>>> [host_lu] = host.get_luns()
 
 		>>> host_lu
-		<LUN 11: <HostCluster id=1011>-><Volume id=1007>>
+		<LUN 11: <HostCluster id=1012>-><Volume id=1007>>
 		
 		>>> host_lu.is_clustered()
 		True

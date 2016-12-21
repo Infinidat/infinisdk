@@ -1,3 +1,4 @@
+# pylint: disable=redefined-builtin
 import functools
 import requests
 from uuid import uuid4

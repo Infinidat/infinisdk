@@ -33,6 +33,7 @@ infinibox.volumes
 .. autoclass:: Volume
    :members:
    :inherited-members:
+   :exclude-members: create_clone, get_clones, is_clone
 
 infinibox.filesystems
 ~~~~~~~~~~~~~~~~~~~~~
