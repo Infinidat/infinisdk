@@ -575,7 +575,7 @@ class Response(object):
         self.method = resp.request.method
         #: Response object as returned from ``requests``
         self.response = resp
-        #: URLObject of the final location the response was obtained from. See the ``urlobject`` Python library for more information
+        #: The URL from which this response was obtained
         self.url = URL(resp.request.url)
         #: Data sent to on
         self.sent_data = data
