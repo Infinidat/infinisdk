@@ -32,6 +32,7 @@ Contents:
    metadata
    events
    components
+   qos
    extending
    cookbook
    faq

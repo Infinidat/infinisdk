@@ -4,7 +4,7 @@ from ..core.type_binder import TypeBinder
 from ..core import Field, CapacityType, MillisecondsDatetimeType
 from ..core.api.special_values import Autogenerate
 from .system_object import InfiniBoxObject
-from ..core.bindings import ListOfRelatedObjectIDsBinding, InfiniSDKBindingWithSpecialFlags
+from ..core.bindings import ListOfRelatedObjectBinding, ListOfRelatedObjectIDsBinding, InfiniSDKBindingWithSpecialFlags
 from ..core.object_query import ObjectQuery
 
 from urlobject import URLObject
@@ -54,6 +54,8 @@ class Pool(InfiniBoxObject):
         Field("filesystems_count", type=int),
         Field("filesystem_snapshots_count", type=int),
         Field("entities_count", type=int),
+        Field("qos_policies", type=list, binding=ListOfRelatedObjectBinding('qos_policies'), feature_name='qos',
+              cached=False)
     ]
 
     @classmethod
@@ -107,3 +109,30 @@ class Pool(InfiniBoxObject):
     def is_over_critical_threshold(self):
         critical_threshold = self.get_field('physical_capacity_critical')
         return self._is_over_threshold(critical_threshold)
+
+    def assign_qos_policy(self, qos_policy):
+        assert self.system.compat.has_qos(), 'QoS is not supported in this version'
+        qos_policy.assign_entity(self)
+
+    def unassign_qos_policies(self):
+        assert self.system.compat.has_qos(), 'QoS is not supported in this version'
+        for qos_policy in self.get_qos_policies():
+            qos_policy.unassign_entity(self)
+
+    def unassign_qos_policy(self, qos_policy):
+        assert self.system.compat.has_qos(), 'QoS is not supported in this version'
+        assert qos_policy in self.get_qos_policies(), 'QoS policy {} is not assigned to {}'.format(qos_policy, self)
+        qos_policy.unassign_entity(self)
+
+    def _get_qos_policy_by_type(self, type_name):
+        assert self.system.compat.has_qos(), 'QoS is not supported in this version'
+        for qos_policy in self.get_qos_policies():
+            if qos_policy.get_type() == type_name:
+                return qos_policy
+        return None
+
+    def get_volume_qos_policy(self):
+        return self._get_qos_policy_by_type('POOL_VOLUME')
+
+    def get_filesystem_qos_policy(self):
+        return self._get_qos_policy_by_type('POOL_FILESYSTEM')

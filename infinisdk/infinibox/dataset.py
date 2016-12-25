@@ -91,6 +91,12 @@ class Dataset(InfiniBoxObject):
         Field('rmr_source', type=bool),
         Field('rmr_target', type=bool),
         Field('rmr_snapshot_guid', is_filterable=True, is_sortable=True),
+        Field('qos_policy', type='infinisdk.infinibox.qos_policy:QosPolicy', api_name='qos_policy_id', is_sortable=True,
+              is_filterable=True, binding=RelatedObjectBinding('qos_policies'), feature_name='qos', cached=False),
+        Field('qos_shared_policy', type='infinisdk.infinibox.qos_policy:QosPolicy', api_name='qos_shared_policy_id',
+              is_sortable=True, is_filterable=True, binding=RelatedObjectBinding('qos_policies'),
+              feature_name='qos', cached=False)
+
     ]
 
     PROVISIONING = namedtuple('Provisioning', ['Thick', 'Thin'])('THICK', 'THIN')
@@ -345,3 +351,12 @@ class Dataset(InfiniBoxObject):
         """Returns True if this volume is a part of a replica, whether as source or as target
         """
         return any(self.get_fields(['rmr_source', 'rmr_target'], from_cache=from_cache).values())
+
+    def assign_qos_policy(self, qos_policy):
+        assert self.system.compat.has_qos(), 'QoS is not supported in this version'
+        qos_policy.assign_entity(self)
+
+    def unassign_qos_policy(self, qos_policy):
+        assert self.system.compat.has_qos(), 'QoS is not supported in this version'
+        assert qos_policy == self.get_qos_policy(), 'QoS policy {} is not assigned to {}'.format(qos_policy, self)
+        qos_policy.unassign_entity(self)

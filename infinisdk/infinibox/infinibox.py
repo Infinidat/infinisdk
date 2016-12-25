@@ -24,6 +24,7 @@ from .san_client import SanClients
 from .events import Events
 from .export import Export
 from .filesystem import Filesystem
+from .qos_policy import QosPolicy
 from .host import Host
 from .host_cluster import HostCluster
 from .initiator import Initiator
@@ -49,7 +50,7 @@ class InfiniBox(APITarget):
     OBJECT_TYPES = [Volume, Pool, Host, HostCluster, User, Filesystem, Export,
                     NetworkSpace, NetworkInterface, Link, Replica, LDAPConfig,
                     NotificationTarget, NotificationRule, ConsGroup, Initiator,
-                    FcSwitch, FcSoftTarget]
+                    FcSwitch, FcSoftTarget, QosPolicy]
     SYSTEM_EVENTS_TYPE = Events
     SYSTEM_COMPONENTS_TYPE = InfiniBoxSystemComponents
 
