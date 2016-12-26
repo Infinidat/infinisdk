@@ -234,15 +234,6 @@ def network_space(infinibox, network_interface):
     interfaces.append(network_interface)
     return create_network_space(infinibox, interfaces=interfaces)
 
-@contextmanager
-def disable_api_context(system):
-    api = system.api
-    system.api = None
-    try:
-        yield
-    finally:
-        system.api = api
-
 @pytest.fixture
 def backup_config(request):
     config.backup()

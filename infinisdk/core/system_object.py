@@ -182,6 +182,9 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
 
         return self._get_fields_from_cache(field_names, raw_value)
 
+    def _is_caching_enabled(self):
+        return self.system.is_caching_enabled()
+
     def _deduce_from_cache(self, field_names, from_cache):
         if from_cache is not DONT_CARE:
             return from_cache
@@ -189,7 +192,7 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
         if not field_names:
             return False
 
-        cache_enabled = self.system.is_caching_enabled()
+        cache_enabled = self._is_caching_enabled()
 
         for field_name in field_names:
             field = self.fields.get_or_fabricate(field_name)
@@ -336,6 +339,9 @@ class SystemObject(BaseSystemObject):
     @classmethod
     def get_tags_for_object_operations(cls, system):
         return [cls.get_type_name().lower(), system.get_type_name().lower()]
+
+    def _is_caching_enabled(self):
+        return self.get_binder().is_caching_enabled() or super(SystemObject, self)._is_caching_enabled()
 
     @classmethod
     def _create(cls, system, url, data, tags=None):

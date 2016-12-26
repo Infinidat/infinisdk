@@ -1,3 +1,4 @@
+import pytest
 from infinisdk import Q
 
 
@@ -26,9 +27,31 @@ def test_null_checking_with_equality(infinibox):
     query = infinibox.volumes.find(Q.cons_group == None)  # pylint: disable=singleton-comparison
     assert str(query).endswith('cg_id=eq%3Anull')
 
+
 def test_query_with_iterables(infinibox, volume):
     for iterable in [[volume.get_id()],
                      {volume.get_id():volume}.keys(),
                      set([volume.get_id()])]:
         query = infinibox.volumes.find(Q.id.in_(iterable))
         assert str(query).endswith('id=in%3A%28{}%29'.format(volume.get_id()))
+
+
+def test_sort_mutability(volume):
+    query = volume.get_binder().find()
+    next(iter(query))
+    with pytest.raises(AssertionError):
+        query.sort(+Q.id)
+
+
+def test_page_mutability(volume):
+    query = volume.get_binder().find()
+    next(iter(query))
+    with pytest.raises(AssertionError):
+        query.page(2)
+
+
+def test_page_size_mutability(volume):
+    query = volume.get_binder().find()
+    next(iter(query))
+    with pytest.raises(AssertionError):
+        query.page_size(2)

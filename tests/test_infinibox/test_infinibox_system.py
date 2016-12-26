@@ -5,7 +5,7 @@ from waiting import wait
 
 import pytest
 
-from ..conftest import disable_api_context, relevant_from_version
+from ..conftest import relevant_from_version
 from infinibox_sysdefs.defs import latest as defs
 from infinisdk._compat import iteritems, string_types
 from infinisdk.core.exceptions import (APITransportFailure,
@@ -139,7 +139,7 @@ def test_get_name(infinibox):
     infinibox = InfiniBox(infinibox.get_simulator())
     # NO LOGIN!
 
-    with disable_api_context(infinibox):
+    with infinibox.api.disable_api_context():
         assert infinibox.get_name() == simulator_host_name
 
     infinibox.components.system_component.update_field_cache(

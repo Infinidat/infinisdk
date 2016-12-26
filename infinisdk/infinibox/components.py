@@ -5,7 +5,7 @@ from ..core.field import Field
 from ..core.system_component import SystemComponentsBinder
 from ..core.system_object import BaseSystemObject
 from ..core.exceptions import ObjectNotFound
-from ..core.type_binder import TypeBinder
+from ..core.type_binder import MonomorphicBinder
 from ..core.translators_and_types import WWNType, CapacityType
 from mitba import cached_method
 from .component_query import InfiniBoxComponentQuery, InfiniBoxGenericComponentQuery
@@ -105,7 +105,7 @@ class ComputedIDBinding(InfiniSDKBinding):
         raise NotImplementedError() # pragma: no cover
 
 
-class InfiniBoxComponentBinder(TypeBinder):
+class InfiniBoxComponentBinder(MonomorphicBinder):
 
     _force_fetching_from_cache = False
 
@@ -143,10 +143,6 @@ class InfiniBoxComponentBinder(TypeBinder):
                 obj_collection = self.system.components[obj_type]
                 stack.enter_context(obj_collection.force_fetching_from_cache_context())
             yield
-
-    @deprecated(message='Use fetch_tree_once_context instead')
-    def fetch_once_context(self):
-        return self.fetch_tree_once_context()
 
     @contextmanager
     def fetch_tree_once_context(self, force_fetch=True, with_logging=True):
@@ -313,12 +309,13 @@ class Nodes(InfiniBoxComponentBinder):
             return fc_port.get_node()
 
     def get_by_ip(self, ip_address):
-        for ns in self.system.network_spaces.get_all():
-            for ip in ns.get_ips(from_cache=True):
-                if ip.interface_id is None:
-                    continue
-                if ip.ip_address == ip_address:
-                    return self.system.network_interfaces.get_by_id_lazy(ip.interface_id).get_node()
+        with self.system.network_interfaces.fetch_once_context():
+            for ns in self.system.network_spaces.get_all():
+                for ip in ns.get_ips(from_cache=True):
+                    if ip.interface_id is None:
+                        continue
+                    if ip.ip_address == ip_address:
+                        return self.system.network_interfaces.get_by_id_lazy(ip.interface_id).get_node()
 
     def refresh_fields(self, field_names):
         assert isinstance(field_names, (list, tuple)), "field_names must be either a list or a tuple"

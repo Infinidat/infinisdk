@@ -8,7 +8,7 @@ from infinisdk._compat import string_types, ExitStack
 from infinisdk.core.config import config
 from infinisdk.infinibox.components import (Drive, Enclosure, FcPort, Node, EthPort, LocalDrive,
                                             Rack, Service, System, ServiceCluster)
-from ..conftest import disable_api_context, relevant_from_version
+from ..conftest import relevant_from_version
 
 NO_OF_ENCLOSURES_DRIVES = config.get_path('infinibox.defaults.enlosure_drives.total_count.simulator')
 
@@ -60,7 +60,7 @@ def _basic_check_for_component(infinibox, component_type, parent_type, blacklist
 
 
 def test_system_component_does_not_perform_api_get(infinibox):
-    with disable_api_context(infinibox):
+    with infinibox.api.disable_api_context():
         system_component = infinibox.components.system_component
         assert system_component.get_index() == 0
 

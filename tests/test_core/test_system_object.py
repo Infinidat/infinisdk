@@ -9,21 +9,28 @@ from ..conftest import relevant_from_version
 
 # pylint: disable=misplaced-comparison-constant, unused-argument
 
-class SampleBaseObject(SystemObject):
+
+class FakeSystemObject(SystemObject):
+
+    def _is_caching_enabled(self):
+        return False
+
+class SampleBaseObject(FakeSystemObject):
+
     FIELDS = [
         Field("id", type=int),
         Field(name="name"),
     ]
 
-
 class SampleDerivedObject(SampleBaseObject):
+
     FIELDS = [
         Field(name="number", type=int, creation_parameter=True),
         Field(name="cached_by_default", cached=True),
     ]
 
 
-class SampleObjectWithStringID(SystemObject):
+class SampleObjectWithStringID(FakeSystemObject):
 
     FIELDS = [
         Field(name='id', type=str),
@@ -53,7 +60,7 @@ def test_querying_fields_by_name(system):
 
 
 def test_no_fields(system):
-    class EmptyObject(SystemObject):
+    class EmptyObject(FakeSystemObject):
         pass
 
     assert len(EmptyObject.fields) == 0  # pylint: disable=no-member
@@ -122,12 +129,12 @@ def test_requires_cache_invalidation_decorator(system, with_fields):
 
 def test_auto_getter_attribute_already_exists_in_same_class(system):
     with pytest.raises(AttributeAlreadyExists):
-        class SomeObjectForGetter(SystemObject):  # pylint: disable=unused-variable
+        class SomeObjectForGetter(FakeSystemObject):  # pylint: disable=unused-variable
             FIELDS = [Field("id", type=int)]
             get_id = lambda self: 'my id'
 
     with pytest.raises(AttributeAlreadyExists):
-        class SomeObjectForUpdater(SystemObject):  # pylint: disable=unused-variable
+        class SomeObjectForUpdater(FakeSystemObject):  # pylint: disable=unused-variable
             FIELDS = [Field("id", type=int, mutable=True)]
             _id = 'my id'
 
@@ -135,7 +142,7 @@ def test_auto_getter_attribute_already_exists_in_same_class(system):
 
 
 def test_auto_getter_attribute_already_exists_in_base_class1(system):
-    class SomeObject(SystemObject):
+    class SomeObject(FakeSystemObject):
         FIELDS = [Field("id", type=int)]
 
     class SomeDerivedObject(SomeObject):
@@ -152,7 +159,7 @@ def test_auto_getter_attribute_already_exists_in_base_class1(system):
 
 
 def test_auto_getter_attribute_already_exists_in_base_class2(system):
-    class SomeObject(SystemObject):
+    class SomeObject(FakeSystemObject):
         _id = 'my id'
 
         def get_id(self): return self._id  # pylint: disable=multiple-statements
