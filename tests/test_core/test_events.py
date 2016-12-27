@@ -3,6 +3,7 @@
 def test_get_last_events(system):
     events = system.events.get_last_events(1)
     assert len(events) == 1
+    assert isinstance(events[0].get_id(), int)
 
 
 def test_get_last_events_with_reversed_param(system):

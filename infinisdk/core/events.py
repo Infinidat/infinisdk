@@ -57,6 +57,9 @@ class Event(SystemObject):
 
     BINDER_CLASS = Events
 
+    def get_binder(self):
+        return self.system.events
+
     def __getitem__(self, item):
         return self._cache[item]
 
