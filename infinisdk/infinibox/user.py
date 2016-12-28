@@ -33,3 +33,6 @@ class User(SystemObject):
     def request_reset_password(self):
         url = self.get_this_url_path().add_path('reset_password')
         self.system.api.post(url)
+
+    def is_builtin(self):
+        return self.get_id() < 0
