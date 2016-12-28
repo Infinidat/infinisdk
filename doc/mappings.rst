@@ -31,12 +31,12 @@ Adding and removing FC ports can be done with :func:`infinisdk.infinibox.host.Ho
 Adding/Removing iSCSI IQNs
 --------------------------
 
-Adding and removing iSCSI IQNs is done in a fashion similar to FC ports, only that the address in this case should be an instance of the ``infi.dtypes.iqn.IQN class``:
+Adding and removing iSCSI IQNs is done in a fashion similar to FC ports, only that the address in this case should be an instance of the ``infi.dtypes.iqn.iSCSIName class``:
 
 .. code-block:: python
 
-                >>> from infi.dtypes.iqn import IQN
-		>>> address = IQN('iqn.1994-05.com.redhat:8f8dcc647276')
+                >>> from infi.dtypes.iqn import make_iscsi_name
+		>>> address = make_iscsi_name('iqn.1994-05.com.redhat:8f8dcc647276')
 		>>> host.add_port(address)
 		>>> host.remove_port(address)
 
