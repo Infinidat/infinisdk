@@ -3,7 +3,7 @@ import munch
 from .._compat import string_types
 from capacity import byte, Capacity
 from datetime import timedelta
-from infi.dtypes.iqn import IQN
+from infi.dtypes.iqn import make_iscsi_name, iSCSIName
 from infi.dtypes.wwn import WWN
 
 from api_object_schema import TypeInfo, ValueTranslator
@@ -96,7 +96,7 @@ def host_port_to_api(value):
     elif isinstance(value, string_types):
         port_type = 'fc'
         value = WWN(value)
-    elif isinstance(value, IQN):
+    elif isinstance(value, iSCSIName):
         port_type = 'iscsi'
     else:
         assert False, "Unknown type of {0}".format(value)
@@ -104,7 +104,7 @@ def host_port_to_api(value):
 
 
 def address_type_factory(type_):
-    _TYPES = {'fc': WWN, 'iscsi': IQN}
+    _TYPES = {'fc': WWN, 'iscsi': make_iscsi_name}
     return _TYPES[type_.lower()]
 
 

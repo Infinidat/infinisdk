@@ -76,7 +76,7 @@ class Host(InfiniBoxLURelatedObject):
         Adds a port address to this host
 
         :param address: the port address to add
-        :type address: Either an ``infi.dtypes.wwn.WWN`` or ``infi.dtypes.iqn.IQN``. Plain strings are assumed
+        :type address: Either an ``infi.dtypes.wwn.WWN`` or ``infi.dtypes.iqn.iSCSIName``. Plain strings are assumed
         to be WWNs
         """
         data = host_port_to_api(address)

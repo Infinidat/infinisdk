@@ -16,7 +16,7 @@ _INSTALL_REQUIRES = [
     "flux",
     'gossip>=1.1.2',
     "infi.dtypes.wwn>=0.0.2",
-    "infi.dtypes.iqn",
+    "infi.dtypes.iqn>=0.3.0",
     "logbook>=0.11.0",
     "munch",
     "mitba",
