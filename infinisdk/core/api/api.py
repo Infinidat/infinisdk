@@ -25,6 +25,8 @@ from .special_values import translate_special_values
 _RETRY_REQUESTS_EXCEPTION_TYPES = (RequestException, socket.error, ProtocolError,
                                    requests.packages.urllib3.exceptions.TimeoutError)
 
+_REQUESTS_HTTP_EXCEPTION_TYPES = (requests.exceptions.HTTPError, requests.models.HTTPError)
+
 _logger = Logger(__name__)
 
 def _get_request_delegate(http_method):
@@ -637,7 +639,7 @@ class Response(object):
     def assert_success(self):
         try:
             self.response.raise_for_status()
-        except requests.exceptions.HTTPError:
+        except _REQUESTS_HTTP_EXCEPTION_TYPES: # pylint: disable=catching-non-exception
             if self.sent_data is not NOTHING and self.sent_data:
                 if isinstance(self.sent_data, bytes):
                     if b'password' in self.sent_data:
