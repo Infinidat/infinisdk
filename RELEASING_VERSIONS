@@ -17,7 +17,7 @@ A customer version should *NOT CONTAIN* any of the following:
 
 ## Release Procedure
 
-1. Edit the contents of `__version__.py`, and change it to the newly released version
+1. Change the `version` field of `setup.cfg` to the newly released version
 2. Commit your change and tag the commit with the same name as the release
 3. Run `make release` to upload customer-facing files to the public FTP.
 

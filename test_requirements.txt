@@ -1,6 +1,0 @@
-pytest
-pytest-xdist
-pyforge
-waiting
-pytest-capturelog
-pytest-pylint

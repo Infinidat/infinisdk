@@ -1,12 +1,12 @@
 import itertools
 import os
+import pkg_resources
 import weakref
 
 import gossip
 from sentinels import NOTHING
 from urlobject import URLObject as URL
 
-from ..__version__ import __version__
 from .._compat import iteritems
 from ..core.api import APITarget
 from ..core.config import config, get_ini_option
@@ -250,7 +250,11 @@ class InfiniBox(APITarget):
         return returned
 
     def _get_client_id(self):
-        return 'infinisdk.v{}.{}.{}.{}'.format(__version__, get_hostname(), get_logged_in_username(), os.getpid())
+        return 'infinisdk.v{}.{}.{}.{}'.format(
+            pkg_resources.get_distribution('infinisdk').version, # pylint: disable=no-member
+            get_hostname(),
+            get_logged_in_username(),
+            os.getpid())
 
     def _get_v1_metadata_generator(self):
         system_metadata = self.api.get('metadata').get_result()
