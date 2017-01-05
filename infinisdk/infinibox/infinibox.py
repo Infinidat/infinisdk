@@ -172,8 +172,6 @@ class InfiniBox(APITarget):
         return self.get_system_info('version')
 
     def get_revision(self):
-        if self.compat.get_version_major() < '2':
-            return self.get_system_info('revision')
         return self.get_system_info('release')['system']['revision']
 
     def iter_related_systems(self):
