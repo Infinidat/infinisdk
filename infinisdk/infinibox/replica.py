@@ -236,8 +236,16 @@ class Replica(InfiniBoxObject):
     def get_local_volume(self):
         """Returns the local volume, assuming there is exactly one
         """
-        if self.is_consistency_group():
-            raise NotImplementedError('get_local_volume() is not supported on a consistency group replication') # pragma: no cover  # pylint: disable=line-too-long
+        if not self.is_volume():
+            raise NotImplementedError('get_local_volume() is not supported on a {} replication'.format(self.get_entity_type())) # pragma: no cover  # pylint: disable=line-too-long
+
+        return self.get_local_entity()
+
+    def get_local_filesystem(self):
+        """Returns the local volume, assuming there is exactly one
+        """
+        if not self.is_filesystem():
+            raise NotImplementedError('get_local_filesystem() is not supported on a {} replication'.format(self.get_entity_type())) # pragma: no cover  # pylint: disable=line-too-long
 
         return self.get_local_entity()
 
@@ -245,7 +253,7 @@ class Replica(InfiniBoxObject):
         """Returns the local cg, assuming this is a consistency group replica
         """
         if not self.is_consistency_group():
-            raise NotImplementedError('get_local_volume() is not supported on a consistency group replication') # pragma: no cover  # pylint: disable=line-too-long
+            raise NotImplementedError('get_local_cg() is not supported on a {} replication'.format(self.get_entity_type())) # pragma: no cover  # pylint: disable=line-too-long
 
         return self.get_local_entity()
 
