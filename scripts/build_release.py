@@ -21,12 +21,13 @@ def main(verbose, quiet):
     with logbook.NullHandler(), logbook.StreamHandler(sys.stderr, level=logbook.WARNING - verbose + quiet, bubble=False):
         repo = Checkout()
         repo.clone()
+        repo.start_release()
         repo.fetch_ours()
         repo.reshape()
         repo.generate_changelog()
         repo.commit()
         repo.tag()
-        raw_input('Committed and tagged under {} [Press Enter to continue]'.format(repo.path))
+        input('Committed and tagged under {} [Press Enter to continue]'.format(repo.path))
 
 
 class Checkout(object):
@@ -36,8 +37,24 @@ class Checkout(object):
         self.path = os.path.join(tempfile.mkdtemp(), 'repo')
 
     def clone(self):
+        email = subprocess.check_output('git config user.email', shell=True, cwd='.').decode('utf-8').strip()
         self._execute('git clone https://github.com/Infinidat/infinisdk {}'.format(self.path), cwd='.')
+        self._execute('git config user.email {}'.format(email), cwd=self.path)
+        self._execute('git flow init -d', cwd=self.path)
         _logger.info('Checked out to {}', self.path)
+
+    def start_release(self):
+        last_released = self._get_released_version()
+        new_version = last_released + '.post1'
+        self._execute('git flow release start {}.post1'.format(last_released), cwd=self.path)
+        version_file = os.path.join(self.path, 'infinisdk', '__version__.py')
+
+        if not os.path.isfile(version_file):
+            raise RuntimeError('Version file {} does not exist'.format(version_file))
+
+        with open(os.path.join(self.path, 'infinisdk', '__version__.py'), 'w') as f:
+            print('__version__ =', repr(new_version), file=f)
+
 
     def fetch_ours(self):
         self._execute('git fetch {}'.format(os.path.abspath('.')))
@@ -60,7 +77,11 @@ class Checkout(object):
             title = 'Version {} (Released {:%Y-%m-%d})'.format(version, datetime.datetime.now())
             print('{}\n{}\n'.format(title, '-' * len(title)), file=changelog)
 
-            for issue in jira_client.search('project = "INFRADEV" and component = "InfiniSDK" and resolution is not empty and fixVersion is not empty and "Release Notes Title" is not empty'):
+            for issue in jira_client.search('project = "INFRADEV" and '
+                                            'component = "InfiniSDK" and '
+                                            'resolution is not empty and '
+                                            'fixVersion is not empty and '
+                                            '"Release Notes Title" is not empty'):
                 if last_released is None or int(issue.fixVersion) > last_released:
                     print('*', '#{}'.format(issue.key.split('-')
                                             [1]), issue._data.fields.customfield_12507, file=changelog)  # pylint: disable=protected-access
@@ -76,7 +97,7 @@ class Checkout(object):
         _logger.info('New changelog written to {}', changelog_filename)
 
     def _get_last_released_tag(self):
-        tags = subprocess.check_output('git tag', cwd=self.path, shell=True).splitlines()
+        tags = subprocess.check_output('git tag', cwd=self.path, shell=True).decode('utf-8').splitlines()
         sorted_tags = []
         for tag in tags:
             try:
@@ -88,7 +109,7 @@ class Checkout(object):
         return sorted_tags[0] if sorted_tags else None
 
     def _get_released_version(self):
-        output = subprocess.check_output('git describe --tags', shell=True).strip().split('-')[0]
+        output = subprocess.check_output('git describe --tags', shell=True).decode('utf-8').strip().split('-')[0]
         return output
 
     def commit(self):
