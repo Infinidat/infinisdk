@@ -1,38 +1,52 @@
 from ..core.api.special_values import Autogenerate
 from ..core import Field
 from ..core.bindings import RelatedObjectBinding
-from ..core.exceptions import InfiniSDKException, UnknownSystem
+from ..core.exceptions import UnknownSystem
+from ..core.utils import DONT_CARE
 from .system_object import InfiniBoxObject
-
 
 
 class Link(InfiniBoxObject):
 
     FIELDS = [
-
         Field('id', type=int, is_identity=True, is_filterable=True, is_sortable=True),
         Field('name', creation_parameter=True, mutable=True, default=Autogenerate("link_{uuid}")),
         Field('local_replication_network_space', api_name='local_replication_network_space_id',
-              binding=RelatedObjectBinding('network_spaces'),
-              type='infinisdk.infinibox.network_space:NetworkSpace', creation_parameter=True),
+              binding=RelatedObjectBinding('network_spaces', value_for_none=None),
+              type='infinisdk.infinibox.network_space:NetworkSpace',
+              mutable=True, creation_parameter=True),
         Field('remote_link_id', type=int),
-        Field('remote_host', type=str, creation_parameter=True),
+        Field('remote_host', type=str, mutable=True, creation_parameter=True),
         Field('remote_system_name', type=str),
         Field('remote_system_serial_number', type=int),
         Field('link_state', type=str),
     ]
 
-    def is_up(self):
-        return self.get_link_state().lower() == 'up'
+    def is_up(self, from_cache=DONT_CARE):
+        return self.get_link_state(from_cache=from_cache).lower() == 'up'
 
-    def is_down(self):
-        return self.get_link_state().lower() in ['down', 'unknown']
+    def is_down(self, from_cache=DONT_CARE):
+        return self.get_link_state(from_cache=from_cache).lower() in ['down', 'unknown']
 
     @classmethod
     def is_supported(cls, system):
         return system.compat.has_replication()
 
-    def delete(self, force_if_remote_error=False, force_if_no_remote_credentials=False):
+    def attach(self, network_space):
+        self.update_field('local_replication_network_space', network_space)
+
+    def detach(self):
+        self.update_field('local_replication_network_space', None)
+
+    def refresh_connectivity(self, remote_host=None):
+        data = {}
+        if remote_host:
+            data['remote_host'] = remote_host
+            self.invalidate_cache('remote_host')
+        url = self.get_this_url_path().add_path('refresh')
+        self.system.api.post(url, data=data)
+
+    def delete(self, force_if_remote_error=False, force_if_no_remote_credentials=False):  # pylint: disable=arguments-differ
         """Deletes this link
 
         :param force_if_remote_error: forces deletion even if remote side caused an API error

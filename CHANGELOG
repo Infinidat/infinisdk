@@ -1,7 +1,54 @@
-Version 57.0 (Released 2016-01-21)
+Version 83.0 (Released 2017-01-11)
 ----------------------------------
 
-* Added support for consistency groups
-* Added support for Remote Replication
-* Added support for NAS
-* Many more bugfixes and improvements
+* #8213 Support caching for object collections
+* #8180 Add `sample()` method for both LazyQuery & BaseBinder
+* #7595 Added `infinisdk-cli` entry point
+* #7363 Added system.api.save_credentials and system.api.load_credentials to enable preserving login across sessions
+* #7356 Add safe deepcopy for system objects
+* #7277 Support `FcPort.op.activate()` & `FcPort.op.deactivate()`
+* #7235 When object deletion fails, object_operation_failure hook no longer triggers (only object_deletion_failure)
+* #7211 Added `get_rmr_snapshot_guid` to consistency groups
+* #7205 Added write_protected parameter for snapshot creation
+* #7199 Added system.api.added_headers_context() to add headers to the API session
+* #7155 Add IB Port component to infinisdk
+* #7133 Added replica.is_user_suspended() to denote user-initiated suspended state
+* #7057 Support NAS Replication
+* #7019 Added infinidat.sdk.object_deletion_failure hook to handle failures on object deletion
+* #6987 Removed `mounts`, `get_all_mounts()` and `is_mounted()` from `MountGroup`
+* #6951 NetworkSpace's service field was changed to immutable (and mandatory creation field)
+* #6942 Calling `system.initiators.targets` now returns `munch` instead of `WWN` object
+* #6764 Add object_restore (pre, post, failure) hooks
+* #6735 Add hooks for refresh snapshot
+* #6707 Support soft targets API (NPIV)
+* #6649 Support SG refresh
+* #6620 IZBox object & unittests were deleted
+* #6613 Component.refresh() is deprecated in favor of Component.refresh_cache()
+* #6610 __repr__ of Field objects now shows if the field is a creation parameter and/or mutable.
+* #6602 Support Infinibox.datasets (PolymorphicBinder) queries
+* #6600 obj.refresh() is now deprecated and has been renamed invalidate_cache()
+* #6599 Support field versioning (added new_to & until attributes to Field)
+* #6573 Adjusted replica API to match the new sync jobs changes in 3.0
+* #6555 Add Dataset.get_family_master()
+* #6498 Added system.api.use_basic_auth_context() for forcing usage of basic auth for systems supporting auth sessions
+* #6475 Added system.is_logged_in() indicating whather login() was called on the given system
+* #6474 system.api.reinitialize_session now properly copies cookies from previous session
+* #6444 Added `snapshot.refresh()` (snapshot refresh API)
+* #6417 Support "capacity" as creation parameter for pools
+* #6414 Removed methods which become deprecated before stable-2.0
+* #6243 Added `is_stalled` to replica objects (new v3.0 async state)
+* #6162 Added support for emptying the auth cache by calling `system.api.set_auth(None)`
+* #6158 Hot upgrade suite between versions is now supported (with limitations)
+* #6135 Added support for datasets compression
+* #6117 Added system.api.disable_login_refresh_context() to disable re-establishing auth sessions automatically
+* #6116 InfiniSDK will now perform login automatically to refresh expired auth session cookies
+* #6111 get_auth_context() method now performs automatic login with the new credentials, unless login=False is provided
+* #6089 Added system.compat.has_auth_sessions()
+* #6058 Support Link attach/detach & refresh_connectivity
+* #6050 Support (local) user disabling
+* #6005 Will no longer send HTTP authorization header if system supports the new Auth Sessions feature
+* #6003 Added system.logout() for logging out the current user
+* #5989 Added system.api.url shortcut for fetching the system's API URL
+* #5981 API logs now use the TRACE low level, below DEBUG
+* #5845 Support new session-based authentication
+

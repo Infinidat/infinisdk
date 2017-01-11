@@ -8,10 +8,10 @@ class Events(TypeBinder):
         self._types = None
 
     def get_events(self, min_event_id=0):
-        return list(self.find(Event.fields.id >= min_event_id).sort(Event.fields.id))
+        return list(self.find(Event.fields.id >= min_event_id).sort(Event.fields.id))  # pylint: disable=no-member
 
-    def get_last_events(self, num, reversed=False):
-        returned = list(self.find().sort(-Event.fields.id).page_size(num).page(1))
+    def get_last_events(self, num, reversed=False):  # pylint: disable=redefined-builtin
+        returned = list(self.find().sort(-Event.fields.id).page_size(num).page(1))  # pylint: disable=no-member
         if not reversed:
             returned.reverse()
         return returned
@@ -25,26 +25,26 @@ class Events(TypeBinder):
     def _get_events_types_from_system(self):
         return self.system.api.get("events/types").get_result()
 
-    def _get_events_types(self):
+    def get_events_types(self):
         if self._types is None:
             self._types = self._get_events_types_from_system()
         return self._types.copy()
 
     def get_codes(self):
-        return self._get_events_types()['codes']
+        return self.get_events_types()['codes']
 
     def get_visibilities(self):
-        return self._get_events_types()['visibilities']
+        return self.get_events_types()['visibilities']
 
     def get_reporters(self):
-        return self._get_events_types()['reporters']
+        return self.get_events_types()['reporters']
 
 
 class Event(SystemObject):
 
     FIELDS = [
         Field("id", type=int, cached=True, is_identity=True, is_sortable=True, is_filterable=True),
-        Field("code", type=str, cached=True,is_filterable=True, is_sortable=True, use_in_repr=True),
+        Field("code", type=str, cached=True, is_filterable=True, is_sortable=True, use_in_repr=True),
         Field("level", type=str, cached=True, is_filterable=True, is_sortable=True),
         Field("description", type=str, cached=True),
         Field("timestamp", type=MillisecondsDatetimeType, cached=True, is_filterable=True, is_sortable=True),
@@ -75,4 +75,4 @@ class Event(SystemObject):
     def get_event_data_dict(self):
         return dict((value['name'], value['value']) for value in self.get_field('data', from_cache=True))
 
-collections.Mapping.register(Event)
+collections.Mapping.register(Event)  # pylint: disable=no-member

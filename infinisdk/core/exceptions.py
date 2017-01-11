@@ -28,22 +28,33 @@ class CannotGetReplicaState(InfiniSDKException):
     pass
 
 class SystemNotFoundException(APICommandException):
-    def __init__(self, err):
-        self.address = URL(err.api_request_obj.url).hostname
+    def __init__(self, err, api_request, start_timestamp):
+        self.start_timestamp = start_timestamp
+        self.err = err
+        self.api_request = api_request
+        self.address = URL(api_request.url).hostname
         super(SystemNotFoundException, self).__init__("Cannot connect {0}".format(self.address))
 
 class APITransportFailure(APICommandException):
-    def __init__(self, request_kwargs, err):
+    def __init__(self, system, request_kwargs, err, api_request, start_timestamp):
         super(APITransportFailure, self).__init__('APITransportFailure: {0}'.format(err))
+        self.start_timestamp = start_timestamp
         self.err = err
-        self.address = URL(err.api_request_obj.url).hostname
+        self.api_request = api_request
+        self.system = system
+        self.address = URL(api_request.url).hostname
         self.attrs = munchify(request_kwargs)
         self.error_desc = str(err)
 
+    @property
+    def request_timestamp(self):
+        return arrow.Arrow.fromtimestamp(self.start_timestamp)
+
     def __repr__(self):
-        return ("API Transport Failure\n\t"
-                "Request: {e.attrs.method} {e.err.api_request_obj.url}\n\t"
-                "Error Description: {e.error_desc}".format(e=self))
+        return ("API Transport Failure on {system_name}\n\t"
+                "Request: {e.attrs.method} {e.api_request.url}\n\t"
+                "Request Timestamp: {e.request_timestamp}\n\t"
+                "Error Description: {e.error_desc}".format(e=self, system_name=self.system.get_name()))
 
     __str__ = __repr__
 
@@ -79,12 +90,17 @@ class APICommandFailed(APICommandException):
 
     def __repr__(self):
         returned = ("API Command Failed\n\t"
-                "Request: {e.response.method} {e.response.url}\n\t"
-                "Request Timestamp: {e.request_timestamp}\n\t"
-                "Response Timestamp: {e.response_timestamp}\n\t"
-                "Data: {e.response.sent_data}\n\t"
-                "Status: {e.status_code}\n\t"
-                "Message: {e.message}".format(e=self))
+                    "Request: {e.response.method} {e.response.url}\n\t"
+                    "Request Timestamp: {e.request_timestamp}\n\t"
+                    "Response Timestamp: {e.response_timestamp}\n\t"
+                    "Data: {e.sent_data_truncated}\n\t"
+                    "Status: {e.status_code}\n\t"
+                    "Code: {e.error_code}\n\t"
+                    "Message: {e.message}".format(e=self))
+
+        cookies = self.response.response.request.headers.get('cookie')
+        if cookies:
+            returned += "\n\tCookies: {}".format(cookies)
         if self.reasons:
             returned += "\n\tReasons:"
             for reason in self.reasons:
@@ -92,12 +108,20 @@ class APICommandFailed(APICommandException):
         return returned
 
     @property
+    def sent_data_truncated(self):
+        max_length = 500
+        returned = repr(self.response.sent_data)
+        if len(returned) > max_length:
+            returned = returned[:max_length - 3 - 1] + '...' + returned[-1:]
+        return returned
+
+    @property
     def request_timestamp(self):
-        return arrow.Arrow.fromtimestamp(self.response.response.start_time)
+        return arrow.Arrow.fromtimestamp(self.response.start_time)
 
     @property
     def response_timestamp(self):
-        return arrow.Arrow.fromtimestamp(self.response.response.end_time)
+        return arrow.Arrow.fromtimestamp(self.response.end_time)
 
     def __str__(self):
         return repr(self)
@@ -154,3 +178,7 @@ class VersionNotSupported(InfiniSDKException):
     def __init__(self, version):
         msg = "System version '{0}' is not supported by this version of InfiniSDK".format(version)
         super(VersionNotSupported, self).__init__(msg)
+
+class MethodDisabled(InfiniSDKException):
+    """Thrown when attempting to use an HTTP method, which has been explicitly disabled"""
+    pass

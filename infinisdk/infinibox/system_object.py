@@ -1,73 +1,15 @@
-from .._compat import requests
-from sentinels import NOTHING
 from urlobject import URLObject as URL
 
 from ..core.system_object import SystemObject, DONT_CARE
-from ..core.object_query import LazyQuery
-from ..core.exceptions import APICommandFailed, InfiniSDKException, CacheMiss
+from ..core.exceptions import InfiniSDKException, CacheMiss
 from .lun import LogicalUnit, LogicalUnitContainer
+from .metadata_holder import MetadataHolder
 
 
-class InfiniBoxObject(SystemObject):
+class InfiniBoxObject(SystemObject, MetadataHolder):
 
     def _get_metadata_uri(self):
         return URL("metadata/{0}".format(self.id))
-
-    def _get_metadata_translated_result(self, metadata_items):
-        if self.system.compat.get_metadata_version() >= 2:
-            return dict((item['key'], item['value']) for item in metadata_items)
-        return metadata_items
-
-    @classmethod
-    def is_supported(cls, system):
-        return True
-
-    def set_metadata(self, key, value):
-        """Sets metadata key in the system associated with this object
-        """
-        return self.set_metadata_from_dict({key: value})
-
-    def set_metadata_from_dict(self, data_dict):
-        """Sets multiple metadata keys/values in the system associated with this object
-        """
-        return self.system.api.post(self._get_metadata_uri(), data=data_dict)
-
-    def get_metadata_value(self, key, default=NOTHING):
-        """Gets a metadata value, optionally specifying a default
-
-        :param default: if specified, the value to retrieve if the metadata key doesn't exist.
-           if not specified, and the key does not exist, the operation will raise an exception
-        """
-        metadata_url = self._get_metadata_uri().add_path(str(key))
-        try:
-            result = self.system.api.get(metadata_url).get_result()
-        except APICommandFailed as caught:
-            if caught.status_code != requests.codes.not_found or default is NOTHING:
-                raise
-            return default
-        if self.system.compat.get_metadata_version() < 2:
-            return result
-        return result['value']
-
-    def get_all_metadata(self):
-        """:returns: Dictionary of all keys and values associated as metadata for this object
-        """
-        url = self._get_metadata_uri()
-        if self.system.compat.get_metadata_version() < 2:
-            return self.system.api.get(url).get_result()
-        query = LazyQuery(self.system, url)
-        return dict((item['key'], item['value']) for item in query)
-
-    def unset_metadata(self, key):
-        """Deletes a metadata key for this object
-        """
-        return self.system.api.delete(self._get_metadata_uri().add_path(str(key)))
-
-    def clear_metadata(self):
-        """Deletes all metadata keys for this object
-        """
-        self.system.api.delete(self._get_metadata_uri())
-
 
 class InfiniBoxLURelatedObject(InfiniBoxObject):
 
@@ -118,8 +60,8 @@ class InfiniBoxLURelatedObject(InfiniBoxObject):
         for lun in luns:
             if lun.get_volume() == volume:
                 return True
-        else:
-            return False
+
+        return False
 
     def map_volume(self, volume, lun=None):
         """
@@ -132,8 +74,8 @@ class InfiniBoxLURelatedObject(InfiniBoxObject):
             post_data['lun'] = int(lun)
         url = self.get_this_url_path().add_path('luns')
         res = self.system.api.post(url, data=post_data)
-        volume.refresh('mapped')
-        self.refresh('luns')
+        volume.invalidate_cache('mapped')
+        self.invalidate_cache('luns')
         return LogicalUnit(system=self.system, **res.get_result())
 
     def unmap_volume(self, volume=None, lun=None):
@@ -149,7 +91,7 @@ class InfiniBoxLURelatedObject(InfiniBoxObject):
         else:
             raise InfiniSDKException('unmap_volume does must get or volume or lun')
         assert self == lun.get_mapping_object()
-        self.refresh('luns')
+        self.invalidate_cache('luns')
         lun.unmap()
         if volume:
-            volume.refresh('mapped')
+            volume.invalidate_cache('mapped')
