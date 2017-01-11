@@ -8,6 +8,5 @@ Overview
 
 Licence
 =======
-
-Proprietary
+BSD-3
 
