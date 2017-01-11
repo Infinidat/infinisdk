@@ -38,9 +38,9 @@ class Checkout(object):
 
     def clone(self):
         email = subprocess.check_output('git config user.email', shell=True, cwd='.').decode('utf-8').strip()
-        self._execute('git clone https://github.com/Infinidat/infinisdk {}'.format(self.path), cwd='.')
-        self._execute('git config user.email {}'.format(email), cwd=self.path)
-        self._execute('git flow init -d', cwd=self.path)
+        self._execute('git clone git@github.com:Infinidat/infinisdk {}'.format(self.path), cwd='.')
+        self._execute('git config user.email {}'.format(email))
+        self._execute('git flow init -d')
         _logger.info('Checked out to {}', self.path)
 
     def start_release(self):
@@ -58,7 +58,9 @@ class Checkout(object):
 
     def fetch_ours(self):
         self._execute('git fetch {}'.format(os.path.abspath('.')))
-        self._execute('git checkout FETCH_HEAD -- .')
+        self._execute('git reset --hard FETCH_HEAD')
+        self._execute('git reset master')
+        self._execute('git add .')
 
     def reshape(self):
         shutil.rmtree(os.path.join(self.path, 'tests'))
