@@ -11,9 +11,9 @@ Installing InfiniSDK is done by using ``pip``::
 .. note:: Depending on your Python installation, the above command might require root privileges
 
 
-.. seealso:: for more information on pip and how to use it to install Python packages, see https://pip.pypa.io/en/stable/
+.. seealso:: For more information on pip and how to use it to install Python packages, see https://pip.pypa.io/en/stable/
 
-Creating the Infinibox Object
+Creating the InfiniBox Object
 -----------------------------
 
 In your Python interpreter, import the :class:`infinisdk.InfiniBox <infinisdk.infinibox.InfiniBox>` class, and initialize it with your system address:
@@ -41,7 +41,15 @@ Authentication information can also be specified via the constructor:
 
 .. code-block:: python
 
-		>>> system = InfiniBox(SYSTEM_ADDRESS, auth=("admin", "password"))
+       >>> system = InfiniBox(SYSTEM_ADDRESS, auth=("admin", "password"))
+
+Note that you need to explicitly call ``login`` to actually log in to the system:
+
+.. code-block:: python
+       
+       >>> system.login()
+       <Response [200]>
+
 
 Another way authentication information can be provided is through an ``.ini`` file. Create a file named ``~/.infinidat/infinisdk.ini``, with the following structure::
 
@@ -177,9 +185,9 @@ InfiniSDK reflects data sizes using the ``capacity`` module, allowing easy compu
 
 		>>> size = pool.get_virtual_capacity()
 		>>> print(size)
-		1*TB
+		1 TB
 		>>> print(size * 2)
-		2*TB
+		2 TB
 		>>> print(size // GiB)
 		931
 
@@ -194,10 +202,10 @@ Querying objects of various types is done relatively easily through InfiniSDK. T
 
 .. code-block:: python
 
-		>>> len(system.volumes)
+		>>> system.volumes.count()
 		0
 
-		>>> list(system.volumes)
+		>>> system.volumes.to_list()
 		[]
 
 .. seealso:: :ref:`querying`

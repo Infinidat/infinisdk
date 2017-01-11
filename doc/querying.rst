@@ -3,7 +3,7 @@
 Querying Objects
 ================
 
-The InfiniBox API layer allows its users to query and sort objects according to various criteria. InfiniSDK offers a clean Pythonic syntax to perform such queries
+The InfiniBox API layer allows its users to query and sort objects according to various criteria. InfiniSDK offers a clean Pythonic syntax to perform such queries.
 
 Querying All Objects
 --------------------
@@ -12,7 +12,7 @@ Querying all objects can be done by iterating over the collection proxies (e.g. 
 
 .. code-block:: python
 		
-		>>> len(system.volumes)
+		>>> system.volumes.count()
 		5
 		>>> for volume in system.volumes:
 		...     print("Found volume:", volume.get_name())
@@ -70,7 +70,7 @@ There is also ``safe_get``, returning ``None`` instead of raising an exception i
 Advanced Queries
 ----------------
 
-Object fields can be used to perform more complex queries, using operators. For instance, here is a query for all volumes which are not named 'vol1'
+Object fields can be used to perform more complex queries, using operators. For instance, here is a query for all volumes whose name is not 'vol1'.
 
 .. code-block:: python
 		
@@ -100,7 +100,7 @@ And here is a query to find all volumes greater than 1 GiB in size:
 .. code-block:: python
 		
 		>>> from capacity import GiB
-		>>> list(system.volumes.find(system.volumes.fields.size > GiB))
+		>>> system.volumes.find(system.volumes.fields.size > GiB).to_list()
 		[]
 
 .. seealso:: :ref:`capacities`

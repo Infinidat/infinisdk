@@ -10,9 +10,11 @@ def doctest_context():
         simulator.events.add_user_event(code='VOLUME_CREATED')
         simulator.events.add_user_event(code='VOLUME_DELETED')
     simulator.activate()
+    system = InfiniBox(simulator, auth=('infinidat', '123456'))
+    system.login()
     try:
         yield {
-            "system": InfiniBox(simulator, auth=('infinidat', '123456')),
+            "system": system,
         }
     finally:
         simulator.deactivate()

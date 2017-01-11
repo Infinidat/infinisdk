@@ -1,7 +1,9 @@
 import arrow
-from datetime import timedelta
 import munch
+from .._compat import string_types
 from capacity import byte, Capacity
+from datetime import timedelta
+from infi.dtypes.iqn import make_iscsi_name, iSCSIName
 from infi.dtypes.wwn import WWN
 
 from api_object_schema import TypeInfo, ValueTranslator
@@ -12,6 +14,10 @@ class CapacityTranslator(ValueTranslator):
     def _to_api(self, value):
         if value is None:
             return value
+        if value == 0:
+            return 0
+        if not isinstance(value, Capacity):
+            raise TypeError('Capacity must be specified using a Capacity object')
         return int(value // byte)
 
     def _from_api(self, value):
@@ -40,10 +46,10 @@ class MunchListTraslator(ValueTranslator):
         self._translator = MunchTranslator()
 
     def _to_api(self, value):
-        return [self._translator._to_api(single_value) for single_value in value]
+        return [self._translator._to_api(single_value) for single_value in value]  # pylint: disable=protected-access
 
     def _from_api(self, value):
-        return [self._translator._from_api(single_value) for single_value in value]
+        return [self._translator._from_api(single_value) for single_value in value]  # pylint: disable=protected-access
 
 MunchType = TypeInfo(type=munch.Munch, api_type=dict, translator=MunchTranslator())
 MunchListType = TypeInfo(type=list, api_type=list, translator=MunchListTraslator())
@@ -52,9 +58,13 @@ MunchListType = TypeInfo(type=list, api_type=list, translator=MunchListTraslator
 class MillisecondsDatetimeTranslator(ValueTranslator):
 
     def _to_api(self, value):
+        if value is None:
+            return None
         return int(round(value.float_timestamp * 1000.0))
 
     def _from_api(self, value):
+        if value is None:
+            return None
         return arrow.get(value / 1000.0)
 
 
@@ -71,21 +81,42 @@ class MillisecondsDeltaTranslator(ValueTranslator):
 
     def _from_api(self, value):
         value /= 1000.0
-        return timedelta(seconds=int(value), microseconds = int((value - int(value)) * 1000))
+        return timedelta(seconds=int(value), microseconds=int((value - int(value)) * 1000))
 
 
-MillisecondsDeltaType = TypeInfo(type=timedelta,
-                                  api_type=int, translator=MillisecondsDeltaTranslator())
+MillisecondsDeltaType = TypeInfo(type=timedelta, api_type=int, translator=MillisecondsDeltaTranslator())
 
 
 WWNType = TypeInfo(type=WWN, api_type=str)
 
 
-class WWNListTranslator(ValueTranslator):
+def host_port_to_api(value):
+    if isinstance(value, WWN):
+        port_type = 'fc'
+    elif isinstance(value, string_types):
+        port_type = 'fc'
+        value = WWN(value)
+    elif isinstance(value, iSCSIName):
+        port_type = 'iscsi'
+    else:
+        assert False, "Unknown type of {0}".format(value)
+    return {'type': port_type, 'address': str(value)}
+
+
+def address_type_factory(type_):
+    _TYPES = {'fc': WWN, 'iscsi': make_iscsi_name}
+    return _TYPES[type_.lower()]
+
+
+def host_port_from_api(value):
+    return address_type_factory(value['type'])(value['address'])
+
+
+class HostPortListTranslator(ValueTranslator):
     def _to_api(self, value):
-        return [str(wwpn) for wwpn in value]
+        return [host_port_to_api(v) for v in value]
 
     def _from_api(self, value):
-        return [WWN(wwpn) for wwpn in value]
+        return [host_port_from_api(v) for v in value]
 
-WWNListType = TypeInfo(type=list, api_type=list, translator=WWNListTranslator())
+HostPortListType = TypeInfo(type=list, api_type=list, translator=HostPortListTranslator())

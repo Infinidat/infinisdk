@@ -15,7 +15,7 @@ Modifying SMTP notification targets:
 
 .. code-block:: python
        
-       >>> smtp_target = list(system.notification_targets.find(protocol='SMTP'))[0]
+       >>> smtp_target = system.notification_targets.find(protocol='SMTP').to_list()[0]
        >>> smtp_target.update_name('sample_config_1')
 
        >>> smtp_target.update_host('mailserver.lab.com')

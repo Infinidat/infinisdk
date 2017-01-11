@@ -1,18 +1,40 @@
-import functools
 import operator
 
 from sentinels import NOTHING
+from vintage import deprecated
 
 from .._compat import httplib
 from ..core.config import config
 
 
-class Compatability(object):
+class Feature(object):
+    def __init__(self, name, version, enabled):
+        self.name = name
+        self.version = version
+        self.enabled = enabled
+
+def _get_predicate(opreator_func, value):
+    def predicate(version):
+        return opreator_func(version, value)
+    return predicate
+
+class Compatibility(object):
 
     def __init__(self, system):
         self.system = system
         self._features = None
         self._system_version = None
+
+    def invalidate_cache(self):
+        self._features = None
+        self._system_version = None
+
+    def is_initialized(self):
+        return self._features is not None
+
+    def initialize(self):
+        if not self.is_initialized():
+            self._init_features()
 
     def can_run_on_system(self):
         version_string = self.system.get_version().split('-', 1)[0]
@@ -25,8 +47,13 @@ class Compatability(object):
         for restriction in restrictions:
             operator_name, value = restriction.split(':', 1)
             op = getattr(operator, operator_name)
-            returned.append(lambda version, op=op: op(version, value))
+            returned.append(_get_predicate(op, value))
         return returned
+
+    def is_feature_supported(self, feature_name):
+        if feature_name is NOTHING:
+            return True
+        return getattr(self, 'has_{0}'.format(feature_name))()
 
     def normalize_version_string(self, version):
         return _InfiniboxVersion.parse(version)
@@ -44,40 +71,42 @@ class Compatability(object):
         float_digit_list = self.system.get_version().split('.')[:2]
         return float(".".join(float_digit_list))
 
-    def _init_fetatures(self):
+    def _init_features(self):
         resp = self.system.api.get("_features", assert_success=False)
         if resp.response.status_code == httplib.NOT_FOUND:
             features_list = []  # Backwards compatible
         else:
             resp.assert_success()
             features_list = resp.get_result()
-        self._features = dict((feature_info['name'], feature_info[
-                              'version']) for feature_info in features_list)
+        self._features = dict((feature_info['name'], Feature(feature_info['name'], feature_info['version'],
+                                                             feature_info.get('enabled', True)))
+                              for feature_info in features_list)
 
     def _get_feature_version(self, feature_key, default_version=NOTHING):
         if self._features is None:
-            self._init_fetatures()
-        return self._features.get(feature_key, default_version)
+            self._init_features()
+        feature = self._features.get(feature_key, None)
+        if feature is None or not feature.enabled:
+            return default_version
+        return feature.version
 
-    def _has_feature(self, feature_key):
+    def has_feature(self, feature_key):
         return self._get_feature_version(feature_key, NOTHING) is not NOTHING
 
-    def set_feature_as_supported(self, feature_key, version=0):
-        assert self._get_feature_version(
-            feature_key, 0) <= version, "Cannot downgrade feature's supported version"
-        self._features[feature_key] = version
-
     def has_npiv(self):
-        return self._has_feature("fc/soft_targets")
+        return self.has_feature('fc_soft_targets') or self.has_feature('fc/soft_targets')
 
     def has_replication(self):
         return int(self.get_version_major()) >= 2
 
-    def get_nas_version(self):
-        return self._get_feature_version('nas', 0)
+    def has_iscsi(self):
+        return self.has_feature('iscsi')
+
+    def has_compression(self):
+        return self.has_feature('compression')
 
     def has_nas(self):
-        return self.get_nas_version() >= 2
+        return self._get_feature_version('nas', 0) >= 2
 
     def has_network_configuration(self):
         return int(self.get_version_major()) >= 2
@@ -91,6 +120,27 @@ class Compatability(object):
     def has_initiators(self):
         return self.get_version_as_float() >= 2.2
 
+    def has_user_disabling(self):
+        return self._get_feature_version("user_management", 0) >= 1
+
+    def has_auth_sessions(self):
+        return self.has_feature('api_auth_sessions') or self.has_feature('api/auth_sessions')
+
+    def has_max_speed(self):
+        return self.get_version_as_float() > 2.2
+
+    def has_writable_snapshots(self):
+        return self.has_feature('snapshots')
+
+    @deprecated('Use has_writable_snapshots instead')
+    def has_snapclones(self):
+        self.has_writable_snapshots()
+
+    def has_sync_job_states(self):
+        return self.get_version_as_float() >= 3.0
+
+    def has_nas_replication(self):
+        return self.has_feature('filesystem_replicas')
 
 _VERSION_TUPLE_LEN = 5
 

@@ -36,7 +36,8 @@ class Autogenerate(SpecialValue):
         if counter is None:
             counter = self._ORDINALS[self.template] = itertools.count(1)
         current_time = flux.current_timeline.time()
-        return self.template.format(time=current_time, timestamp=int(current_time * 1000), ordinal=next(counter), uuid=_LAZY_UUID_FACTORY, short_uuid=_LAZY_SHORT_UUID_FACTORY, prefix=self._prefix)
+        return self.template.format(time=current_time, timestamp=int(current_time * 1000), ordinal=next(counter),
+                                    uuid=_LAZY_UUID_FACTORY, short_uuid=_LAZY_SHORT_UUID_FACTORY, prefix=self._prefix)
 
     @classmethod
     def set_prefix(cls, prefix):

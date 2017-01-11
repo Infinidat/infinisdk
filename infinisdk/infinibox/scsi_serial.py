@@ -25,12 +25,12 @@ class SCSISerial(object):
         return self.serial
 
     def __eq__(self, other):
-        if type(other) != SCSISerial:
+        if not isinstance(other, SCSISerial):
             return self.serial == other
         return self.serial == other.serial
 
     def __ne__(self, other):
-        if type(other) != SCSISerial:
+        if not isinstance(other, SCSISerial):
             return self.serial != other
         return self.serial != other.serial
 

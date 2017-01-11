@@ -1,33 +1,31 @@
-import itertools
+import copy
 import gossip
 import functools
-import sys
+import gadget
 from contextlib import contextmanager
 
-from sentinels import NOTHING
-from infi.pyutils.lazy import cached_method
+from mitba import cached_method
+from vintage import deprecated
 from urlobject import URLObject as URL
 
-from .exceptions import APICommandFailed, APITransportFailure
-from .._compat import with_metaclass, iteritems, httplib, reraise
-from .exceptions import MissingFields, CacheMiss
+from .exceptions import APICommandFailed
+from .system_object_utils import get_data_for_object_creation
+from .._compat import with_metaclass, iteritems, httplib, string_types  # pylint: disable=no-name-in-module
+from .exceptions import CacheMiss
 from api_object_schema import FieldsMeta as FieldsMetaBase
 from .field import Field
-from .field_filter import FieldFilter
-from .q import QField
-from .object_query import ObjectQuery
 from .type_binder import TypeBinder
 from .bindings import PassthroughBinding
 from .api.special_values import translate_special_values
-from .utils import DONT_CARE
-
+from .utils import DONT_CARE, end_reraise_context
 
 
 class FieldsMeta(FieldsMetaBase):
 
     @classmethod
-    def FIELD_FACTORY(cls, name):
+    def FIELD_FACTORY(mcs, name):
         return Field(name, binding=PassthroughBinding())
+
 
 class BaseSystemObject(with_metaclass(FieldsMeta)):
     """
@@ -44,32 +42,44 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
         #: the system to which this object belongs
         self.system = system
         self._cache = initial_data
-        self.id = self.fields.id.binding.get_value_from_api_object(system, type(self), self, self._cache)
+        self.id = self.fields.id.binding.get_value_from_api_object(
+            system, type(self), self, self._cache)
 
     def get_system(self):
         return self.system
 
-    def refresh(self, *field_names):
-        """Discards the cached field values of this object, causing the next fetch to retrieve the fresh value from the system
+    def invalidate_cache(self, *field_names):
+        """Discards the cached field values of this object, causing the next fetch to retrieve the fresh value from
+        the system
         """
         if field_names:
             for field_name in field_names:
-                self._cache.pop(self.fields.get_or_fabricate(field_name).api_name, None)
+                self._cache.pop(self.fields.get_or_fabricate(
+                    field_name).api_name, None)
         else:
             self._cache.clear()
 
+    @deprecated(message='use invalidate_cache instead')
+    def refresh(self, *field_names):
+        return self.invalidate_cache(*field_names)
+
+    @classmethod
+    def is_supported(cls, system): # pylint: disable=unused-argument
+        return True
+
     @staticmethod
-    def requires_refresh(*fields):
-        refresh_fields = fields
+    def requires_cache_invalidation(*fields):
+        invalidate_fields = fields
         if len(fields) == 1 and callable(fields[0]):
-            refresh_fields = []
-        def wraps(func, *args, **kwargs):
+            invalidate_fields = []
+
+        def wraps(func, *args, **kwargs): # pylint: disable=unused-argument
             @functools.wraps(func)
-            def refreshes(self, *args, **kwargs):
+            def invalidates(self, *args, **kwargs):
                 returned = func(self, *args, **kwargs)
-                self.refresh(*refresh_fields)
+                self.invalidate_cache(*invalidate_fields)
                 return returned
-            return refreshes
+            return invalidates
         if len(fields) == 1 and callable(fields[0]):
             return wraps(fields[0])
         return wraps
@@ -81,7 +91,7 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
         return self.system == other.system and self.id == other.id
 
     def __ne__(self, other):
-        return not (self == other)
+        return not (self == other) # pylint: disable=superfluous-parens
 
     def __hash__(self):
         return hash(self.get_unique_key())
@@ -89,9 +99,8 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
     def get_unique_key(self):
         return (self.system, type(self).__name__, self.id)
 
-    @classmethod
-    def is_supported(cls, system):
-        return True
+    def __deepcopy__(self, memo):
+        return self.construct(self.system, copy.deepcopy(self._cache, memo))
 
     @classmethod
     def construct(cls, system, data):
@@ -115,7 +124,7 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
         return "{0}s".format(cls.get_type_name())
 
     @classmethod
-    def get_url_path(cls, system):
+    def get_url_path(cls, system): # pylint: disable=unused-argument
         url_path = cls.URL_PATH
         if url_path is None:
             url_path = "/api/rest/{0}".format(cls.get_plural_name())
@@ -128,7 +137,8 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
         :param cache: Attempt to use the last cached version of the field value
         :param fetch_if_not_cached: Pass ``False`` to force only from cache
         """
-        kwargs = {'from_cache': from_cache, 'fetch_if_not_cached': fetch_if_not_cached, 'raw_value': raw_value}
+        kwargs = {'from_cache': from_cache,
+                  'fetch_if_not_cached': fetch_if_not_cached, 'raw_value': raw_value}
         return self.get_fields([field_name], **kwargs)[field_name]
 
     def get_fields(self, field_names=(), from_cache=DONT_CARE, fetch_if_not_cached=True, raw_value=False):
@@ -149,13 +159,13 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
                 if not fetch_if_not_cached:
                     raise
 
-        # TODO: remove unnecessary construction, move to direct getting
         query = self.get_this_url_path()
 
         only_fields = []
         for field_name in field_names:
             try:
-                only_fields.append(self._get_field_api_name_if_defined(field_name))
+                only_fields.append(
+                    self._get_field_api_name_if_defined(field_name))
             except LookupError:
                 only_fields.append(field_name)
 
@@ -200,7 +210,8 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
 
     def _get_fields_from_cache(self, field_names, raw_value):
         if not field_names:
-            field_names = self.fields.get_all_field_names_or_fabricate(self._cache.keys())
+            field_names = self.fields.get_all_field_names_or_fabricate(
+                self._cache.keys())
         returned = {}
         missed = []
         for field_name in field_names:
@@ -209,9 +220,11 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
                 if raw_value:
                     value = self._cache[field.api_name]
                 else:
-                    value = field.binding.get_value_from_api_object(self.system, type(self), self, self._cache)
+                    value = field.binding.get_value_from_api_object(
+                        self.system, type(self), self, self._cache)
             except KeyError:
-                missed.append(field_name)
+                if self.system.is_field_supported(field):
+                    missed.append(field_name)
             else:
                 returned[field_name] = value
         if missed:
@@ -221,7 +234,12 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
 
         return returned
 
+    def is_field_supported(self, field_name):
+        field = self.fields.get_or_fabricate(field_name)
+        return self.system.is_field_supported(field)
+
     def update_field_cache(self, api_obj):
+        assert all(isinstance(key, string_types) for key in api_obj.keys())
         self._cache.update(api_obj)
 
     def update_field(self, field_name, field_value):
@@ -245,22 +263,29 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
                 field = self.fields[field_name]
             except LookupError:
                 continue
-            translated_value = field.binding.get_api_value_from_value(self.system, type(self), self, field_value)
+            translated_value = field.binding.get_api_value_from_value(
+                self.system, type(self), self, field_value)
             update_dict[field.api_name] = translated_value
             if field.api_name != field_name:
                 update_dict.pop(field_name)
 
-        hook_tags = self._get_tags_for_object_operations(self.system)
-        gossip.trigger_with_tags('infinidat.sdk.pre_object_update', {'obj': self, 'data': update_dict}, tags=hook_tags)
-        with _possible_api_failure_context(tags=hook_tags):
+        hook_tags = self.get_tags_for_object_operations(self.system)
+        gossip.trigger_with_tags('infinidat.sdk.pre_object_update', {'obj': self, 'data': update_dict},
+                                 tags=hook_tags)
+        try:
             res = self.system.api.put(self.get_this_url_path(), data=update_dict)
+        except Exception as e:  # pylint: disable=broad-except
+            with end_reraise_context():
+                gossip.trigger_with_tags('infinidat.sdk.object_update_failure',
+                                         {'obj': self, 'exception': e, 'system': self.system},
+                                         tags=hook_tags)
         response_dict = res.get_result()
         if len(update_dict) == 1 and not isinstance(response_dict, dict):
             [key] = update_dict.keys()
             response_dict = {key: response_dict}
-        self.update_field_cache(response_dict)
+        self.update_field_cache({k: response_dict[k] for k in update_dict if k in response_dict})
         gossip.trigger_with_tags('infinidat.sdk.post_object_update',
-                {'obj': self, 'data': update_dict, 'response_dict': response_dict}, tags=hook_tags)
+                                 {'obj': self, 'data': update_dict, 'response_dict': response_dict}, tags=hook_tags)
         return res
 
     @cached_method
@@ -272,7 +297,8 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
         for field in self.FIELDS:
             if field.use_in_repr:
                 try:
-                    value = self.get_field(field.name, from_cache=True, fetch_if_not_cached=False)
+                    value = self.get_field(
+                        field.name, from_cache=True, fetch_if_not_cached=False)
                 except CacheMiss:
                     value = '?'
                 s += ', {0}={1}'.format(field.name, value)
@@ -284,19 +310,15 @@ class SystemObject(BaseSystemObject):
     """
     System object, that has query methods, creation and deletion
     """
+
     @classmethod
     def find(cls, system, *predicates, **kw):
-        url = URL(cls.get_url_path(system))
-        if kw:
-            predicates = itertools.chain(
-                predicates,
-                (cls.fields.get_or_fabricate(key) == value for key, value in iteritems(kw)))
-        for pred in predicates:
-            if isinstance(pred.field, QField):
-                pred = FieldFilter(cls.fields.get_or_fabricate(pred.field.name), pred.operator_name, pred.value)
-            url = pred.add_to_url(url)
+        binder = system.objects[cls.get_plural_name()]
+        return binder.find(*predicates, **kw)
 
-        return ObjectQuery(system, url, cls)
+    def get_binder(self):
+        return self.system.objects[self.get_plural_name()]
+    get_collection = get_binder
 
     def is_in_system(self):
         """
@@ -312,23 +334,25 @@ class SystemObject(BaseSystemObject):
             return True
 
     @classmethod
-    def _get_tags_for_object_operations(cls, system):
+    def get_tags_for_object_operations(cls, system):
         return [cls.get_type_name().lower(), system.get_type_name().lower()]
 
     @classmethod
     def _create(cls, system, url, data, tags=None):
-        hook_tags = tags or cls._get_tags_for_object_operations(system)
-        gossip.trigger_with_tags('infinidat.sdk.pre_object_creation', {'data': data, 'system': system, 'cls': cls}, tags=hook_tags)
+        hook_tags = tags or cls.get_tags_for_object_operations(system)
+        gossip.trigger_with_tags('infinidat.sdk.pre_object_creation', {'data': data, 'system': system, 'cls': cls},
+                                 tags=hook_tags)
         try:
-            with _possible_api_failure_context(tags=hook_tags):
-                returned = system.api.post(url, data=data).get_result()
+            returned = system.api.post(url, data=data).get_result()
             obj = cls(system, returned)
-        except Exception as e:
-            gossip.trigger_with_tags('infinidat.sdk.object_creation_failure',
-                {'cls': cls, 'system': system, 'data': data, 'exception': e}, tags=hook_tags)
-            raise
+        except Exception as e:  # pylint: disable=broad-except
+            with end_reraise_context():
+                gossip.trigger_with_tags('infinidat.sdk.object_creation_failure',
+                                         {'cls': cls, 'system': system, 'data': data, 'exception': e},
+                                         tags=hook_tags)
         gossip.trigger_with_tags('infinidat.sdk.post_object_creation',
-                {'obj': obj, 'data': data, 'response_dict': returned}, tags=hook_tags)
+                                 {'obj': obj, 'data': data, 'response_dict': returned}, tags=hook_tags)
+        gadget.log_entity_creation(entity=obj, params=data)
         return obj
 
     @classmethod
@@ -336,52 +360,25 @@ class SystemObject(BaseSystemObject):
         """
         Creates a new object of this type
         """
-        gossip.trigger_with_tags('infinidat.sdk.pre_creation_data_validation', {'fields': fields, 'system': system, 'cls': cls})
-        data = cls._get_data_for_post(system, fields)
+        gossip.trigger_with_tags('infinidat.sdk.pre_creation_data_validation',
+                                 {'fields': fields, 'system': system, 'cls': cls})
+        data = get_data_for_object_creation(cls, system, fields)
         return cls._create(system, cls.get_url_path(system), data)
-
-    @classmethod
-    def _get_data_for_post(cls, system, fields):
-        returned = {}
-        missing_fields = set()
-        extra_fields = fields.copy()
-        for field in cls.fields:
-            if field.name not in fields:
-                if not field.creation_parameter or field.optional:
-                    continue
-
-            field_value = extra_fields.get(field.name, NOTHING)
-            extra_fields.pop(field.name, None)
-            field_api_value = extra_fields.get(field.api_name, NOTHING)
-            extra_fields.pop(field.api_name, None)
-            if field_value is NOTHING and field_api_value is NOTHING:
-                field_value = field.generate_default()
-            if field_value is not NOTHING and field_api_value is not NOTHING:
-                raise ValueError("Multiple colliding arguments: {0} and {1}".format(field.name, field.api_name))
-            if field_value is NOTHING and field_api_value is NOTHING:
-                missing_fields.add(field.name)
-            if field_value is not NOTHING:
-                returned[field.api_name] = field.binding.get_api_value_from_value(system, cls, None, field_value)
-            else:
-                returned[field.api_name] = field_api_value
-
-        if missing_fields:
-            raise MissingFields("Following fields were not specified: {0}".format(", ".join(sorted(missing_fields))))
-        returned.update(extra_fields)
-        return returned
 
     @classmethod
     def get_creation_defaults(cls):
         """
-        Returns a dict representing the default arguments as implicitly constructed by infinisdk to fulfill a ``create`` call
+        Returns a dict representing the default arguments as implicitly constructed by infinisdk to fulfill
+        a ``create`` call
 
         .. note:: This will cause generation of defaults, which will have side effects if they are special values
 
-        .. note:: This does not necessarily generate all fields that are passable into ``create``, only mandatory fields
+        .. note:: This does not necessarily generate all fields that are passable into ``create``, only mandatory
+        'fields
         """
         return translate_special_values(dict(
             (field.name, field.generate_default())
-            for field in cls.fields
+            for field in cls.fields  # pylint: disable=no-member
             if field.creation_parameter and not field.optional))
 
     def safe_delete(self, *args, **kwargs):
@@ -400,18 +397,22 @@ class SystemObject(BaseSystemObject):
 
     @contextmanager
     def _get_delete_context(self):
-        hook_tags = self._get_tags_for_object_operations(self.system)
+        hook_tags = self.get_tags_for_object_operations(self.system)
         gossip.trigger_with_tags('infinidat.sdk.pre_object_deletion', {'obj': self}, tags=hook_tags)
-        with _possible_api_failure_context(hook_tags):
+        try:
             yield
+        except Exception as e:       # pylint: disable=broad-except
+            with end_reraise_context():
+                gossip.trigger_with_tags('infinidat.sdk.object_deletion_failure',
+                                         {'obj': self, 'exception': e, 'system': self.system},
+                                         tags=hook_tags)
         gossip.trigger_with_tags('infinidat.sdk.post_object_deletion', {'obj': self}, tags=hook_tags)
 
 
-@contextmanager
-def _possible_api_failure_context(tags):
-    try:
-        yield
-    except APICommandFailed as e:
-        exc_type, exc_value, exc_tb = sys.exc_info()
-        gossip.trigger_with_tags('infinidat.sdk.object_operation_failure', {'exception': e}, tags=tags)
-        reraise(exc_type, exc_value, exc_tb)
+@gossip.register('infinidat.sdk.object_creation_failure')
+@gossip.register('infinidat.sdk.object_deletion_failure')
+@gossip.register('infinidat.sdk.object_update_failure')
+def _notify_operation_failed(system, exception, **kwargs):
+    cls = kwargs.pop('cls', None) or type(kwargs.pop('obj'))
+    tags = cls.get_tags_for_object_operations(system)
+    gossip.trigger_with_tags('infinidat.sdk.object_operation_failure', {'exception': exception}, tags=tags)
