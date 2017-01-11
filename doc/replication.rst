@@ -17,3 +17,15 @@ Replicating a volume to a remote system (mirroring) can be done by calling the *
 .. note:: the above example assumes you already have a :class:`infinisdk.infinibox.link.Link` object.
 
 .. seealso:: :class:`infinisdk.infinibox.replica.Replica`
+
+
+Replicating Consistency Groups
+------------------------------
+
+Creating a CG replica is also straightforward, and is done via the ``replicate_cons_group`` method:
+
+.. code-block:: python
+       
+       >>> cg = primary.cons_groups.create(pool=pool)       
+       >>> replica = primary.replicas.replicate_cons_group(cg, link=link, remote_pool=remote_pool)
+

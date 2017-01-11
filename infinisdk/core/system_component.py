@@ -1,5 +1,7 @@
-from .._compat import itervalues, iterkeys, OrderedDict
+from collections import OrderedDict
+from .._compat import itervalues, iterkeys
 from .type_binder import TypeBinder
+
 
 class SystemComponentsBinder(TypeBinder):
 
@@ -8,6 +10,9 @@ class SystemComponentsBinder(TypeBinder):
 
     def __init__(self, base_component_type, system):
         super(SystemComponentsBinder, self).__init__(base_component_type, system)
+        self._components_by_id = OrderedDict()
+
+    def invalidate_cache(self):
         self._components_by_id = OrderedDict()
 
     def get_component_types(self):
@@ -31,7 +36,7 @@ class SystemComponentsBinder(TypeBinder):
         """
         self._components_by_id[component.id] = component
 
-    def get_by_id_lazy(self, id):
+    def get_by_id_lazy(self, id):  # pylint: disable=redefined-builtin
         returned = self.try_get_component_by_id(id)
         if returned is None:
             raise NotImplementedError("Initializing generic components lazily is not yet supported") # pragma: no cover
@@ -57,6 +62,7 @@ class SystemComponentsBinder(TypeBinder):
         except AttributeError:
             raise KeyError(attr)
 
+
 class SpecificComponentBinderGetter(object):
 
     def __init__(self, object_type):
@@ -71,14 +77,16 @@ class SpecificComponentBinderGetter(object):
             setattr(components_binder, self.cached_name, returned)
         return returned
 
+
 class SpecificComponentBinder(TypeBinder):
 
-    def get_by_id_lazy(self, id):
+    def get_by_id_lazy(self, id):  # pylint: disable=redefined-builtin
         returned = self.system.components.try_get_component_by_id(id)
         if returned is None:
             returned = self.object_type(self.system, {"id": id, "type": self.object_type.get_type_name()})
             self.system.components.cache_component(returned)
         return returned
+
 
 class TypeContainer(object):
     pass

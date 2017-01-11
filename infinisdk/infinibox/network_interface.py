@@ -8,11 +8,14 @@ class NetworkInterface(InfiniBoxObject):
     URL_PATH = 'network/interfaces'
 
     FIELDS = [
-        Field("id", is_identity=True, type=int, cached=True),
-        Field("ports", optional=True, creation_parameter=True, mutable=True, type=list, default=list, add_updater=False, binding=ListToDictBinding(key="name")),
-        Field("node", api_name="node_id", creation_parameter=True, use_in_repr=True, mutable=False, type=int, binding=RelatedComponentBinding()),
+        Field("id", is_identity=True, type=int, is_filterable=True, is_sortable=True, cached=True),
+        Field("ports", optional=True, creation_parameter=True, mutable=True, type=list, default=list, add_updater=False,
+              binding=ListToDictBinding(key="name")),
+        Field("node", api_name="node_id", type=int, creation_parameter=True, use_in_repr=True, mutable=False,
+              is_sortable=True, binding=RelatedComponentBinding()),
         Field("state", cached=False),
         Field("type", creation_parameter=True, default="PORT_GROUP"),
+        Field("rate_limit", type=int, mutable=True, creation_parameter=True, optional=True),
         Field("name", creation_parameter=True, mutable=True, default=Autogenerate("pg_{ordinal}")),
     ]
 
@@ -47,5 +50,4 @@ class NetworkInterface(InfiniBoxObject):
         return self.system.api.post(url)
 
     def is_enabled(self):
-        # FIXME: Need to be changed after INFINIBOX-12968 will be resolved
         return self.get_state() in ['OK', 'ENABLED']

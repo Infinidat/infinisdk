@@ -20,24 +20,10 @@ config = confetti.Config(dict(
         system_api_port=80,
         retry_sleep_seconds=5,
     ),
-    izbox=dict(
-        defaults=dict(
-            system_api=dict(
-                timeout_seconds=180,
-            ),
-            events=dict(
-                page_size=1000,
-                max_events=10 ** 6,
-                max_page_size=1000),
-        ),
-        approval_required_codes=tuple((
-            "DANGEROUS_OPERATION",
-        )),
-    ),
     infinibox=dict(
 
-        compatible_versions = [
-            "ge:1.5",
+        compatible_versions=[
+            "ge:2.0",
         ],
 
         defaults=dict(
@@ -59,7 +45,7 @@ config = confetti.Config(dict(
 _cached_ini_parser = None
 
 def get_ini_option(section, option, default=None):
-    global _cached_ini_parser
+    global _cached_ini_parser  # pylint: disable=global-statement
     if _cached_ini_parser is None:
         _cached_ini_parser = ConfigParser()
         _cached_ini_parser.read(os.path.expanduser((config.root.ini_file_path)))

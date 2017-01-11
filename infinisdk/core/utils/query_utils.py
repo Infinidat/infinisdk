@@ -1,4 +1,6 @@
 from urlobject import URLObject as URL
+from collections import Iterable
+from ..._compat import string_types
 
 
 def add_comma_separated_query_param(url, param_name, value):
@@ -12,7 +14,7 @@ def add_comma_separated_query_param(url, param_name, value):
     """
     if not isinstance(url, URL):
         url = URL(url)
-    if isinstance(value, (list, tuple)):
+    if isinstance(value, Iterable) and not isinstance(value, string_types):
         value = ",".join(value)
     existing_sort = url.query_dict.get(param_name, "")
     if existing_sort:

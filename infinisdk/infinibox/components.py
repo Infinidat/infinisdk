@@ -1,14 +1,14 @@
+import copy
 
-from .._compat import ExitStack, zip
+from .._compat import ExitStack, zip  # pylint: disable=redefined-builtin
 from ..core.field import Field
-from ..core.utils import deprecated
 from ..core.system_component import SystemComponentsBinder
 from ..core.system_object import BaseSystemObject
 from ..core.exceptions import ObjectNotFound
 from ..core.type_binder import TypeBinder
 from ..core.translators_and_types import WWNType, CapacityType
-from infi.pyutils.lazy import cached_method
-from .component_query import InfiniBoxComponentQuery
+from mitba import cached_method
+from .component_query import InfiniBoxComponentQuery, InfiniBoxGenericComponentQuery
 from ..core.bindings import InfiniSDKBinding, ListOfRelatedComponentBinding, RelatedComponentBinding
 
 from collections import defaultdict
@@ -16,7 +16,9 @@ from contextlib import contextmanager
 from logbook import Logger
 from pact import Pact
 from urlobject import URLObject as URL
+from vintage import deprecated
 
+# pylint: disable=attribute-defined-outside-init,no-member,super-on-old-class,no-init,abstract-method
 _logger = Logger(__name__)
 
 
@@ -24,15 +26,22 @@ class InfiniBoxSystemComponents(SystemComponentsBinder):
 
     def __init__(self, system):
         super(InfiniBoxSystemComponents, self).__init__(InfiniBoxSystemComponent, system)
+        self._initialize()
+
+    def _initialize(self):
         self.system_component = System(self.system, {'parent_id': "", 'id': 0})
         self.cache_component(self.system_component)
-        Rack = self.racks.object_type
-        self._rack_1 = Rack(self.system, {'parent_id': self.system_component.id, 'rack': 1})
+        RackType = self.racks.object_type
+        self._rack_1 = RackType(self.system, {'parent_id': self.system_component.id, 'rack': 1})
         self.cache_component(self._rack_1)
         self._fetched_nodes = False
         self._fetched_others = False
         self._fetched_service_clusters = False
         self._deps_by_compoents_tree = defaultdict(set)
+
+    def invalidate_cache(self):
+        super(InfiniBoxSystemComponents, self).invalidate_cache()
+        self._initialize()
 
     def get_depended_components_type(self, component_type):
         deps = self._deps_by_compoents_tree[component_type].copy()
@@ -49,7 +58,6 @@ class InfiniBoxSystemComponents(SystemComponentsBinder):
     def should_fetch_service_clusters(self):
         return not self._fetched_service_clusters
 
-
     def mark_fetched_nodes(self):
         self._fetched_nodes = True
 
@@ -62,6 +70,23 @@ class InfiniBoxSystemComponents(SystemComponentsBinder):
 
     def get_rack_1(self):
         return self._rack_1
+
+    def find(self, component_type=None, *predicates, **kw):
+        # component_type is the name of the component
+        if component_type is None:
+            return InfiniBoxGenericComponentQuery(self.system, *predicates, **kw)
+        component_type = self._COMPONENTS_BY_TYPE_NAME[component_type]
+        component_collection = self.system.components[component_type]
+        return component_collection.find(*predicates, **kw)
+
+    @contextmanager
+    def fetch_tree_once_context(self, force_fetch=True, with_logging=True):
+        component_roots = [self.racks, self.service_clusters, self.systems]
+        with ExitStack() as ctx:
+            for component_binder in component_roots:
+                ctx.enter_context(component_binder.fetch_tree_once_context(force_fetch=force_fetch,
+                                                                           with_logging=with_logging))
+            yield
 
 
 class ComputedIDBinding(InfiniSDKBinding):
@@ -80,21 +105,6 @@ class ComputedIDBinding(InfiniSDKBinding):
         raise NotImplementedError() # pragma: no cover
 
 
-class NotExistsSupportBinding(InfiniSDKBinding):
-    # Prior to 2.0 not all services have all the fields. For now, return None if missing.
-    # TODO: Check that system version <= 1.7
-    def __init__(self, value_for_non_exists=None):
-        super(NotExistsSupportBinding, self).__init__()
-        self._value_for_non_exists = value_for_non_exists
-        pass
-
-    def get_value_from_api_object(self, system, objtype, obj, api_obj):
-        try:
-            return super(NotExistsSupportBinding, self).get_value_from_api_object(system, objtype, obj, api_obj)
-        except KeyError:
-            return self._value_for_non_exists
-
-
 class InfiniBoxComponentBinder(TypeBinder):
 
     _force_fetching_from_cache = False
@@ -102,11 +112,19 @@ class InfiniBoxComponentBinder(TypeBinder):
     def should_force_fetching_from_cache(self):
         return self._force_fetching_from_cache
 
-    def get_by_id_lazy(self, id):
+    def get_by_id_lazy(self, id):  # pylint: disable=redefined-builtin
         returned = self.safe_get_by_id(id)
         if returned is None:
-            raise NotImplementedError("Initializing infinibox components lazily is not yet supported") # pragma: no cover
+            raise NotImplementedError(
+                "Initializing infinibox components lazily is not yet supported") # pragma: no cover
         return returned
+
+    def find(self, *predicates, **kw):
+        return InfiniBoxComponentQuery(self.system, self.object_type, *predicates, **kw)
+
+    @deprecated(message="Use to_list/count instead")
+    def __len__(self):
+        return len(self.find())
 
     @contextmanager
     def force_fetching_from_cache_context(self):
@@ -119,8 +137,8 @@ class InfiniBoxComponentBinder(TypeBinder):
 
     @contextmanager
     def _force_fetching_tree_from_cache_context(self):
-        with ExitStack() as stack:
-            stack.enter_context(self.force_fetching_from_cache_context())
+        # Don't add the second context to the ExitStack. For more information see INFRADEV-5884
+        with ExitStack() as stack, self.force_fetching_from_cache_context():
             for obj_type in self.system.components.get_depended_components_type(self.object_type):
                 obj_collection = self.system.components[obj_type]
                 stack.enter_context(obj_collection.force_fetching_from_cache_context())
@@ -145,13 +163,13 @@ class InfiniBoxComponentBinder(TypeBinder):
 
     def _fetch_tree(self, force_fetch):
         components = self.system.components
-        if self.object_type in [
-                components.nodes.object_type,
-                components.services.object_type,
-                components.fc_ports.object_type,
-                components.eth_ports.object_type,
-                components.local_drives.object_type,
-                ]:
+        if self.object_type in [components.nodes.object_type,
+                                components.services.object_type,
+                                components.ib_ports.object_type,
+                                components.fc_ports.object_type,
+                                components.eth_ports.object_type,
+                                components.local_drives.object_type,
+                               ]:
             if force_fetch or components.should_fetch_nodes():
                 rack_1 = components.get_rack_1()
                 rack_1.refresh_without_enclosures()
@@ -161,7 +179,7 @@ class InfiniBoxComponentBinder(TypeBinder):
         else:
             if force_fetch or components.should_fetch_all():
                 rack_1 = components.get_rack_1()
-                rack_1.refresh()
+                rack_1.refresh_cache()
 
     def _fetch_service_clusters(self):
         components = self.system.components
@@ -180,6 +198,9 @@ class InfiniBoxSystemComponent(BaseSystemObject):
         Field("id", binding=ComputedIDBinding(), is_identity=True, cached=True),
         Field("parent_id", cached=True, add_updater=False, is_identity=True),
     ]
+
+    def __deepcopy__(self, memo):
+        return self.construct(self.system, copy.deepcopy(self._cache, memo), self.get_parent_id())
 
     def _deduce_from_cache(self, *args, **kwargs):
         collection = self.system.components[self.get_plural_name()]
@@ -201,19 +222,27 @@ class InfiniBoxSystemComponent(BaseSystemObject):
         # Currently there is no url, in infinibox, to get all instances of specific component
         raise NotImplementedError()  # pragma: no cover
 
-    @classmethod
-    def find(cls, system, *predicates, **kw):
-        return InfiniBoxComponentQuery(system, cls, *predicates, **kw)
+    def get_binder(self):
+        return self.system.components[self.get_plural_name()]
+    get_collection = get_binder
 
     def get_sub_components(self):
-        return self.system.components.find(parent_id=self.id)
+        for field in self.fields:
+            if isinstance(field.binding, ListOfRelatedComponentBinding):
+                for component in self.get_field(field.name):
+                    yield component
 
-    def refresh(self):
+    def refresh_cache(self):
         data = self.system.api.get(self.get_this_url_path()).get_result()
         self.construct(self.system, data, self.get_parent_id())
 
+    @deprecated(message='Use refresh_cache()')
+    def refresh(self):
+        self.refresh_cache()
+
     @classmethod
-    def construct(cls, system, data, parent_id, allow_partial_fields=False):
+    def construct(cls, system, data, parent_id, allow_partial_fields=False):    # pylint: disable=arguments-differ
+        # pylint: disable=protected-access
         data['parent_id'] = parent_id
         component_id = cls.fields.id.binding.get_value_from_api_object(system, cls, None, data)
         returned = system.components.try_get_component_by_id(component_id)
@@ -235,12 +264,14 @@ class InfiniBoxSystemComponent(BaseSystemObject):
         return returned
 
 
+
 @InfiniBoxSystemComponents.install_component_type
 class Rack(InfiniBoxSystemComponent):
     FIELDS = [
         Field("index", api_name="rack", type=int, cached=True),
         Field("enclosures", type=list, binding=ListOfRelatedComponentBinding()),
         Field("nodes", type=list, binding=ListOfRelatedComponentBinding()),
+        Field("bbus", api_name='ups', type=list, binding=ListOfRelatedComponentBinding()),
     ]
 
     @classmethod
@@ -253,15 +284,16 @@ class Rack(InfiniBoxSystemComponent):
         return self.get_specific_rack_url(self.get_index())
 
     def refresh_without_enclosures(self):
-        url = self.get_this_url_path().add_query_param('fields','enclosures_number,rack,nodes')
+        fields = ",".join(field.api_name for field in self.fields if field.name != 'enclosures')
+        url = self.get_this_url_path().add_query_param('fields', fields)
         self.system.components.mark_fetched_nodes()
         data = self.system.api.get(url).get_result()
         data['enclosures'] = []
         self.construct(self.system, data, self.get_parent_id())
 
-    def refresh(self):
+    def refresh_cache(self):
         self.system.components.mark_fetched_all()
-        super(Rack, self).refresh()
+        super(Rack, self).refresh_cache()
 
 
 @InfiniBoxSystemComponents.install_component_type
@@ -276,7 +308,17 @@ class Enclosure(InfiniBoxSystemComponent):
 class Nodes(InfiniBoxComponentBinder):
 
     def get_by_wwpn(self, wwpn):
-        return self.system.components.fc_ports.get(wwpn=wwpn).get_node()
+        fc_port = self.system.components.fc_ports.safe_get(wwpn=wwpn)
+        if fc_port is not None:
+            return fc_port.get_node()
+
+    def get_by_ip(self, ip_address):
+        for ns in self.system.network_spaces.get_all():
+            for ip in ns.get_ips(from_cache=True):
+                if ip.interface_id is None:
+                    continue
+                if ip.ip_address == ip_address:
+                    return self.system.network_interfaces.get_by_id_lazy(ip.interface_id).get_node()
 
     def refresh_fields(self, field_names):
         assert isinstance(field_names, (list, tuple)), "field_names must be either a list or a tuple"
@@ -294,6 +336,7 @@ class Node(InfiniBoxSystemComponent):
         Field("index", api_name="id", type=int, cached=True),
         Field("name", cached=True),
         Field("model", cached=True),
+        Field("ib_ports", type=list, binding=ListOfRelatedComponentBinding()),
         Field("fc_ports", type=list, binding=ListOfRelatedComponentBinding()),
         Field("eth_ports", type=list, binding=ListOfRelatedComponentBinding()),
         Field("drives", type=list, binding=ListOfRelatedComponentBinding("local_drives")),
@@ -367,11 +410,13 @@ class LocalDrive(InfiniBoxSystemComponent):
     def is_ssd(self):
         return self.get_type() == 'SSD'
 
+
 @InfiniBoxSystemComponents.install_component_type
 class EthPort(InfiniBoxSystemComponent):
     FIELDS = [
         Field("hw_addr", is_identity=True),
-        Field("connection_speed"),
+        Field("connection_speed", type=int),
+        Field("max_speed", type=int, feature_name="max_speed"),
         Field("device_name", api_name="name"),
         Field("port_number", type=int, cached=True),
         Field("index", api_name="id", type=int, cached=True),
@@ -380,7 +425,7 @@ class EthPort(InfiniBoxSystemComponent):
         Field("name", cached=True),
         Field("system_interface_port_number", type=int),
         Field("state", cached=False),
-        Field("link_state", cached=False, binding=NotExistsSupportBinding()),
+        Field("link_state", cached=False),
         Field("ip_v4_addr"),
         Field("ip_v4_broadcast"),
         Field("ip_v4_netmask"),
@@ -398,6 +443,35 @@ class EthPort(InfiniBoxSystemComponent):
         return self.get_link_state().lower() in ("link up", "up")
 
 
+@InfiniBoxSystemComponents.install_component_type
+class IbPort(InfiniBoxSystemComponent):
+    FIELDS = [
+        Field("index", api_name="id", type=int, cached=True),
+        Field("firmware"),
+        Field("last_probe_timestamp", type=int),
+        Field("link_state", cached=False, new_to="3.0"),
+        Field("model", cached=True),
+        Field("node", api_name="node_index", type=int, cached=True, binding=RelatedComponentBinding()),
+        Field("node_index", type=int, cached=True),
+        Field("probe_ttl", type=int),
+        Field("state", cached=False),
+        Field("state_description", cached=False),
+        Field("vendor", cached=True),
+    ]
+
+    @classmethod
+    def get_type_name(cls):
+        return "ib_port"
+
+    def is_link_up(self):
+        if self.get_state() != 'OK':
+            return False
+        if not self.is_field_supported('link_state'):
+            return True
+        link_state = self.get_link_state()
+        return link_state and link_state.lower() == "up"
+
+
 class FcPorts(InfiniBoxComponentBinder):
     def get_online_target_addresses(self):
         addresses = []
@@ -406,6 +480,7 @@ class FcPorts(InfiniBoxComponentBinder):
                 if fc_port.is_link_up():
                     addresses.extend(fc_port.get_target_addresses())
         return addresses
+
 
 @InfiniBoxSystemComponents.install_component_type
 class FcPort(InfiniBoxSystemComponent):
@@ -419,7 +494,7 @@ class FcPort(InfiniBoxSystemComponent):
         Field("role", cached=True),
         Field("soft_target_addresses", type=list, cached=True),
         Field("switch_vendor", cached=True),
-        Field("enabled", type=bool, binding=NotExistsSupportBinding(True)),
+        Field("enabled", type=bool),
     ]
 
     def is_link_up(self):
@@ -448,6 +523,7 @@ class FcPort(InfiniBoxSystemComponent):
             return self.get_soft_target_addresses()
         return set([self.get_wwpn()])
 
+
 @InfiniBoxSystemComponents.install_component_type
 class Drive(InfiniBoxSystemComponent):
     FIELDS = [
@@ -468,12 +544,13 @@ class Drive(InfiniBoxSystemComponent):
     def is_active(self):
         return self.get_state() == 'ACTIVE'
 
+
 @InfiniBoxSystemComponents.install_component_type
 class Service(InfiniBoxSystemComponent):
     FIELDS = [
         Field("index", api_name="name", cached=True),
         Field("name", is_identity=True, cached=True),
-        Field("role", binding=NotExistsSupportBinding(), cached=False),
+        Field("role", cached=False),
         Field("state", cached=False),
     ]
 
@@ -495,7 +572,8 @@ class Service(InfiniBoxSystemComponent):
         return self.get_state() == 'ACTIVE'
 
     def is_inactive(self):
-        return self.get_state() in ('INACTIVE', 'PROCESS_FINISHED', 'SHUTDOWN', 'INVALID')  # Workaround for INFINIBOX-18309 & INFINIBOX-18308 & INFINIBOX-18647 & INFINIBOX-17256
+        # Workaround for INFINIBOX-18309 & INFINIBOX-18308 & INFINIBOX-18647 & INFINIBOX-17256
+        return self.get_state() in ('INACTIVE', 'PROCESS_FINISHED', 'SHUTDOWN', 'INVALID')
 
     def is_master(self):
         return self.get_role() == 'MASTER'
@@ -508,6 +586,7 @@ class Service(InfiniBoxSystemComponent):
 
     def get_node(self):
         return self.get_parent()
+
 
 @InfiniBoxSystemComponents.install_component_type
 class ServiceCluster(InfiniBoxSystemComponent):
@@ -563,7 +642,26 @@ class ServiceCluster(InfiniBoxSystemComponent):
         return self.get_state() == 'ACTIVE'
 
     def is_inactive(self):
-        return self.get_state() == 'INACTIVE'
+        return self.get_state() in ('INACTIVE', 'SHUTDOWN')
+
+
+@InfiniBoxSystemComponents.install_component_type
+class BBU(InfiniBoxSystemComponent):
+    FIELDS = [
+        Field("index", api_name="id", type=int, cached=True),
+        Field("state", cached=False),
+        Field("on_battery", api_name="onBattery", type=bool, cached=False),
+        Field("charging", type=bool, cached=False),
+    ]
+
+    @classmethod
+    def get_url_path(cls, system):
+        return cls.BASE_URL.add_path('ups')
+
+    @cached_method
+    def get_this_url_path(self):
+        return self.get_url_path(self.system).add_path(str(self.get_index()))
+
 
 @InfiniBoxSystemComponents.install_component_type
 class System(InfiniBoxSystemComponent):
@@ -582,7 +680,7 @@ class System(InfiniBoxSystemComponent):
     def safe_get_state(self):
         try:
             return self.get_state()
-        except:
+        except Exception:  # pylint: disable=broad-except
             return None
 
     def is_active(self):
@@ -594,6 +692,6 @@ class System(InfiniBoxSystemComponent):
     def is_down(self):
         return self.safe_get_state() is None
 
-    def refresh(self):
+    def refresh_cache(self):
         data = self.system.api.get(self.get_this_url_path()).get_result()
         self.update_field_cache(data)

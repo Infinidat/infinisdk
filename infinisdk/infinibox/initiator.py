@@ -1,7 +1,6 @@
 from ..core import SystemObject, Field
-from ..core.bindings import RelatedObjectBinding
+from ..core.bindings import RelatedObjectBinding, InitiatorAddressBinding, InitiatorTargetsBinding
 from ..core.type_binder import TypeBinder
-from ..core.translators_and_types import WWNType, WWNListType
 
 
 class InitiatorBinder(TypeBinder):
@@ -16,8 +15,8 @@ class Initiator(SystemObject):
 
     FIELDS = [
         Field("id", api_name="address", is_identity=True),
-        Field("address", type=WWNType),
-        Field("targets", type=WWNListType),
+        Field("address", binding=InitiatorAddressBinding()),
+        Field("targets", type=list, binding=InitiatorTargetsBinding()),
         Field("type"),
         Field("host", api_name="host_id", is_filterable=True, is_sortable=True, binding=RelatedObjectBinding('hosts')),
     ]

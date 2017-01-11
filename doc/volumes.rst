@@ -10,7 +10,7 @@ Creating volumes is done with the ``create`` method:
 
 		>>> v = system.volumes.create(pool=pool, name='my_vol')
 
-.. note:: When a size isn't explicitly stated, a default of 1 GiB is used. You can also provide the size explicitly:
+.. note:: When a size is not explicitly stated, a default of 1 GiB is used. You can also provide the size explicitly:
 
 	  .. code-block:: python
 

@@ -12,6 +12,7 @@ def doctest_context():
     simulator = Simulator(True)
     simulator.activate()
     system = InfiniBox(simulator, auth=('infinidat', '123456'))
+    system.login()
     for user in system.users.to_list():
         if user.id > 0:
             user.delete()

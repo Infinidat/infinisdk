@@ -14,9 +14,11 @@ def doctest_context():
     for i in range(5):
         simulator.volumes.create(pool=pool, name="vol{0}".format(i), size=GiB)
     simulator.activate()
+    system = InfiniBox(simulator, auth=('infinidat', '123456'))
+    system.login()
     try:
         yield {
-            "system": InfiniBox(simulator, auth=('infinidat', '123456'))
+            "system": system,
         }
     finally:
         simulator.deactivate()

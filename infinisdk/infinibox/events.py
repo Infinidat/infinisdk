@@ -1,6 +1,4 @@
 from ..core import Events as EventsBase
-from ..core import Field, SystemObject
-from ..core.api.special_values import Autogenerate
 
 
 class Events(EventsBase):
@@ -14,11 +12,11 @@ class Events(EventsBase):
         return self.object_type(self.system, object_data)
 
     def get_levels(self):
-        sorted_levels = sorted(self._get_events_types()['levels'], key=lambda d: d['value'])
+        sorted_levels = sorted(self.get_events_types()['levels'], key=lambda d: d['value'])
         return [level_info['name'] for level_info in sorted_levels]
 
     def get_levels_name_to_number_mapping(self):
-        return dict((level_info['name'], level_info['value']) for level_info in self._get_events_types()['levels'])
+        return dict((level_info['name'], level_info['value']) for level_info in self.get_events_types()['levels'])
 
     def _get_anti_flooding_path(self):
         return "config/mgmt/events.flooding_detector.enabled"

@@ -1,12 +1,5 @@
 from urlobject import URLObject as URL
-
-from .._compat import iteritems
-from ..core.type_binder import TypeBinder
 from ..core import Field, SystemObject
-from ..core.utils import deprecated
-from .user import User
-
-
 
 class NotificationTarget(SystemObject):
 
@@ -25,6 +18,7 @@ class NotificationTarget(SystemObject):
         Field('from_address', mutable=True),
         Field('username', mutable=True),
         Field('password', mutable=True),
+        Field('visibility', mutable=True),
 
         #### SNMP ####
         Field('version', type=str, mutable=True),
@@ -55,4 +49,3 @@ class NotificationTarget(SystemObject):
                 recipients = [recipients]
             data['recipients'] = recipients
         return self.system.api.post('notifications/targets/{0}/test'.format(self.id), data=data)
-

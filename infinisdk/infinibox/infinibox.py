@@ -1,36 +1,43 @@
 import itertools
-import gossip
+import os
 import weakref
 
+import gossip
 from sentinels import NOTHING
 from urlobject import URLObject as URL
 
+from ..__version__ import __version__
 from .._compat import iteritems
 from ..core.api import APITarget
 from ..core.config import config, get_ini_option
+from ..core.exceptions import CacheMiss, VersionNotSupported
 from ..core.object_query import LazyQuery
-from ..core.exceptions import VersionNotSupported, CacheMiss
-from ..core.utils import deprecated
-from .host_cluster import HostCluster
-from .components import InfiniBoxSystemComponents
+from ..core.utils.environment import get_hostname, get_logged_in_username
 from .capacities import InfiniBoxSystemCapacity
+from .compatibility import Compatibility
+from .components import InfiniBoxSystemComponents
+from .cons_group import ConsGroup
+from .dataset import Datasets
+from .fc_switch import FcSwitch
+from .fc_soft_target import FcSoftTarget
+from .san_client import SanClients
 from .events import Events
+from .export import Export
+from .filesystem import Filesystem
 from .host import Host
+from .host_cluster import HostCluster
+from .initiator import Initiator
+from .ldap_config import LDAPConfig
+from .link import Link
+from .network_interface import NetworkInterface
+from .network_space import NetworkSpace
+from .notification_rule import NotificationRule
+from .notification_target import NotificationTarget
 from .pool import Pool
+from .replica import Replica
 from .user import User
 from .volume import Volume
-from .filesystem import Filesystem
-from .export import Export
-from .network_space import NetworkSpace
-from .network_interface import NetworkInterface
-from .ldap_config import LDAPConfig
-from .notification_target import NotificationTarget
-from .notification_rule import NotificationRule
-from .link import Link
-from .replica import Replica
-from .compatability import Compatability
-from .cons_group import ConsGroup
-from .initiator import Initiator
+from .metadata import SystemMetadata
 
 try:
     from infinisim.core.context import lookup_simulator_by_address
@@ -41,25 +48,31 @@ except ImportError:
 class InfiniBox(APITarget):
     OBJECT_TYPES = [Volume, Pool, Host, HostCluster, User, Filesystem, Export,
                     NetworkSpace, NetworkInterface, Link, Replica, LDAPConfig,
-                    NotificationTarget, NotificationRule, ConsGroup, Initiator]
+                    NotificationTarget, NotificationRule, ConsGroup, Initiator,
+                    FcSwitch, FcSoftTarget]
     SYSTEM_EVENTS_TYPE = Events
     SYSTEM_COMPONENTS_TYPE = InfiniBoxSystemComponents
 
     def _initialize(self):
         super(InfiniBox, self)._initialize()
         self.current_user = _CurrentUserProxy(self)
-        self.compat = Compatability(self)
+        self.compat = Compatibility(self)
         self.capacities = InfiniBoxSystemCapacity(self)
+        self.system_metadata = SystemMetadata(self)
         self._related_systems = []
+        self.datasets = Datasets(self)
+        self.san_clients = SanClients(self)
 
     def check_version(self):
         if not self.compat.can_run_on_system():
             raise VersionNotSupported(self.get_version())
 
-    @property
-    @deprecated(message='Use <system>.host_clusters')
-    def clusters(self):
-        return self.host_clusters
+    def is_field_supported(self, field):
+        if field.new_to_version and self.compat.get_parsed_system_version() < field.new_to_version:
+            return False
+        if field.until_version and self.compat.get_parsed_system_version() > field.until_version:
+            return False
+        return self.compat.is_feature_supported(field.feature_name)
 
     def _get_api_auth(self):
         username = self._get_auth_ini_option('username', None)
@@ -91,9 +104,9 @@ class InfiniBox(APITarget):
     def _is_simulator(self, address):
         return type(address).__name__ == "Infinibox"
 
-    def _get_simulator_address(self, address):
+    def _get_simulator_address(self, address, use_ssl):
         simulator_address = address.get_floating_addresses()[0]
-        return (simulator_address, 80)
+        return (simulator_address, 443 if use_ssl else 80)
 
     def get_approval_failure_codes(self):
         d = config.get_path('infinibox.approval_required_codes')
@@ -126,10 +139,10 @@ class InfiniBox(APITarget):
     def is_mock(self):
         return "mock" in self.get_system_info("name")
 
-    def get_system_info(self, field_name):
-        return self.components.system_component.get_field(field_name,
-                                                          from_cache=True,
-                                                          fetch_if_not_cached=True)
+    def get_system_info(self, field_name, **kwargs):
+        kwargs.setdefault('fetch_if_not_cached', True)
+        kwargs.setdefault('from_cache', True)
+        return self.components.system_component.get_field(field_name, **kwargs)
 
     def get_name(self):
         """
@@ -140,11 +153,11 @@ class InfiniBox(APITarget):
         except CacheMiss:
             return self._get_received_name_or_ip()
 
-    def get_serial(self):
+    def get_serial(self, **kwargs):
         """
         Returns the serial number of the system
         """
-        return self.get_system_info('serial_number')
+        return self.get_system_info('serial_number', **kwargs)
 
     def get_model_name(self):
         """
@@ -159,8 +172,6 @@ class InfiniBox(APITarget):
         return self.get_system_info('version')
 
     def get_revision(self):
-        if self.compat.get_version_major() < '2':
-            return self.get_system_info('revision')
         return self.get_system_info('release')['system']['revision']
 
     def iter_related_systems(self):
@@ -201,7 +212,8 @@ class InfiniBox(APITarget):
             self._related_systems.remove(system_ref)
 
     def _after_login(self):
-        self.components.system_component.refresh()
+        self.components.system_component.refresh_cache()
+
         gossip.trigger('infinidat.sdk.after_login', system=self)
 
     def login(self):
@@ -209,9 +221,36 @@ class InfiniBox(APITarget):
         Verifies the current user against the system
         """
         username, password = self.api.get_auth()
-        res = self.api.post("users/login", data={"username": username, "password": password})
+        login_data = {"username": username, "password": password}
+        if self.compat.has_auth_sessions():
+            login_data['clientid'] = self._get_client_id()
+        res = self.api.post("users/login", data=login_data)
+        self.api.mark_logged_in()
         self._after_login()
         return res
+
+    def is_logged_in(self):
+        """Returns True if login() was called on this system, and logout() hasn't been called yet
+        """
+        return self.api.is_logged_in()
+
+    def mark_logged_in(self):
+        self.api.mark_logged_in()
+
+    def mark_not_logged_in(self):
+        self.api.mark_not_logged_in()
+
+    def logout(self):
+        """
+        Logs out the current user
+        """
+        returned = self.api.post('users/logout', data={})
+        self.api.mark_not_logged_in()
+        self.api.clear_cookies()
+        return returned
+
+    def _get_client_id(self):
+        return 'infinisdk.v{}.{}.{}.{}'.format(__version__, get_hostname(), get_logged_in_username(), os.getpid())
 
     def _get_v1_metadata_generator(self):
         system_metadata = self.api.get('metadata').get_result()
@@ -231,6 +270,20 @@ class InfiniBox(APITarget):
 
     def is_active(self):
         return self.components.system_component.is_active()
+
+    def __hash__(self):
+        return hash(self.get_name())
+
+    def __eq__(self, other):
+        if not isinstance(other, InfiniBox):
+            return NotImplemented
+        try:
+            return self.get_serial(fetch_if_not_cached=False) == other.get_serial(fetch_if_not_cached=False)
+        except CacheMiss:
+            return self.get_api_addresses() == other.get_api_addresses()
+
+    def __ne__(self, other):
+        return not (self == other) # pylint: disable=superfluous-parens
 
 
 class _CurrentUserProxy(object):

@@ -1,7 +1,10 @@
 from api_object_schema import ObjectAPIBinding
+from sentinels import NOTHING
+from munch import Munch
+from .api.special_values import SpecialValue, RawValue
+from .translators_and_types import address_type_factory, host_port_from_api
 
-from .api.special_values import SpecialValue,RawValue
-
+# pylint: disable=abstract-method
 
 class InfiniSDKBinding(ObjectAPIBinding):
 
@@ -83,10 +86,11 @@ class ListOfRelatedObjectIDsBinding(RelatedObjectBinding):
 
 class RelatedComponentBinding(InfiniSDKBinding):
 
-    def __init__(self, collection_name=None, api_index_name=None):
+    def __init__(self, collection_name=None, api_index_name=None, value_for_none=NOTHING):
         super(RelatedComponentBinding, self).__init__()
         self._collection_name = collection_name
         self._api_index_name = api_index_name
+        self._value_for_none = value_for_none
 
     def set_field(self, field):
         super(RelatedComponentBinding, self).set_field(field)
@@ -96,9 +100,13 @@ class RelatedComponentBinding(InfiniSDKBinding):
             self._api_index_name = 'index'
 
     def get_api_value_from_value(self, system, objtype, obj, value):
+        if value is None:
+            return self._value_for_none
         return value.get_field(self._api_index_name)
 
     def get_value_from_api_value(self, system, objtype, obj, value):
+        if value == self._value_for_none or value is None:
+            return None
         kwargs = {self._api_index_name: value}
         return system.components[self._collection_name].get(**kwargs)
 
@@ -125,7 +133,7 @@ class ListOfRelatedObjectBinding(InfiniSDKBinding):
     def _get_collection(self, system):
         return getattr(system, self._collection_name)
 
-    def _get_related_obj(self, system, related_obj_info, obj):
+    def _get_related_obj(self, system, related_obj_info, obj):  # pylint: disable=unused-argument
         return self._get_collection(system).object_type.construct(system, related_obj_info)
 
     def get_value_from_api_value(self, system, objtype, obj, value):
@@ -161,7 +169,7 @@ class PassthroughBinding(InfiniSDKBinding):
 
 class ListToDictBinding(InfiniSDKBinding):
     """
-    Binding for simple api quircks, where api expects the following:
+    Binding for simple api quirks, where api expects the following:
     [ { "name" : value1 }, { "name" : value2 } ]
     InfiniSDK will use a simple list of strings:
     [ value1, value2 ]
@@ -179,3 +187,26 @@ class ListToDictBinding(InfiniSDKBinding):
                 return value.generate()
             return value
         return [{self.key:val} for val in value]
+
+
+class InitiatorAddressBinding(InfiniSDKBinding):
+    def get_value_from_api_object(self, system, objtype, obj, api_obj): # pylint: disable=unused-argument, no-self-use
+        return host_port_from_api(api_obj)
+
+
+class InitiatorTargetsBinding(InfiniSDKBinding):
+    def get_value_from_api_object(self, system, objtype, obj, api_obj): # pylint: disable=unused-argument
+        initiator_type = api_obj.get('type') or obj.get_type(from_cache=True)
+        target_type = address_type_factory(initiator_type)
+        result = []
+        for target_info in api_obj[self._field.api_name]:
+            target = Munch()
+            if system.compat.has_iscsi():
+                target_address = target_info.pop('address')
+                target.node = system.components.nodes.get(index=target_info.pop('node_id'))
+                target.update(target_info)
+            else:
+                target_address = target_info
+            target.address = target_type(target_address)
+            result.append(target)
+        return result
