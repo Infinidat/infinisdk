@@ -33,20 +33,20 @@ if sys.version_info < (3, 0):
 
 setup(name="infinisdk",
       classifiers=[
-          "Programming Language :: Python :: 2.6",
           "Programming Language :: Python :: 2.7",
           "Programming Language :: Python :: 3.3",
           "Programming Language :: Python :: 3.4",
           "Programming Language :: Python :: 3.5",
+          "Programming Language :: Python :: 3.6",
           ],
       description="Infinidat API SDK",
-      license="Proprietary",
+      license="BSD-3",
       author="Infinidat",
       author_email="info@infinidat.com",
       version=__version__, # pylint: disable=E0602
       packages=find_packages(exclude=["tests"]),
 
-      url="http://devdocs.infinidat.com/sphinx/infinisdk/",
+      url="https://infinisdk.readthedocs.org",
 
       install_requires=_INSTALL_REQUIRES,
       scripts=[],
