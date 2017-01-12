@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 from __future__ import print_function
 import datetime
+import itertools
 import os
 import shutil
 import subprocess
@@ -17,11 +18,12 @@ _logger = logbook.Logger(__name__)
 @click.command()
 @click.option("-v", "--verbose", count=True)
 @click.option("-q", "--quiet", count=True)
-def main(verbose, quiet):
+@click.option("--version", default=None)
+def main(verbose, quiet, version):
     with logbook.NullHandler(), logbook.StreamHandler(sys.stderr, level=logbook.WARNING - verbose + quiet, bubble=False):
         repo = Checkout()
         repo.clone()
-        repo.start_release()
+        repo.start_release(new_version=version)
         repo.fetch_ours()
         repo.reshape()
         repo.generate_changelog()
@@ -43,17 +45,16 @@ class Checkout(object):
         self._execute('git flow init -d')
         _logger.info('Checked out to {}', self.path)
 
-    def start_release(self):
-        last_released = self._get_released_version()
-        new_version = last_released + '.post1'
-        self._execute('git flow release start {}.post1'.format(last_released), cwd=self.path)
-        version_file = os.path.join(self.path, 'infinisdk', '__version__.py')
-
-        if not os.path.isfile(version_file):
-            raise RuntimeError('Version file {} does not exist'.format(version_file))
-
-        with open(os.path.join(self.path, 'infinisdk', '__version__.py'), 'w') as f:
-            print('__version__ =', repr(new_version), file=f)
+    def start_release(self, new_version=None):
+        if new_version is None:
+            last_released = self._get_released_version()
+            existing_releases = {tag.strip() for tag in subprocess.check_output('git tag', cwd=self.path, shell=True).decode('utf-8').splitlines()}
+            for i in itertools.count():
+                new_version = '{}.post{}'.format(last_released, i)
+                if new_version not in existing_releases:
+                    break
+        self._new_version = new_version
+        self._execute('git flow release start {}'.format(new_version), cwd=self.path)
 
 
     def fetch_ours(self):
@@ -61,6 +62,14 @@ class Checkout(object):
         self._execute('git reset --hard FETCH_HEAD')
         self._execute('git reset master')
         self._execute('git add .')
+        version_file = os.path.join(self.path, 'infinisdk', '__version__.py')
+
+        if not os.path.isfile(version_file):
+            raise RuntimeError('Version file {} does not exist'.format(version_file))
+
+        with open(os.path.join(self.path, 'infinisdk', '__version__.py'), 'w') as f:
+            print('__version__ =', repr(self._new_version), file=f)
+
 
     def reshape(self):
         shutil.rmtree(os.path.join(self.path, 'tests'))
