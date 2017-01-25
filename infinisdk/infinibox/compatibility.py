@@ -139,6 +139,9 @@ class Compatibility(object):
     def has_sync_job_states(self):
         return self.get_version_as_float() >= 3.0
 
+    def has_sync_replication(self):
+        return self.get_version_as_float() >= 4.0
+
     def has_nas_replication(self):
         return self.has_feature('filesystem_replicas')
 

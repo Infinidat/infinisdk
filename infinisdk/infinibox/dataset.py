@@ -94,7 +94,7 @@ class Dataset(InfiniBoxObject):
     ]
 
     PROVISIONING = namedtuple('Provisioning', ['Thick', 'Thin'])('THICK', 'THIN')
-
+    _forked_obj = None
 
     def _get_snapshot_type(self):
         return 'SNAPSHOT' if self.system.compat.has_writable_snapshots() else 'SNAP'
@@ -180,17 +180,30 @@ class Dataset(InfiniBoxObject):
         self._handle_possible_replication_snapshot(child)
         return child
 
+    def _is_synced_remote_entity(self):
+        if not self.is_rmr_target():
+            return False
+        source_replica = self.get_replica().get_remote_replica()
+        return source_replica.is_type_sync() and not source_replica.is_async_mode()
+
     def trigger_begin_fork(self):
+        assert self._forked_obj is None
+        if self._is_synced_remote_entity():
+            self._forked_obj = self.get_replica().get_remote_entity()
+        else:
+            self._forked_obj = self
         hook_tags = self.get_tags_for_object_operations(self.system)
-        gossip.trigger_with_tags(_BEGIN_FORK_HOOK, {'obj': self}, tags=hook_tags)
+        gossip.trigger_with_tags(_BEGIN_FORK_HOOK, {'obj': self._forked_obj}, tags=hook_tags)
 
     def trigger_cancel_fork(self):
         hook_tags = self.get_tags_for_object_operations(self.system)
-        gossip.trigger_with_tags(_CANCEL_FORK_HOOK, {'obj': self}, tags=hook_tags)
+        gossip.trigger_with_tags(_CANCEL_FORK_HOOK, {'obj': self._forked_obj}, tags=hook_tags)
+        self._forked_obj = None
 
     def trigger_finish_fork(self, child):
         hook_tags = self.get_tags_for_object_operations(self.system)
-        gossip.trigger_with_tags(_FINISH_FORK_HOOK, {'obj': self, 'child': child}, tags=hook_tags)
+        gossip.trigger_with_tags(_FINISH_FORK_HOOK, {'obj': self._forked_obj, 'child': child}, tags=hook_tags)
+        self._forked_obj = None
 
     def _handle_possible_replication_snapshot(self, snapshot):
         fields = snapshot.get_fields(from_cache=True, raw_value=True)

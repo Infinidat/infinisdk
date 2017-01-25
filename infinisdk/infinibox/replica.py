@@ -5,6 +5,7 @@ import logbook
 
 import gossip
 import gadget
+import functools
 
 from ..core import Field, MillisecondsDatetimeType
 from ..core.api.special_values import OMIT
@@ -15,6 +16,14 @@ from ..core.type_binder import TypeBinder
 from ..core.system_object import SystemObject
 
 _logger = logbook.Logger(__name__)
+
+def require_sync_replication(func):
+    @functools.wraps(func)
+    def new_func(self, *args, **kwargs):
+        if self.system.compat.has_sync_replication():
+            return func(self, *args, **kwargs)
+        raise NotImplementedError("not availble in this version")
+    return new_func
 
 
 class ReplicaBinder(TypeBinder):
@@ -187,10 +196,15 @@ class Replica(SystemObject):
         Field('state', type=str, cached=False),
         Field('initial', api_name='is_initial', type=bool, cached=False),
         Field('sync_interval', api_name='sync_interval', type=MillisecondsDeltaType,
-              mutable=True, creation_parameter=True, default=timedelta(seconds=4), is_filterable=True),
+              mutable=True, creation_parameter=True, default=timedelta(seconds=4), is_filterable=True, optional=True),
         Field('rpo', api_name='rpo_value', type=MillisecondsDeltaType, mutable=True, is_filterable=True),
         Field('rpo_state'),
-
+        Field('replication_type', type=str, creation_parameter=True, optional=True, is_filterable=True, new_to="4.0"),
+        Field('sync_state', type=str, new_to="4.0"),
+        Field('async_mode', type=bool, new_to="4.0"),
+        Field('latency', type=int, new_to="4.0"),
+        Field('domino', type=bool, is_filterable=True, new_to="4.0"),
+        Field('assigned_sync_remote_ips', type=list, api_name="_assigned_sync_remote_ips", new_to="4.0"),
     ]
 
     @classmethod
@@ -309,6 +323,36 @@ class Replica(SystemObject):
         self.system.api.post(self.get_this_url_path().add_path('resume'))
         self.invalidate_cache('state')
         gadget.log_operation(self, "resume")
+
+    @require_sync_replication
+    def switch_role(self):
+        """Switches replica role - sync replicas only
+        """
+        self.system.api.post(self.get_this_url_path().add_path('switch_role'))
+        self.invalidate_cache()
+        gadget.log_operation(self, "switch role")
+
+    @require_sync_replication
+    def is_type_sync(self):
+        return self.get_replication_type() == 'SYNC'
+
+    @require_sync_replication
+    def is_type_async(self):
+        return self.get_replication_type() == 'ASYNC'
+
+    @require_sync_replication
+    def change_type_to_async(self):
+        """Switches replica role - sync replicas only
+        """
+        self.system.api.post(self.get_this_url_path().add_path('change_type_to_async'))
+        self.invalidate_cache()
+        gadget.log_operation(self, "change type to async")
+
+    @require_sync_replication
+    def change_type_to_sync(self):
+        self.system.api.post(self.get_this_url_path().add_path('change_type_to_sync'))
+        self.invalidate_cache()
+        gadget.log_operation(self, "change type to sync")
 
     def _validate_can_check_state(self):
         if self.is_target():
