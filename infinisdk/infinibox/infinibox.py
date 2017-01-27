@@ -275,6 +275,9 @@ class InfiniBox(APITarget):
     def is_active(self):
         return self.components.system_component.is_active()
 
+    def is_read_only(self, **kwargs):
+        return self.components.system_component.get_operational_state(**kwargs)['read_only_system']
+
     def __hash__(self):
         return hash(self.get_name())
 
