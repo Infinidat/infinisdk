@@ -189,5 +189,7 @@ def test_is_eq_no_api(infinibox, secondary_infinibox):
     secondary_infinibox.api = None
     assert(infinibox != secondary_infinibox)
 
+
+@relevant_from_version('4.0')
 def test_is_read_only(infinibox):
     assert not infinibox.is_read_only()
