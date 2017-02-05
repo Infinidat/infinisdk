@@ -1,5 +1,6 @@
 from urlobject import URLObject as URL
 from ..core import Field, SystemObject
+from ..core.api.special_values import Autogenerate
 
 class NotificationTarget(SystemObject):
 
@@ -8,7 +9,7 @@ class NotificationTarget(SystemObject):
 
     FIELDS = [
         Field('id', type=int, is_identity=True),
-        Field('name', mutable=True),
+        Field('name', mutable=True, default=Autogenerate("target_{uuid}")),
         Field('protocol'),
 
         #### SMTP #####
