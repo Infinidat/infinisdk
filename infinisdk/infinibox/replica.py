@@ -12,7 +12,7 @@ from ..core.bindings import RelatedObjectBinding
 from ..core.exceptions import (CannotGetReplicaState, InvalidUsageException, TooManyObjectsFound, UnknownSystem)
 from ..core.translators_and_types import MillisecondsDeltaType
 from ..core.type_binder import TypeBinder
-from .system_object import InfiniBoxObject
+from ..core.system_object import SystemObject
 
 _logger = logbook.Logger(__name__)
 
@@ -165,7 +165,7 @@ class ReplicaBinder(TypeBinder):
         return [entity]
 
 
-class Replica(InfiniBoxObject):
+class Replica(SystemObject):
 
     BINDER_CLASS = ReplicaBinder
 
