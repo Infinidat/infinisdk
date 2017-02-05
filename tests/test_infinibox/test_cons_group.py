@@ -16,7 +16,7 @@ def test_create_cg(infinibox, pool):
 @pytest.mark.parametrize('field', ConsGroup.FIELDS)
 def test_get_cg_fields(cg, field):
     field_value = cg.get_field(field.name)
-    if field.name in {'parent', 'rmr_snapshot_guid'}:
+    if field.name in {'parent', 'rmr_snapshot_guid', 'data_snapshot_guid'}:
         assert field_value is None
     else:
         assert loose_isinstance(field_value, field.type.type)
