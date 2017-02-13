@@ -1,5 +1,6 @@
 import gossip
 import functools
+import gadget
 
 from collections import namedtuple
 from ..core import Field, MillisecondsDatetimeType
@@ -115,6 +116,7 @@ class ConsGroup(InfiniBoxObject):
         path = self.get_this_url_path()
         if delete_members is not None:
             path = path.add_query_param('delete_members', str(delete_members).lower())
+        gadget.log_entity_deletion(self)
         with self._get_delete_context():
             self.system.api.delete(path)
 

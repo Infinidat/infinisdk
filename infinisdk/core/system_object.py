@@ -398,6 +398,7 @@ class SystemObject(BaseSystemObject):
         """
         Deletes this object.
         """
+        gadget.log_entity_deletion(self)
         with self._get_delete_context():
             self.system.api.delete(self.get_this_url_path())
 

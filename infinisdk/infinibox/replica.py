@@ -427,6 +427,7 @@ class Replica(SystemObject):
         except UnknownSystem:
             remote_replica = None
 
+        gadget.log_entity_deletion(self)
         with self._get_delete_context():
             resp = self.system.api.delete(path)
 
