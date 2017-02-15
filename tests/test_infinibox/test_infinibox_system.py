@@ -193,3 +193,14 @@ def test_is_eq_no_api(infinibox, secondary_infinibox):
 @relevant_from_version('4.0')
 def test_is_read_only(infinibox):
     assert not infinibox.is_read_only()
+
+
+def test_fields_supported(infinibox, type_binder):
+    broken_fields = []
+    for field in type_binder.fields:
+        try:
+            infinibox.is_field_supported(field)
+        except Exception as e:  # pylint: disable=broad-except
+            broken_fields.append('{}: {!r}'.format(field.name, e))
+    type_name = type_binder.object_type.get_type_name().replace('_', ' ').title()
+    assert not broken_fields, "{}'s broken fields:\n{}".format(type_name, '\n'.join(broken_fields))
