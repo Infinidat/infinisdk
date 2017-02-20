@@ -11,8 +11,8 @@ Creating hosts is the same like creating any other management object through Inf
 .. code-block:: python
 
 		>>> host = system.hosts.create(name='production01')
-		>>> host
-		<Host id=1008>
+		>>> host # doctest: +ELLIPSIS
+		<Host ... id=1008>
 		>>> print(host.get_name())
 		production01
 
@@ -103,20 +103,20 @@ Iterating over available mappings of a host is fairly simple:
 
 		>>> lu = host.map_volume(volume, lun=5)
 
-		>>> host.get_luns()
-		<LogicalUnitsContainer: [<LUN 5: <Host id=1008>-><Volume id=1007>>]>
+		>>> host.get_luns() # doctest: +ELLIPSIS
+		<LogicalUnitsContainer: [<LUN 5: <Host ... id=1008>-><Volume ... id=1007>>]>
 
 		>>> for lun in host.get_luns():
-		...     print("{0} is mapped to {1}".format(lun, lun.volume))
-		<LUN 5: <Host id=1008>-><Volume id=1007>> is mapped to <Volume id=1007>
+		...     print("{0} is mapped to {1}".format(lun, lun.volume)) # doctest: +ELLIPSIS
+		<LUN 5: <Host ... id=1008>-><Volume ... id=1007>> is mapped to <Volume ... id=1007>
 
 There is also a shortcut to iterate over all mappings in the entire system:
 
 .. code-block:: python
 
 		>>> for lun in system.luns:
-		...     print("{0} belongs to {1} and is mapped to {2}".format(lun, lun.mapping_object, lun.volume))
-		<LUN 5: <Host id=1008>-><Volume id=1007>> belongs to <Host id=1008> and is mapped to <Volume id=1007>
+		...     print("{0} belongs to {1} and is mapped to {2}".format(lun, lun.mapping_object, lun.volume)) # doctest: +ELLIPSIS
+		<LUN 5: <Host ... id=1008>-><Volume ... id=1007>> belongs to <Host ... id=1008> and is mapped to <Volume ... id=1007>
 
 
 Here is a code snippet to unmap all volumes in the system that contain 'to remove' in their names:
@@ -131,8 +131,8 @@ Here is a code snippet to unmap all volumes in the system that contain 'to remov
 		...     for lun in mapping_object.get_luns():
 		...         if 'to remove' in lun.volume.get_name():
 		...             print("Unmapping", lun.volume)
-		...             lun.unmap()
-		Unmapping <Volume id=1007>
+		...             lun.unmap() # doctest: +ELLIPSIS
+		Unmapping <Volume ... id=1007>
 
 
 Of course there is a much more convenient shortcut for unmapping a volume from all hosts, using the :meth:`.Volume.unmap` shortcut:
@@ -162,8 +162,8 @@ Manipulating clusters is done with the :class:`infinisdk.infinibox.host_cluster.
 		>>> host.invalidate_cache()
 		>>> [host_lu] = host.get_luns()
 
-		>>> host_lu
-		<LUN 11: <HostCluster id=1012>-><Volume id=1007>>
+		>>> host_lu # doctest: +ELLIPSIS
+		<LUN 11: <HostCluster ... id=1012>-><Volume ... id=1007>>
 		
 		>>> host_lu.is_clustered()
 		True

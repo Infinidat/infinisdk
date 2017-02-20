@@ -34,6 +34,10 @@ def system(is_caching_enabled):  # pylint: disable=unused-argument
     class _System(object):
         def is_field_supported(self, field):  # pylint: disable=unused-argument
             return True
+
+        def get_name(self):  # pylint: disable=unused-argument
+            return 'fake_system_name'
+
     return _System()
 
 

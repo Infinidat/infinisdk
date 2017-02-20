@@ -306,7 +306,7 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
                     value = '?'
                 s += ', {0}={1}'.format(field.name, value)
 
-        return "<{0} {1}>".format(type(self).__name__, s)
+        return "<{0} {1} {2}>".format(type(self).__name__, self.system.get_name(), s)
 
 
 class SystemObject(BaseSystemObject):

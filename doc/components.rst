@@ -58,8 +58,8 @@ Use :meth:`.Node.get_service` to get a service by its name:
 
 .. code-block:: python
        
-       >>> node.get_service('mgmt')
-       <Service id=system:0_rack:1_node:3_service:mgmt>
+       >>> node.get_service('mgmt') # doctest: +ELLIPSIS
+       <Service ... id=system:0_rack:1_node:3_service:mgmt>
 
 Or get a specific service type (core/mgmt):
 
