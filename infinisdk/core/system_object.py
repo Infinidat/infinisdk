@@ -296,7 +296,7 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
         return URL(self.get_url_path(self.system)).add_path(str(self.id))
 
     def __repr__(self):
-        s = 'id={0}'.format(self.id)
+        id_string = 'id={0}'.format(self.id)
         for field in self.FIELDS:
             if field.use_in_repr:
                 try:
@@ -304,9 +304,12 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
                         field.name, from_cache=True, fetch_if_not_cached=False)
                 except CacheMiss:
                     value = '?'
-                s += ', {0}={1}'.format(field.name, value)
+                id_string += ', {0}={1}'.format(field.name, value)
 
-        return "<{0} {1} {2}>".format(type(self).__name__, self.system.get_name(), s)
+        return "<{system_name}:{typename} {id_string}>".format(
+            typename=type(self).__name__,
+            system_name=self.system.get_name(),
+            id_string=id_string)
 
 
 class SystemObject(BaseSystemObject):
