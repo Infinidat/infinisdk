@@ -4,6 +4,7 @@ py27:
     - infradev
   script:
     - pip install -U --pre -i https://pypi.infinidat.com/simple -e .[testing] infinisim
+    - pylint --rcfile .pylintrc infinisdk tests
     - pytest
 
 py34:
@@ -12,10 +13,20 @@ py34:
     - infradev
   script:
     - pip install -U --pre -i https://pypi.infinidat.com/simple -e .[testing] infinisim
+    - pylint --rcfile .pylintrc infinisdk tests
     - pytest
 
 py35:
   image: python:3.5
+  tags:
+    - infradev
+  script:
+    - pip install -U --pre -i https://pypi.infinidat.com/simple -e .[testing] infinisim
+    - pylint --rcfile .pylintrc infinisdk tests
+    - pytest
+
+py36:
+  image: python:3.6
   tags:
     - infradev
   script:
