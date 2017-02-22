@@ -9,7 +9,7 @@ class NotificationTarget(SystemObject):
 
     FIELDS = [
         Field('id', type=int, is_identity=True),
-        Field('name', mutable=True, default=Autogenerate("target_{uuid}")),
+        Field('name', creation_parameter=True, mutable=True, default=Autogenerate("target_{uuid}")),
         Field('protocol'),
 
         #### SMTP #####

@@ -89,7 +89,7 @@ def smtp_target(infinibox):
 @pytest.fixture
 def snmp_target(infinibox):
     return infinibox.notification_targets.create(
-        name='snmp_target', protocol='SNMP', host='somehost', private_key='private',
+        protocol='SNMP', host='somehost', private_key='private',
         username='user', password='password',
         private_protocol='AES',
         version='SNMPv3', engine='engine', auth_type='AuthPriv', auth_protocol='MD5')
@@ -98,5 +98,4 @@ def snmp_target(infinibox):
 @pytest.fixture
 def rsyslog_target(infinibox):
     return infinibox.notification_targets.create(
-        host='hostname',
-        name='syslog_target', protocol='SYSLOG', transport='TCP', facility='local0')
+        host='hostname', protocol='SYSLOG', transport='TCP', facility='local0')
