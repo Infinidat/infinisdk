@@ -22,13 +22,13 @@ def test_disable_enable_network_space_ip(network_space):
     interface_id = network_space.get_interfaces()[0].get_id()
     network_space.add_ip_address(ip_address)
     assert network_space.get_ips() == [
-        {'enabled': True, 'ip_address': ip_address, 'reserved': False, 'vlan_id': 1, 'interface_id': interface_id}]
+        {'enabled': True, 'ip_address': ip_address, 'reserved': False, 'vlan_id': 1, 'interface_id': interface_id, 'type': 'MANAGMENT'}]
     network_space.disable_ip_address(ip_address)
     assert network_space.get_ips() == [
-        {'enabled': False, 'ip_address': ip_address, 'reserved': False, 'vlan_id': 1, 'interface_id': None}]
+        {'enabled': False, 'ip_address': ip_address, 'reserved': False, 'vlan_id': 1, 'interface_id': None, 'type': 'MANAGMENT'}]
     network_space.enable_ip_address(ip_address)
     assert network_space.get_ips() == [
-        {'enabled': True, 'ip_address': ip_address, 'reserved': False, 'vlan_id': 1, 'interface_id': interface_id}]
+        {'enabled': True, 'ip_address': ip_address, 'reserved': False, 'vlan_id': 1, 'interface_id': interface_id, 'type': 'MANAGMENT'}]
     network_space.disable_ip_address(ip_address)
     network_space.remove_ip_address(ip_address)
     assert network_space.get_ips() == []
