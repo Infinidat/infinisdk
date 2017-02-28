@@ -199,12 +199,13 @@ class Replica(SystemObject):
               mutable=True, creation_parameter=True, default=timedelta(seconds=4), is_filterable=True, optional=True),
         Field('rpo', api_name='rpo_value', type=MillisecondsDeltaType, mutable=True, is_filterable=True),
         Field('rpo_state'),
-        Field('replication_type', type=str, creation_parameter=True, optional=True, is_filterable=True, new_to="4.0"),
-        Field('sync_state', type=str, new_to="4.0"),
-        Field('async_mode', type=bool, new_to="4.0"),
-        Field('latency', type=int, new_to="4.0"),
-        Field('domino', type=bool, is_filterable=True, new_to="4.0"),
-        Field('assigned_sync_remote_ips', type=list, api_name="_assigned_sync_remote_ips", new_to="4.0"),
+        Field('replication_type', type=str, creation_parameter=True, optional=True, is_filterable=True,
+              feature_name="sync_replication"),
+        Field('sync_state', type=str, feature_name="sync_replication"),
+        Field('async_mode', type=bool, feature_name="sync_replication"),
+        Field('latency', type=int, feature_name="sync_replication"),
+        Field('domino', type=bool, is_filterable=True, feature_name="sync_replication"),
+        Field('assigned_sync_remote_ips', type=list, api_name="_assigned_sync_remote_ips", feature_name="sync_replication"),
     ]
 
     @classmethod
