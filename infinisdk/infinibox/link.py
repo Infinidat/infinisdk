@@ -20,9 +20,9 @@ class Link(InfiniBoxObject):
         Field('remote_system_name', type=str),
         Field('remote_system_serial_number', type=int),
         Field('link_state', type=str),
-        Field('state_description', type=str),
-        Field('is_local_link_ready_for_sync', type=bool),
-        Field('async_only', type=bool),
+        Field('state_description', type=str, feature_name="sync_replication"),
+        Field('is_local_link_ready_for_sync', type=bool, feature_name="sync_replication"),
+        Field('async_only', type=bool, feature_name="sync_replication"),
     ]
 
     def is_up(self, from_cache=DONT_CARE):
