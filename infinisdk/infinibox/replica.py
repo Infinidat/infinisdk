@@ -1,5 +1,4 @@
 # pylint: disable=no-member
-from datetime import timedelta
 
 import logbook
 
@@ -196,7 +195,7 @@ class Replica(SystemObject):
         Field('state', type=str, cached=False),
         Field('initial', api_name='is_initial', type=bool, cached=False),
         Field('sync_interval', api_name='sync_interval', type=MillisecondsDeltaType,
-              mutable=True, creation_parameter=True, default=timedelta(seconds=4), is_filterable=True, optional=True),
+              mutable=True, creation_parameter=True, is_filterable=True, optional=True),
         Field('rpo', api_name='rpo_value', type=MillisecondsDeltaType, mutable=True, is_filterable=True),
         Field('rpo_state'),
         Field('replication_type', type=str, creation_parameter=True, optional=True, is_filterable=True,
@@ -205,7 +204,8 @@ class Replica(SystemObject):
         Field('async_mode', type=bool, feature_name="sync_replication"),
         Field('latency', type=int, feature_name="sync_replication"),
         Field('domino', type=bool, is_filterable=True, feature_name="sync_replication"),
-        Field('assigned_sync_remote_ips', type=list, api_name="_assigned_sync_remote_ips", feature_name="sync_replication"),
+        Field('assigned_sync_remote_ips', type=list, api_name="_assigned_sync_remote_ips",
+              feature_name="sync_replication"),
     ]
 
     @classmethod

@@ -97,6 +97,7 @@ def test_replicate_volume_shortcut(infinibox, secondary_infinibox, link, create_
     else:
         remote_volume = kwargs['remote_volume'] = secondary_infinibox.volumes.create(
             pool=remote_pool)
+    kwargs['sync_interval'] = timedelta(seconds=4)
     replica = infinibox.replicas.replicate_volume(volume, link=link, **kwargs)
     assert replica is not None
 
@@ -218,7 +219,7 @@ def test_volume_get_replica_too_many(volume, replica, secondary_infinibox):
     remote_pool = secondary_infinibox.pools.create()
     remote_volume = secondary_infinibox.volumes.create(pool=remote_pool)
     replica2 = replica.system.replicas.replicate_entity_existing_target(  # pylint: disable=unused-variable
-        volume, link=replica.get_link(), remote_entity=remote_volume)
+        volume, link=replica.get_link(), remote_entity=remote_volume, sync_interval=timedelta(seconds=4))
     with pytest.raises(TooManyObjectsFound):
         volume.get_replica()
 
@@ -278,6 +279,7 @@ def replica_creation_kwargs(volume, create_remote, secondary_pool):
 
     return {
         'remote_pool_id': secondary_pool.id,
+        'sync_interval': timedelta(seconds=4),
         'entity_pairs': [entity_pair],
     }
 
