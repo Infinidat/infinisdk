@@ -181,7 +181,9 @@ class Dataset(InfiniBoxObject):
         return child
 
     def _is_synced_remote_entity(self):
-        if not self.is_rmr_target():
+        if not self.system.compat.has_sync_replication() or not self.is_rmr_target():
+            return False
+        if isinstance(self, self.system.filesystems.object_type):
             return False
         source_replica = self.get_replica().get_remote_replica()
         return source_replica.is_type_sync() and not source_replica.is_async_mode()
