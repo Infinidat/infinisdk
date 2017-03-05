@@ -137,6 +137,11 @@ class ReplicaBinder(TypeBinder):
 
     def _build_entity_pairs_existing(self, local_entity, remote_entity, member_mappings, use_snapshots,
                                      take_snapshot=False):
+        if local_entity is None:
+            raise InvalidUsageException("Local entity cannot be None")
+        if remote_entity is None:
+            raise InvalidUsageException("Remote entity cannot be None")
+
         returned = []
         if not member_mappings:
             if isinstance(local_entity, local_entity.system.cons_groups.object_type) and \
