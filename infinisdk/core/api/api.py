@@ -136,12 +136,17 @@ class API(object):
             self._use_basic_auth = prev
 
 
+    def __del__(self):
+        if self._session is not None:
+            self._session.close()
+
     def reinitialize_session(self, auth=None):
         prev_auth = self._auth
         if auth is None:
             auth = self._auth
         if self._session is not None:
             prev_cookies = self._session.cookies.copy()
+            self._session.close()
         else:
             prev_cookies = None
         was_logged_in = self.is_logged_in()
