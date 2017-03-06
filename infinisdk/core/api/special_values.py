@@ -7,7 +7,12 @@ from api_object_schema.special_value import SpecialValue
 from ..._compat import iteritems
 
 
-OMIT = SpecialValue()
+class _OmitType(SpecialValue):
+
+    def __repr__(self):
+        return '<OMIT>'
+
+OMIT = _OmitType()
 
 class Autogenerate(SpecialValue):
     """
@@ -50,6 +55,8 @@ class Autogenerate(SpecialValue):
     def get_prefix(cls):
         return cls._prefix
 
+    def __repr__(self):
+        return "<Autogenerate: {}>".format(self.template)
 
 class RawValue(SpecialValue):
     def __init__(self, value):
