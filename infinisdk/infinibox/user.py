@@ -13,7 +13,7 @@ class User(SystemObject):
         Field("email", creation_parameter=True, mutable=True, default=Autogenerate("user_{uuid}@infinidat.com")),
         Field("name", creation_parameter=True, mutable=True, is_filterable=True, is_sortable=True,
               default=Autogenerate("user_{uuid}")),
-        Field("password", creation_parameter=True, add_getter=False, mutable=True, default="12345678"),
+        Field("password", creation_parameter=True, hidden=True, mutable=True, default="12345678"),
         Field("enabled", type=bool, mutable=True, feature_name='user_disabling')
     ]
 

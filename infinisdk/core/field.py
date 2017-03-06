@@ -26,6 +26,7 @@ class Field(FieldBase):
         )
 
     def __init__(self, *args, **kwargs):
+        hidden = kwargs.pop("hidden", False)
         cached = kwargs.pop("cached", NOTHING)
         add_getter = kwargs.pop("add_getter", True)
         add_updater = kwargs.pop("add_updater", True)
@@ -41,10 +42,12 @@ class Field(FieldBase):
             cached = True
         elif cached is NOTHING:
             cached = DONT_CARE
+        #:Specifies if this field is returns though system API
+        self.hidden = hidden
         #:Specifies if this field is cached by default
         self.cached = cached
-        #:Specifies if this field needs to have get function
-        self.add_getter = add_getter
+        #:Specifies if this field needs to have get function (there is no need to add getter for hidden fields)
+        self.add_getter = add_getter and not hidden
         #:Specifies if this field needs to have update function
         self.add_updater = add_updater and self.mutable  # pylint: disable=no-member
         #:Specifies that the object's __repr__ method should use this field to describe the object
