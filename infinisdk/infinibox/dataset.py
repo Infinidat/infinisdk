@@ -185,8 +185,8 @@ class Dataset(InfiniBoxObject):
             return False
         if isinstance(self, self.system.filesystems.object_type):
             return False
-        source_replica = self.get_replica().get_remote_replica()
-        return source_replica.is_type_sync() and not source_replica.is_async_mode()
+        source_replica = self.get_replica().get_remote_replica(safe=True)
+        return source_replica and source_replica.is_type_sync() and not source_replica.is_async_mode()
 
     def trigger_begin_fork(self):
         assert self._forked_obj is None

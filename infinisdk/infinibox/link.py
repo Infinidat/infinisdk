@@ -63,7 +63,7 @@ class Link(InfiniBoxObject):
         with self._get_delete_context():
             self.system.api.delete(url)
 
-    def get_linked_system(self):
+    def get_linked_system(self, safe=False):
         """Get the corresponsing system object at the remote and of the link. For this to work, the SDK user should
         call the register_related_system method of the Infinibox object when a link to a remote system is consructed
         for the first time"""
@@ -73,5 +73,7 @@ class Link(InfiniBoxObject):
                 for ip in network_space.get_ips():
                     if ip.ip_address == remote_host:
                         return related_system
+        if safe:
+            return None
 
         raise UnknownSystem("Could not find a related machine with IP address {0}".format(remote_host))

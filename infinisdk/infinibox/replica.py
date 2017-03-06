@@ -538,11 +538,11 @@ class Replica(SystemObject):
         return local, remote
 
 
-    def get_remote_replica(self, from_cache=False):
+    def get_remote_replica(self, from_cache=False, safe=False):
         """Get the corresponsing replica object in the remote machine. For this to work, the SDK user should
         call the register_related_system method of the Infinibox object when a link to a remote system is consructed
         for the first time"""
-        linked_system = self.get_link(from_cache=from_cache).get_linked_system()
+        linked_system = self.get_link(from_cache=from_cache).get_linked_system(safe=safe)
         if linked_system is None:
             return None
         return linked_system.replicas.get_by_id_lazy(self.get_remote_replica_id(from_cache=from_cache))
