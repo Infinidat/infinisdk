@@ -15,8 +15,7 @@ class Filesystem(Dataset):
               binding=RelatedObjectBinding('filesystems'), is_filterable=True),
         Field("name", creation_parameter=True, mutable=True, is_filterable=True,
               is_sortable=True, default=Autogenerate("fs_{uuid}")),
-        Field("root_mode", creation_parameter=True, optional=True, hidden=True, is_filterable=True,
-              is_sortable=True),
+        Field("root_mode", creation_parameter=True, optional=True, hidden=True),
         Field("atime_mode", is_filterable=True, is_sortable=True),
         Field('data_snapshot_guid', is_filterable=True, is_sortable=True, feature_name="nas_replication"),
     ]
