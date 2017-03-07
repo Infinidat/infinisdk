@@ -16,7 +16,7 @@ class NetworkSpace(InfiniBoxObject):
               binding=ListOfRelatedObjectIDsBinding('network_interfaces')),
         Field("service", creation_parameter=True, default="NAS_SERVICE"),
         Field("ips", creation_parameter=False, mutable=False, type=MunchListType),
-        Field("properties", creation_parameter=False, mutable=False, type=MunchType),
+        Field("properties", creation_parameter=True, mutable=True, optional=True, type=MunchType),
         Field("automatic_ip_failback", creation_parameter=True, mutable=True, optional=True, type=bool),
         Field("mtu", type=int, creation_parameter=True, mutable=True, optional=True),
         Field("rate_limit", type=int, creation_parameter=True, mutable=True, optional=True),
