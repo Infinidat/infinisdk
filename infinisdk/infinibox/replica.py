@@ -288,13 +288,19 @@ class Replica(SystemObject):
             return None
         return self.get_local_entity().id
 
-
     def get_local_data_entities(self):
         """Returns all local volumes, whether as part of a consistency group or a single volume
         """
         if self.is_consistency_group():
             return self.get_local_entity().get_members().to_list()
         return [self.get_local_entity()]
+
+    def get_remote_data_entities(self):
+        """Returns all local volumes, whether as part of a consistency group or a single volume
+        """
+        if self.is_consistency_group():
+            return self.get_remote_entity().get_members().to_list()
+        return [self.get_remote_entity()]
 
     def is_consistency_group(self):
         """Returns whether this replica is configured with a consistency group as a local entity
@@ -346,11 +352,16 @@ class Replica(SystemObject):
 
     @require_sync_replication
     def is_type_sync(self):
-        return self.get_replication_type() == 'SYNC'
+        return self.get_replication_type().lower() == 'sync'
 
     @require_sync_replication
     def is_type_async(self):
-        return self.get_replication_type() == 'ASYNC'
+        return self.get_replication_type().lower() == 'async'
+
+    def is_synchronized(self):
+        """Returns True if this replica is in a synchronized state
+         """
+        return self.get_sync_state().lower() == 'synchronized'
 
     @require_sync_replication
     def change_type_to_async(self):
