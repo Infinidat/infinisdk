@@ -1,10 +1,6 @@
-default: docs
+all:
+	@echo "Please specify target"
+	@exit 2
 
-.PHONY: doc
-doc: docs
-
-docs: env
-	sphinx-build -a -E ./doc ./build/sphinx/html
-
-customer-release: env
+customer-release:
 	python scripts/build_release.py
