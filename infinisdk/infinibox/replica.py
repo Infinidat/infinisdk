@@ -4,7 +4,6 @@ import gossip
 import gadget
 import functools
 
-from ..core.utils import end_reraise_context
 from ..core import Field, MillisecondsDatetimeType
 from ..core.api.special_values import OMIT
 from ..core.bindings import RelatedObjectBinding
@@ -347,20 +346,7 @@ class Replica(SystemObject):
     def switch_role(self):
         """Switches replica role - sync replicas only
         """
-        local_entity = self.get_local_entity()
-        remote_entity = self.get_remote_entity()
-        local_entity.trigger_begin_fork()
-        try:
-            self.system.api.post(self.get_this_url_path().add_path('switch_role'))
-        except Exception: #pylint: disable=broad-except
-            with end_reraise_context():
-                local_entity.trigger_cancel_fork()
-
-        local_entity.trigger_finish_fork(remote_entity)
-        hook_tags = [local_entity.get_type_name().lower()]
-        gossip.trigger_with_tags('infinidat.sdk.dataset_unreadable',
-                                 {'dataset': local_entity}, tags=hook_tags)
-
+        self.system.api.post(self.get_this_url_path().add_path('switch_role'))
         self.invalidate_cache()
         gadget.log_operation(self, "switch role")
 
