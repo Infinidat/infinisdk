@@ -49,6 +49,18 @@ def test_sample(infinibox):
     assert set(sampled_objects).issubset(pools)
 
 
+def test_choose_from_query(infinibox):
+    pool = infinibox.pools.create()
+    infinibox.volumes.create(pool=pool)
+    volume = infinibox.volumes.get_all().choose()
+    assert volume.is_in_system()
+
+
+def test_choose_from_query_not_found(infinibox):
+    with pytest.raises(ObjectNotFound):
+        infinibox.volumes.get_all().choose()
+
+
 @pytest.fixture
 def field(infinibox):
     return infinibox.objects.volumes.fields.id

@@ -6,6 +6,7 @@ from .._compat import xrange  # pylint: disable=redefined-builtin
 from .field import Field
 from .field_filter import FieldFilter
 from .q import QField
+from .exceptions import ObjectNotFound
 
 _DEFAULT_SYSTEM_PAGE_SIZE = 50
 _DEFAULT_PAGE_SIZE = 1000
@@ -29,6 +30,12 @@ class QueryBase(object):
           be a very big collection. This can cause issues like slowness and memory exhaustion
         """
         return list(self)
+
+    def choose(self):
+        try:
+            return self.sample(1)[0]
+        except ValueError:
+            raise ObjectNotFound('No items where returned')
 
     def sample(self, sample_count):
         """
