@@ -361,7 +361,8 @@ class Replica(SystemObject):
     def is_synchronized(self):
         """Returns True if this replica is in a synchronized state
          """
-        return self.get_sync_state().lower() == 'synchronized'
+        sync_state = self.get_sync_state()
+        return sync_state and self.get_sync_state().lower() == 'synchronized'
 
     @require_sync_replication
     def change_type_to_async(self):
@@ -460,8 +461,6 @@ class Replica(SystemObject):
         data = {'entity_pairs': entity_pairs} if entity_pairs is not OMIT else None
         self.system.api.post(self.get_this_url_path().add_path('change_role'), data=data)
         self.invalidate_cache()
-        gadget.log_operation(self, "change role")
-        gossip.trigger_with_tags('infinidat.sdk.replica_after_change_role', {'replica': self}, tags=['infinibox'])
 
     def is_source(self, *args, **kwargs):
         return self.get_role(*args, **kwargs).lower() == 'source'
