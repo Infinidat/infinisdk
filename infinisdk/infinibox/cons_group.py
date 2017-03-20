@@ -149,7 +149,11 @@ class ConsGroup(InfiniBoxObject):
                                          kwargs={'cons_group': self, 'member': member, 'request': data},
                                          tags=['infinibox'])
         trigger_hook('infinidat.sdk.pre_cons_group_add_member')
-        self.system.api.post(self._get_members_url(), data=data)
+        try:
+            self.system.api.post(self._get_members_url(), data=data)
+        except Exception:  # pylint: disable=broad-except
+            with end_reraise_context():
+                trigger_hook('infinidat.sdk.cons_group_add_member_failure')
         trigger_hook('infinidat.sdk.post_cons_group_add_member')
         self.invalidate_cache('members_count')
 
@@ -172,7 +176,17 @@ class ConsGroup(InfiniBoxObject):
         if replica_name is not OMIT:
             path = path.set_query_param('replica_name', replica_name)
 
-        self.system.api.delete(path)
+        trigger_hook = functools.partial(gossip.trigger_with_tags,
+                                         kwargs={'cons_group': self, 'member': member},
+                                         tags=['infinibox'])
+
+        trigger_hook('infinidat.sdk.pre_cons_group_remove_member')
+        try:
+            self.system.api.delete(path)
+        except Exception:  # pylint: disable=broad-except
+            with end_reraise_context():
+                trigger_hook('infinidat.sdk.cons_group_remove_member_failure')
+        trigger_hook('infinidat.sdk.post_cons_group_remove_member')
         self.invalidate_cache('members_count')
 
     def restore(self, snap_group):
