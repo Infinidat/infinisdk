@@ -4,7 +4,7 @@ py27:
     - infradev
   script:
     - pip install -U --pre -i https://pypi.infinidat.com/simple -e .[testing]
-    - pylint --rcfile .pylintrc infinisdk tests
+    - pylint --rcfile .pylintrc -j $(nproc) infinisdk tests
     - pytest
 
 py34:
@@ -13,7 +13,7 @@ py34:
     - infradev
   script:
     - pip install -U --pre -i https://pypi.infinidat.com/simple -e .[testing]
-    - pylint --rcfile .pylintrc infinisdk tests
+    - pylint --rcfile .pylintrc -j $(nproc) infinisdk tests
     - pytest
 
 py35:
@@ -22,7 +22,7 @@ py35:
     - infradev
   script:
     - pip install -U --pre -i https://pypi.infinidat.com/simple -e .[testing]
-    - pylint --rcfile .pylintrc infinisdk tests
+    - pylint --rcfile .pylintrc -j $(nproc) infinisdk tests
     - pytest
 
 py36:
