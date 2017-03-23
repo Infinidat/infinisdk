@@ -214,16 +214,6 @@ def secondary_volume(replica, secondary_infinibox):  # pylint: disable=unused-ar
 
 
 @relevant_from_version('2.0')
-def test_volume_get_replica_too_many(volume, replica, secondary_infinibox):
-    remote_pool = secondary_infinibox.pools.create()
-    remote_volume = secondary_infinibox.volumes.create(pool=remote_pool)
-    replica2 = replica.system.replicas.replicate_entity_existing_target(  # pylint: disable=unused-variable
-        volume, link=replica.get_link(), remote_entity=remote_volume)
-    with pytest.raises(TooManyObjectsFound):
-        volume.get_replica()
-
-
-@relevant_from_version('2.0')
 def test_volume_get_replica_no_replicas(volume):
     with pytest.raises(ObjectNotFound):
         volume.get_replica()
