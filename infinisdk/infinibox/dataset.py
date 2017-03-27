@@ -165,6 +165,11 @@ class Dataset(InfiniBoxObject):
         return self.update_field('size', self.get_size() + delta)
 
     def create_child(self, name=None, write_protected=None, ssd_enabled=None):
+        hook_tags = self.get_tags_for_object_operations(self)
+        gossip.trigger_with_tags('infinidat.sdk.pre_entity_child_creation',
+                                 {'source': self, 'system': self.system},
+                                 tags=hook_tags)
+
         self.invalidate_cache('has_children')
         self.trigger_begin_fork()
         if not name:
@@ -179,10 +184,17 @@ class Dataset(InfiniBoxObject):
         try:
             child = self._create(self.system, self.get_url_path(self.system), data=data,
                                  tags=self.get_tags_for_object_operations(self.system))
-        except Exception:  # pylint: disable=broad-except
+        except Exception as e:  # pylint: disable=broad-except
             with end_reraise_context():
+                gossip.trigger_with_tags('infinidat.sdk.entity_child_failure',
+                                         {'obj': self, 'exception': e, 'system': self.system},
+                                         tags=hook_tags)
                 self.trigger_cancel_fork()
         self.trigger_finish_fork(child)
+        gossip.trigger_with_tags('infinidat.sdk.post_entity_child_creation',
+                                 {'source': self, 'target': child, 'system': self.system},
+                                 tags=hook_tags)
+
         self._handle_possible_replication_snapshot(child)
         return child
 

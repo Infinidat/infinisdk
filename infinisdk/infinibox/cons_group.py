@@ -59,6 +59,11 @@ class ConsGroup(InfiniBoxObject):
     get_snapgroups = get_children
 
     def create_snapgroup(self, name=None, prefix=None, suffix=None):
+        hook_tags = self.get_tags_for_object_operations(self)
+        gossip.trigger_with_tags('infinidat.sdk.pre_entity_child_creation',
+                                 {'source': self, 'system': self.system},
+                                 tags=hook_tags)
+
         self.invalidate_cache('members_count')
         if not name:
             name = self.fields.name.generate_default().generate()
@@ -70,14 +75,21 @@ class ConsGroup(InfiniBoxObject):
             member.trigger_begin_fork()
         try:
             child = self._create(self.system, self.get_url_path(self.system), data=data, tags=None)
-        except Exception:  # pylint: disable=broad-except
+        except Exception as e:  # pylint: disable=broad-except
             with end_reraise_context():
+                gossip.trigger_with_tags('infinidat.sdk.entity_child_failure',
+                                         {'obj': self, 'exception': e, 'system': self.system},
+                                         tags=hook_tags)
                 for member in members:
                     member.trigger_cancel_fork()
         child_members = dict((snapshot.get_parent(from_cache=True).id, snapshot) for snapshot in child.get_members())
         for member in members:
             snap = child_members[member.id]
             member.trigger_finish_fork(snap)
+
+        gossip.trigger_with_tags('infinidat.sdk.post_entity_child_creation',
+                                 {'source': self, 'target': child, 'system': self.system},
+                                 tags=hook_tags)
         return child
 
     create_snapshot = create_snapgroup

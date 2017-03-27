@@ -32,6 +32,10 @@ def _install_hooks():
     gossip.define(_SDK_HOOK('post_pool_move'), tags=['infinibox', 'volume', 'filesystem', 'cons_group'])
     gossip.define(_SDK_HOOK('pool_move_failure'), tags=['infinibox', 'volume', 'filesystem', 'cons_group'])
 
+    gossip.define(_SDK_HOOK('pre_entity_child_creation'), tags=['volume', 'filesystem', 'cons_group'])
+    gossip.define(_SDK_HOOK('post_entity_child_creation'), tags=['volume', 'filesystem', 'cons_group'])
+    gossip.define(_SDK_HOOK('entity_child_creation_failure'), tags=['volume', 'filesystem', 'cons_group'])
+
     gossip.define(_SDK_HOOK('pre_creation_data_validation'), tags=obj_type_name)
 
     gossip.define(_SDK_HOOK('pre_fields_update'), tags=obj_type_name)
