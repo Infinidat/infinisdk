@@ -214,6 +214,12 @@ class ConsGroup(InfiniBoxObject):
         hook_tags = self.get_tags_for_object_operations(self.system)
         source_pool = self.get_pool()
 
+        gossip.trigger_with_tags(
+            'infinidat.sdk.pre_pool_move',
+            {'obj': self, 'with_capacity': with_capacity, 'system': self.system,
+             'target_pool': target_pool, 'source_pool': source_pool},
+            tags=hook_tags)
+
         try:
             self.system.api.post(self.get_this_url_path().add_path('move'), data=data)
         except Exception as e:
