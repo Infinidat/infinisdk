@@ -369,8 +369,10 @@ class SystemObject(BaseSystemObject):
         """
         Creates a new object of this type
         """
+        hook_tags = cls.get_tags_for_object_operations(system)
         gossip.trigger_with_tags('infinidat.sdk.pre_creation_data_validation',
-                                 {'fields': fields, 'system': system, 'cls': cls})
+                                 {'fields': fields, 'system': system, 'cls': cls},
+                                 tags=hook_tags)
         data = get_data_for_object_creation(cls, system, fields)
         return cls._create(system, cls.get_url_path(system), data)
 

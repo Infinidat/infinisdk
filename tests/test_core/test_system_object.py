@@ -29,6 +29,10 @@ class SampleDerivedObject(SampleBaseObject):
         Field(name="cached_by_default", cached=True),
     ]
 
+    @staticmethod
+    def get_type_name():
+        return 'infinibox'
+
 
 class SampleObjectWithStringID(FakeSystemObject):
 
@@ -44,6 +48,10 @@ class FakeSystem(object):
 
     def is_field_supported(self, field):  # pylint: disable=unused-argument
         return True
+
+    @staticmethod
+    def get_type_name():
+        return 'infinibox'
 
 
 def test_num_fields(system):
