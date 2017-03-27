@@ -128,9 +128,20 @@ class ConsGroup(InfiniBoxObject):
         path = self.get_this_url_path()
         if delete_members is not None:
             path = path.add_query_param('delete_members', str(delete_members).lower())
+
+        trigger_hook = functools.partial(gossip.trigger_with_tags,
+                                         kwargs={'cons_group': self, 'delete_members': delete_members},
+                                         tags=['cons_group'])
+        trigger_hook('infinidat.sdk.pre_cons_group_deletion')
         gadget.log_entity_deletion(self)
-        with self._get_delete_context():
-            self.system.api.delete(path)
+        try:
+            with self._get_delete_context():
+                self.system.api.delete(path)
+        except Exception:  # pylint: disable=broad-except
+            with end_reraise_context():
+                trigger_hook('infinidat.sdk.cons_group_deletion_failure')
+
+        trigger_hook('infinidat.sdk.post_cons_group_deletion')
 
     def _get_members_url(self):
         return self.get_this_url_path().add_path('members')
