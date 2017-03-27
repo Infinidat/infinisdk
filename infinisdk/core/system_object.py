@@ -257,9 +257,10 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
         self._update_fields(update_dict)
 
     def _update_fields(self, update_dict):
+        hook_tags = self.get_tags_for_object_operations(self.system)
         gossip.trigger_with_tags(
             'infinidat.sdk.pre_fields_update',
-            {'source': self, 'fields': update_dict}, tags=['infinibox'])
+            {'source': self, 'fields': update_dict}, tags=hook_tags)
 
         for field_name, field_value in list(iteritems(update_dict)):
             try:
@@ -272,7 +273,6 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
             if field.api_name != field_name:
                 update_dict.pop(field_name)
 
-        hook_tags = self.get_tags_for_object_operations(self.system)
         gossip.trigger_with_tags('infinidat.sdk.pre_object_update', {'obj': self, 'data': update_dict},
                                  tags=hook_tags)
         try:

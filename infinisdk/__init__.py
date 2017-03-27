@@ -34,7 +34,7 @@ def _install_hooks():
 
     gossip.define(_SDK_HOOK('pre_creation_data_validation'), tags=obj_type_name)
 
-    gossip.define(_SDK_HOOK('pre_fields_update'), tags=['infinibox'])
+    gossip.define(_SDK_HOOK('pre_fields_update'), tags=obj_type_name)
 
     gossip.define(_SDK_HOOK('pre_cons_group_add_member'), tags=['infinibox'])
     gossip.define(_SDK_HOOK('post_cons_group_add_member'), tags=['infinibox'])
