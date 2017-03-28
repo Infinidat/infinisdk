@@ -56,3 +56,9 @@ class NetworkSpace(InfiniBoxObject):
 
     def get_links(self):
         return self.system.links.find(local_replication_network_space_id=self.id)
+
+    def get_mgmt_ip(self):
+        for ip in self.get_ips():
+            if ip.get('type') == "MANAGEMENT":
+                return ip
+        return self.get_ips()[0]
