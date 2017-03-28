@@ -257,7 +257,7 @@ def link(infinibox, secondary_infinibox, mocked_ecosystem):
     return returned
 
 def create_rmr_network_space(system):
-    returned = create_network_space(infinibox=system, name='rmr',
+    returned = create_network_space(infinibox=system, name='rmr', service="RMR_SERVICE",
         network_config={  # pylint: disable=bad-continuation
             'default_gateway': '1.1.1.1',
             'netmask': '255.0.0.0',

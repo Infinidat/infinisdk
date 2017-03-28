@@ -58,6 +58,8 @@ class NetworkSpace(InfiniBoxObject):
         return self.system.links.find(local_replication_network_space_id=self.id)
 
     def get_mgmt_ip(self):
+        if self.get_service().lower() != "rmr_service":
+            raise NotImplementedError('get_mgmt_ip() is supported on a RMR network spaces')
         for ip in self.get_ips():
             if ip.get('type') == "MANAGEMENT":
                 return ip
