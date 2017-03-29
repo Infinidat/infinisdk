@@ -40,7 +40,8 @@ class QosPolicy(InfiniBoxObject):
     def get_assigned_entities(self):
         def object_factory(system, received_item):
             type_name = received_item['entity_type'].lower()
-            return system.objects.get_binder_by_type_name(type_name).object_type.construct(system, received_item)
+            entity_id = received_item['entity_id']
+            return system.objects.get_binder_by_type_name(type_name).get_by_id_lazy(entity_id)
 
         object_types = (self.system.volumes.object_type, self.system.filesystems.object_type,
                         self.system.pools.object_type)
@@ -48,8 +49,8 @@ class QosPolicy(InfiniBoxObject):
                                 object_types, object_factory)
 
     def assign_entity(self, entity):
-        data = {'entity_id': entity.id, 'entity_type': entity.get_type_name()}
-        self.system.api.post(self.get_this_url_path().add_path('assigned_entities'), data=data)
+        data = {'entity_id': entity.id}
+        self.system.api.post(self.get_this_url_path().add_path('assign'), data=data)
 
     def unassign_entity(self, entity):
         self.system.api.post(self.get_this_url_path().add_path('unassign'),
