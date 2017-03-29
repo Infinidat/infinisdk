@@ -183,6 +183,9 @@ class Replica(SystemObject):
     FIELDS = [
 
         Field('id', type=int, is_identity=True, is_filterable=True),
+        Field('description', is_filterable=True, mutable=True),
+        Field('updated_at', type=int, is_filterable=True, is_sortable=True),
+        Field('created_at', type=int),
         Field('link', api_name='link_id', binding=RelatedObjectBinding('links'),
               type='infinisdk.infinibox.link:Link', creation_parameter=True),
         Field('entity_pairs', type=list, creation_parameter=True),
@@ -192,23 +195,44 @@ class Replica(SystemObject):
         Field('role', type=str, cached=False, is_filterable=True),
         Field('progress', type=int),
         Field('jobs', type=list, cached=False),
+        Field('job_state'),
+        Field('pending_job_count', type=int),
+        Field('throughput', type=int),
         Field('restore_point', type=MillisecondsDatetimeType, is_filterable=True),
         Field('last_synchronized', type=int),
         Field('last_replicated_guid', api_name='_consistent_guid', is_filterable=True),
         Field('state', type=str, cached=False),
+        Field('state_description'),
+        Field('state_reason'),
         Field('initial', api_name='is_initial', type=bool, cached=False),
         Field('sync_interval', api_name='sync_interval', type=MillisecondsDeltaType,
               mutable=True, creation_parameter=True, is_filterable=True, optional=True),
         Field('rpo', api_name='rpo_value', type=MillisecondsDeltaType, mutable=True, is_filterable=True),
         Field('rpo_state'),
+        Field('rpo_type'),
+        Field('remote_cg_id', type=int, is_filterable=True),
+        Field('remote_cg_name', is_filterable=True),
+        Field('local_cg_id', type=int, is_filterable=True),
+        Field('local_cg_name', is_filterable=True),
+        Field('local_pool_id', type=int, is_filterable=True),
+        Field('local_pool_name', is_filterable=True),
+        Field('remote_pool_name', is_filterable=True),
+        Field('staging_area_allocated_size', type=int),
         Field('replication_type', type=str, creation_parameter=True, optional=True, is_filterable=True,
               feature_name="sync_replication"),
         Field('sync_state', type=str, feature_name="sync_replication"),
+        Field('sync_duration', type=int),
         Field('async_mode', type=bool, feature_name="sync_replication"),
         Field('latency', type=int, feature_name="sync_replication"),
         Field('domino', type=bool, is_filterable=True, feature_name="sync_replication"),
         Field('assigned_sync_remote_ips', type=list, api_name="_assigned_sync_remote_ips",
               feature_name="sync_replication"),
+        Field('next_job_start_time', type=MillisecondsDatetimeType),
+        Field('next_restore_point', type=MillisecondsDatetimeType),
+        Field('permanent_failure_wait_interval', type=MillisecondsDeltaType),
+        Field('temporary_failure_retry_interval', type=MillisecondsDeltaType),
+        Field('temporary_failure_retry_count', type=int),
+        Field('started_at', type=MillisecondsDatetimeType),
     ]
 
     @classmethod
@@ -282,11 +306,6 @@ class Replica(SystemObject):
             raise NotImplementedError('get_local_cg() is not supported on a {} replication'.format(self.get_entity_type())) # pragma: no cover  # pylint: disable=line-too-long
 
         return self.get_local_entity()
-
-    def get_local_cg_id(self):
-        if not self.is_consistency_group():
-            return None
-        return self.get_local_entity().id
 
     def get_local_data_entities(self):
         """Returns all local volumes, whether as part of a consistency group or a single volume
