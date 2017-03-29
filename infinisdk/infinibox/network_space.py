@@ -59,7 +59,7 @@ class NetworkSpace(InfiniBoxObject):
 
     def get_mgmt_ip(self):
         if self.get_service().lower() != "rmr_service":
-            raise NotImplementedError('get_mgmt_ip() is supported on a RMR network spaces')
+            raise NotImplementedError('get_mgmt_ip() is supported only on RMR network spaces')
         for ip in self.get_ips():
             if ip.get('type') == "MANAGEMENT":
                 return ip
