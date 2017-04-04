@@ -4,9 +4,26 @@ from ..core.bindings import RelatedObjectBinding
 from ..core.exceptions import UnknownSystem
 from ..core.utils import DONT_CARE
 from .system_object import InfiniBoxObject
+from ..core.type_binder import TypeBinder
+
+class LinkBinder(TypeBinder):
+    def __init__(self, *args, **kwargs):
+        super(LinkBinder, self).__init__(*args, **kwargs)
+        self._cached_related_systems = {}
+
+    def remove_cached_related_system(self, related_system):
+        self._cached_related_systems = {k:v for k, v in self._cached_related_systems.items() if v != related_system}
+
+    def set_cached_related_system(self, link, related_system):
+        self._cached_related_systems[link] = related_system
+
+    def get_cached_related_system(self, link):
+        return self._cached_related_systems.get(link)
 
 
 class Link(InfiniBoxObject):
+
+    BINDER_CLASS = LinkBinder
 
     FIELDS = [
         Field('id', type=int, is_identity=True, is_filterable=True, is_sortable=True),
@@ -67,11 +84,17 @@ class Link(InfiniBoxObject):
         """Get the corresponsing system object at the remote and of the link. For this to work, the SDK user should
         call the register_related_system method of the Infinibox object when a link to a remote system is consructed
         for the first time"""
+        related_system = self.system.links.get_cached_related_system(self)
+        if related_system is not None:
+            return related_system
         remote_host = self.get_remote_host()
         for related_system in self.get_system().iter_related_systems():
+            if safe and not related_system.is_active():
+                continue
             for network_space in related_system.network_spaces.get_all():
                 for ip in network_space.get_ips():
                     if ip.ip_address == remote_host:
+                        self.system.links.set_cached_related_system(self, related_system)
                         return related_system
         if safe:
             return None

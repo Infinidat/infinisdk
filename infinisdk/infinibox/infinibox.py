@@ -212,6 +212,8 @@ class InfiniBox(APITarget):
         if system_ref is not None:
             self._related_systems.remove(system_ref)
 
+        self.links.remove_cached_related_system(system)
+
     def _after_login(self):
         self.components.system_component.refresh_cache()
 

@@ -195,8 +195,8 @@ def test_remote_replica(request, replica, secondary_volume, secondary_infinibox)
 @relevant_from_version('2.0')
 def test_remote_replica_without_remote_system(replica, secondary_infinibox):  # pylint: disable=unused-argument
     remote_replica = replica.get_remote_replica()
-    replica.system._related_systems.pop()  # pylint: disable=protected-access
-    remote_replica.system._related_systems.pop()  # pylint: disable=protected-access
+    replica.system.unregister_related_system(remote_replica.system)  # pylint: disable=protected-access
+    remote_replica.system.unregister_related_system(replica.system)  # pylint: disable=protected-access
     flux.current_timeline.sleep_wait_all_scheduled()
     assert replica.is_idle()
     with pytest.raises(InfiniSDKException):
