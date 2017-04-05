@@ -239,14 +239,6 @@ class Replica(SystemObject):
     def is_supported(cls, system):
         return system.compat.has_replication()
 
-    @classmethod
-    def _create(cls, system, path, data, *args, **kwargs):
-        # workaround to preserve older behavior for async creation
-        if data.get('replication_type', 'ASYNC').lower() == 'async':
-            data.setdefault('sync_interval', 4000)
-        return super(Replica, cls)._create(system, path, data, *args, **kwargs)
-
-
     def _get_entity_collection(self):
         if self.is_filesystem():
             return self.system.filesystems
