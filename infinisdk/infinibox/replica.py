@@ -8,7 +8,7 @@ from ..core import Field, MillisecondsDatetimeType
 from ..core.api.special_values import OMIT
 from ..core.bindings import RelatedObjectBinding
 from ..core.exceptions import CannotGetReplicaState, InvalidUsageException, TooManyObjectsFound, UnknownSystem
-from ..core.translators_and_types import MillisecondsDeltaType
+from ..core.translators_and_types import MillisecondsDeltaType, CapacityType
 from ..core.type_binder import TypeBinder
 from ..core.system_object import SystemObject
 
@@ -184,8 +184,8 @@ class Replica(SystemObject):
 
         Field('id', type=int, is_identity=True, is_filterable=True),
         Field('description', is_filterable=True, mutable=True),
-        Field('updated_at', type=int, is_filterable=True, is_sortable=True),
-        Field('created_at', type=int),
+        Field('updated_at', type=MillisecondsDatetimeType, is_filterable=True, is_sortable=True),
+        Field('created_at', type=MillisecondsDatetimeType, is_sortable=True, is_filterable=True),
         Field('link', api_name='link_id', binding=RelatedObjectBinding('links'),
               type='infinisdk.infinibox.link:Link', creation_parameter=True),
         Field('entity_pairs', type=list, creation_parameter=True),
@@ -217,7 +217,7 @@ class Replica(SystemObject):
         Field('local_pool_id', type=int, is_filterable=True),
         Field('local_pool_name', is_filterable=True),
         Field('remote_pool_name', is_filterable=True),
-        Field('staging_area_allocated_size', type=int),
+        Field('staging_area_allocated_size', type=CapacityType),
         Field('replication_type', type=str, creation_parameter=True, optional=True, is_filterable=True,
               feature_name="sync_replication"),
         Field('sync_state', type=str, feature_name="sync_replication"),
