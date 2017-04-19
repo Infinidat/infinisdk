@@ -23,8 +23,6 @@ class QosPolicy(InfiniBoxObject):
         Field("burst_enabled", type=bool, creation_parameter=True, optional=True, is_filterable=True, is_sortable=True),
         Field("burst_factor", type=float, creation_parameter=True, mutable=True, optional=True, is_filterable=True,
               is_sortable=True),
-        Field("burst_duration_seconds", type=int, creation_parameter=True, mutable=True, optional=True,
-              is_filterable=True, is_sortable=True),
     ]
 
     @classmethod
