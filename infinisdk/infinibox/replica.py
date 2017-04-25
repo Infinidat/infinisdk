@@ -4,6 +4,7 @@ import gossip
 import gadget
 import functools
 
+from ..core.utils import end_reraise_context
 from ..core import Field, MillisecondsDatetimeType
 from ..core.api.special_values import OMIT
 from ..core.bindings import RelatedObjectBinding
@@ -269,8 +270,32 @@ class Replica(SystemObject):
         else:
             return self.system.volumes.get_by_id_lazy(pair['local_entity_id'])
 
+    def _get_entity_tags(self):
+        if self.is_consistency_group():
+            return ['cons_group']
+
+        if self.is_filesystem():
+            return ['filesystem']
+        else:
+            return ['volume']
+
     def expose_last_consistent_snapshot(self):
-        resp = self.system.api.post(self.get_this_url_path().add_path('expose_last_consistent_snapshot')).get_result()
+        local_entity = self.get_local_entity()
+        tags = self._get_entity_tags()
+
+        gossip.trigger_with_tags(
+            'infinidat.sdk.pre_replication_snapshot_expose', {'source': local_entity, 'system': self.system}, tags=tags)
+
+
+        try:
+            resp = self.system.api.post(
+                self.get_this_url_path().add_path('expose_last_consistent_snapshot')).get_result()
+        except Exception as e:  # pylint: disable=broad-except
+            with end_reraise_context():
+                gossip.trigger_with_tags('infinidat.sdk.replication_snapshot_expose_failure',
+                                         {'obj': self, 'exception': e, 'system': self.system},
+                                         tags=tags)
+
         if self.is_consistency_group():
             snapshot_id = resp['_local_reclaimed_sg_id']
         else:
@@ -279,6 +304,8 @@ class Replica(SystemObject):
             return None
         returned = self._get_entity_collection().get_by_id_lazy(snapshot_id)
         gossip.trigger_with_tags('infinidat.sdk.replica_snapshot_created', {'snapshot': returned}, tags=['infinibox'])
+        gossip.trigger_with_tags('infinidat.sdk.post_replication_snapshot_expose',
+                                 {'source': local_entity, 'snapshot': returned, 'system': self.system}, tags=tags)
         gadget.log_operation(self, "expose last consistent snapshot")
         return returned
 
