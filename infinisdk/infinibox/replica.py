@@ -279,22 +279,43 @@ class Replica(SystemObject):
         else:
             return ['volume']
 
-    def expose_last_consistent_snapshot(self):
-        local_entity = self.get_local_entity()
-        tags = self._get_entity_tags()
+    @staticmethod
+    def _notify_pre_exposure(replica):
+        if replica is None or not replica.is_in_system():
+            return
 
         gossip.trigger_with_tags(
-            'infinidat.sdk.pre_replication_snapshot_expose', {'source': local_entity, 'system': self.system}, tags=tags)
+            'infinidat.sdk.pre_replication_snapshot_expose',
+            {'source': replica.get_local_entity(), 'system': replica.system}, tags=replica._get_entity_tags())  # pylint: disable=protected-access
 
+    @staticmethod
+    def _notify_exposure_failure(replica, exception):
+        if replica is None or not replica.is_in_system():
+            return
+
+        gossip.trigger_with_tags('infinidat.sdk.replication_snapshot_expose_failure',
+                                 {'obj': replica, 'exception': exception, 'system': replica.system},
+                                 tags=replica._get_entity_tags())  # pylint: disable=protected-access
+
+    @staticmethod
+    def _notify_post_exposure(replica, snapshot):
+        if replica is None or not replica.is_in_system():
+            return
+
+        gossip.trigger_with_tags(
+            'infinidat.sdk.post_replication_snapshot_expose',
+            {'source': replica.get_local_entity(), 'snapshot': snapshot, 'system': replica.system},
+            tags=replica._get_entity_tags())  # pylint: disable=protected-access
+
+    def expose_last_consistent_snapshot(self):
+        self._notify_pre_exposure(self)
 
         try:
             resp = self.system.api.post(
                 self.get_this_url_path().add_path('expose_last_consistent_snapshot')).get_result()
         except Exception as e:  # pylint: disable=broad-except
             with end_reraise_context():
-                gossip.trigger_with_tags('infinidat.sdk.replication_snapshot_expose_failure',
-                                         {'obj': self, 'exception': e, 'system': self.system},
-                                         tags=tags)
+                self._notify_exposure_failure(self, e)
 
         if self.is_consistency_group():
             snapshot_id = resp['_local_reclaimed_sg_id']
@@ -304,8 +325,7 @@ class Replica(SystemObject):
             return None
         returned = self._get_entity_collection().get_by_id_lazy(snapshot_id)
         gossip.trigger_with_tags('infinidat.sdk.replica_snapshot_created', {'snapshot': returned}, tags=['infinibox'])
-        gossip.trigger_with_tags('infinidat.sdk.post_replication_snapshot_expose',
-                                 {'source': local_entity, 'snapshot': returned, 'system': self.system}, tags=tags)
+        self._notify_post_exposure(self, returned)
         gadget.log_operation(self, "expose last consistent snapshot")
         return returned
 
@@ -539,18 +559,30 @@ class Replica(SystemObject):
         except UnknownSystem:
             remote_replica = None
 
+        if retain_staging_area:
+            self._notify_pre_exposure(self)
+            self._notify_pre_exposure(remote_replica)
+
         gadget.log_entity_deletion(self)
         with self._get_delete_context():
-            resp = self.system.api.delete(path)
+            try:
+                resp = self.system.api.delete(path)
+            except Exception as e:  # pylint: disable=broad-except
+                with end_reraise_context():
+                    if retain_staging_area:
+                        self._notify_exposure_failure(self, e)
+                        self._notify_exposure_failure(remote_replica, e)
 
         if retain_staging_area:
             local, remote = self._get_deletion_result(resp.get_result(), remote_replica)
         else:
             local = remote = None
-        for snap in local, remote:
+        for replica, snap in (self, local), (remote_replica, remote):
             if snap is not None:
                 gossip.trigger_with_tags(
                     'infinidat.sdk.replica_snapshot_created', {'snapshot': snap}, tags=['infinibox'])
+
+                self._notify_post_exposure(replica, snap)
         return local, remote
 
     def _any_sync_job_state_contains(self, state):
