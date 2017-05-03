@@ -17,6 +17,7 @@ class Filesystem(Dataset):
               is_sortable=True, default=Autogenerate("fs_{uuid}")),
         Field("root_mode", creation_parameter=True, hidden=True, optional=True),
         Field("atime_mode", is_filterable=True, is_sortable=True),
+        Field("established", api_name="_is_established", type=bool, is_filterable=True, is_sortable=True),
         Field('data_snapshot_guid', is_filterable=True, is_sortable=True, feature_name="nas_replication"),
     ]
 
