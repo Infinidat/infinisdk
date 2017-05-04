@@ -467,7 +467,8 @@ class Replica(SystemObject):
         """
         self._validate_can_check_state()
         if self.system.compat.has_sync_job_states():
-            return not self.is_replicating() and not self.is_initial_replication() and self.is_active()
+            return not self.is_replicating() and not self.is_initial_replication()\
+                and not self.is_stalled() and self.is_active()
         return self.get_state(*args, **kwargs).lower() == 'idle'
 
     def is_auto_suspended(self, *args, **kwargs):
@@ -481,7 +482,7 @@ class Replica(SystemObject):
         """
         self._validate_can_check_state()
         if self.system.compat.has_sync_job_states():
-            return self.is_initial() and self._any_sync_job_state_contains('initializing')
+            return self.is_initial() and self._any_sync_job_state_contains(['initializing', 'stalled'])
         return 'initial' in self.get_state(*args, **kwargs).lower()
 
     def is_pending(self):
@@ -517,7 +518,7 @@ class Replica(SystemObject):
         self._validate_can_check_state()
         if not self.system.compat.has_sync_job_states():
             raise NotImplementedError("Checking for stalled is not supported on systems without sync job states")
-        return self._any_sync_job_state_contains('stall')
+        return self._any_sync_job_state_contains('stalled')
 
     def is_active(self, *args, **kwargs):
         self._validate_can_check_state()
@@ -587,11 +588,14 @@ class Replica(SystemObject):
                 self._notify_post_exposure(replica, snap)
         return local, remote
 
-    def _any_sync_job_state_contains(self, state):
-        state = state.lower()
-        for sync_job in self._get_jobs():
-            if sync_job['state'] is not None and state == sync_job['state'].lower():
-                return True
+    def _any_sync_job_state_contains(self, states):
+        if not isinstance(states, list):
+            states = [states]
+        for state in states:
+            state = state.lower()
+            for sync_job in self._get_jobs():
+                if sync_job['state'] is not None and state == sync_job['state'].lower():
+                    return True
         return False
 
     def _get_deletion_result(self, result, remote_replica):
