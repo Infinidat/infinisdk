@@ -416,13 +416,15 @@ class Replica(SystemObject):
         self.invalidate_cache()
         gadget.log_operation(self, "switch role")
 
-    @require_sync_replication
     def is_type_sync(self):
-        return self.get_replication_type().lower() == 'sync'
+        if self.system.compat.has_sync_replication():
+            return self.get_replication_type().lower() == 'sync'
+        return False
 
-    @require_sync_replication
     def is_type_async(self):
-        return self.get_replication_type().lower() == 'async'
+        if self.system.compat.has_sync_replication():
+            return self.get_replication_type().lower() == 'async'
+        return True
 
     def is_synchronized(self):
         """Returns True if this replica is in a synchronized state
