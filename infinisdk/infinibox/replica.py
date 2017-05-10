@@ -427,11 +427,35 @@ class Replica(SystemObject):
             return self.get_replication_type().lower() == 'async'
         return True
 
-    def is_synchronized(self):
-        """Returns True if this replica is in a synchronized state
-         """
+    def _is_in_sync_state(self, sync_state):
         sync_state = self.get_sync_state()
-        return sync_state and self.get_sync_state().lower() == 'synchronized'
+        return sync_state and self.get_sync_state().lower() == sync_state.lower()
+
+    def is_synchronized(self):
+        """Returns True if this replica sync state is 'SYNCHRONIZED'
+         """
+        return self._is_in_sync_state('synchronized')
+
+    def is_sync_in_progress(self):
+        """Returns True if this replica sync state is 'SYNC_IN_PROGRESS'
+         """
+        return self._is_in_sync_state('sync_in_progress')
+
+    def is_initializing(self):
+        """Returns True if the replica sync state is 'INITIALIZING'
+         """
+        return self._is_in_sync_state('initializing')
+
+    def is_initializing_pending(self):
+        """Returns True if the replica sync state is 'INITIALIZING_PENDING'
+         """
+        return self._is_in_sync_state('initializing_pending')
+
+    def is_out_of_sync(self):
+        """Returns True if the replica sync state is 'OUT_OF_SYNC'
+         """
+        return self._is_in_sync_state('out_of_sync')
+
 
     @require_sync_replication
     def change_type_to_async(self):
