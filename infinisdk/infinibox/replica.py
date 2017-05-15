@@ -398,8 +398,9 @@ class Replica(SystemObject):
         """
         returned = self.system.api.post(self.get_this_url_path().add_path('sync'),
                                         headers={'X-INFINIDAT-RAW-RESPONSE': 'true'})
-        gadget.log_operation(self, "sync")
-        return returned.get_result()
+        result = returned.get_result()
+        gadget.log_operation(self, "sync", params=result)
+        return result
 
     def resume(self):
         """Resumes this replica
