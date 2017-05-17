@@ -247,7 +247,6 @@ class Replica(SystemObject):
             data.setdefault('sync_interval', 4000)
         return super(Replica, cls)._create(system, path, data, *args, **kwargs)
 
-
     def _get_entity_collection(self):
         if self.is_filesystem():
             return self.system.filesystems
@@ -595,6 +594,10 @@ class Replica(SystemObject):
         with self._get_delete_context():
             try:
                 resp = self.system.api.delete(path)
+                gossip.trigger_with_tags(
+                    'infinidat.sdk.replica_deleted',
+                    {'replica': self, 'entity_pairs': resp.get_result().get('entity_pairs')},
+                    tags=['infinibox'])
             except Exception as e:  # pylint: disable=broad-except
                 with end_reraise_context():
                     if retain_staging_area:
