@@ -594,9 +594,13 @@ class Replica(SystemObject):
         with self._get_delete_context():
             try:
                 resp = self.system.api.delete(path)
+                entity_pairs = None
+                result = resp.get_result()
+                if result:
+                    entity_pairs = result.get('entity_pairs')
                 gossip.trigger_with_tags(
                     'infinidat.sdk.replica_deleted',
-                    {'replica': self, 'entity_pairs': resp.get_result().get('entity_pairs')},
+                    {'replica': self, 'entity_pairs': entity_pairs},
                     tags=['infinibox'])
             except Exception as e:  # pylint: disable=broad-except
                 with end_reraise_context():
