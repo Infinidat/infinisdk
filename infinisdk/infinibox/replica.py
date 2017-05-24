@@ -230,9 +230,9 @@ class Replica(SystemObject):
               feature_name="sync_replication"),
         Field('next_job_start_time', type=MillisecondsDatetimeType),
         Field('next_restore_point', type=MillisecondsDatetimeType),
-        Field('permanent_failure_wait_interval', type=MillisecondsDeltaType),
-        Field('temporary_failure_retry_interval', type=MillisecondsDeltaType),
-        Field('temporary_failure_retry_count', type=int),
+        Field('permanent_failure_wait_interval', type=MillisecondsDeltaType, mutable=True),
+        Field('temporary_failure_retry_interval', type=MillisecondsDeltaType, mutable=True),
+        Field('temporary_failure_retry_count', type=int, mutable=True),
         Field('started_at', type=MillisecondsDatetimeType),
     ]
 
