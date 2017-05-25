@@ -255,7 +255,7 @@ class Replica(SystemObject):
         return self.system.cons_groups
 
     def get_local_entity(self):
-        """Returns the local entity used for replication, be it a volume or a consistency group.
+        """Returns the local entity used for replication, be it a volume, filesystem or a consistency group
         """
         if self.is_consistency_group():
             return self.system.cons_groups.get_by_id_lazy(self.get_field('local_cg_id'))
@@ -354,14 +354,14 @@ class Replica(SystemObject):
         return self.get_local_entity()
 
     def get_local_data_entities(self):
-        """Returns all local volumes, whether as part of a consistency group or a single volume
+        """Returns all local volumes, whether as part of a consistency group, filesystem or a single volume
         """
         if self.is_consistency_group():
             return self.get_local_entity().get_members().to_list()
         return [self.get_local_entity()]
 
     def get_remote_data_entities(self):
-        """Returns all local volumes, whether as part of a consistency group or a single volume
+        """Returns all local volumes, whether as part of a consistency group, filesystem or a single volume
         """
         if self.is_consistency_group():
             return self.get_remote_entity().get_members().to_list()
