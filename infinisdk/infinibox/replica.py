@@ -427,8 +427,8 @@ class Replica(SystemObject):
         return True
 
     def _is_in_sync_state(self, sync_state):
-        sync_state = self.get_sync_state()
-        return sync_state and self.get_sync_state().lower() == sync_state.lower()
+        current_sync_state = self.get_sync_state()
+        return current_sync_state and current_sync_state.lower() == sync_state.lower()
 
     def is_synchronized(self):
         """Returns True if this replica sync state is 'SYNCHRONIZED'
