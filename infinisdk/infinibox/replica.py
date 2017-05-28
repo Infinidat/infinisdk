@@ -221,7 +221,7 @@ class Replica(SystemObject):
         Field('staging_area_allocated_size', type=CapacityType),
         Field('replication_type', type=str, creation_parameter=True, optional=True, is_filterable=True,
               feature_name="sync_replication"),
-        Field('sync_state', type=str, feature_name="sync_replication"),
+        Field('sync_state', type=str, feature_name="sync_replication", cached=False),
         Field('sync_duration', type=int),
         Field('async_mode', type=bool, feature_name="sync_replication"),
         Field('latency', type=int, feature_name="sync_replication"),
