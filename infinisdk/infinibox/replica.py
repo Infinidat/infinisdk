@@ -223,7 +223,7 @@ class Replica(SystemObject):
               feature_name="sync_replication"),
         Field('sync_state', type=str, feature_name="sync_replication", cached=False),
         Field('sync_duration', type=int),
-        Field('async_mode', type=bool, feature_name="sync_replication"),
+        Field('async_mode', type=bool, feature_name="sync_replication", cached=False),
         Field('latency', type=int, feature_name="sync_replication"),
         Field('domino', type=bool, is_filterable=True, feature_name="sync_replication"),
         Field('assigned_sync_remote_ips', type=list, api_name="_assigned_sync_remote_ips",
