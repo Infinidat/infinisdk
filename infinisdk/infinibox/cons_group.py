@@ -8,7 +8,7 @@ from ..core.api.special_values import OMIT
 from ..core.object_query import PolymorphicQuery
 from ..core.bindings import RelatedObjectBinding
 from ..core.api.special_values import Autogenerate
-from ..core.utils import end_reraise_context
+from ..core.utils import end_reraise_context, handle_possible_replication_snapshot
 from .system_object import InfiniBoxObject
 
 _CG_SUFFIX = Autogenerate('_{timestamp}')
@@ -86,6 +86,7 @@ class ConsGroup(InfiniBoxObject):
         for member in members:
             snap = child_members[member.id]
             member.trigger_finish_fork(snap)
+            handle_possible_replication_snapshot(snap)
 
         gossip.trigger_with_tags('infinidat.sdk.post_entity_child_creation',
                                  {'source': self, 'target': child, 'system': self.system},

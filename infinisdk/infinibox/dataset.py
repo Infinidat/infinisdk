@@ -6,7 +6,7 @@ from collections import namedtuple
 from mitba import cached_method
 from vintage import deprecated
 from ..core.api.special_values import Autogenerate
-from ..core.utils import end_reraise_context, DONT_CARE
+from ..core.utils import end_reraise_context, DONT_CARE, handle_possible_replication_snapshot
 from ..core.exceptions import InvalidOperationException, ObjectNotFound, TooManyObjectsFound
 from ..core.type_binder import TypeBinder, PolymorphicBinder
 from ..core import Field, CapacityType, MillisecondsDatetimeType
@@ -195,7 +195,7 @@ class Dataset(InfiniBoxObject):
                                  {'source': self, 'target': child, 'system': self.system},
                                  tags=hook_tags)
 
-        self._handle_possible_replication_snapshot(child)
+        handle_possible_replication_snapshot(child)
         return child
 
     def _is_synced_remote_entity(self):
@@ -224,12 +224,6 @@ class Dataset(InfiniBoxObject):
         hook_tags = self.get_tags_for_object_operations(self.system)
         gossip.trigger_with_tags(_FINISH_FORK_HOOK, {'obj': self._forked_obj, 'child': child}, tags=hook_tags)
         self._forked_obj = None
-
-    def _handle_possible_replication_snapshot(self, snapshot):
-        fields = snapshot.get_fields(from_cache=True, raw_value=True)
-        if fields.get('rmr_snapshot_guid', None) or fields.get('data_snapshot_guid', None):
-            gossip.trigger_with_tags('infinidat.sdk.replica_snapshot_created', {'snapshot': snapshot},
-                                     tags=['infinibox'])
 
     @deprecated
     def create_clone(self, name=None):
