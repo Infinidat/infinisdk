@@ -177,3 +177,17 @@ Deleting an export is done with :meth:`.Export.delete`:
 .. code-block:: python
 
 		>>> export.delete()
+
+Tree Quotas
+------------
+
+Each filesystem has a ``treeqs`` member, which is a collection of its TreeQ's:
+
+.. code-block:: python
+
+   >>> fs.treeqs.to_list()
+   []
+   >>> treeq = fs.treeqs.create(path='/path', soft_capacity=GB, hard_inodes=200)
+   >>> print(treeq.get_capacity_state())
+   BELOW_QUOTA
+

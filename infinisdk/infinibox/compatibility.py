@@ -148,6 +148,9 @@ class Compatibility(object):
     def has_qos(self):
         return self.has_feature('qos')
 
+    def has_treeq(self):
+        return self.has_feature('treeq')
+
 _VERSION_TUPLE_LEN = 5
 
 
