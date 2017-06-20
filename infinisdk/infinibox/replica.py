@@ -35,12 +35,12 @@ class ReplicaBinder(TypeBinder):
         """
         return self.replicate_entity(entity=volume, remote_entity=remote_volume, **kw)
 
-    def replicate_cons_group(self, cg, remote_cg=None, **kw):
+    def replicate_cons_group(self, cg, remote_cg=None, remote_pool=OMIT, **kw):
         """Convenience wrapper around :func:`ReplicaBinder.replicate_entity`
 
         :seealso: :meth:`.replicate_entity`
         """
-        return self.replicate_entity(entity=cg, remote_entity=remote_cg, **kw)
+        return self.replicate_entity(entity=cg, remote_entity=remote_cg, remote_pool=remote_pool, **kw)
 
 
     def replicate_entity(self, entity, link, remote_pool=None, remote_entity=None, **kw):
@@ -57,7 +57,7 @@ class ReplicaBinder(TypeBinder):
             return self.replicate_entity_create_target(entity, link, remote_pool=remote_pool, **kw)
         return self.replicate_entity_existing_target(entity, link, remote_entity=remote_entity, **kw)
 
-    def replicate_entity_create_target(self, entity, link, remote_pool, **kw):
+    def replicate_entity_create_target(self, entity, link, remote_pool=OMIT, **kw):
         """Replicates an entity, creating its remote replica on the specified pool
 
         :param remote_pool: Remote pool to use for entity creation on the remote side
