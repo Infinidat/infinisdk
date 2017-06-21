@@ -200,7 +200,7 @@ class Replica(SystemObject):
         Field('pending_job_count', type=int),
         Field('throughput', type=int),
         Field('restore_point', type=MillisecondsDatetimeType, is_filterable=True),
-        Field('last_synchronized', type=int),
+        Field('last_synchronized', type=MillisecondsDatetimeType),
         Field('last_replicated_guid', api_name='_consistent_guid', is_filterable=True),
         Field('state', type=str, cached=False),
         Field('state_description'),
