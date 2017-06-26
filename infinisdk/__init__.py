@@ -59,7 +59,17 @@ def _install_hooks():
     gossip.define(_SDK_HOOK('post_replication_snapshot_expose'), tags=['volume', 'filesystem', 'cons_group'])
     gossip.define(_SDK_HOOK('replication_snapshot_expose_failure'), tags=['volume', 'filesystem', 'cons_group'])
 
+    gossip.define(_SDK_HOOK('pre_replica_suspend'), tags=['infinibox'])
+    gossip.define(_SDK_HOOK('post_replica_suspend'), tags=['infinibox'])
+    gossip.define(_SDK_HOOK('replica_suspend_failure'), tags=['infinibox'])
+
+    gossip.define(_SDK_HOOK('pre_replica_resume'), tags=['infinibox'])
+    gossip.define(_SDK_HOOK('post_replica_resume'), tags=['infinibox'])
+    gossip.define(_SDK_HOOK('replica_resume_failure'), tags=['infinibox'])
+
+    gossip.define(_SDK_HOOK('replica_before_change_role'), tags=['infinibox'])
     gossip.define(_SDK_HOOK('replica_after_change_role'), tags=['infinibox'])
+    gossip.define(_SDK_HOOK('replica_change_role_failure'), tags=['infinibox'])
 
     gossip.define(_SDK_HOOK('pre_refresh_snapshot'), tags=['infinibox', 'volume', 'filesystem', 'cons_group'])
     gossip.define(_SDK_HOOK('post_refresh_snapshot'), tags=['infinibox', 'volume', 'filesystem', 'cons_group'])
