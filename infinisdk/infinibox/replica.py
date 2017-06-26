@@ -156,7 +156,7 @@ class ReplicaBinder(TypeBinder):
             if use_snapshots:
                 returned.append({
                     'local_base_action': 'BASE',
-                    'remote_base_action': 'TAKE_SNAP' if take_snapshot else 'BASE',
+                    'remote_base_action': 'BASE',
                     'local_entity_id': sub_entity.get_parent(from_cache=True).id,
                     'remote_entity_id': remote_sub_entity.get_parent(from_cache=True).id,
                     'local_base_entity_id': sub_entity.id,
@@ -164,7 +164,7 @@ class ReplicaBinder(TypeBinder):
                 })
             else:
                 returned.append({
-                    'remote_base_action': 'NO_BASE_DATA',
+                    'remote_base_action': 'TAKE_SNAP' if take_snapshot else 'NO_BASE_DATA',
                     'local_entity_id': sub_entity.id,
                     'remote_entity_id': member_mappings[sub_entity].id,
                 })
