@@ -20,7 +20,7 @@ def test_non_exist_system():
     infinibox = InfiniBox('fake_system')
     with pytest.raises(SystemNotFoundException) as caught:
         infinibox.get_version()
-        assert caught.exception.address == 'fake_system'
+    assert caught.value.address == 'fake_system'
 
 
 def test_api_transport_error(infinibox):

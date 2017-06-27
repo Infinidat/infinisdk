@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 from vintage import deprecated
 
 from .._compat import requests

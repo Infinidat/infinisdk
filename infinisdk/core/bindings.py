@@ -27,10 +27,10 @@ class InfiniSDKBindingWithSpecialFlags(InfiniSDKBinding):
             return value
         return super(InfiniSDKBindingWithSpecialFlags, self).get_api_value_from_value(system, objtype, obj, value)
 
-    def get_value_from_api_value(self, system, objtype, obj, value):
-        if value in self._special_flags:
-            return value
-        return super(InfiniSDKBindingWithSpecialFlags, self).get_value_from_api_value(system, objtype, obj, value)
+    def get_value_from_api_value(self, system, objtype, obj, api_value):
+        if api_value in self._special_flags:
+            return api_value
+        return super(InfiniSDKBindingWithSpecialFlags, self).get_value_from_api_value(system, objtype, obj, api_value)
 
 
 class RelatedObjectBinding(InfiniSDKBinding):
@@ -59,10 +59,10 @@ class RelatedObjectBinding(InfiniSDKBinding):
             return self._value_for_none
         return obj.id
 
-    def get_value_from_api_value(self, system, objtype, obj, value):
-        if value == self._value_for_none or value is None:
+    def get_value_from_api_value(self, system, objtype, obj, api_value):
+        if api_value == self._value_for_none or api_value is None:
             return None
-        return getattr(system, self._collection_name).get_by_id_lazy(value)
+        return getattr(system, self._collection_name).get_by_id_lazy(api_value)
 
 
 class ListOfRelatedObjectIDsBinding(RelatedObjectBinding):
@@ -79,9 +79,9 @@ class ListOfRelatedObjectIDsBinding(RelatedObjectBinding):
             return value
         return [single_value.id for single_value in value]
 
-    def get_value_from_api_value(self, system, objtype, obj, value):
+    def get_value_from_api_value(self, system, objtype, obj, api_value):
         obj_getter = getattr(system, self._collection_name).get_by_id_lazy
-        return [obj_getter(obj_id) for obj_id in value]
+        return [obj_getter(obj_id) for obj_id in api_value]
 
 
 class RelatedComponentBinding(InfiniSDKBinding):
@@ -104,10 +104,10 @@ class RelatedComponentBinding(InfiniSDKBinding):
             return self._value_for_none
         return value.get_field(self._api_index_name)
 
-    def get_value_from_api_value(self, system, objtype, obj, value):
-        if value == self._value_for_none or value is None:
+    def get_value_from_api_value(self, system, objtype, obj, api_value):
+        if api_value == self._value_for_none or api_value is None:
             return None
-        kwargs = {self._api_index_name: value}
+        kwargs = {self._api_index_name: api_value}
         return system.components[self._collection_name].get(**kwargs)
 
 
@@ -136,9 +136,9 @@ class ListOfRelatedObjectBinding(InfiniSDKBinding):
     def _get_related_obj(self, system, related_obj_info, obj):  # pylint: disable=unused-argument
         return self._get_collection(system).object_type.construct(system, related_obj_info)
 
-    def get_value_from_api_value(self, system, objtype, obj, value):
+    def get_value_from_api_value(self, system, objtype, obj, api_value):
         return [self._get_related_obj(system, related_obj_info, obj)
-                for related_obj_info in value]
+                for related_obj_info in api_value]
 
 
 class ListOfRelatedComponentBinding(ListOfRelatedObjectBinding):
@@ -163,8 +163,8 @@ class PassthroughBinding(InfiniSDKBinding):
             return value.generate()
         return value
 
-    def get_value_from_api_value(self, system, objtype, obj, value):
-        return value
+    def get_value_from_api_value(self, system, objtype, obj, api_value):
+        return api_value
 
 
 class ListToDictBinding(InfiniSDKBinding):
@@ -178,8 +178,8 @@ class ListToDictBinding(InfiniSDKBinding):
         super(ListToDictBinding, self).__init__()
         self.key = key
 
-    def get_value_from_api_value(self, system, objtype, obj, value):
-        return [d[self.key] for d in value]
+    def get_value_from_api_value(self, system, objtype, obj, api_value):
+        return [d[self.key] for d in api_value]
 
     def get_api_value_from_value(self, system, objtype, obj, value):
         if isinstance(value, SpecialValue):

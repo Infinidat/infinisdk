@@ -70,7 +70,7 @@ class InfiniBoxSystemComponents(SystemComponentsBinder):
     def get_rack_1(self):
         return self._rack_1
 
-    def find(self, component_type=None, *predicates, **kw):
+    def find(self, component_type=None, *predicates, **kw): # pylint: disable=arguments-differ
         # component_type is the name of the component
         if component_type is None:
             return InfiniBoxGenericComponentQuery(self.system, *predicates, **kw)
@@ -100,7 +100,7 @@ class ComputedIDBinding(InfiniSDKBinding):
         returned += '{0}:{1}'.format(objtype.get_type_name(), index)
         return returned
 
-    def get_value_from_api_value(self, *args):
+    def get_value_from_api_value(self, system, objtype, obj, api_value):
         raise NotImplementedError() # pragma: no cover
 
 
@@ -197,11 +197,11 @@ class InfiniBoxSystemComponent(BaseSystemObject):
     def __deepcopy__(self, memo):
         return self.construct(self.system, copy.deepcopy(self._cache, memo), self.get_parent_id())
 
-    def _deduce_from_cache(self, *args, **kwargs):
+    def _deduce_from_cache(self, field_names, from_cache):
         collection = self.system.components[self.get_plural_name()]
         if collection.should_force_fetching_from_cache():
             return True
-        return super(InfiniBoxSystemComponent, self)._deduce_from_cache(*args, **kwargs)
+        return super(InfiniBoxSystemComponent, self)._deduce_from_cache(field_names, from_cache)
 
     def get_parent(self):
         return self.system.components.try_get_component_by_id(self.get_parent_id())
@@ -232,7 +232,7 @@ class InfiniBoxSystemComponent(BaseSystemObject):
         self.construct(self.system, data, self.get_parent_id())
 
     @deprecated(message='Use refresh_cache()')
-    def refresh(self):
+    def refresh(self): # pylint: disable=arguments-differ
         self.refresh_cache()
 
     @classmethod

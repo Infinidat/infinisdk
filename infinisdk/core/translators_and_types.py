@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 import arrow
 import munch
 from .._compat import string_types
