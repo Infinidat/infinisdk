@@ -31,6 +31,7 @@ py36:
     - infradev
   script:
     - pip install -U --pre -i https://pypi.infinidat.com/simple -e .[testing]
+    - pylint --rcfile .pylintrc -j $(nproc) infinisdk tests
     - pytest
 
 pypi:
