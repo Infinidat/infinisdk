@@ -163,12 +163,14 @@ class ReplicaBinder(TypeBinder):
                     'remote_base_entity_id': remote_sub_entity.id,
                 })
             else:
-                returned.append({
+                entity_pair = {
                     'remote_base_action': 'TAKE_SNAP' if take_snapshot else 'NO_BASE_DATA',
                     'local_entity_id': sub_entity.id,
                     'remote_entity_id': member_mappings[sub_entity].id,
-                })
-
+                }
+                if take_snapshot:
+                    entity_pair['local_base_action'] = 'TAKE_SNAP'
+                returned.append(entity_pair)
         return returned
 
     def _get_sub_entities(self, entity):
