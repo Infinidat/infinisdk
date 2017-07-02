@@ -151,7 +151,7 @@ class Dataset(InfiniBoxObject):
         """
         return self.get_type() == self._get_snapshot_type()
 
-    @deprecated
+    @deprecated(since='64.0.1')
     def is_clone(self):
         """Returns whether or not this entity is a clone
         """
@@ -225,7 +225,7 @@ class Dataset(InfiniBoxObject):
         gossip.trigger_with_tags(_FINISH_FORK_HOOK, {'obj': self._forked_obj, 'child': child}, tags=hook_tags)
         self._forked_obj = None
 
-    @deprecated
+    @deprecated(since='64.0.1')
     def create_clone(self, name=None):
         """Creates a clone from this entity, if supported by the system
         """
@@ -260,7 +260,7 @@ class Dataset(InfiniBoxObject):
         gossip.trigger_with_tags('infinidat.sdk.pre_object_restore', {'source': source, 'target': self}, tags=hook_tags)
         gossip.trigger_with_tags('infinidat.sdk.pre_data_restore', {'source': source, 'target': self}, tags=hook_tags)
 
-    @deprecated("Use trigger_restore_failure() instead")
+    @deprecated("Use trigger_restore_failure() instead", since='78.0')
     def trigger_data_restore_failure(self, source, e):
         self.trigger_data_restore_failure(source, e)
 
@@ -282,7 +282,7 @@ class Dataset(InfiniBoxObject):
         """
         return self.get_children(type=self._get_snapshot_type())
 
-    @deprecated
+    @deprecated(since='64.0.1')
     def get_clones(self):
         """Retrieves all clone children of this entity
         """

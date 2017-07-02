@@ -132,7 +132,7 @@ class Compatibility(object):
     def has_writable_snapshots(self):
         return self.has_feature('snapshots')
 
-    @deprecated('Use has_writable_snapshots instead')
+    @deprecated('Use has_writable_snapshots instead', since='65.0')
     def has_snapclones(self):
         self.has_writable_snapshots()
 

@@ -121,7 +121,7 @@ class InfiniBoxComponentBinder(MonomorphicBinder):
     def find(self, *predicates, **kw):
         return InfiniBoxComponentQuery(self.system, self.object_type, *predicates, **kw)
 
-    @deprecated(message="Use to_list/count instead")
+    @deprecated(message="Use to_list/count instead", since='63.0')
     def __len__(self):
         return len(self.find())
 
@@ -231,7 +231,7 @@ class InfiniBoxSystemComponent(BaseSystemObject):
         data = self.system.api.get(self.get_this_url_path()).get_result()
         self.construct(self.system, data, self.get_parent_id())
 
-    @deprecated(message='Use refresh_cache()')
+    @deprecated(message='Use refresh_cache()', since='65.0')
     def refresh(self): # pylint: disable=arguments-differ
         self.refresh_cache()
 

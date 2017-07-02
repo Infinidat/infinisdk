@@ -290,7 +290,7 @@ class API(object):
         self._session.cookies.clear()
 
 
-    @deprecated(message="Use get_auth_context instead")
+    @deprecated(message="Use get_auth_context instead", since='46.0')
     def auth_context(self, *args, **kwargs):
         return self.get_auth_context(*args, **kwargs)
 
@@ -456,7 +456,7 @@ class API(object):
         finally:
             self._no_reponse_logs -= 1
 
-    @deprecated(message="Use get_no_response_logs_context instead")
+    @deprecated(message="Use get_no_response_logs_context instead", since='46.0')
     def no_response_logs_context(self):
         return self.get_no_response_logs_context()
 
