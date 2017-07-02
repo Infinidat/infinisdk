@@ -34,6 +34,8 @@ class Export(InfiniBoxObject):
                is_filterable=False, is_sortable=False),
         _Field("created_at", type=MillisecondsDatetimeType),
         _Field("updated_at", type=MillisecondsDatetimeType),
+        Field("snapshot_dir_visible", type=bool, creation_parameter=True, optional=True, mutable=True,
+              api_name="is_snapshot_dir_visible", is_filterable=True, is_sortable=True, feature_name="dot_snapshot")
     ]
 
     @classmethod

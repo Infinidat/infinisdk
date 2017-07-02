@@ -11,7 +11,9 @@ def test_get_filesystem(infinibox, filesystem, export):
 
 @relevant_from_version('2.2')
 @pytest.mark.parametrize('field', Export.FIELDS)
-def test_verify_fields(export, field):
+def test_verify_fields(infinibox, export, field):
+    if not infinibox.compat.is_feature_supported(field.feature_name):
+        pytest.skip('System does not support {}'.format(field.feature_name))
     assert field.name == export.fields.get(field.name).name
     assert export.get_field(field.name) is not None
 

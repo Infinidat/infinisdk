@@ -154,6 +154,9 @@ class Compatibility(object):
     def has_openvms(self):
         return self.has_feature('open_vms')
 
+    def has_dot_snapshot(self):
+        return self.has_feature('dot_snapshots')
+
 
 _VERSION_TUPLE_LEN = 5
 
