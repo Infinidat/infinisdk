@@ -313,7 +313,7 @@ class API(object):
             try:
                 with self.use_basic_auth_context():
                     self.system.check_version()
-            except:
+            except Exception:  # pylint: disable=broad-except
                 self._checked_version = False
                 raise
 
