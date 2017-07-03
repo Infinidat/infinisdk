@@ -687,6 +687,8 @@ class Replica(SystemObject):
             remote = getattr(remote_replica.system, collection_name).get_by_id_lazy(remote_reclaimed_id)
         return local, remote
 
+    def get_remote_system(self, from_cache=True, safe=False):
+        return self.get_link(from_cache=from_cache).get_linked_system(safe=safe)
 
     def get_remote_replica(self, from_cache=False, safe=False):
         """Get the corresponsing replica object in the remote machine. For this to work, the SDK user should

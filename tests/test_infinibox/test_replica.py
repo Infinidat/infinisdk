@@ -178,6 +178,12 @@ def test_is_rmr_target(volume, replica, secondary_volume):  # pylint: disable=un
 
 
 @relevant_from_version('2.0')
+def test_get_remote_system(replica, secondary_infinibox):
+    assert replica.get_remote_system() == secondary_infinibox
+    assert replica.get_remote_replica().get_remote_system() == replica.system
+
+
+@relevant_from_version('2.0')
 def test_remote_replica(request, replica, secondary_volume, secondary_infinibox):
     third_system = secondary_infinibox_fx(request)
     replica.system.register_related_system(third_system)
