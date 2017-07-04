@@ -471,17 +471,18 @@ class Replica(SystemObject):
          """
         return self._is_in_sync_state('out_of_sync')
 
-
     @require_sync_replication
     def change_type_to_async(self):
-        """Switches replica role - sync replicas only
-        """
+        """Changes the replication type to ASYNC
+         """
         self.system.api.post(self.get_this_url_path().add_path('change_type_to_async'))
         self.invalidate_cache()
         gadget.log_operation(self, "change type to async")
 
     @require_sync_replication
     def change_type_to_sync(self):
+        """Changes the replication type to SYNC
+         """
         self.system.api.post(self.get_this_url_path().add_path('change_type_to_sync'))
         self.invalidate_cache()
         gadget.log_operation(self, "change type to sync")
