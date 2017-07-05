@@ -40,10 +40,18 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
     def __init__(self, system, initial_data):
         super(BaseSystemObject, self).__init__()
         #: the system to which this object belongs
-        self.system = system
+        self._system = system
         self._cache = initial_data
-        self.id = self.fields.id.binding.get_value_from_api_object(
+        self._uid = self.fields.id.binding.get_value_from_api_object(
             system, type(self), self, self._cache)
+
+    @property
+    def id(self):
+        return self._uid
+
+    @property
+    def system(self):
+        return self._system
 
     def get_system(self):
         return self.system
