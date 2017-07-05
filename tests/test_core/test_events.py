@@ -87,3 +87,9 @@ def test_events_types_caching(system, forge):
     assert system.events._types is not None  # pylint: disable=protected-access
     system.events.get_codes()
     system.events.get_levels()
+
+
+def test_events_collection(system):
+    event = system.events.get_last_event()
+    assert event.get_collection() is system.events
+    assert event.get_binder() is system.events

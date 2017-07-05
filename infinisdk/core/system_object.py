@@ -324,7 +324,9 @@ class SystemObject(BaseSystemObject):
 
     def get_binder(self):
         return self.system.objects[self.get_plural_name()]
-    get_collection = get_binder
+
+    def get_collection(self):
+        return self.get_binder()
 
     def is_in_system(self):
         """
