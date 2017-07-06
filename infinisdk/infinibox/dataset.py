@@ -164,6 +164,7 @@ class Dataset(InfiniBoxObject):
         assert isinstance(delta, Capacity), "Delta must be an instance of Capacity"
         return self.update_field('size', self.get_size() + delta)
 
+    @deprecated(since='95.0.1')
     def create_child(self, name=None, write_protected=None, ssd_enabled=None):
         hook_tags = self.get_tags_for_object_operations(self)
         gossip.trigger_with_tags('infinidat.sdk.pre_entity_child_creation',
@@ -235,12 +236,12 @@ class Dataset(InfiniBoxObject):
             return self.create_child(name)
         raise InvalidOperationException('Cannot create clone for volume/clone')
 
-    def create_snapshot(self, name=None, write_protected=None):
+    def create_snapshot(self, name=None, write_protected=None, ssd_enabled=None):
         """Creates a snapshot from this entity, if supported by the system
         """
         if not self.system.compat.has_writable_snapshots() and self.is_snapshot():
             raise InvalidOperationException('Cannot create snapshot for snapshot')
-        return self.create_child(name, write_protected)
+        return self.create_child(name, write_protected, ssd_enabled)
 
     def restore(self, snapshot):
         """Restores this entity from a given snapshot object
