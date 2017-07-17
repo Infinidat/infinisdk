@@ -1,3 +1,8 @@
+stages:
+  - test
+  - deploy
+  - post
+
 py27:
   image: python:2.7
   tags:
@@ -45,3 +50,14 @@ pypi:
     - /^(dev|stable)-\d+(\.\d+)*$/
   script:
     - curl -sL http://goto/pypi_register | python - -v ./
+
+trigger:
+  image: python
+  tags:
+    - infradev
+  stage: post
+  only:
+    - master
+    - /^(dev|stable)-\d+(\.\d+)*$/
+  script:
+    - curl --request POST --form "token=$CI_JOB_TOKEN" --form "ref=$CI_COMMIT_REF_NAME" https://git.infinidat.com/api/v4/projects/222/trigger/pipeline
