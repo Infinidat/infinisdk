@@ -1,3 +1,8 @@
+Version 83.0.0.post5 (Released 2017-08-07)
+------------------------------------------
+
+* #9427 Fix get_logged_in_username in cases where fetching the current user fails
+
 Version 83.0 (Released 2017-01-12)
 ----------------------------------
 
