@@ -18,25 +18,30 @@ _logger = logbook.Logger(__name__)
 @click.command()
 @click.option("-v", "--verbose", count=True)
 @click.option("-q", "--quiet", count=True)
-@click.option("--version", default=None)
-def main(verbose, quiet, version):
+@click.option("--path", default=None)
+@click.option("--version", required=True)
+def main(verbose, quiet, version, path):
     with logbook.NullHandler(), logbook.StreamHandler(sys.stderr, level=logbook.WARNING - verbose + quiet, bubble=False):
-        repo = Checkout()
+        repo = Checkout(version=version, path=path)
         repo.clone()
-        repo.start_release(new_version=version)
+        repo.start_release()
         repo.fetch_ours()
         repo.reshape()
         repo.generate_changelog()
         repo.commit()
-        repo.tag()
         input('Committed and tagged under {} [Press Enter to continue]'.format(repo.path))
 
 
 class Checkout(object):
 
-    def __init__(self):
+    def __init__(self, version, path=None):
         super(Checkout, self).__init__()
-        self.path = os.path.join(tempfile.mkdtemp(), 'repo')
+        if path is None:
+            path = os.path.join(tempfile.mkdtemp(), 'repo')
+        self.path = path
+        if os.path.exists(self.path):
+            shutil.rmtree(self.path)
+        self._version = version
 
     def clone(self):
         email = subprocess.check_output('git config user.email', shell=True, cwd='.').decode('utf-8').strip()
@@ -45,22 +50,15 @@ class Checkout(object):
         self._execute('git flow init -d')
         _logger.info('Checked out to {}', self.path)
 
-    def start_release(self, new_version=None):
-        if new_version is None:
-            last_released = self._get_released_version()
-            existing_releases = {tag.strip() for tag in subprocess.check_output('git tag', cwd=self.path, shell=True).decode('utf-8').splitlines()}
-            for i in itertools.count():
-                new_version = '{}.post{}'.format(last_released, i)
-                if new_version not in existing_releases:
-                    break
-        self._new_version = new_version
-        self._execute('git flow release start {}'.format(new_version), cwd=self.path)
+    def start_release(self):
+        self._execute('git flow release start {}'.format(self._version), cwd=self.path)
 
 
     def fetch_ours(self):
         self._execute('git fetch {}'.format(os.path.abspath('.')))
         self._execute('git reset --hard FETCH_HEAD')
         self._execute('git reset master')
+        self._execute('git checkout -- CHANGELOG')
         self._execute('git add .')
         version_file = os.path.join(self.path, 'infinisdk', '__version__.py')
 
@@ -68,7 +66,7 @@ class Checkout(object):
             raise RuntimeError('Version file {} does not exist'.format(version_file))
 
         with open(os.path.join(self.path, 'infinisdk', '__version__.py'), 'w') as f:
-            print('__version__ =', repr(self._new_version), file=f)
+            print('__version__ =', repr(self._version), file=f)
 
 
     def reshape(self):
@@ -76,16 +74,16 @@ class Checkout(object):
         shutil.rmtree(os.path.join(self.path, 'scripts'))
 
     def generate_changelog(self):
-        version = self._get_released_version()
         changelog_filename = os.path.join(self.path, 'CHANGELOG')
         new_changelog_filename = changelog_filename + '.new'
 
         last_released = self._get_last_released_tag()
+        assert last_released is not None
 
         _logger.debug('Last released version: {}', last_released)
 
         with open(new_changelog_filename, 'w') as changelog:
-            title = 'Version {} (Released {:%Y-%m-%d})'.format(version, datetime.datetime.now())
+            title = 'Version {} (Released {:%Y-%m-%d})'.format(self._version, datetime.datetime.now())
             print('{}\n{}\n'.format(title, '-' * len(title)), file=changelog)
 
             for issue in jira_client.search('project = "INFRADEV" and '
@@ -93,7 +91,10 @@ class Checkout(object):
                                             'resolution is not empty and '
                                             'fixVersion is not empty and '
                                             '"Release Notes Title" is not empty'):
-                if last_released is None or int(issue.fixVersion) > last_released:
+
+                if any(_normalize_version(self._version) > _normalize_version(fix_version) > _normalize_version(last_released) # pylint: disable=line-too-long
+                       for fix_version in issue.get_fix_versions()):
+
                     print('*', '#{}'.format(issue.key.split('-')
                                             [1]), issue._data.fields.customfield_12507, file=changelog)  # pylint: disable=protected-access
 
@@ -112,7 +113,7 @@ class Checkout(object):
         sorted_tags = []
         for tag in tags:
             try:
-                sorted_tags.append(int(tag))
+                sorted_tags.append(_normalize_version(tag))
             except ValueError:
                 continue
             sorted_tags.append(tag)
@@ -125,10 +126,7 @@ class Checkout(object):
 
     def commit(self):
         self._execute('git add .')
-        self._execute('git commit -m "v{}"'.format(self._get_released_version()))
-
-    def tag(self):
-        self._execute('git tag {}'.format(self._get_released_version()))
+        self._execute('git commit -m "v{}"'.format(self._version))
 
     def _execute(self, cmd, cwd=None):
         if cwd is None:
@@ -136,6 +134,14 @@ class Checkout(object):
         _logger.debug('Running {}', cmd)
         subprocess.check_call(cmd, shell=True, cwd=cwd)
 
+
+def _normalize_version(version):
+    version = str(version)
+    if not version.split('.')[0].isdigit():
+        raise ValueError('Invalid version specified: {!r}'.format(version))
+    while version.count('.') < 2:
+        version += '.0'
+    return version
 
 if __name__ == "__main__":
     main()  # pylint: disable=no-value-for-parameter
