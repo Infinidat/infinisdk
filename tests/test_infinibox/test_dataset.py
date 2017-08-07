@@ -5,8 +5,7 @@ import flux
 import gossip
 import pytest
 from capacity import GB, Capacity, KiB
-from infinisdk.core.exceptions import (APICommandFailed,
-                                       InvalidOperationException)
+from infinisdk.core.exceptions import APICommandFailed
 from infinisdk.core.translators_and_types import MillisecondsDatetimeTranslator
 from infinisdk.infinibox.dataset import (_BEGIN_FORK_HOOK, _CANCEL_FORK_HOOK,
                                          _FINISH_FORK_HOOK)
@@ -151,30 +150,6 @@ def test_get_not_exist_attribute(data_entity):
         data_entity.system.api.get(data_entity.get_this_url_path().add_path('bla'))
     received_error = caught.value.response.get_error()
     assert isinstance(received_error, dict)
-
-
-def test_invalid_child_operation(data_entity):
-    if data_entity.get_system().compat.has_writable_snapshots():
-        pytest.skip("Test required for backwards compatibility")
-    with pytest.raises(InvalidOperationException):
-        data_entity.create_clone()
-
-    flux.current_timeline.sleep(5)
-    snapshot = data_entity.create_child()
-    with pytest.raises(InvalidOperationException):
-        snapshot.create_snapshot()
-
-
-@relevant_from_version("3.0")
-def test_clones_no_longer_supported(data_entity):
-    with pytest.raises(AssertionError):
-        data_entity.create_clone()
-    snap = data_entity.create_snapshot()
-    with pytest.raises(AssertionError):
-        snap.create_clone()
-    with pytest.raises(AssertionError):
-        snap.is_clone()
-    assert snap.is_snapshot()
 
 
 def test_object_creation_hooks_for_child_entities(data_entity):

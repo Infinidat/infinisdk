@@ -7,7 +7,7 @@ from mitba import cached_method
 from vintage import deprecated
 from ..core.api.special_values import Autogenerate
 from ..core.utils import end_reraise_context, DONT_CARE, handle_possible_replication_snapshot
-from ..core.exceptions import InvalidOperationException, ObjectNotFound, TooManyObjectsFound
+from ..core.exceptions import ObjectNotFound, TooManyObjectsFound
 from ..core.type_binder import TypeBinder, PolymorphicBinder
 from ..core import Field, CapacityType, MillisecondsDatetimeType
 from ..core.bindings import RelatedObjectBinding
@@ -151,14 +151,6 @@ class Dataset(InfiniBoxObject):
         """
         return self.get_type() == self._get_snapshot_type()
 
-    @deprecated(since='64.0.1')
-    def is_clone(self):
-        """Returns whether or not this entity is a clone
-        """
-        assert not self.system.compat.has_writable_snapshots(), '{}.is_clone() with snapclones is not supported'.format(
-            self.__class__.__name__)
-        return self.get_type() == 'CLONE'
-
     def resize(self, delta):
         """Resize the entity by the given delta"""
         assert isinstance(delta, Capacity), "Delta must be an instance of Capacity"
@@ -229,21 +221,9 @@ class Dataset(InfiniBoxObject):
         gossip.trigger_with_tags(_FINISH_FORK_HOOK, {'obj': self._forked_obj, 'child': child}, tags=hook_tags)
         self._forked_obj = None
 
-    @deprecated(since='64.0.1')
-    def create_clone(self, name=None):
-        """Creates a clone from this entity, if supported by the system
-        """
-        assert not self.system.compat.has_writable_snapshots(), \
-            '{}.create_clone() with snapclones is not supported'.format(self.__class__.__name__)
-        if self.is_snapshot():
-            return self.create_child(name)
-        raise InvalidOperationException('Cannot create clone for volume/clone')
-
     def create_snapshot(self, name=None, write_protected=None, ssd_enabled=None):
         """Creates a snapshot from this entity, if supported by the system
         """
-        if not self.system.compat.has_writable_snapshots() and self.is_snapshot():
-            raise InvalidOperationException('Cannot create snapshot for snapshot')
         return self._create_child(name, write_protected, ssd_enabled)
 
     def restore(self, snapshot):
