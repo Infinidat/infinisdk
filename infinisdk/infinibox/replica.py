@@ -192,7 +192,7 @@ class Replica(SystemObject):
         Field('link', api_name='link_id', binding=RelatedObjectBinding('links'),
               type='infinisdk.infinibox.link:Link', creation_parameter=True),
         Field('entity_pairs', type=list, creation_parameter=True),
-        Field('entity_type', type=str, creation_parameter=True, default='VOLUME', is_filterable=True),
+        Field('entity_type', type=str, cached=True, creation_parameter=True, default='VOLUME', is_filterable=True),
         Field('remote_pool_id', type=int, creation_parameter=True, optional=True, is_filterable=True),
         Field('remote_replica_id', type=int, is_filterable=True),
         Field('role', type=str, cached=False, is_filterable=True),
