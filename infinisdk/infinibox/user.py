@@ -14,7 +14,8 @@ class User(SystemObject):
         Field("name", creation_parameter=True, mutable=True, is_filterable=True, is_sortable=True,
               default=Autogenerate("user_{uuid}")),
         Field("password", creation_parameter=True, hidden=True, mutable=True, default="12345678"),
-        Field("enabled", type=bool, mutable=True, feature_name='user_disabling')
+        Field("enabled", type=bool, mutable=True, feature_name='user_disabling', creation_parameter=True,
+              optional=True),
     ]
 
 
