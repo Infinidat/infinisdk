@@ -78,8 +78,11 @@ def test_snapshot_creation_time(data_entity):
 
 
 def _create_and_validate_children(parent_obj, child_type):
-    children = [parent_obj.create_child(name) for name in ['test_{}_{}'.format(child_type, parent_obj.get_id()), None]]
-    is_right_type = lambda child: getattr(child, 'is_' + child_type)()
+    # pylint: disable=protected-access
+    children = [parent_obj.create_snapshot(name)
+                for name in ['test_{}_{}'.format(child_type, parent_obj.get_id()), None]]
+    expected_type = parent_obj._get_snapshot_type() if child_type == 'snapshot' else 'CLONE'
+    is_right_type = lambda child: child.get_type() == expected_type
     validate_child = lambda child: is_right_type(child) and child.get_parent() == parent_obj
     assert all(validate_child(child) for child in  children)
     get_children_func = getattr(parent_obj, "get_{0}s".format(child_type))
