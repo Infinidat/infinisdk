@@ -7,6 +7,8 @@ py27:
   image: python:2.7
   tags:
     - infradev
+  except:
+    - /^customer-.*$/
   script:
     - pip install -U --pre -i https://pypi.infinidat.com/simple -e .[testing]
     - pylint --rcfile .pylintrc -j $(nproc) infinisdk tests
@@ -16,6 +18,8 @@ py34:
   image: python:3.4
   tags:
     - infradev
+  except:
+    - /^customer-.*$/
   script:
     - pip install -U --pre -i https://pypi.infinidat.com/simple -e .[testing]
     - pylint --rcfile .pylintrc -j $(nproc) infinisdk tests
@@ -25,6 +29,8 @@ py35:
   image: python:3.5
   tags:
     - infradev
+  except:
+    - /^customer-.*$/
   script:
     - pip install -U --pre -i https://pypi.infinidat.com/simple -e .[testing]
     - pylint --rcfile .pylintrc -j $(nproc) infinisdk tests
@@ -34,6 +40,8 @@ py36:
   image: python:3.6
   tags:
     - infradev
+  except:
+    - /^customer-.*$/
   script:
     - pip install -U --pre -i https://pypi.infinidat.com/simple -e .[testing]
     - pylint --rcfile .pylintrc -j $(nproc) infinisdk tests
