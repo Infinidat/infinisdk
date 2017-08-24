@@ -271,6 +271,8 @@ class Rack(InfiniBoxSystemComponent):
 
     @classmethod
     def get_specific_rack_url(cls, rack_id):
+        if rack_id == 1:
+            return cls.BASE_URL
         racks_url = cls.BASE_URL.add_path(cls.get_plural_name())
         return racks_url.add_path(str(rack_id))
 
