@@ -469,9 +469,10 @@ class IbPort(InfiniBoxSystemComponent):
 
 
 class FcPorts(InfiniBoxComponentBinder):
-    def get_online_target_addresses(self):
+    def get_online_target_addresses(self, from_cache=False):
         addresses = []
-        with self.fetch_tree_once_context():
+        ctx = self.force_fetching_from_cache_context if from_cache else self.fetch_tree_once_context
+        with ctx():
             for fc_port in self:
                 if fc_port.is_link_up():
                     addresses.extend(fc_port.get_target_addresses())

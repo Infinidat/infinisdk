@@ -7,6 +7,7 @@ from contextlib import contextmanager
 from infi.dtypes.wwn import WWN
 from infinisdk._compat import string_types, ExitStack
 from infinisdk.core.config import config
+from infinisdk.core.exceptions import MethodDisabled
 from infinisdk.infinibox.components import (Drive, Enclosure, FcPort, Node, EthPort, LocalDrive,
                                             Rack, Service, System, ServiceCluster)
 from ..conftest import relevant_from_version
@@ -124,9 +125,19 @@ def test_fc_port_component(infinibox):
     assert fc_port.get_parent() == fc_port.get_node()
     assert fc_port.get_node() in infinibox.components.nodes.get_all()
 
-def test_get_online_target_addresses(infinibox):
-    addresses = infinibox.components.fc_ports.get_online_target_addresses()
+@pytest.mark.parametrize('from_cache', [True, False])
+def test_get_online_target_addresses(infinibox, from_cache):
+    infinibox.components.get_rack_1().refresh_without_enclosures()  # Ensure FC ports in cache
+    addresses = infinibox.components.fc_ports.get_online_target_addresses(from_cache=from_cache)
+    assert addresses
     assert all(isinstance(addr, WWN) for addr in addresses)
+
+def test_get_online_target_addresses_caching(infinibox):
+    with pytest.raises(MethodDisabled):
+        with infinibox.api.disable_api_context():
+            infinibox.components.fc_ports.get_online_target_addresses()
+    with infinibox.api.disable_api_context():
+        infinibox.components.fc_ports.get_online_target_addresses(from_cache=True)
 
 def test_using_from_cache_context_multiple_times(infinibox):
     nodes = infinibox.components.nodes
