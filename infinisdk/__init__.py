@@ -75,6 +75,14 @@ def _install_hooks():
     gossip.define(_SDK_HOOK('post_refresh_snapshot'), tags=['infinibox', 'volume', 'filesystem', 'cons_group'])
     gossip.define(_SDK_HOOK('refresh_snapshot_failure'), tags=['infinibox', 'volume', 'filesystem', 'cons_group'])
 
+    gossip.define(_SDK_HOOK('pre_pool_lock'), tags=['infinibox', 'pool'])
+    gossip.define(_SDK_HOOK('post_pool_lock'), tags=['infinibox', 'pool'])
+    gossip.define(_SDK_HOOK('pool_lock_failure'), tags=['infinibox', 'pool'])
+
+    gossip.define(_SDK_HOOK('pre_pool_unlock'), tags=['infinibox', 'pool'])
+    gossip.define(_SDK_HOOK('post_pool_unlock'), tags=['infinibox', 'pool'])
+    gossip.define(_SDK_HOOK('pool_unlock_failure'), tags=['infinibox', 'pool'])
+
     gossip.define(_SDK_HOOK('before_api_request'))
     gossip.define(_SDK_HOOK('after_api_request'))
 

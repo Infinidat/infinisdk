@@ -1,7 +1,10 @@
+import gossip
+
 from capacity import TB
 from sentinels import NOTHING
 from ..core.type_binder import TypeBinder
 from ..core import Field, CapacityType, MillisecondsDatetimeType
+from ..core.utils import end_reraise_context
 from ..core.api.special_values import Autogenerate
 from .system_object import InfiniBoxObject
 from ..core.bindings import ListOfRelatedObjectBinding, ListOfRelatedObjectIDsBinding, InfiniSDKBindingWithSpecialFlags
@@ -92,11 +95,23 @@ class Pool(InfiniBoxObject):
         # pylint: disable=no-member
         return self.get_state(*args, **kwargs) == 'LIMITED'
 
+    def _lock_unlock_operation(self, operation_name):
+        hook_tags = self.get_tags_for_object_operations(self.system)
+        gossip.trigger_with_tags('infinidat.sdk.pre_pool_{}'.format(operation_name), {'pool': self}, tags=hook_tags)
+        try:
+            self.system.api.post(self.get_this_url_path().add_path(operation_name))
+        except Exception as e:  # pylint: disable=broad-except
+            with end_reraise_context():
+                gossip.trigger_with_tags('infinidat.sdk.pool_{}_failure'.format(operation_name),
+                                         {'pool': self, 'exception': e},
+                                         tags=hook_tags)
+        gossip.trigger_with_tags('infinidat.sdk.post_pool_{}'.format(operation_name), {'pool': self}, tags=hook_tags)
+
     def lock(self):
-        self.system.api.post(self.get_this_url_path().add_path('lock'))
+        self._lock_unlock_operation('lock')
 
     def unlock(self):
-        self.system.api.post(self.get_this_url_path().add_path('unlock'))
+        self._lock_unlock_operation('unlock')
 
     def _is_over_threshold(self, threshold):
         # pylint: disable=no-member
