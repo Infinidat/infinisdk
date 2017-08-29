@@ -375,9 +375,6 @@ class Node(InfiniBoxSystemComponent):
     def _get_tags(self):
         return ['infinibox', 'node{0}'.format(self.get_index())]
 
-    def __repr__(self):
-        return '<Node {0}>'.format(self.get_index())
-
 
 @InfiniBoxSystemComponents.install_component_type
 class LocalDrive(InfiniBoxSystemComponent):
