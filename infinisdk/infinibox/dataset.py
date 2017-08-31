@@ -5,7 +5,6 @@ from urlobject import URLObject as URL
 from collections import namedtuple
 from mitba import cached_method
 from vintage import deprecated
-from ..core.api.special_values import Autogenerate
 from ..core.utils import end_reraise_context, DONT_CARE, handle_possible_replication_snapshot
 from ..core.exceptions import ObjectNotFound, TooManyObjectsFound
 from ..core.type_binder import TypeBinder, PolymorphicBinder
@@ -46,7 +45,7 @@ class DatasetTypeBinder(TypeBinder):
         """
         name = kwargs.pop('name', None)
         if name is None:
-            name = Autogenerate('vol_{uuid}').generate()
+            name = self.fields.name.generate_default().generate()
         count = kwargs.pop('count', 1)
         return [self.create(*args, name='{0}_{1}'.format(name, i), **kwargs)
                 for i in range(1, count + 1)]
