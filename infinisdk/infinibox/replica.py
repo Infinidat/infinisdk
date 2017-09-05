@@ -472,18 +472,26 @@ class Replica(SystemObject):
         return self._is_in_sync_state('out_of_sync')
 
     @require_sync_replication
-    def change_type_to_async(self):
+    def change_type_to_async(self, params=None):
         """Changes the replication type to ASYNC
+
+        :param params: Optional dictionary containing additional parameters for the type change
          """
-        self.system.api.post(self.get_this_url_path().add_path('change_type_to_async'))
+        if params is None:
+            params = {}
+        self.system.api.post(self.get_this_url_path().add_path('change_type_to_async'), data=params)
         self.invalidate_cache()
         gadget.log_operation(self, "change type to async")
 
     @require_sync_replication
-    def change_type_to_sync(self):
+    def change_type_to_sync(self, params=None):
         """Changes the replication type to SYNC
+
+        :param params: Optional dictionary containing additional parameters for the type change
          """
-        self.system.api.post(self.get_this_url_path().add_path('change_type_to_sync'))
+        if params is None:
+            params = {}
+        self.system.api.post(self.get_this_url_path().add_path('change_type_to_sync'), data=params)
         self.invalidate_cache()
         gadget.log_operation(self, "change type to sync")
 
