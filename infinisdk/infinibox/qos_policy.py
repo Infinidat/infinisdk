@@ -1,9 +1,11 @@
+import gossip
 from urlobject import URLObject as URL
 
 from ..core import Field
 from ..core.api.special_values import Autogenerate
 from ..core.object_query import PolymorphicQuery
 from ..core.translators_and_types import MillisecondsDatetimeType
+from ..core.utils import end_reraise_context
 from .system_object import InfiniBoxObject
 
 
@@ -48,10 +50,23 @@ class QosPolicy(InfiniBoxObject):
         return PolymorphicQuery(self.system, self.get_this_url_path().add_path('assigned_entities'),
                                 object_types, object_factory)
 
-    def assign_entity(self, entity):
+    def _assign_unassign_operation(self, entity, operation_name):
+        hook_tags = self.get_tags_for_object_operations(self.system)
+        gossip.trigger_with_tags('infinidat.sdk.pre_qos_policy_{}'.format(operation_name),
+                                 {'qos_policy': self, 'entity': entity}, tags=hook_tags)
         data = {'entity_id': entity.id}
-        self.system.api.post(self.get_this_url_path().add_path('assign'), data=data)
+
+        try:
+            self.system.api.post(self.get_this_url_path().add_path(operation_name), data=data)
+        except Exception as e: # pylint: disable=broad-except
+            with end_reraise_context():
+                gossip.trigger_with_tags('infinidat.sdk.qos_policy_{}_failure'.format(operation_name),
+                                         {'exception': e, 'qos_policy': self, 'entity': entity}, tags=hook_tags)
+        gossip.trigger_with_tags('infinidat.sdk.post_qos_policy_{}'.format(operation_name),
+                                 {'qos_policy':self, 'entty': entity}, tags=['infinibox'])
+
+    def assign_entity(self, entity):
+        self._assign_unassign_operation(entity, 'assign')
 
     def unassign_entity(self, entity):
-        self.system.api.post(self.get_this_url_path().add_path('unassign'),
-                             data={'entity_id': entity.id})
+        self._assign_unassign_operation(entity, 'unassign')

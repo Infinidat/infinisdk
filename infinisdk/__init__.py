@@ -83,6 +83,13 @@ def _install_hooks():
     gossip.define(_SDK_HOOK('post_pool_unlock'), tags=['infinibox', 'pool'])
     gossip.define(_SDK_HOOK('pool_unlock_failure'), tags=['infinibox', 'pool'])
 
+    gossip.define(_SDK_HOOK('pre_qos_policy_assign'), tags=['infinibox', 'qos_policy'])
+    gossip.define(_SDK_HOOK('post_qos_policy_assign'), tags=['infinibox', 'qos_policy'])
+    gossip.define(_SDK_HOOK('qos_policy_assign_failure'), tags=['infinibox', 'qos_policy'])
+    gossip.define(_SDK_HOOK('pre_qos_policy_unassign'), tags=['infinibox', 'qos_policy'])
+    gossip.define(_SDK_HOOK('post_qos_policy_unassign'), tags=['infinibox', 'qos_policy'])
+    gossip.define(_SDK_HOOK('qos_policy_unassign_failure'), tags=['infinibox', 'qos_policy'])
+
     gossip.define(_SDK_HOOK('before_api_request'))
     gossip.define(_SDK_HOOK('after_api_request'))
 
