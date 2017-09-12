@@ -63,7 +63,7 @@ class QosPolicy(InfiniBoxObject):
                 gossip.trigger_with_tags('infinidat.sdk.qos_policy_{}_failure'.format(operation_name),
                                          {'exception': e, 'qos_policy': self, 'entity': entity}, tags=hook_tags)
         gossip.trigger_with_tags('infinidat.sdk.post_qos_policy_{}'.format(operation_name),
-                                 {'qos_policy':self, 'entty': entity}, tags=['infinibox'])
+                                 {'qos_policy':self, 'entity': entity}, tags=['infinibox'])
 
     def assign_entity(self, entity):
         self._assign_unassign_operation(entity, 'assign')
