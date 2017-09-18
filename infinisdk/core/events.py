@@ -46,7 +46,7 @@ class Event(SystemObject):
         Field("id", type=int, cached=True, is_identity=True, is_sortable=True, is_filterable=True),
         Field("code", type=str, cached=True, is_filterable=True, is_sortable=True, use_in_repr=True),
         Field("level", type=str, cached=True, is_filterable=True, is_sortable=True),
-        Field("username", type=str, cached=True),
+        Field("username", type=str, cached=True, is_filterable=True, is_sortable=True),
         Field("description", type=str, cached=True),
         Field("timestamp", type=MillisecondsDatetimeType, cached=True, is_filterable=True, is_sortable=True),
         Field("reporter", type=str, cached=True, is_filterable=True, is_sortable=True),
