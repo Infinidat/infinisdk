@@ -74,7 +74,9 @@ def test_replica_deletion(replica, retain_staging_area, force_params):
 
 @relevant_from_version('2.2')
 def test_replica_deletion_unknown_system(replica, forge):
-    def raise_unknown_system():
+    def raise_unknown_system(safe=False):
+        if safe:
+            return None
         raise UnknownSystem()
     forge.replace_with(replica, 'get_remote_replica', raise_unknown_system)
     replica.delete()

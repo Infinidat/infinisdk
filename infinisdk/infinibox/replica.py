@@ -614,7 +614,9 @@ class Replica(SystemObject):
             path = path.add_query_param('force_if_no_remote_credentials', 'true')
 
         try:
-            remote_replica = self.get_remote_replica()
+            remote_replica = self.get_remote_replica(safe=True)
+            if remote_replica is None:
+                _logger.debug('Failed to get remote replica during delete operation')
         except UnknownSystem:
             remote_replica = None
 
