@@ -1,5 +1,6 @@
 import functools
 import gossip
+import logbook
 from capacity import Capacity, byte, GB
 from urlobject import URLObject as URL
 from collections import namedtuple
@@ -15,6 +16,8 @@ from .system_object import InfiniBoxObject
 _BEGIN_FORK_HOOK = "infinidat.sdk.begin_fork"
 _CANCEL_FORK_HOOK = "infinidat.sdk.cancel_fork"
 _FINISH_FORK_HOOK = "infinidat.sdk.finish_fork"
+
+_logger = logbook.Logger(__name__)
 
 
 class Datasets(PolymorphicBinder):
@@ -204,11 +207,17 @@ class Dataset(InfiniBoxObject):
     def trigger_begin_fork(self):
         assert self._forked_obj is None
         if self._is_synced_remote_entity():
-            self._forked_obj = self.get_replica().get_remote_entity()
+            remote_entity = self.get_remote_entity()
+            if remote_entity is not None:
+                self._forked_obj = self.get_remote_entity()
+            else:
+                _logger.debug('Could not fetch remote entity for {}. Forking local entity', self)
+                self._forked_obj = self
         else:
             self._forked_obj = self
         hook_tags = self.get_tags_for_object_operations(self.system)
         gossip.trigger_with_tags(_BEGIN_FORK_HOOK, {'obj': self._forked_obj}, tags=hook_tags)
+
 
     def trigger_cancel_fork(self):
         hook_tags = self.get_tags_for_object_operations(self.system)
@@ -334,6 +343,27 @@ class Dataset(InfiniBoxObject):
             raise TooManyObjectsFound('Replicas of {}'.format(self))
         elif len(returned) == 0:
             raise ObjectNotFound('Replicas of {}'.format(self))
+        return returned[0]
+
+    def get_remote_entities(self):
+        returned = []
+        for replica in self.get_replicas():
+            remote_system = replica.get_remote_system()
+            if remote_system is None:
+                continue
+            collection = remote_system.objects.get_binder_by_type_name(self.get_type_name())
+            for pair in replica.get_entity_pairs():
+                if pair['local_entity_id'] == self.id:
+                    returned.append(collection.get_by_id_lazy(pair['remote_entity_id']))
+                    break
+        return returned
+
+    def get_remote_entity(self):
+        returned = self.get_remote_entities()
+        if len(returned) > 1:
+            raise TooManyObjectsFound()
+        elif len(returned) == 0:
+            return None
         return returned[0]
 
     def is_replicated(self, from_cache=DONT_CARE):

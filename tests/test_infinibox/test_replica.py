@@ -213,10 +213,6 @@ def test_remote_replica_without_remote_system(replica, secondary_infinibox):  # 
     with pytest.raises(InfiniSDKException):
         remote_replica.is_suspended()
 
-@pytest.fixture
-def secondary_volume(replica, secondary_infinibox):  # pylint: disable=unused-argument
-    [returned] = secondary_infinibox.volumes
-    return returned
 
 
 @relevant_from_version('2.0')
@@ -233,56 +229,15 @@ def test_replica_suspend_resume(replica):
     replica.resume()
     assert not replica.is_suspended()
 
+@relevant_from_version('2.0')
+def test_replica_get_remote_entity(replica):
+    local = replica.get_local_entity()
+    remote = replica.get_remote_entity()
+    assert local.system == replica.system
+    assert remote.system != replica.system
+    assert local != remote
+    assert local.get_remote_entity() == remote
 
-@pytest.fixture
-def replica(infinibox, secondary_infinibox, link, replica_creation_kwargs):
-    infinibox.register_related_system(secondary_infinibox)
-    secondary_infinibox.register_related_system(infinibox)
-    return infinibox.replicas.create(
-        link=link, **replica_creation_kwargs)
-
-@pytest.fixture
-def synced_replica(infinibox, secondary_infinibox, link, replica_creation_kwargs):
-    infinibox.register_related_system(secondary_infinibox)
-    secondary_infinibox.register_related_system(infinibox)
-    replica = infinibox.replicas.create(
-        link=link, **replica_creation_kwargs)
-    flux.current_timeline.sleep_wait_all_scheduled()
-    return replica
-
-@pytest.fixture
-def remote_replica(replica, secondary_infinibox):  # pylint: disable=unused-argument
-    [returned] = secondary_infinibox.replicas
-    return returned
-
-
-@pytest.fixture
-def replica_creation_kwargs(volume, create_remote, secondary_pool):
-    entity_pair = {
-        'local_entity_id': volume.id,
-    }
-
-    if create_remote:
-        entity_pair.update({
-            'remote_base_action': 'CREATE',
-        })
-    else:
-        entity_pair.update({
-            'remote_entity_id': secondary_pool.system.volumes.create(pool=secondary_pool).id,
-            'remote_base_action': 'NO_BASE_DATA',
-        })
-
-    return {
-        'remote_pool_id': secondary_pool.id,
-        'entity_pairs': [entity_pair],
-    }
-
-
-@pytest.fixture
-def secondary_pool(secondary_infinibox):
-    return secondary_infinibox.pools.create()
-
-
-@pytest.fixture(params=[True, False])
-def create_remote(request):
-    return request.param
+def test_get_remote_entity_no_replica(data_entity):
+    assert data_entity.get_remote_entity() is None
+    assert data_entity.get_remote_entities() == []
