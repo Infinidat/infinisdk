@@ -334,6 +334,8 @@ class Dataset(InfiniBoxObject):
             tags=hook_tags)
 
     def get_replicas(self):
+        if isinstance(self, self.system.types.filesystem) and not self.system.compat.has_nas_replication():
+            return []
         pairs = self.system.api.get(self.get_this_url_path().add_path('replication_pairs')).response.json()['result']
         return [self.system.replicas.get_by_id_lazy(pair['replica_id']) for pair in pairs]
 
