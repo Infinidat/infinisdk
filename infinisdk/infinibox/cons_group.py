@@ -48,6 +48,8 @@ class ConsGroup(InfiniBoxObject):
         return 'SNAPSHOT' if self.system.compat.has_writable_snapshots() else 'SNAP'
 
     def is_snapgroup(self):
+        """Checks if this is a snapshot group (as opposed to consistency group)
+        """
         return self.get_type() == self._get_snapshot_type()
 
     def get_children(self):
@@ -59,6 +61,8 @@ class ConsGroup(InfiniBoxObject):
     get_snapgroups = get_children
 
     def create_snapgroup(self, name=None, prefix=None, suffix=None):
+        """Create a snapshot group out of the consistency group.
+        """
         hook_tags = self.get_tags_for_object_operations(self)
         gossip.trigger_with_tags('infinidat.sdk.pre_entity_child_creation',
                                  {'source': self, 'system': self.system},
@@ -126,6 +130,10 @@ class ConsGroup(InfiniBoxObject):
     refresh_snapshot = refresh_snapgroup
 
     def delete(self, delete_members=None): # pylint: disable=arguments-differ
+        """Deletes the consistency group
+
+        :param delete_members: if True, deletes the member datasets as well as the group itself
+        """
         path = self.get_this_url_path()
         if delete_members is not None:
             path = path.add_query_param('delete_members', str(delete_members).lower())
@@ -148,6 +156,14 @@ class ConsGroup(InfiniBoxObject):
         return self.get_this_url_path().add_path('members')
 
     def get_members(self):
+        """
+        Retrieves a lazy query for the consistency group's member datasets
+
+        .. note:: in many cases you should prefer to collect the result of this method as a list using ``to_list()``:
+           .. code-block:: python
+
+              member_list = cg.get_members().to_list()
+        """
         def object_factory(system, received_item):
             type_name = 'volume' if received_item['dataset_type'] == 'VOLUME' else 'filesystem'
             return system.objects.get_binder_by_type_name(type_name).object_type.construct(system, received_item)

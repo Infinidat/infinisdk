@@ -17,8 +17,9 @@ class HostBinder(TypeBinder):
     """
 
     def get_host_id_by_initiator_address(self, address):
-        """:returns: an id of a host object defined on a system having the specified FC address configured,
-        None if none exists
+        """
+        :returns: an id of a host object defined on a system having the specified FC address configured,
+          None if none exists
         """
         try:
             res = self.system.api.get("hosts/host_id_by_initiator_address/{0}".format(address), check_version=False)
@@ -79,7 +80,7 @@ class Host(InfiniBoxLURelatedObject):
 
         :param address: the port address to add
         :type address: Either an ``infi.dtypes.wwn.WWN`` or ``infi.dtypes.iqn.iSCSIName``. Plain strings are assumed
-        to be WWNs
+          to be WWNs
         """
         data = host_port_to_api(address)
         self.system.api.post(self.get_this_url_path().add_path('ports'), data=data)

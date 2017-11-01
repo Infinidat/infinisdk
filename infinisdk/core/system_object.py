@@ -395,7 +395,7 @@ class SystemObject(BaseSystemObject):
         .. note:: This will cause generation of defaults, which will have side effects if they are special values
 
         .. note:: This does not necessarily generate all fields that are passable into ``create``, only mandatory
-        'fields
+          'fields
         """
         return translate_special_values(dict(
             (field.name, field.generate_default())
@@ -403,6 +403,9 @@ class SystemObject(BaseSystemObject):
             if field.creation_parameter and not field.optional))
 
     def safe_delete(self, *args, **kwargs):
+        """
+        Tries to delete the object, doing nothing if the object cannot be found on the system
+        """
         try:
             self.delete(*args, **kwargs)
         except APICommandFailed as e:
