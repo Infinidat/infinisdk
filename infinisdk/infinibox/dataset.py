@@ -11,6 +11,7 @@ from ..core.exceptions import ObjectNotFound, TooManyObjectsFound
 from ..core.type_binder import TypeBinder, PolymorphicBinder
 from ..core import Field, CapacityType, MillisecondsDatetimeType
 from ..core.bindings import RelatedObjectBinding
+from ..core.api.special_values import OMIT
 from .system_object import InfiniBoxObject
 
 _BEGIN_FORK_HOOK = "infinidat.sdk.begin_fork"
@@ -129,8 +130,10 @@ class Dataset(InfiniBoxObject):
         """
         return self.get_type() == 'MASTER'
 
-    def refresh_snapshot(self):
+    def refresh_snapshot(self, force_if_replicated_on_target=OMIT):
         """Refresh a snapshot with the most recent data from the parent
+        :param force_if_replicated_on_target: (Only required on some InfiniBox versions) allows the refresh operation
+                                                to occur on a dataset that is currently a replication target.
         """
         parent = self.get_parent()
         assert parent, "Cannot refresh_snapshot on master volume"
@@ -140,7 +143,11 @@ class Dataset(InfiniBoxObject):
         trigger_hook('infinidat.sdk.pre_refresh_snapshot')
         parent.trigger_begin_fork()
         try:
-            self.system.api.post(self.get_this_url_path().add_path('refresh'), data={'source_id': parent.id})
+            url = self.get_this_url_path().add_path('refresh')
+            if force_if_replicated_on_target is not OMIT:
+                force = 'true' if force_if_replicated_on_target else 'false'
+                url = url.add_query_param('force_if_replicated_on_target', force)
+            self.system.api.post(url, data={'source_id': parent.id})
         except Exception:  # pylint: disable=broad-except
             with end_reraise_context():
                 parent.trigger_cancel_fork()
