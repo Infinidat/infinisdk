@@ -33,6 +33,7 @@ Contents:
    cons_groups
    users
    system_configuration
+   networking
    replication
    metadata
    events
