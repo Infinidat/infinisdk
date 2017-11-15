@@ -48,9 +48,11 @@ Some network space types can receive additional configuration options through *p
 
 .. code-block:: python
 
-       >>> netspace.update_properties({
-       ...   'is_async_only': False,
-       ... })
+       netspace = system.network_spaces.create(..., properties: {'is_async_only': True})
+       ...
+       netspace.update_properties({
+         'is_async_only': False,
+        })
 
 
 .. seealso:: For more information regarding network space properties and their meaning, please refer to the official InfiniBox API documentation
