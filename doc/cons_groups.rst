@@ -51,3 +51,12 @@ Restoring a snapshot group is done with the :meth:`.ConsGroup.restore` method:
        >>> cg.restore(sg)
 
 
+Deleting Consistency Groups
+---------------------------
+
+Deleting consistency groups is done through :meth:`.ConsGroup.delete`:
+
+.. code-block:: python
+       
+       >>> sg.delete()
+       >>> cg.delete()

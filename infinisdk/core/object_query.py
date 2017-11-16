@@ -6,6 +6,7 @@ from .._compat import xrange  # pylint: disable=redefined-builtin
 from .field import Field
 from .field_filter import FieldFilter
 from .q import QField
+from .exceptions import ObjectNotFound
 
 _DEFAULT_SYSTEM_PAGE_SIZE = 50
 _DEFAULT_PAGE_SIZE = 1000
@@ -30,6 +31,12 @@ class QueryBase(object):
         """
         return list(self)
 
+    def choose(self):
+        try:
+            return self.sample(1)[0]
+        except ValueError:
+            raise ObjectNotFound('No items where returned')
+
     def sample(self, sample_count):
         """
         Chooses a random sample out of the query's objects.
@@ -51,7 +58,12 @@ class LazyQuery(QueryBase):
         self._requested_page = None
         self._requested_page_size = None
         self._fetched = {}
+        self._objects_by_id = {}
         self._total_num_objects = None
+        self._mutable = True
+
+    def safe_get_by_id_from_cache(self, id): # pylint: disable=redefined-builtin
+        return self._objects_by_id.get(id)
 
     def __iter__(self):
         if self._total_num_objects is None:
@@ -96,6 +108,7 @@ class LazyQuery(QueryBase):
             raise IndexError()
 
     def _fetch(self, element_index=None):
+        self._mutable = False
         element_index = self._get_requested_element_index(element_index)
         assert element_index is not None
         if self._fetched.get(element_index) is None:
@@ -138,6 +151,7 @@ class LazyQuery(QueryBase):
         Requests a specific pagination page
         """
         assert page_index != 0, "Page cannot be zero based"
+        assert self._mutable, "Cannot modify query after fetching"
         self._requested_page = page_index
         return self
 
@@ -145,6 +159,7 @@ class LazyQuery(QueryBase):
         """
         Sets the page size of the query
         """
+        assert self._mutable, "Cannot modify query after fetching"
         self._requested_page_size = page_size
         return self
 
@@ -159,7 +174,8 @@ class PolymorphicQuery(LazyQuery):
     def _translate_item_if_needed(self, item_index):
         received_item = self._fetched.get(item_index)
         if isinstance(received_item, dict):
-            self._fetched[item_index] = self.factory(self.system, received_item)
+            obj = self._fetched[item_index] = self.factory(self.system, received_item)
+            self._objects_by_id[obj.id] = obj
 
     def _get_or_fabricate_field(self, field_name):
         for obj_type in self.object_types:
@@ -169,6 +185,7 @@ class PolymorphicQuery(LazyQuery):
         self.object_types[0].fields.get_or_fabricate(field_name)
 
     def extend_url(self, *predicates, **kw):
+        assert self._mutable, "Cannot modify query after fetching"
         url = URL(self.query)
         if kw:
             predicates = itertools.chain(predicates, (self._get_or_fabricate_field(key) == value
@@ -187,6 +204,7 @@ class PolymorphicQuery(LazyQuery):
         """
         Sorts the response according to the specified fields criteria
         """
+        assert self._mutable, "Cannot modify query after fetching"
         query = self.query
         for c in criteria:
             if isinstance(c, Field):
@@ -200,6 +218,7 @@ class PolymorphicQuery(LazyQuery):
         Plucks the specified field names from the query. Can be specified multiple times
         """
         assert isinstance(field_names, (list, tuple)), "field_names must be either a list or a tuple"
+        assert self._mutable, "Cannot modify query after fetching"
         query_fields = self.query.query_dict.get("fields", None)
         requested_fields = set([] if not query_fields else query_fields.split(","))
 

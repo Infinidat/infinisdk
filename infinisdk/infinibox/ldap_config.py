@@ -67,7 +67,7 @@ class LDAPConfig(SystemObject):
         """
         self.system.api.post('config/ldap/{0}/test'.format(self.id), data={})
 
-    @deprecated("Use create_group instead")
+    @deprecated("Use create_group instead", since='54.0')
     def create_local_group(self, name, role, dn):
         returned = self.system.api.post('users', data={
             'type': 'Ldap',

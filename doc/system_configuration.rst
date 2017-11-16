@@ -41,7 +41,7 @@ Creating SNMP targets:
        ...    name='snmp_target', protocol='SNMP', host='somehost', private_key='private',
        ...    username='user', password='password',
        ...    private_protocol='AES',
-       ...    version='SNMPv3', engine='engine', auth_type='AuthPriv', auth_protocol='MD5')
+       ...    version='SNMPv3', engine='0x1000000000', auth_type='AuthPriv', auth_protocol='MD5')
 
 Querying SNMP targets:
 

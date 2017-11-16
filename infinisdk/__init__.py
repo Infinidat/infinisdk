@@ -32,19 +32,63 @@ def _install_hooks():
     gossip.define(_SDK_HOOK('post_pool_move'), tags=['infinibox', 'volume', 'filesystem', 'cons_group'])
     gossip.define(_SDK_HOOK('pool_move_failure'), tags=['infinibox', 'volume', 'filesystem', 'cons_group'])
 
-    gossip.define(_SDK_HOOK('pre_creation_data_validation'), tags=['infinibox', 'volume', 'filesystem'])
+    gossip.define(_SDK_HOOK('pre_cons_group_deletion'), tags=['cons_group'])
+    gossip.define(_SDK_HOOK('post_cons_group_deletion'), tags=['cons_group'])
+    gossip.define(_SDK_HOOK('cons_group_deletion_failure'), tags=['cons_group'])
 
-    gossip.define(_SDK_HOOK('pre_fields_update'), tags=['infinibox'])
+    gossip.define(_SDK_HOOK('pre_entity_child_creation'), tags=['volume', 'filesystem', 'cons_group'])
+    gossip.define(_SDK_HOOK('post_entity_child_creation'), tags=['volume', 'filesystem', 'cons_group'])
+    gossip.define(_SDK_HOOK('entity_child_creation_failure'), tags=['volume', 'filesystem', 'cons_group'])
+
+    gossip.define(_SDK_HOOK('pre_creation_data_validation'), tags=obj_type_name)
+
+    gossip.define(_SDK_HOOK('pre_fields_update'), tags=obj_type_name)
 
     gossip.define(_SDK_HOOK('pre_cons_group_add_member'), tags=['infinibox'])
     gossip.define(_SDK_HOOK('post_cons_group_add_member'), tags=['infinibox'])
+    gossip.define(_SDK_HOOK('cons_group_add_member_failure'), tags=['infinibox'])
+
+    gossip.define(_SDK_HOOK('pre_cons_group_remove_member'), tags=['infinibox'])
+    gossip.define(_SDK_HOOK('post_cons_group_remove_member'), tags=['infinibox'])
+    gossip.define(_SDK_HOOK('cons_group_remove_member_failure'), tags=['infinibox'])
 
     gossip.define(_SDK_HOOK('replica_snapshot_created'), tags=['infinibox'])
+    gossip.define(_SDK_HOOK('replica_deleted'), tags=['infinibox'])
+
+    gossip.define(_SDK_HOOK('pre_replication_snapshot_expose'), tags=['volume', 'filesystem', 'cons_group'])
+    gossip.define(_SDK_HOOK('post_replication_snapshot_expose'), tags=['volume', 'filesystem', 'cons_group'])
+    gossip.define(_SDK_HOOK('replication_snapshot_expose_failure'), tags=['volume', 'filesystem', 'cons_group'])
+
+    gossip.define(_SDK_HOOK('pre_replica_suspend'), tags=['infinibox'])
+    gossip.define(_SDK_HOOK('post_replica_suspend'), tags=['infinibox'])
+    gossip.define(_SDK_HOOK('replica_suspend_failure'), tags=['infinibox'])
+
+    gossip.define(_SDK_HOOK('pre_replica_resume'), tags=['infinibox'])
+    gossip.define(_SDK_HOOK('post_replica_resume'), tags=['infinibox'])
+    gossip.define(_SDK_HOOK('replica_resume_failure'), tags=['infinibox'])
+
+    gossip.define(_SDK_HOOK('replica_before_change_role'), tags=['infinibox'])
     gossip.define(_SDK_HOOK('replica_after_change_role'), tags=['infinibox'])
+    gossip.define(_SDK_HOOK('replica_change_role_failure'), tags=['infinibox'])
 
     gossip.define(_SDK_HOOK('pre_refresh_snapshot'), tags=['infinibox', 'volume', 'filesystem', 'cons_group'])
     gossip.define(_SDK_HOOK('post_refresh_snapshot'), tags=['infinibox', 'volume', 'filesystem', 'cons_group'])
     gossip.define(_SDK_HOOK('refresh_snapshot_failure'), tags=['infinibox', 'volume', 'filesystem', 'cons_group'])
+
+    gossip.define(_SDK_HOOK('pre_pool_lock'), tags=['infinibox', 'pool'])
+    gossip.define(_SDK_HOOK('post_pool_lock'), tags=['infinibox', 'pool'])
+    gossip.define(_SDK_HOOK('pool_lock_failure'), tags=['infinibox', 'pool'])
+
+    gossip.define(_SDK_HOOK('pre_pool_unlock'), tags=['infinibox', 'pool'])
+    gossip.define(_SDK_HOOK('post_pool_unlock'), tags=['infinibox', 'pool'])
+    gossip.define(_SDK_HOOK('pool_unlock_failure'), tags=['infinibox', 'pool'])
+
+    gossip.define(_SDK_HOOK('pre_qos_policy_assign'), tags=['infinibox', 'qos_policy'])
+    gossip.define(_SDK_HOOK('post_qos_policy_assign'), tags=['infinibox', 'qos_policy'])
+    gossip.define(_SDK_HOOK('qos_policy_assign_failure'), tags=['infinibox', 'qos_policy'])
+    gossip.define(_SDK_HOOK('pre_qos_policy_unassign'), tags=['infinibox', 'qos_policy'])
+    gossip.define(_SDK_HOOK('post_qos_policy_unassign'), tags=['infinibox', 'qos_policy'])
+    gossip.define(_SDK_HOOK('qos_policy_unassign_failure'), tags=['infinibox', 'qos_policy'])
 
     gossip.define(_SDK_HOOK('before_api_request'))
     gossip.define(_SDK_HOOK('after_api_request'))

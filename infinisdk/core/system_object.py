@@ -40,10 +40,18 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
     def __init__(self, system, initial_data):
         super(BaseSystemObject, self).__init__()
         #: the system to which this object belongs
-        self.system = system
+        self._system = system
         self._cache = initial_data
-        self.id = self.fields.id.binding.get_value_from_api_object(
+        self._uid = self.fields.id.binding.get_value_from_api_object(
             system, type(self), self, self._cache)
+
+    @property
+    def id(self):
+        return self._uid
+
+    @property
+    def system(self):
+        return self._system
 
     def get_system(self):
         return self.system
@@ -59,7 +67,7 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
         else:
             self._cache.clear()
 
-    @deprecated(message='use invalidate_cache instead')
+    @deprecated(message='use invalidate_cache instead', since='65.0')
     def refresh(self, *field_names):
         return self.invalidate_cache(*field_names)
 
@@ -182,6 +190,9 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
 
         return self._get_fields_from_cache(field_names, raw_value)
 
+    def _is_caching_enabled(self):
+        return self.system.is_caching_enabled()
+
     def _deduce_from_cache(self, field_names, from_cache):
         if from_cache is not DONT_CARE:
             return from_cache
@@ -189,7 +200,7 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
         if not field_names:
             return False
 
-        cache_enabled = self.system.is_caching_enabled()
+        cache_enabled = self._is_caching_enabled()
 
         for field_name in field_names:
             field = self.fields.get_or_fabricate(field_name)
@@ -254,9 +265,10 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
         self._update_fields(update_dict)
 
     def _update_fields(self, update_dict):
+        hook_tags = self.get_tags_for_object_operations(self.system)
         gossip.trigger_with_tags(
             'infinidat.sdk.pre_fields_update',
-            {'source': self, 'fields': update_dict}, tags=['infinibox'])
+            {'source': self, 'fields': update_dict}, tags=hook_tags)
 
         for field_name, field_value in list(iteritems(update_dict)):
             try:
@@ -269,7 +281,6 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
             if field.api_name != field_name:
                 update_dict.pop(field_name)
 
-        hook_tags = self.get_tags_for_object_operations(self.system)
         gossip.trigger_with_tags('infinidat.sdk.pre_object_update', {'obj': self, 'data': update_dict},
                                  tags=hook_tags)
         try:
@@ -293,7 +304,7 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
         return URL(self.get_url_path(self.system)).add_path(str(self.id))
 
     def __repr__(self):
-        s = 'id={0}'.format(self.id)
+        id_string = 'id={0}'.format(self.id)
         for field in self.FIELDS:
             if field.use_in_repr:
                 try:
@@ -301,9 +312,12 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
                         field.name, from_cache=True, fetch_if_not_cached=False)
                 except CacheMiss:
                     value = '?'
-                s += ', {0}={1}'.format(field.name, value)
+                id_string += ', {0}={1}'.format(field.name, value)
 
-        return "<{0} {1}>".format(type(self).__name__, s)
+        return "<{system_name}:{typename} {id_string}>".format(
+            typename=type(self).__name__,
+            system_name=self.system.get_name(),
+            id_string=id_string)
 
 
 class SystemObject(BaseSystemObject):
@@ -318,7 +332,9 @@ class SystemObject(BaseSystemObject):
 
     def get_binder(self):
         return self.system.objects[self.get_plural_name()]
-    get_collection = get_binder
+
+    def get_collection(self):
+        return self.get_binder()
 
     def is_in_system(self):
         """
@@ -336,6 +352,9 @@ class SystemObject(BaseSystemObject):
     @classmethod
     def get_tags_for_object_operations(cls, system):
         return [cls.get_type_name().lower(), system.get_type_name().lower()]
+
+    def _is_caching_enabled(self):
+        return self.get_binder().is_caching_enabled() or super(SystemObject, self)._is_caching_enabled()
 
     @classmethod
     def _create(cls, system, url, data, tags=None):
@@ -360,8 +379,10 @@ class SystemObject(BaseSystemObject):
         """
         Creates a new object of this type
         """
+        hook_tags = cls.get_tags_for_object_operations(system)
         gossip.trigger_with_tags('infinidat.sdk.pre_creation_data_validation',
-                                 {'fields': fields, 'system': system, 'cls': cls})
+                                 {'fields': fields, 'system': system, 'cls': cls},
+                                 tags=hook_tags)
         data = get_data_for_object_creation(cls, system, fields)
         return cls._create(system, cls.get_url_path(system), data)
 
@@ -374,7 +395,7 @@ class SystemObject(BaseSystemObject):
         .. note:: This will cause generation of defaults, which will have side effects if they are special values
 
         .. note:: This does not necessarily generate all fields that are passable into ``create``, only mandatory
-        'fields
+          'fields
         """
         return translate_special_values(dict(
             (field.name, field.generate_default())
@@ -382,6 +403,9 @@ class SystemObject(BaseSystemObject):
             if field.creation_parameter and not field.optional))
 
     def safe_delete(self, *args, **kwargs):
+        """
+        Tries to delete the object, doing nothing if the object cannot be found on the system
+        """
         try:
             self.delete(*args, **kwargs)
         except APICommandFailed as e:
@@ -392,6 +416,7 @@ class SystemObject(BaseSystemObject):
         """
         Deletes this object.
         """
+        gadget.log_entity_deletion(self)
         with self._get_delete_context():
             self.system.api.delete(self.get_this_url_path())
 

@@ -211,6 +211,19 @@ Querying objects of various types is done relatively easily through InfiniSDK. T
 .. seealso:: :ref:`querying`
 
 
+Deleting Objects
+----------------
+
+Deleting objects can be done by the ``delete`` method, which is available for the vast majority of the object types. 
+
+.. code-block:: python
+       
+                >>> host = system.hosts.create()
+                >>> host.delete() # <-- host gets deleted
+
+.. note:: The ``delete`` method usually doesn't take care of indirect deletion needed to fullfill the request (like deleting volumes inside pools). This is a design decision that has been made to prevent unintended operations from being unwittingly made on the user's behalf.
+
+
 Accessing HTTP/REST API Directly
 --------------------------------
 

@@ -1,11 +1,11 @@
 [MESSAGES CONTROL]
-disable=R,locally-disabled,invalid-name,wrong-import-order,wrong-import-position,ungrouped-imports,missing-docstring,redefined-outer-name,unneeded-not,property-on-old-class,superfluous-parens,consider-iterating-dictionary
+disable=R,locally-disabled,invalid-name,wrong-import-order,wrong-import-position,ungrouped-imports,missing-docstring,redefined-outer-name,unneeded-not,property-on-old-class,superfluous-parens,consider-iterating-dictionary,len-as-condition
 
 [REPORTS]
 reports=no
 
 [TYPECHECK]
-ignored-modules = flux.current_timeline,infi.dtypes.iqn,infi.dtypes.wwn
+ignored-modules = flux.current_timeline,infi.dtypes.iqn,infi.dtypes.wwn,infi
 ignored-classes = httplib,http.client,LookupDict
 
 [FORMAT]

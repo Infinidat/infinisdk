@@ -1,20 +1,27 @@
 # pylint: disable=no-member
-from datetime import timedelta
-
 import logbook
-
 import gossip
 import gadget
+import functools
 
+from ..core.utils import end_reraise_context
 from ..core import Field, MillisecondsDatetimeType
 from ..core.api.special_values import OMIT
 from ..core.bindings import RelatedObjectBinding
-from ..core.exceptions import (CannotGetReplicaState, InvalidUsageException, TooManyObjectsFound, UnknownSystem)
-from ..core.translators_and_types import MillisecondsDeltaType
+from ..core.exceptions import CannotGetReplicaState, InvalidUsageException, TooManyObjectsFound, UnknownSystem
+from ..core.translators_and_types import MillisecondsDeltaType, CapacityType
 from ..core.type_binder import TypeBinder
-from .system_object import InfiniBoxObject
+from ..core.system_object import SystemObject
 
 _logger = logbook.Logger(__name__)
+
+def require_sync_replication(func):
+    @functools.wraps(func)
+    def new_func(self, *args, **kwargs):
+        if self.system.compat.has_sync_replication():
+            return func(self, *args, **kwargs)
+        raise NotImplementedError("not availble in this version")
+    return new_func
 
 
 class ReplicaBinder(TypeBinder):
@@ -28,12 +35,12 @@ class ReplicaBinder(TypeBinder):
         """
         return self.replicate_entity(entity=volume, remote_entity=remote_volume, **kw)
 
-    def replicate_cons_group(self, cg, remote_cg=None, **kw):
+    def replicate_cons_group(self, cg, remote_cg=None, remote_pool=OMIT, **kw):
         """Convenience wrapper around :func:`ReplicaBinder.replicate_entity`
 
         :seealso: :meth:`.replicate_entity`
         """
-        return self.replicate_entity(entity=cg, remote_entity=remote_cg, **kw)
+        return self.replicate_entity(entity=cg, remote_entity=remote_cg, remote_pool=remote_pool, **kw)
 
 
     def replicate_entity(self, entity, link, remote_pool=None, remote_entity=None, **kw):
@@ -50,7 +57,7 @@ class ReplicaBinder(TypeBinder):
             return self.replicate_entity_create_target(entity, link, remote_pool=remote_pool, **kw)
         return self.replicate_entity_existing_target(entity, link, remote_entity=remote_entity, **kw)
 
-    def replicate_entity_create_target(self, entity, link, remote_pool, **kw):
+    def replicate_entity_create_target(self, entity, link, remote_pool=OMIT, **kw):
         """Replicates an entity, creating its remote replica on the specified pool
 
         :param remote_pool: Remote pool to use for entity creation on the remote side
@@ -131,6 +138,11 @@ class ReplicaBinder(TypeBinder):
 
     def _build_entity_pairs_existing(self, local_entity, remote_entity, member_mappings, use_snapshots,
                                      take_snapshot=False):
+        if local_entity is None:
+            raise InvalidUsageException("Local entity cannot be None")
+        if remote_entity is None:
+            raise InvalidUsageException("Remote entity cannot be None")
+
         returned = []
         if not member_mappings:
             if isinstance(local_entity, local_entity.system.cons_groups.object_type) and \
@@ -144,19 +156,21 @@ class ReplicaBinder(TypeBinder):
             if use_snapshots:
                 returned.append({
                     'local_base_action': 'BASE',
-                    'remote_base_action': 'TAKE_SNAP' if take_snapshot else 'BASE',
+                    'remote_base_action': 'BASE',
                     'local_entity_id': sub_entity.get_parent(from_cache=True).id,
                     'remote_entity_id': remote_sub_entity.get_parent(from_cache=True).id,
                     'local_base_entity_id': sub_entity.id,
                     'remote_base_entity_id': remote_sub_entity.id,
                 })
             else:
-                returned.append({
-                    'remote_base_action': 'NO_BASE_DATA',
+                entity_pair = {
+                    'remote_base_action': 'TAKE_SNAP' if take_snapshot else 'NO_BASE_DATA',
                     'local_entity_id': sub_entity.id,
                     'remote_entity_id': member_mappings[sub_entity].id,
-                })
-
+                }
+                if take_snapshot:
+                    entity_pair['local_base_action'] = 'TAKE_SNAP'
+                returned.append(entity_pair)
         return returned
 
     def _get_sub_entities(self, entity):
@@ -165,37 +179,75 @@ class ReplicaBinder(TypeBinder):
         return [entity]
 
 
-class Replica(InfiniBoxObject):
+class Replica(SystemObject):
 
     BINDER_CLASS = ReplicaBinder
 
     FIELDS = [
 
         Field('id', type=int, is_identity=True, is_filterable=True),
+        Field('description', is_filterable=True, mutable=True),
+        Field('updated_at', type=MillisecondsDatetimeType, is_filterable=True, is_sortable=True),
+        Field('created_at', type=MillisecondsDatetimeType, is_sortable=True, is_filterable=True, cached=True),
         Field('link', api_name='link_id', binding=RelatedObjectBinding('links'),
               type='infinisdk.infinibox.link:Link', creation_parameter=True),
         Field('entity_pairs', type=list, creation_parameter=True),
-        Field('entity_type', type=str, creation_parameter=True, default='VOLUME', is_filterable=True),
+        Field('entity_type', type=str, cached=True, creation_parameter=True, default='VOLUME', is_filterable=True),
         Field('remote_pool_id', type=int, creation_parameter=True, optional=True, is_filterable=True),
-        Field('remote_replica_id', type=int, is_filterable=True),
+        Field('remote_replica_id', type=int, is_filterable=True, cached=True),
         Field('role', type=str, cached=False, is_filterable=True),
         Field('progress', type=int),
         Field('jobs', type=list, cached=False),
+        Field('job_state'),
+        Field('pending_job_count', type=int),
+        Field('throughput', type=int),
         Field('restore_point', type=MillisecondsDatetimeType, is_filterable=True),
-        Field('last_synchronized', type=int),
+        Field('last_synchronized', type=MillisecondsDatetimeType),
         Field('last_replicated_guid', api_name='_consistent_guid', is_filterable=True),
         Field('state', type=str, cached=False),
+        Field('state_description'),
+        Field('state_reason'),
         Field('initial', api_name='is_initial', type=bool, cached=False),
         Field('sync_interval', api_name='sync_interval', type=MillisecondsDeltaType,
-              mutable=True, creation_parameter=True, default=timedelta(seconds=4), is_filterable=True),
+              mutable=True, creation_parameter=True, is_filterable=True, optional=True),
         Field('rpo', api_name='rpo_value', type=MillisecondsDeltaType, mutable=True, is_filterable=True),
         Field('rpo_state'),
-
+        Field('rpo_type'),
+        Field('remote_cg_id', type=int, is_filterable=True, cached=True),
+        Field('remote_cg_name', is_filterable=True),
+        Field('local_cg_id', type=int, is_filterable=True, cached=True),
+        Field('local_cg_name', is_filterable=True),
+        Field('local_pool_id', type=int, is_filterable=True),
+        Field('local_pool_name', is_filterable=True),
+        Field('remote_pool_name', is_filterable=True),
+        Field('staging_area_allocated_size', type=CapacityType),
+        Field('replication_type', type=str, creation_parameter=True, optional=True, is_filterable=True,
+              feature_name="sync_replication"),
+        Field('sync_state', type=str, feature_name="sync_replication", cached=False),
+        Field('sync_duration', type=int),
+        Field('async_mode', type=bool, feature_name="sync_replication", cached=False),
+        Field('latency', type=int, feature_name="sync_replication"),
+        Field('domino', type=bool, is_filterable=True, feature_name="sync_replication"),
+        Field('assigned_sync_remote_ips', type=list, api_name="_assigned_sync_remote_ips",
+              feature_name="sync_replication"),
+        Field('next_job_start_time', type=MillisecondsDatetimeType),
+        Field('next_restore_point', type=MillisecondsDatetimeType),
+        Field('permanent_failure_wait_interval', type=MillisecondsDeltaType, mutable=True),
+        Field('temporary_failure_retry_interval', type=MillisecondsDeltaType, mutable=True),
+        Field('temporary_failure_retry_count', type=int, mutable=True),
+        Field('started_at', type=MillisecondsDatetimeType),
     ]
 
     @classmethod
     def is_supported(cls, system):
         return system.compat.has_replication()
+
+    @classmethod
+    def _create(cls, system, url, data, tags=None):
+        if not system.compat.has_sync_replication() and data.get('replication_type', 'ASYNC').lower() == 'async':
+            # workaround to preserve older behavior for async creation
+            data.setdefault('sync_interval', 4000)
+        return super(Replica, cls)._create(system, url, data, tags)
 
     def _get_entity_collection(self):
         if self.is_filesystem():
@@ -205,7 +257,7 @@ class Replica(InfiniBoxObject):
         return self.system.cons_groups
 
     def get_local_entity(self):
-        """Returns the local entity used for replication, be it a volume or a consistency group.
+        """Returns the local entity used for replication, be it a volume, filesystem or a consistency group
         """
         if self.is_consistency_group():
             return self.system.cons_groups.get_by_id_lazy(self.get_field('local_cg_id'))
@@ -219,8 +271,53 @@ class Replica(InfiniBoxObject):
         else:
             return self.system.volumes.get_by_id_lazy(pair['local_entity_id'])
 
+    def _get_entity_tags(self):
+        if self.is_consistency_group():
+            return ['cons_group']
+
+        if self.is_filesystem():
+            return ['filesystem']
+        else:
+            return ['volume']
+
+    @staticmethod
+    def _notify_pre_exposure(replica):
+        if replica is None or not replica.is_in_system():
+            return
+
+        gossip.trigger_with_tags(
+            'infinidat.sdk.pre_replication_snapshot_expose',
+            {'source': replica.get_local_entity(), 'system': replica.system}, tags=replica._get_entity_tags())  # pylint: disable=protected-access
+
+    @staticmethod
+    def _notify_exposure_failure(replica, exception):
+        if replica is None or not replica.is_in_system():
+            return
+
+        gossip.trigger_with_tags('infinidat.sdk.replication_snapshot_expose_failure',
+                                 {'obj': replica, 'exception': exception, 'system': replica.system},
+                                 tags=replica._get_entity_tags())  # pylint: disable=protected-access
+
+    @staticmethod
+    def _notify_post_exposure(replica, snapshot):
+        if replica is None or not replica.is_in_system():
+            return
+
+        gossip.trigger_with_tags(
+            'infinidat.sdk.post_replication_snapshot_expose',
+            {'source': replica.get_local_entity(), 'snapshot': snapshot, 'system': replica.system},
+            tags=replica._get_entity_tags())  # pylint: disable=protected-access
+
     def expose_last_consistent_snapshot(self):
-        resp = self.system.api.post(self.get_this_url_path().add_path('expose_last_consistent_snapshot')).get_result()
+        self._notify_pre_exposure(self)
+
+        try:
+            resp = self.system.api.post(
+                self.get_this_url_path().add_path('expose_last_consistent_snapshot')).get_result()
+        except Exception as e:  # pylint: disable=broad-except
+            with end_reraise_context():
+                self._notify_exposure_failure(self, e)
+
         if self.is_consistency_group():
             snapshot_id = resp['_local_reclaimed_sg_id']
         else:
@@ -229,6 +326,7 @@ class Replica(InfiniBoxObject):
             return None
         returned = self._get_entity_collection().get_by_id_lazy(snapshot_id)
         gossip.trigger_with_tags('infinidat.sdk.replica_snapshot_created', {'snapshot': returned}, tags=['infinibox'])
+        self._notify_post_exposure(self, returned)
         gadget.log_operation(self, "expose last consistent snapshot")
         return returned
 
@@ -257,18 +355,19 @@ class Replica(InfiniBoxObject):
 
         return self.get_local_entity()
 
-    def get_local_cg_id(self):
-        if not self.is_consistency_group():
-            return None
-        return self.get_local_entity().id
-
-
     def get_local_data_entities(self):
-        """Returns all local volumes, whether as part of a consistency group or a single volume
+        """Returns all local volumes, whether as part of a consistency group, filesystem or a single volume
         """
         if self.is_consistency_group():
             return self.get_local_entity().get_members().to_list()
         return [self.get_local_entity()]
+
+    def get_remote_data_entities(self):
+        """Returns all local volumes, whether as part of a consistency group, filesystem or a single volume
+        """
+        if self.is_consistency_group():
+            return self.get_remote_entity().get_members().to_list()
+        return [self.get_remote_entity()]
 
     def is_consistency_group(self):
         """Returns whether this replica is configured with a consistency group as a local entity
@@ -291,7 +390,14 @@ class Replica(InfiniBoxObject):
     def suspend(self):
         """Suspends this replica
         """
-        self.system.api.post(self.get_this_url_path().add_path('suspend'))
+        gossip.trigger_with_tags('infinidat.sdk.pre_replica_suspend', {'replica': self}, tags=['infinibox'])
+        try:
+            self.system.api.post(self.get_this_url_path().add_path('suspend'))
+        except Exception as e: # pylint: disable=broad-except
+            with end_reraise_context():
+                gossip.trigger_with_tags('infinidat.sdk.replica_suspend_failure',
+                                         {'replica': self, 'exception': e}, tags=['infinibox'])
+        gossip.trigger_with_tags('infinidat.sdk.post_replica_suspend', {'replica': self}, tags=['infinibox'])
         self.invalidate_cache('state')
         gadget.log_operation(self, "suspend")
 
@@ -300,15 +406,94 @@ class Replica(InfiniBoxObject):
         """
         returned = self.system.api.post(self.get_this_url_path().add_path('sync'),
                                         headers={'X-INFINIDAT-RAW-RESPONSE': 'true'})
-        gadget.log_operation(self, "sync")
-        return returned.get_result()
+        result = returned.get_result()
+        gadget.log_operation(self, "sync", params=result)
+        return result
 
     def resume(self):
         """Resumes this replica
         """
-        self.system.api.post(self.get_this_url_path().add_path('resume'))
+        gossip.trigger_with_tags('infinidat.sdk.pre_replica_resume', {'replica': self}, tags=['infinibox'])
+        try:
+            self.system.api.post(self.get_this_url_path().add_path('resume'))
+        except Exception as e: # pylint: disable=broad-except
+            with end_reraise_context():
+                gossip.trigger_with_tags('infinidat.sdk.replica_resume_failure',
+                                         {'replica': self, 'exception': e}, tags=['infinibox'])
+        gossip.trigger_with_tags('infinidat.sdk.post_replica_resume', {'replica': self}, tags=['infinibox'])
         self.invalidate_cache('state')
         gadget.log_operation(self, "resume")
+
+    @require_sync_replication
+    def switch_role(self):
+        """Switches replica role - sync replicas only
+        """
+        self.system.api.post(self.get_this_url_path().add_path('switch_role'))
+        self.invalidate_cache()
+        gadget.log_operation(self, "switch role")
+
+    def is_type_sync(self):
+        if self.system.compat.has_sync_replication():
+            return self.get_replication_type().lower() == 'sync'
+        return False
+
+    def is_type_async(self):
+        if self.system.compat.has_sync_replication():
+            return self.get_replication_type().lower() == 'async'
+        return True
+
+    def _is_in_sync_state(self, sync_state):
+        current_sync_state = self.get_sync_state()
+        return current_sync_state and current_sync_state.lower() == sync_state.lower()
+
+    def is_synchronized(self):
+        """Returns True if this replica sync state is 'SYNCHRONIZED'
+         """
+        return self._is_in_sync_state('synchronized')
+
+    def is_sync_in_progress(self):
+        """Returns True if this replica sync state is 'SYNC_IN_PROGRESS'
+         """
+        return self._is_in_sync_state('sync_in_progress')
+
+    def is_initializing(self):
+        """Returns True if the replica sync state is 'INITIALIZING'
+         """
+        return self._is_in_sync_state('initializing')
+
+    def is_initializing_pending(self):
+        """Returns True if the replica sync state is 'INITIALIZING_PENDING'
+         """
+        return self._is_in_sync_state('initializing_pending')
+
+    def is_out_of_sync(self):
+        """Returns True if the replica sync state is 'OUT_OF_SYNC'
+         """
+        return self._is_in_sync_state('out_of_sync')
+
+    @require_sync_replication
+    def change_type_to_async(self, params=None):
+        """Changes the replication type to ASYNC
+
+        :param params: Optional dictionary containing additional parameters for the type change
+         """
+        if params is None:
+            params = {}
+        self.system.api.post(self.get_this_url_path().add_path('change_type_to_async'), data=params)
+        self.invalidate_cache()
+        gadget.log_operation(self, "change type to async")
+
+    @require_sync_replication
+    def change_type_to_sync(self, params=None):
+        """Changes the replication type to SYNC
+
+        :param params: Optional dictionary containing additional parameters for the type change
+         """
+        if params is None:
+            params = {}
+        self.system.api.post(self.get_this_url_path().add_path('change_type_to_sync'), data=params)
+        self.invalidate_cache()
+        gadget.log_operation(self, "change type to sync")
 
     def _validate_can_check_state(self):
         if self.is_target():
@@ -331,7 +516,8 @@ class Replica(InfiniBoxObject):
         """
         self._validate_can_check_state()
         if self.system.compat.has_sync_job_states():
-            return not self.is_replicating() and not self.is_initial_replication() and self.is_active()
+            return not self.is_replicating() and not self.is_initial_replication()\
+                and not self.is_stalled() and self.is_active()
         return self.get_state(*args, **kwargs).lower() == 'idle'
 
     def is_auto_suspended(self, *args, **kwargs):
@@ -345,7 +531,7 @@ class Replica(InfiniBoxObject):
         """
         self._validate_can_check_state()
         if self.system.compat.has_sync_job_states():
-            return self.is_initial() and self._any_sync_job_state_contains('initializing')
+            return self.is_initial() and self._any_sync_job_state_contains(['initializing', 'stalled'])
         return 'initial' in self.get_state(*args, **kwargs).lower()
 
     def is_pending(self):
@@ -381,7 +567,7 @@ class Replica(InfiniBoxObject):
         self._validate_can_check_state()
         if not self.system.compat.has_sync_job_states():
             raise NotImplementedError("Checking for stalled is not supported on systems without sync job states")
-        return self._any_sync_job_state_contains('stall')
+        return self._any_sync_job_state_contains('stalled')
 
     def is_active(self, *args, **kwargs):
         self._validate_can_check_state()
@@ -391,10 +577,15 @@ class Replica(InfiniBoxObject):
 
     def change_role(self, entity_pairs=OMIT):
         data = {'entity_pairs': entity_pairs} if entity_pairs is not OMIT else None
-        self.system.api.post(self.get_this_url_path().add_path('change_role'), data=data)
-        self.invalidate_cache()
-        gadget.log_operation(self, "change role")
+        gossip.trigger_with_tags('infinidat.sdk.replica_before_change_role', {'replica': self}, tags=['infinibox'])
+        try:
+            self.system.api.post(self.get_this_url_path().add_path('change_role'), data=data)
+        except Exception as e: # pylint: disable=broad-except
+            with end_reraise_context():
+                gossip.trigger_with_tags('infinidat.sdk.replica_change_role_failure',
+                                         {'replica': self, 'exception': e}, tags=['infinibox'])
         gossip.trigger_with_tags('infinidat.sdk.replica_after_change_role', {'replica': self}, tags=['infinibox'])
+        self.invalidate_cache()
 
     def is_source(self, *args, **kwargs):
         return self.get_role(*args, **kwargs).lower() == 'source'
@@ -427,24 +618,48 @@ class Replica(InfiniBoxObject):
         except UnknownSystem:
             remote_replica = None
 
+        if retain_staging_area:
+            self._notify_pre_exposure(self)
+            self._notify_pre_exposure(remote_replica)
+
+        gadget.log_entity_deletion(self)
         with self._get_delete_context():
-            resp = self.system.api.delete(path)
+            try:
+                resp = self.system.api.delete(path)
+                entity_pairs = None
+                result = resp.get_result()
+                if result:
+                    entity_pairs = result.get('entity_pairs')
+                gossip.trigger_with_tags(
+                    'infinidat.sdk.replica_deleted',
+                    {'replica': self, 'entity_pairs': entity_pairs},
+                    tags=['infinibox'])
+            except Exception as e:  # pylint: disable=broad-except
+                with end_reraise_context():
+                    if retain_staging_area:
+                        self._notify_exposure_failure(self, e)
+                        self._notify_exposure_failure(remote_replica, e)
 
         if retain_staging_area:
             local, remote = self._get_deletion_result(resp.get_result(), remote_replica)
         else:
             local = remote = None
-        for snap in local, remote:
+        for replica, snap in (self, local), (remote_replica, remote):
             if snap is not None:
                 gossip.trigger_with_tags(
                     'infinidat.sdk.replica_snapshot_created', {'snapshot': snap}, tags=['infinibox'])
+
+                self._notify_post_exposure(replica, snap)
         return local, remote
 
-    def _any_sync_job_state_contains(self, state):
-        state = state.lower()
-        for sync_job in self._get_jobs():
-            if sync_job['state'] is not None and state == sync_job['state'].lower():
-                return True
+    def _any_sync_job_state_contains(self, states):
+        if not isinstance(states, list):
+            states = [states]
+        for state in states:
+            state = state.lower()
+            for sync_job in self._get_jobs():
+                if sync_job['state'] is not None and state == sync_job['state'].lower():
+                    return True
         return False
 
     def _get_deletion_result(self, result, remote_replica):
@@ -480,12 +695,14 @@ class Replica(InfiniBoxObject):
             remote = getattr(remote_replica.system, collection_name).get_by_id_lazy(remote_reclaimed_id)
         return local, remote
 
+    def get_remote_system(self, from_cache=True, safe=False):
+        return self.get_link(from_cache=from_cache).get_linked_system(safe=safe)
 
-    def get_remote_replica(self, from_cache=False):
+    def get_remote_replica(self, from_cache=False, safe=False):
         """Get the corresponsing replica object in the remote machine. For this to work, the SDK user should
         call the register_related_system method of the Infinibox object when a link to a remote system is consructed
         for the first time"""
-        linked_system = self.get_link(from_cache=from_cache).get_linked_system()
+        linked_system = self.get_link(from_cache=from_cache).get_linked_system(safe=safe)
         if linked_system is None:
             return None
         return linked_system.replicas.get_by_id_lazy(self.get_remote_replica_id(from_cache=from_cache))

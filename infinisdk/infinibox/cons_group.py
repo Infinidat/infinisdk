@@ -1,5 +1,6 @@
 import gossip
 import functools
+import gadget
 
 from collections import namedtuple
 from ..core import Field, MillisecondsDatetimeType
@@ -7,7 +8,7 @@ from ..core.api.special_values import OMIT
 from ..core.object_query import PolymorphicQuery
 from ..core.bindings import RelatedObjectBinding
 from ..core.api.special_values import Autogenerate
-from ..core.utils import end_reraise_context
+from ..core.utils import end_reraise_context, handle_possible_replication_snapshot
 from .system_object import InfiniBoxObject
 
 _CG_SUFFIX = Autogenerate('_{timestamp}')
@@ -47,6 +48,8 @@ class ConsGroup(InfiniBoxObject):
         return 'SNAPSHOT' if self.system.compat.has_writable_snapshots() else 'SNAP'
 
     def is_snapgroup(self):
+        """Checks if this is a snapshot group (as opposed to consistency group)
+        """
         return self.get_type() == self._get_snapshot_type()
 
     def get_children(self):
@@ -58,6 +61,13 @@ class ConsGroup(InfiniBoxObject):
     get_snapgroups = get_children
 
     def create_snapgroup(self, name=None, prefix=None, suffix=None):
+        """Create a snapshot group out of the consistency group.
+        """
+        hook_tags = self.get_tags_for_object_operations(self)
+        gossip.trigger_with_tags('infinidat.sdk.pre_entity_child_creation',
+                                 {'source': self, 'system': self.system},
+                                 tags=hook_tags)
+
         self.invalidate_cache('members_count')
         if not name:
             name = self.fields.name.generate_default().generate()
@@ -69,14 +79,22 @@ class ConsGroup(InfiniBoxObject):
             member.trigger_begin_fork()
         try:
             child = self._create(self.system, self.get_url_path(self.system), data=data, tags=None)
-        except Exception:  # pylint: disable=broad-except
+        except Exception as e:  # pylint: disable=broad-except
             with end_reraise_context():
+                gossip.trigger_with_tags('infinidat.sdk.entity_child_failure',
+                                         {'obj': self, 'exception': e, 'system': self.system},
+                                         tags=hook_tags)
                 for member in members:
                     member.trigger_cancel_fork()
         child_members = dict((snapshot.get_parent(from_cache=True).id, snapshot) for snapshot in child.get_members())
         for member in members:
             snap = child_members[member.id]
             member.trigger_finish_fork(snap)
+            handle_possible_replication_snapshot(snap)
+
+        gossip.trigger_with_tags('infinidat.sdk.post_entity_child_creation',
+                                 {'source': self, 'target': child, 'system': self.system},
+                                 tags=hook_tags)
         return child
 
     create_snapshot = create_snapgroup
@@ -112,16 +130,40 @@ class ConsGroup(InfiniBoxObject):
     refresh_snapshot = refresh_snapgroup
 
     def delete(self, delete_members=None): # pylint: disable=arguments-differ
+        """Deletes the consistency group
+
+        :param delete_members: if True, deletes the member datasets as well as the group itself
+        """
         path = self.get_this_url_path()
         if delete_members is not None:
             path = path.add_query_param('delete_members', str(delete_members).lower())
-        with self._get_delete_context():
-            self.system.api.delete(path)
+
+        trigger_hook = functools.partial(gossip.trigger_with_tags,
+                                         kwargs={'cons_group': self, 'delete_members': delete_members},
+                                         tags=['cons_group'])
+        trigger_hook('infinidat.sdk.pre_cons_group_deletion')
+        gadget.log_entity_deletion(self)
+        try:
+            with self._get_delete_context():
+                self.system.api.delete(path)
+        except Exception:  # pylint: disable=broad-except
+            with end_reraise_context():
+                trigger_hook('infinidat.sdk.cons_group_deletion_failure')
+
+        trigger_hook('infinidat.sdk.post_cons_group_deletion')
 
     def _get_members_url(self):
         return self.get_this_url_path().add_path('members')
 
     def get_members(self):
+        """
+        Retrieves a lazy query for the consistency group's member datasets
+
+        .. note:: in many cases you should prefer to collect the result of this method as a list using ``to_list()``:
+           .. code-block:: python
+
+              member_list = cg.get_members().to_list()
+        """
         def object_factory(system, received_item):
             type_name = 'volume' if received_item['dataset_type'] == 'VOLUME' else 'filesystem'
             return system.objects.get_binder_by_type_name(type_name).object_type.construct(system, received_item)
@@ -147,7 +189,11 @@ class ConsGroup(InfiniBoxObject):
                                          kwargs={'cons_group': self, 'member': member, 'request': data},
                                          tags=['infinibox'])
         trigger_hook('infinidat.sdk.pre_cons_group_add_member')
-        self.system.api.post(self._get_members_url(), data=data)
+        try:
+            self.system.api.post(self._get_members_url(), data=data)
+        except Exception:  # pylint: disable=broad-except
+            with end_reraise_context():
+                trigger_hook('infinidat.sdk.cons_group_add_member_failure')
         trigger_hook('infinidat.sdk.post_cons_group_add_member')
         self.invalidate_cache('members_count')
 
@@ -170,7 +216,17 @@ class ConsGroup(InfiniBoxObject):
         if replica_name is not OMIT:
             path = path.set_query_param('replica_name', replica_name)
 
-        self.system.api.delete(path)
+        trigger_hook = functools.partial(gossip.trigger_with_tags,
+                                         kwargs={'cons_group': self, 'member': member},
+                                         tags=['infinibox'])
+
+        trigger_hook('infinidat.sdk.pre_cons_group_remove_member')
+        try:
+            self.system.api.delete(path)
+        except Exception:  # pylint: disable=broad-except
+            with end_reraise_context():
+                trigger_hook('infinidat.sdk.cons_group_remove_member_failure')
+        trigger_hook('infinidat.sdk.post_cons_group_remove_member')
         self.invalidate_cache('members_count')
 
     def restore(self, snap_group):
@@ -197,6 +253,12 @@ class ConsGroup(InfiniBoxObject):
         data = dict(pool_id=target_pool.get_id(), with_capacity=with_capacity)
         hook_tags = self.get_tags_for_object_operations(self.system)
         source_pool = self.get_pool()
+
+        gossip.trigger_with_tags(
+            'infinidat.sdk.pre_pool_move',
+            {'obj': self, 'with_capacity': with_capacity, 'system': self.system,
+             'target_pool': target_pool, 'source_pool': source_pool},
+            tags=hook_tags)
 
         try:
             self.system.api.post(self.get_this_url_path().add_path('move'), data=data)

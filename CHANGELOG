@@ -1,3 +1,19 @@
+Version 103.0.0 (Released 2017-11-16)
+-------------------------------------
+
+* Support InfiniBox v4.0.0
+* #9668 Added `username` and `affected_entity_id` fields to Event objects
+* #9619 Improve `repr` of node objets
+* #9584 `FcPorts.get_online_target_addresses` now supports `from_cache` parameter
+* #9439 Removed deprecated Dataset methods: `is_clone` & `create_clone`
+* #8734 InfiniSDK now correctly detects the remote network space management IP when establishing replicas
+* #8564 Remove Backward compatibility for deprecation utils
+* #8365 Support creation of Sync replication
+* #7057 Support NAS replication
+* #8274 Added hidden flag to Field & used it for fields that don't return from API
+* #8213 Support caching for object collections
+* #8032 Added `is_read_only()` method to system object
+
 Version 83.0.0.post5 (Released 2017-08-07)
 ------------------------------------------
 

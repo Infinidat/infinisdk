@@ -46,6 +46,7 @@ class Event(SystemObject):
         Field("id", type=int, cached=True, is_identity=True, is_sortable=True, is_filterable=True),
         Field("code", type=str, cached=True, is_filterable=True, is_sortable=True, use_in_repr=True),
         Field("level", type=str, cached=True, is_filterable=True, is_sortable=True),
+        Field("username", type=str, cached=True, is_filterable=True, is_sortable=True),
         Field("description", type=str, cached=True),
         Field("timestamp", type=MillisecondsDatetimeType, cached=True, is_filterable=True, is_sortable=True),
         Field("reporter", type=str, cached=True, is_filterable=True, is_sortable=True),
@@ -53,9 +54,13 @@ class Event(SystemObject):
         Field("system_version", type=str, cached=True, is_filterable=True, is_sortable=True),
         Field("source_node_id", type=int, cached=True, is_filterable=True, is_sortable=True),
         Field("description_template", type=str, cached=True, is_filterable=True, is_sortable=True),
+        Field("affected_entity_id", type=str, cached=True, is_filterable=True, is_sortable=True),
     ]
 
     BINDER_CLASS = Events
+
+    def get_binder(self):
+        return self.system.events
 
     def __getitem__(self, item):
         return self._cache[item]

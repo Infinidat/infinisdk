@@ -5,7 +5,7 @@ from ..core.field import Field
 from ..core.system_component import SystemComponentsBinder
 from ..core.system_object import BaseSystemObject
 from ..core.exceptions import ObjectNotFound
-from ..core.type_binder import TypeBinder
+from ..core.type_binder import MonomorphicBinder
 from ..core.translators_and_types import WWNType, CapacityType
 from mitba import cached_method
 from .component_query import InfiniBoxComponentQuery, InfiniBoxGenericComponentQuery
@@ -14,7 +14,6 @@ from ..core.bindings import InfiniSDKBinding, ListOfRelatedComponentBinding, Rel
 from collections import defaultdict
 from contextlib import contextmanager
 from logbook import Logger
-from pact import Pact
 from urlobject import URLObject as URL
 from vintage import deprecated
 
@@ -71,7 +70,7 @@ class InfiniBoxSystemComponents(SystemComponentsBinder):
     def get_rack_1(self):
         return self._rack_1
 
-    def find(self, component_type=None, *predicates, **kw):
+    def find(self, component_type=None, *predicates, **kw): # pylint: disable=arguments-differ
         # component_type is the name of the component
         if component_type is None:
             return InfiniBoxGenericComponentQuery(self.system, *predicates, **kw)
@@ -101,11 +100,11 @@ class ComputedIDBinding(InfiniSDKBinding):
         returned += '{0}:{1}'.format(objtype.get_type_name(), index)
         return returned
 
-    def get_value_from_api_value(self, *args):
+    def get_value_from_api_value(self, system, objtype, obj, api_value):
         raise NotImplementedError() # pragma: no cover
 
 
-class InfiniBoxComponentBinder(TypeBinder):
+class InfiniBoxComponentBinder(MonomorphicBinder):
 
     _force_fetching_from_cache = False
 
@@ -122,7 +121,7 @@ class InfiniBoxComponentBinder(TypeBinder):
     def find(self, *predicates, **kw):
         return InfiniBoxComponentQuery(self.system, self.object_type, *predicates, **kw)
 
-    @deprecated(message="Use to_list/count instead")
+    @deprecated(message="Use to_list/count instead", since='63.0')
     def __len__(self):
         return len(self.find())
 
@@ -143,10 +142,6 @@ class InfiniBoxComponentBinder(TypeBinder):
                 obj_collection = self.system.components[obj_type]
                 stack.enter_context(obj_collection.force_fetching_from_cache_context())
             yield
-
-    @deprecated(message='Use fetch_tree_once_context instead')
-    def fetch_once_context(self):
-        return self.fetch_tree_once_context()
 
     @contextmanager
     def fetch_tree_once_context(self, force_fetch=True, with_logging=True):
@@ -202,11 +197,11 @@ class InfiniBoxSystemComponent(BaseSystemObject):
     def __deepcopy__(self, memo):
         return self.construct(self.system, copy.deepcopy(self._cache, memo), self.get_parent_id())
 
-    def _deduce_from_cache(self, *args, **kwargs):
+    def _deduce_from_cache(self, field_names, from_cache):
         collection = self.system.components[self.get_plural_name()]
         if collection.should_force_fetching_from_cache():
             return True
-        return super(InfiniBoxSystemComponent, self)._deduce_from_cache(*args, **kwargs)
+        return super(InfiniBoxSystemComponent, self)._deduce_from_cache(field_names, from_cache)
 
     def get_parent(self):
         return self.system.components.try_get_component_by_id(self.get_parent_id())
@@ -236,8 +231,8 @@ class InfiniBoxSystemComponent(BaseSystemObject):
         data = self.system.api.get(self.get_this_url_path()).get_result()
         self.construct(self.system, data, self.get_parent_id())
 
-    @deprecated(message='Use refresh_cache()')
-    def refresh(self):
+    @deprecated(message='Use refresh_cache()', since='65.0')
+    def refresh(self): # pylint: disable=arguments-differ
         self.refresh_cache()
 
     @classmethod
@@ -276,6 +271,8 @@ class Rack(InfiniBoxSystemComponent):
 
     @classmethod
     def get_specific_rack_url(cls, rack_id):
+        if rack_id == 1:
+            return cls.BASE_URL
         racks_url = cls.BASE_URL.add_path(cls.get_plural_name())
         return racks_url.add_path(str(rack_id))
 
@@ -286,8 +283,8 @@ class Rack(InfiniBoxSystemComponent):
     def refresh_without_enclosures(self):
         fields = ",".join(field.api_name for field in self.fields if field.name != 'enclosures')
         url = self.get_this_url_path().add_query_param('fields', fields)
-        self.system.components.mark_fetched_nodes()
         data = self.system.api.get(url).get_result()
+        self.system.components.mark_fetched_nodes()
         data['enclosures'] = []
         self.construct(self.system, data, self.get_parent_id())
 
@@ -313,12 +310,13 @@ class Nodes(InfiniBoxComponentBinder):
             return fc_port.get_node()
 
     def get_by_ip(self, ip_address):
-        for ns in self.system.network_spaces.get_all():
-            for ip in ns.get_ips(from_cache=True):
-                if ip.interface_id is None:
-                    continue
-                if ip.ip_address == ip_address:
-                    return self.system.network_interfaces.get_by_id_lazy(ip.interface_id).get_node()
+        with self.system.network_interfaces.fetch_once_context():
+            for ns in self.system.network_spaces.get_all():
+                for ip in ns.get_ips(from_cache=True):
+                    if ip.interface_id is None:
+                        continue
+                    if ip.ip_address == ip_address:
+                        return self.system.network_interfaces.get_by_id_lazy(ip.interface_id).get_node()
 
     def refresh_fields(self, field_names):
         assert isinstance(field_names, (list, tuple)), "field_names must be either a list or a tuple"
@@ -376,9 +374,6 @@ class Node(InfiniBoxSystemComponent):
 
     def _get_tags(self):
         return ['infinibox', 'node{0}'.format(self.get_index())]
-
-    def __repr__(self):
-        return '<Node {0}>'.format(self.get_index())
 
 
 @InfiniBoxSystemComponents.install_component_type
@@ -473,9 +468,10 @@ class IbPort(InfiniBoxSystemComponent):
 
 
 class FcPorts(InfiniBoxComponentBinder):
-    def get_online_target_addresses(self):
+    def get_online_target_addresses(self, from_cache=False):
         addresses = []
-        with self.fetch_tree_once_context():
+        ctx = self.force_fetching_from_cache_context if from_cache else self.fetch_tree_once_context
+        with ctx():
             for fc_port in self:
                 if fc_port.is_link_up():
                     addresses.extend(fc_port.get_target_addresses())
@@ -560,14 +556,6 @@ class Service(InfiniBoxSystemComponent):
         except ObjectNotFound:
             raise NotImplementedError("This service ({0}) doesn't support CLM".format(self.get_name()))
 
-    @deprecated("Use Service.op.activate instead")
-    def start(self):
-        return self.get_service_cluster().start(node=self.get_parent())
-
-    @deprecated("Use Service.op.deactivate instead")
-    def stop(self):
-        return self.get_service_cluster().stop(node=self.get_parent())
-
     def is_active(self):
         return self.get_state() == 'ACTIVE'
 
@@ -613,30 +601,6 @@ class ServiceCluster(InfiniBoxSystemComponent):
     def get_services(self):
         return [self.system.components.nodes.get(index=service_info['node_id']).get_service(self.get_name())
                 for service_info in self.get_field('node_states')]
-
-    @deprecated("Use ServiceCluster.op.activate instead")
-    def start(self, node=None):
-        if node:
-            data = {'node_id': node.get_index()}
-            obj = node.get_service(self.get_name())
-        else:
-            data = {}
-            obj = self
-        pact = Pact('Starting {0}'.format(obj)).until(obj.is_active)
-        self.system.api.post(self.get_this_url_path().add_path('start'), data=data)
-        return pact
-
-    @deprecated("Use ServiceCluster.op.deactivate instead")
-    def stop(self, node=None):
-        if node:
-            data = {'node_id': node.get_index()}
-            obj = node.get_service(self.get_name())
-        else:
-            data = {}
-            obj = self
-        pact = Pact('Stopping {0}'.format(obj)).until(obj.is_inactive)
-        self.system.api.post(self.get_this_url_path().add_path('stop'), data=data)
-        return pact
 
     def is_active(self):
         return self.get_state() == 'ACTIVE'

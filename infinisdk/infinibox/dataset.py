@@ -1,21 +1,24 @@
 import functools
 import gossip
+import logbook
 from capacity import Capacity, byte, GB
 from urlobject import URLObject as URL
 from collections import namedtuple
 from mitba import cached_method
 from vintage import deprecated
-from ..core.api.special_values import Autogenerate
-from ..core.utils import end_reraise_context, DONT_CARE
-from ..core.exceptions import InvalidOperationException, ObjectNotFound, TooManyObjectsFound
+from ..core.utils import end_reraise_context, DONT_CARE, handle_possible_replication_snapshot
+from ..core.exceptions import ObjectNotFound, TooManyObjectsFound
 from ..core.type_binder import TypeBinder, PolymorphicBinder
 from ..core import Field, CapacityType, MillisecondsDatetimeType
 from ..core.bindings import RelatedObjectBinding
+from ..core.api.special_values import OMIT
 from .system_object import InfiniBoxObject
 
 _BEGIN_FORK_HOOK = "infinidat.sdk.begin_fork"
 _CANCEL_FORK_HOOK = "infinidat.sdk.cancel_fork"
 _FINISH_FORK_HOOK = "infinidat.sdk.finish_fork"
+
+_logger = logbook.Logger(__name__)
 
 
 class Datasets(PolymorphicBinder):
@@ -46,7 +49,7 @@ class DatasetTypeBinder(TypeBinder):
         """
         name = kwargs.pop('name', None)
         if name is None:
-            name = Autogenerate('vol_{uuid}').generate()
+            name = self.fields.name.generate_default().generate()
         count = kwargs.pop('count', 1)
         return [self.create(*args, name='{0}_{1}'.format(name, i), **kwargs)
                 for i in range(1, count + 1)]
@@ -88,13 +91,19 @@ class Dataset(InfiniBoxObject):
         Field("depth", cached=True, type=int, is_sortable=True, is_filterable=True),
         Field("mapped", type=bool, is_sortable=True, is_filterable=True),
         Field("has_children", type=bool, add_getter=False),
-        Field('rmr_source', type=bool),
-        Field('rmr_target', type=bool),
+        Field('rmr_source', type=bool, is_sortable=True, is_filterable=True),
+        Field('rmr_target', type=bool, is_sortable=True, is_filterable=True),
         Field('rmr_snapshot_guid', is_filterable=True, is_sortable=True),
+        Field('qos_policy', type='infinisdk.infinibox.qos_policy:QosPolicy', api_name='qos_policy_id', is_sortable=True,
+              is_filterable=True, binding=RelatedObjectBinding('qos_policies'), feature_name='qos', cached=False),
+        Field('qos_shared_policy', type='infinisdk.infinibox.qos_policy:QosPolicy', api_name='qos_shared_policy_id',
+              is_sortable=True, is_filterable=True, binding=RelatedObjectBinding('qos_policies'),
+              feature_name='qos', cached=False)
+
     ]
 
     PROVISIONING = namedtuple('Provisioning', ['Thick', 'Thin'])('THICK', 'THIN')
-
+    _forked_obj = None
 
     def _get_snapshot_type(self):
         return 'SNAPSHOT' if self.system.compat.has_writable_snapshots() else 'SNAP'
@@ -121,8 +130,10 @@ class Dataset(InfiniBoxObject):
         """
         return self.get_type() == 'MASTER'
 
-    def refresh_snapshot(self):
+    def refresh_snapshot(self, force_if_replicated_on_target=OMIT):
         """Refresh a snapshot with the most recent data from the parent
+        :param force_if_replicated_on_target: (Only required on some InfiniBox versions) allows the refresh operation
+                                                to occur on a dataset that is currently a replication target.
         """
         parent = self.get_parent()
         assert parent, "Cannot refresh_snapshot on master volume"
@@ -132,7 +143,11 @@ class Dataset(InfiniBoxObject):
         trigger_hook('infinidat.sdk.pre_refresh_snapshot')
         parent.trigger_begin_fork()
         try:
-            self.system.api.post(self.get_this_url_path().add_path('refresh'), data={'source_id': parent.id})
+            url = self.get_this_url_path().add_path('refresh')
+            if force_if_replicated_on_target is not OMIT:
+                force = 'true' if force_if_replicated_on_target else 'false'
+                url = url.add_query_param('force_if_replicated_on_target', force)
+            self.system.api.post(url, data={'source_id': parent.id})
         except Exception:  # pylint: disable=broad-except
             with end_reraise_context():
                 parent.trigger_cancel_fork()
@@ -145,20 +160,21 @@ class Dataset(InfiniBoxObject):
         """
         return self.get_type() == self._get_snapshot_type()
 
-    @deprecated
-    def is_clone(self):
-        """Returns whether or not this entity is a clone
-        """
-        assert not self.system.compat.has_writable_snapshots(), '{}.is_clone() with snapclones is not supported'.format(
-            self.__class__.__name__)
-        return self.get_type() == 'CLONE'
-
     def resize(self, delta):
         """Resize the entity by the given delta"""
         assert isinstance(delta, Capacity), "Delta must be an instance of Capacity"
         return self.update_field('size', self.get_size() + delta)
 
+    @deprecated(message="Use create_snapshot instead", since='95.0.1')
     def create_child(self, name=None, write_protected=None, ssd_enabled=None):
+        return self._create_child(name, write_protected, ssd_enabled)
+
+    def _create_child(self, name=None, write_protected=None, ssd_enabled=None):
+        hook_tags = self.get_tags_for_object_operations(self)
+        gossip.trigger_with_tags('infinidat.sdk.pre_entity_child_creation',
+                                 {'source': self, 'system': self.system},
+                                 tags=hook_tags)
+
         self.invalidate_cache('has_children')
         self.trigger_begin_fork()
         if not name:
@@ -173,47 +189,57 @@ class Dataset(InfiniBoxObject):
         try:
             child = self._create(self.system, self.get_url_path(self.system), data=data,
                                  tags=self.get_tags_for_object_operations(self.system))
-        except Exception:  # pylint: disable=broad-except
+        except Exception as e:  # pylint: disable=broad-except
             with end_reraise_context():
+                gossip.trigger_with_tags('infinidat.sdk.entity_child_failure',
+                                         {'obj': self, 'exception': e, 'system': self.system},
+                                         tags=hook_tags)
                 self.trigger_cancel_fork()
         self.trigger_finish_fork(child)
-        self._handle_possible_replication_snapshot(child)
+        gossip.trigger_with_tags('infinidat.sdk.post_entity_child_creation',
+                                 {'source': self, 'target': child, 'system': self.system},
+                                 tags=hook_tags)
+
+        handle_possible_replication_snapshot(child)
         return child
 
+    def _is_synced_remote_entity(self):
+        if not self.system.compat.has_sync_replication() or not self.is_rmr_target():
+            return False
+        if isinstance(self, self.system.filesystems.object_type):
+            return False
+        source_replica = self.get_replica().get_remote_replica(safe=True)
+        return source_replica and source_replica.is_type_sync() and not source_replica.is_async_mode()
+
     def trigger_begin_fork(self):
+        assert self._forked_obj is None
+        if self._is_synced_remote_entity():
+            remote_entity = self.get_remote_entity()
+            if remote_entity is not None:
+                self._forked_obj = self.get_remote_entity()
+            else:
+                _logger.debug('Could not fetch remote entity for {}. Forking local entity', self)
+                self._forked_obj = self
+        else:
+            self._forked_obj = self
         hook_tags = self.get_tags_for_object_operations(self.system)
-        gossip.trigger_with_tags(_BEGIN_FORK_HOOK, {'obj': self}, tags=hook_tags)
+        gossip.trigger_with_tags(_BEGIN_FORK_HOOK, {'obj': self._forked_obj}, tags=hook_tags)
+
 
     def trigger_cancel_fork(self):
         hook_tags = self.get_tags_for_object_operations(self.system)
-        gossip.trigger_with_tags(_CANCEL_FORK_HOOK, {'obj': self}, tags=hook_tags)
+        gossip.trigger_with_tags(_CANCEL_FORK_HOOK, {'obj': self._forked_obj}, tags=hook_tags)
+        self._forked_obj = None
 
     def trigger_finish_fork(self, child):
         hook_tags = self.get_tags_for_object_operations(self.system)
-        gossip.trigger_with_tags(_FINISH_FORK_HOOK, {'obj': self, 'child': child}, tags=hook_tags)
+        gossip.trigger_with_tags(_FINISH_FORK_HOOK, {'obj': self._forked_obj, 'child': child}, tags=hook_tags)
+        self._forked_obj = None
 
-    def _handle_possible_replication_snapshot(self, snapshot):
-        fields = snapshot.get_fields(from_cache=True, raw_value=True)
-        if fields.get('rmr_snapshot_guid', None) is not None:
-            gossip.trigger_with_tags('infinidat.sdk.replica_snapshot_created', {'snapshot': snapshot},
-                                     tags=['infinibox'])
-
-    @deprecated
-    def create_clone(self, name=None):
-        """Creates a clone from this entity, if supported by the system
-        """
-        assert not self.system.compat.has_writable_snapshots(), \
-            '{}.create_clone() with snapclones is not supported'.format(self.__class__.__name__)
-        if self.is_snapshot():
-            return self.create_child(name)
-        raise InvalidOperationException('Cannot create clone for volume/clone')
-
-    def create_snapshot(self, name=None, write_protected=None):
+    def create_snapshot(self, name=None, write_protected=None, ssd_enabled=None):
         """Creates a snapshot from this entity, if supported by the system
         """
-        if not self.system.compat.has_writable_snapshots() and self.is_snapshot():
-            raise InvalidOperationException('Cannot create snapshot for snapshot')
-        return self.create_child(name, write_protected)
+        return self._create_child(name, write_protected, ssd_enabled)
 
     def restore(self, snapshot):
         """Restores this entity from a given snapshot object
@@ -233,7 +259,7 @@ class Dataset(InfiniBoxObject):
         gossip.trigger_with_tags('infinidat.sdk.pre_object_restore', {'source': source, 'target': self}, tags=hook_tags)
         gossip.trigger_with_tags('infinidat.sdk.pre_data_restore', {'source': source, 'target': self}, tags=hook_tags)
 
-    @deprecated("Use trigger_restore_failure() instead")
+    @deprecated("Use trigger_restore_failure() instead", since='78.0')
     def trigger_data_restore_failure(self, source, e):
         self.trigger_data_restore_failure(source, e)
 
@@ -255,7 +281,7 @@ class Dataset(InfiniBoxObject):
         """
         return self.get_children(type=self._get_snapshot_type())
 
-    @deprecated
+    @deprecated(since='64.0.1')
     def get_clones(self):
         """Retrieves all clone children of this entity
         """
@@ -315,6 +341,8 @@ class Dataset(InfiniBoxObject):
             tags=hook_tags)
 
     def get_replicas(self):
+        if isinstance(self, self.system.types.filesystem) and not self.system.compat.has_nas_replication():
+            return []
         pairs = self.system.api.get(self.get_this_url_path().add_path('replication_pairs')).response.json()['result']
         return [self.system.replicas.get_by_id_lazy(pair['replica_id']) for pair in pairs]
 
@@ -326,7 +354,37 @@ class Dataset(InfiniBoxObject):
             raise ObjectNotFound('Replicas of {}'.format(self))
         return returned[0]
 
+    def get_remote_entities(self):
+        returned = []
+        for replica in self.get_replicas():
+            remote_system = replica.get_remote_system()
+            if remote_system is None:
+                continue
+            collection = remote_system.objects.get_binder_by_type_name(self.get_type_name())
+            for pair in replica.get_entity_pairs():
+                if pair['local_entity_id'] == self.id:
+                    returned.append(collection.get_by_id_lazy(pair['remote_entity_id']))
+                    break
+        return returned
+
+    def get_remote_entity(self):
+        returned = self.get_remote_entities()
+        if len(returned) > 1:
+            raise TooManyObjectsFound()
+        elif len(returned) == 0:
+            return None
+        return returned[0]
+
     def is_replicated(self, from_cache=DONT_CARE):
         """Returns True if this volume is a part of a replica, whether as source or as target
         """
         return any(self.get_fields(['rmr_source', 'rmr_target'], from_cache=from_cache).values())
+
+    def assign_qos_policy(self, qos_policy):
+        assert self.system.compat.has_qos(), 'QoS is not supported in this version'
+        qos_policy.assign_entity(self)
+
+    def unassign_qos_policy(self, qos_policy):
+        assert self.system.compat.has_qos(), 'QoS is not supported in this version'
+        assert qos_policy == self.get_qos_policy(), 'QoS policy {} is not assigned to {}'.format(qos_policy, self)
+        qos_policy.unassign_entity(self)

@@ -37,13 +37,13 @@ def doctest_context():
         link = primary.links.create(
             name='link',
             local_replication_network_space_id=primary_ns.id,
-            remote_host=secondary_ns.get_ips()[0].ip_address,
+            remote_host=secondary_ns.get_mgmt_ip().ip_address,
         )
 
         yield {
             'link': link,
             'primary': primary,
-            'primary_ip': primary_ns.get_ips()[0],
+            'primary_ip': primary_ns.get_mgmt_ip(),
             'secondary': secondary,
-            'secondary_ip': secondary_ns.get_ips()[0],
+            'secondary_ip': secondary_ns.get_mgmt_ip(),
         }
