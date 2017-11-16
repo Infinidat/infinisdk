@@ -1,0 +1,23 @@
+# Releasing Customer-Facing Versions
+
+## Customer Versions
+
+A branch called 'customer-facing' exists, and holds the code as can be seen by a customer. By default it does not descend from the master branch, but rather receives cherry pick commits holding key functionality needed by customers.
+
+The namespace of versions seen by customer is completely unrelated to internal versions, and release dates are not tightly bound to internal version release dates.
+
+## What's Included?
+
+A customer version should always be functional with the latest released version of InfiniBox.
+
+A customer version should *NOT CONTAIN* any of the following:
+
+1. Obscene, unnecessary clever or shameful comments of any sort
+2. Implementation code for features that are not released to customers yet, especially if they're not fully defined or commissioned yet.
+
+## Release Procedure
+
+1. Change the `version` field of `setup.cfg` to the newly released version
+2. Commit your change and tag the commit with the same name as the release
+3. Run `make release` to upload customer-facing files to the public FTP.
+

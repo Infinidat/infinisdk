@@ -132,15 +132,21 @@ class Compatibility(object):
     def has_writable_snapshots(self):
         return self.has_feature('snapshots')
 
-    @deprecated('Use has_writable_snapshots instead')
+    @deprecated('Use has_writable_snapshots instead', since='65.0')
     def has_snapclones(self):
         self.has_writable_snapshots()
 
     def has_sync_job_states(self):
         return self.get_version_as_float() >= 3.0
 
+    def has_sync_replication(self):
+        return self.get_version_as_float() >= 4.0
+
     def has_nas_replication(self):
         return self.has_feature('filesystem_replicas')
+
+    def has_qos(self):
+        return self.has_feature('qos')
 
 _VERSION_TUPLE_LEN = 5
 

@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 from vintage import deprecated
 
 from .._compat import requests
@@ -16,8 +17,9 @@ class HostBinder(TypeBinder):
     """
 
     def get_host_id_by_initiator_address(self, address):
-        """:returns: an id of a host object defined on a system having the specified FC address configured,
-        None if none exists
+        """
+        :returns: an id of a host object defined on a system having the specified FC address configured,
+          None if none exists
         """
         try:
             res = self.system.api.get("hosts/host_id_by_initiator_address/{0}".format(address), check_version=False)
@@ -54,16 +56,17 @@ class Host(InfiniBoxLURelatedObject):
         Field("ports", type=HostPortListType, add_updater=False),
         Field("cluster", api_name="host_cluster_id", type='infinisdk.infinibox.host_cluster:HostCluster',
               is_filterable=True, binding=RelatedObjectBinding('host_clusters')),
-        Field("host_type", creation_parameter=True, optional=True, mutable=True),
-        Field("security_method", feature_name='iscsi', creation_parameter=True, optional=True, mutable=True),
+        Field("host_type", creation_parameter=True, optional=True, mutable=True, is_sortable=True, is_filterable=True),
+        Field("security_method", feature_name='iscsi', creation_parameter=True, optional=True, mutable=True,
+              is_sortable=True, is_filterable=True),
         Field("security_chap_inbound_username", creation_parameter=True, feature_name='iscsi', optional=True,
               mutable=True, is_sortable=True, is_filterable=True),
-        Field("security_chap_inbound_secret", creation_parameter=True, feature_name='iscsi', add_getter=False,
+        Field("security_chap_inbound_secret", creation_parameter=True, feature_name='iscsi', hidden=True,
               optional=True, mutable=True),
         Field("security_chap_has_inbound_secret", type=bool, feature_name='iscsi'),
         Field("security_chap_outbound_username", creation_parameter=True, feature_name='iscsi', optional=True,
               mutable=True, is_sortable=True, is_filterable=True),
-        Field("security_chap_outbound_secret", creation_parameter=True, feature_name='iscsi', add_getter=False,
+        Field("security_chap_outbound_secret", creation_parameter=True, feature_name='iscsi', hidden=True,
               optional=True, mutable=True),
         Field("security_chap_has_outbound_secret", type=bool, feature_name='iscsi'),
         Field("created_at", type=MillisecondsDatetimeType, is_sortable=True, is_filterable=True),
@@ -77,7 +80,7 @@ class Host(InfiniBoxLURelatedObject):
 
         :param address: the port address to add
         :type address: Either an ``infi.dtypes.wwn.WWN`` or ``infi.dtypes.iqn.iSCSIName``. Plain strings are assumed
-        to be WWNs
+          to be WWNs
         """
         data = host_port_to_api(address)
         self.system.api.post(self.get_this_url_path().add_path('ports'), data=data)
@@ -94,14 +97,14 @@ class Host(InfiniBoxLURelatedObject):
               .add_path(data['address'])
         self.system.api.delete(url)
 
-    @deprecated("Use get_ports() instead")
+    @deprecated("Use get_ports() instead", since='58.0')
     def get_fc_ports(self):
         return [port for port in self.get_ports() if isinstance(port, WWN)]
 
-    @deprecated("Use add_port() instead")
+    @deprecated("Use add_port() instead", since='58.0')
     def add_fc_port(self, *args, **kwargs):
         return self.add_port(*args, **kwargs)
 
-    @deprecated("Use remove_port() instead")
+    @deprecated("Use remove_port() instead", since='58.0')
     def remove_fc_port(self, *args, **kwargs):
         return self.remove_port(*args, **kwargs)

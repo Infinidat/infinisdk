@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 import arrow
 import munch
 from .._compat import string_types
@@ -80,6 +81,8 @@ class MillisecondsDeltaTranslator(ValueTranslator):
         return int(total_seconds * 1000.0)
 
     def _from_api(self, value):
+        if value is None:
+            return None
         value /= 1000.0
         return timedelta(seconds=int(value), microseconds=int((value - int(value)) * 1000))
 

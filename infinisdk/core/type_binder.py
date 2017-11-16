@@ -1,4 +1,5 @@
 import random
+from contextlib import contextmanager
 from sentinels import NOTHING
 
 from .object_query import PolymorphicQuery, ObjectQuery
@@ -13,6 +14,9 @@ class BaseBinder(object):
     def __init__(self, system):
         super(BaseBinder, self).__init__()
         self.system = system
+
+    def is_caching_enabled(self):
+        return False
 
     def get_url_path(self):
         raise NotImplementedError()
@@ -126,14 +130,18 @@ class PolymorphicBinder(BaseBinder):
         return query.extend_url(*predicates, **kw)
 
 
-class TypeBinder(BaseBinder):
+class MonomorphicBinder(BaseBinder): # pylint: disable=abstract-method
 
     def __init__(self, object_type, system):
-        super(TypeBinder, self).__init__(system)
+        super(MonomorphicBinder, self).__init__(system)
         self.object_type = object_type
 
     def __repr__(self):
         return "<{0}.{1}>".format(self.system, self.object_type.get_plural_name())
+
+    @property
+    def fields(self):
+        return self.object_type.fields
 
     def is_supported(self):
         return self.object_type.is_supported(self.system)
@@ -143,13 +151,24 @@ class TypeBinder(BaseBinder):
 
     def create(self, *args, **kwargs):
         """
-        Creats an object on the system
+        Creates an object on the system
         """
         return self.object_type.create(self.system, *args, **kwargs)
 
-    @property
-    def fields(self):
-        return self.object_type.fields
+    def get_mutable_fields(self):
+        """Returns a list of all mutable fields for this object type
+        """
+        return [f for f in self.fields if f.mutable]
+
+
+class TypeBinder(MonomorphicBinder):
+
+    def __init__(self, object_type, system):
+        super(TypeBinder, self).__init__(object_type, system)
+        self._cache = None
+
+    def is_caching_enabled(self):
+        return self._cache is not None
 
     def find(self, *predicates, **kw):
         """Queries objects according to predicates. Can receive arguments in two possible forms:
@@ -167,13 +186,11 @@ class TypeBinder(BaseBinder):
 
         .. seealso:: :class:`infinisdk.core.object_query.ObjectQuery`
         """
+        if self._cache is not None:
+            assert not predicates and not kw, "Custom find() is unsupported when forcing queries from cache"
+            return self._cache
         query = ObjectQuery(self.system, self.get_url_path(), self.object_type)
         return query.extend_url(*predicates, **kw)
-
-    def get_mutable_fields(self):
-        """Returns a list of all mutable fields for this object type
-        """
-        return [f for f in self.fields if f.mutable]
 
     def get_by_id_lazy(self, id):  # pylint: disable=redefined-builtin
         """
@@ -181,4 +198,20 @@ class TypeBinder(BaseBinder):
 
         This is useful assuming the next operation is a further query/update on this object.
         """
+        if self._cache is not None:
+            obj = self._cache.safe_get_by_id_from_cache(id)
+            if obj is not None:
+                return obj
         return self.object_type.construct(self.system, {self.fields.id.api_name:id})
+
+    @contextmanager
+    def fetch_once_context(self):
+        original_cache = self._cache
+        try:
+            if original_cache is None:
+                self._cache = self.get_all()
+                for _ in self._cache:
+                    pass
+            yield
+        finally:
+            self._cache = original_cache

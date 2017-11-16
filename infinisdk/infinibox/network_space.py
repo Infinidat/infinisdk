@@ -16,7 +16,7 @@ class NetworkSpace(InfiniBoxObject):
               binding=ListOfRelatedObjectIDsBinding('network_interfaces')),
         Field("service", creation_parameter=True, default="NAS_SERVICE"),
         Field("ips", creation_parameter=False, mutable=False, type=MunchListType),
-        Field("properties", creation_parameter=False, mutable=False, type=MunchType),
+        Field("properties", creation_parameter=True, mutable=True, optional=True, type=MunchType),
         Field("automatic_ip_failback", creation_parameter=True, mutable=True, optional=True, type=bool),
         Field("mtu", type=int, creation_parameter=True, mutable=True, optional=True),
         Field("rate_limit", type=int, creation_parameter=True, mutable=True, optional=True),
@@ -56,3 +56,11 @@ class NetworkSpace(InfiniBoxObject):
 
     def get_links(self):
         return self.system.links.find(local_replication_network_space_id=self.id)
+
+    def get_mgmt_ip(self):
+        if self.get_service().lower() != "rmr_service":
+            raise NotImplementedError('get_mgmt_ip() is supported only on RMR network spaces')
+        for ip in self.get_ips():
+            if ip.get('type') == "MANAGEMENT":
+                return ip
+        return self.get_ips()[0]

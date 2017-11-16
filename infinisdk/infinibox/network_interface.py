@@ -9,7 +9,7 @@ class NetworkInterface(InfiniBoxObject):
 
     FIELDS = [
         Field("id", is_identity=True, type=int, is_filterable=True, is_sortable=True, cached=True),
-        Field("ports", optional=True, creation_parameter=True, mutable=True, type=list, default=list, add_updater=False,
+        Field("ports", optional=True, creation_parameter=True, mutable=True, type=list, add_updater=False,
               binding=ListToDictBinding(key="name")),
         Field("node", api_name="node_id", type=int, creation_parameter=True, use_in_repr=True, mutable=False,
               is_sortable=True, binding=RelatedComponentBinding()),

@@ -167,6 +167,15 @@ infinibox.components
    :members:
 
 
+infinibox.qos_policies
+~~~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: infinisdk.infinibox.qos_policy
+
+.. autoclass:: QosPolicy
+   :members:
+   :inherited-members:
+
 Base Objects
 ~~~~~~~~~~~~
 
