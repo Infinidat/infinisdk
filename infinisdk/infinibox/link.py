@@ -4,9 +4,26 @@ from ..core.bindings import RelatedObjectBinding
 from ..core.exceptions import UnknownSystem
 from ..core.utils import DONT_CARE
 from .system_object import InfiniBoxObject
+from ..core.type_binder import TypeBinder
+
+class LinkBinder(TypeBinder):
+    def __init__(self, *args, **kwargs):
+        super(LinkBinder, self).__init__(*args, **kwargs)
+        self._cached_related_systems = {}
+
+    def remove_cached_related_system(self, related_system):
+        self._cached_related_systems = {k:v for k, v in self._cached_related_systems.items() if v != related_system}
+
+    def set_cached_related_system(self, link, related_system):
+        self._cached_related_systems[link] = related_system
+
+    def get_cached_related_system(self, link):
+        return self._cached_related_systems.get(link)
 
 
 class Link(InfiniBoxObject):
+
+    BINDER_CLASS = LinkBinder
 
     FIELDS = [
         Field('id', type=int, is_identity=True, is_filterable=True, is_sortable=True),
@@ -20,6 +37,9 @@ class Link(InfiniBoxObject):
         Field('remote_system_name', type=str),
         Field('remote_system_serial_number', type=int),
         Field('link_state', type=str),
+        Field('state_description', type=str, feature_name="sync_replication"),
+        Field('is_local_link_ready_for_sync', type=bool, feature_name="sync_replication"),
+        Field('async_only', type=bool, feature_name="sync_replication"),
     ]
 
     def is_up(self, from_cache=DONT_CARE):
@@ -60,15 +80,30 @@ class Link(InfiniBoxObject):
         with self._get_delete_context():
             self.system.api.delete(url)
 
-    def get_linked_system(self):
+    def get_linked_system(self, safe=False):
         """Get the corresponsing system object at the remote and of the link. For this to work, the SDK user should
         call the register_related_system method of the Infinibox object when a link to a remote system is consructed
         for the first time"""
+        related_system = self.system.links.get_cached_related_system(self)
+        if related_system is not None:
+            return related_system
         remote_host = self.get_remote_host()
         for related_system in self.get_system().iter_related_systems():
+            if safe and not related_system.is_active():
+                continue
             for network_space in related_system.network_spaces.get_all():
                 for ip in network_space.get_ips():
                     if ip.ip_address == remote_host:
+                        self.system.links.set_cached_related_system(self, related_system)
                         return related_system
+        if safe:
+            return None
 
         raise UnknownSystem("Could not find a related machine with IP address {0}".format(remote_host))
+
+    def get_remote_link(self, safe=False):
+        """Get the corresponsing link object in the remote machine"""
+        linked_system = self.get_linked_system(safe=safe)
+        if linked_system is None:
+            return None
+        return linked_system.links.get_by_id_lazy(self.get_remote_link_id())

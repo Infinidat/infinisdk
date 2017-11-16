@@ -1,0 +1,17 @@
+# -*- mode: python -*-
+from contextlib import contextmanager
+from infinisim.infinibox import Infinibox as Simulator
+from infinisdk.infinibox import InfiniBox
+
+@contextmanager
+def doctest_context():
+    simulator = Simulator()
+    simulator.activate()
+    system = InfiniBox(simulator, auth=('infinidat', '123456'))
+    system.login()
+    try:
+        yield {
+            "system": system,
+        }
+    finally:
+        simulator.deactivate()

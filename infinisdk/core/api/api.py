@@ -136,12 +136,17 @@ class API(object):
             self._use_basic_auth = prev
 
 
+    def __del__(self):
+        if self._session is not None:
+            self._session.close()
+
     def reinitialize_session(self, auth=None):
         prev_auth = self._auth
         if auth is None:
             auth = self._auth
         if self._session is not None:
             prev_cookies = self._session.cookies.copy()
+            self._session.close()
         else:
             prev_cookies = None
         was_logged_in = self.is_logged_in()
@@ -285,7 +290,7 @@ class API(object):
         self._session.cookies.clear()
 
 
-    @deprecated(message="Use get_auth_context instead")
+    @deprecated(message="Use get_auth_context instead", since='46.0')
     def auth_context(self, *args, **kwargs):
         return self.get_auth_context(*args, **kwargs)
 
@@ -308,7 +313,7 @@ class API(object):
             try:
                 with self.use_basic_auth_context():
                     self.system.check_version()
-            except:
+            except Exception:  # pylint: disable=broad-except
                 self._checked_version = False
                 raise
 
@@ -451,7 +456,7 @@ class API(object):
         finally:
             self._no_reponse_logs -= 1
 
-    @deprecated(message="Use get_no_response_logs_context instead")
+    @deprecated(message="Use get_no_response_logs_context instead", since='46.0')
     def no_response_logs_context(self):
         return self.get_no_response_logs_context()
 

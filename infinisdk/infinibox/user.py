@@ -13,8 +13,9 @@ class User(SystemObject):
         Field("email", creation_parameter=True, mutable=True, default=Autogenerate("user_{uuid}@infinidat.com")),
         Field("name", creation_parameter=True, mutable=True, is_filterable=True, is_sortable=True,
               default=Autogenerate("user_{uuid}")),
-        Field("password", creation_parameter=True, add_getter=False, mutable=True, default="12345678"),
-        Field("enabled", type=bool, mutable=True, feature_name='user_disabling')
+        Field("password", creation_parameter=True, hidden=True, mutable=True, default="12345678"),
+        Field("enabled", type=bool, mutable=True, feature_name='user_disabling', creation_parameter=True,
+              optional=True),
     ]
 
 
@@ -33,3 +34,6 @@ class User(SystemObject):
     def request_reset_password(self):
         url = self.get_this_url_path().add_path('reset_password')
         self.system.api.post(url)
+
+    def is_builtin(self):
+        return self.get_id() < 0
