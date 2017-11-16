@@ -41,6 +41,9 @@ As for the remote entity, it depends on the scenario being used to create the re
 
 .. seealso:: :class:`infinisdk.infinibox.replica.Replica`
 
+.. note:: The type of the replica created (async/sync) is controlled by an optional parameter called ``replication_type``. The default, if not specified, is ``"ASYNC"``.
+
+
 
 Replicating Consistency Groups
 ------------------------------
@@ -67,5 +70,3 @@ Creating synchronous replicas is done by specifying ``"SYNC"`` for the ``replica
        ...     vol, link=link, 
        ...     replication_type="SYNC", remote_pool=remote_pool)
 
-
-.. note:: The default for the ``replication_type`` argument is ``"ASYNC"``.

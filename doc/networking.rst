@@ -52,7 +52,7 @@ Some network space types can receive additional configuration options through *p
        ...
        netspace.update_properties({
          'is_async_only': False,
-        })
+       })
 
 
 .. seealso:: For more information regarding network space properties and their meaning, please refer to the official InfiniBox API documentation
