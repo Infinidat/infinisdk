@@ -477,10 +477,7 @@ class Replica(SystemObject):
 
         :param params: Optional dictionary containing additional parameters for the type change
          """
-        if params is None:
-            params = {}
-        self.system.api.post(self.get_this_url_path().add_path('change_type_to_async'), data=params)
-        self.invalidate_cache()
+        self._change_type(new_type='async', params=params)
         gadget.log_operation(self, "change type to async")
 
     @require_sync_replication
@@ -489,11 +486,30 @@ class Replica(SystemObject):
 
         :param params: Optional dictionary containing additional parameters for the type change
          """
+        self._change_type(new_type='sync', params=params)
+        gadget.log_operation(self, "change type to sync")
+
+    def _change_type(self, new_type, params=None):
         if params is None:
             params = {}
-        self.system.api.post(self.get_this_url_path().add_path('change_type_to_sync'), data=params)
+        old_type = self.get_replication_type().lower()
+        new_type = new_type.lower()
+        gossip.trigger_with_tags('infinidat.sdk.pre_replica_change_type',
+                                 {'replica': self, 'old_type': old_type, 'new_type': new_type},
+                                 tags=['infinibox'])
+        try:
+            url = self.get_this_url_path().add_path('change_type_to_async') if new_type == 'async' \
+                  else self.get_this_url_path().add_path('change_type_to_sync')
+            self.system.api.post(url, data=params)
+        except Exception as e: # pylint: disable=broad-except
+            with end_reraise_context():
+                gossip.trigger_with_tags('infinidat.sdk.replica_change_type_failure',
+                                         {'replica': self, 'old_type': old_type, 'new_type': new_type, 'exception': e},
+                                         tags=['infinibox'])
+        gossip.trigger_with_tags('infinidat.sdk.post_replica_change_type',
+                                 {'replica': self, 'old_type': old_type, 'new_type': new_type},
+                                 tags=['infinibox'])
         self.invalidate_cache()
-        gadget.log_operation(self, "change type to sync")
 
     def _validate_can_check_state(self):
         if self.is_target():
