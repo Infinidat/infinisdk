@@ -428,7 +428,14 @@ class Replica(SystemObject):
     def switch_role(self):
         """Switches replica role - sync replicas only
         """
-        self.system.api.post(self.get_this_url_path().add_path('switch_role'))
+        gossip.trigger_with_tags('infinidat.sdk.pre_replica_switch_role', {'replica': self}, tags=['infinibox'])
+        try:
+            self.system.api.post(self.get_this_url_path().add_path('switch_role'))
+        except Exception as e: # pylint: disable=broad-except
+            with end_reraise_context():
+                gossip.trigger_with_tags('infinidat.sdk.replica_switch_role_failure',
+                                         {'replica': self, 'exception': e}, tags=['infinibox'])
+        gossip.trigger_with_tags('infinidat.sdk.post_replica_switch_role', {'replica': self}, tags=['infinibox'])
         self.invalidate_cache()
         gadget.log_operation(self, "switch role")
 

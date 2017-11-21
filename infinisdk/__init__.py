@@ -73,6 +73,10 @@ def _install_hooks():
     gossip.define(_SDK_HOOK('post_replica_change_type'), tags=['infinibox'])
     gossip.define(_SDK_HOOK('replica_change_type_failure'), tags=['infinibox'])
 
+    gossip.define(_SDK_HOOK('pre_replica_switch_role'), tags=['infinibox'])
+    gossip.define(_SDK_HOOK('post_replica_switch_role'), tags=['infinibox'])
+    gossip.define(_SDK_HOOK('replica_switch_role_failure'), tags=['infinibox'])
+
     gossip.define(_SDK_HOOK('replica_before_change_role'), tags=['infinibox'])
     gossip.define(_SDK_HOOK('replica_after_change_role'), tags=['infinibox'])
     gossip.define(_SDK_HOOK('replica_change_role_failure'), tags=['infinibox'])
