@@ -140,7 +140,7 @@ class ConsGroup(InfiniBoxObject):
 
         trigger_hook = functools.partial(gossip.trigger_with_tags,
                                          kwargs={'cons_group': self, 'delete_members': delete_members},
-                                         tags=['cons_group'])
+                                         tags=self.get_tags_for_object_operations(self.system))
         trigger_hook('infinidat.sdk.pre_cons_group_deletion')
         gadget.log_entity_deletion(self)
         try:
