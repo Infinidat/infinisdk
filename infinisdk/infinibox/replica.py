@@ -600,14 +600,14 @@ class Replica(SystemObject):
 
     def change_role(self, entity_pairs=OMIT):
         data = {'entity_pairs': entity_pairs} if entity_pairs is not OMIT else None
-        gossip.trigger_with_tags('infinidat.sdk.replica_before_change_role', {'replica': self}, tags=['infinibox'])
+        gossip.trigger_with_tags('infinidat.sdk.pre_replica_change_role', {'replica': self}, tags=['infinibox'])
         try:
             self.system.api.post(self.get_this_url_path().add_path('change_role'), data=data)
         except Exception as e: # pylint: disable=broad-except
             with end_reraise_context():
                 gossip.trigger_with_tags('infinidat.sdk.replica_change_role_failure',
                                          {'replica': self, 'exception': e}, tags=['infinibox'])
-        gossip.trigger_with_tags('infinidat.sdk.replica_after_change_role', {'replica': self}, tags=['infinibox'])
+        gossip.trigger_with_tags('infinidat.sdk.post_replica_change_role', {'replica': self}, tags=['infinibox'])
         self.invalidate_cache()
 
     def is_source(self, *args, **kwargs):
