@@ -306,3 +306,20 @@ def test_save_credentials_preserves_domain(infinibox):
     [cookie] = infinibox.api._session.cookies # pylint: disable=protected-access
     new_domain = cookie.domain
     assert new_domain == domain
+
+def test_clone_requests_session(infinibox):
+    # pylint: disable=protected-access
+    new_session = infinibox.api.clone_requests_session()
+    assert new_session is not infinibox.api._session
+    assert new_session.cookies is not infinibox.api._session.cookies
+    assert new_session.headers is not infinibox.api._session.headers
+    assert new_session.adapters is not infinibox.api._session.adapters
+    # test cookies manipulation
+    new_session.cookies['x'] = 'y'
+    assert 'x' not in infinibox.api._session.cookies
+    # test headers manipulation
+    new_session.headers['x'] = 'y'
+    assert 'x' not in infinibox.api._session.headers
+    # test adapters manipulation
+    new_session.adapters['x'] = 'y'
+    assert 'x' not in infinibox.api._session.adapters

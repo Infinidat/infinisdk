@@ -135,6 +135,20 @@ class API(object):
         finally:
             self._use_basic_auth = prev
 
+    def clone_requests_session(self):
+        """
+        Return a copy of system session for cases
+        we need to manipulate different attrs of the session
+        for now, the cloned session has a copy of:
+        headers, cookies, verify, cert, adapters
+        """
+        cloned_session = requests.Session()
+        cloned_session.cookies = self._session.cookies.copy()
+        cloned_session.verify = copy.copy(self._session.verify)
+        cloned_session.cert = copy.copy(self._session.cert)
+        cloned_session.headers = self._session.headers.copy()
+        cloned_session.adapters = self._session.adapters.copy()
+        return cloned_session
 
     def __del__(self):
         if self._session is not None:
