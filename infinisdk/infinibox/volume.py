@@ -118,4 +118,7 @@ class Volume(Dataset):
     def has_children(self):
         return self.get_field("has_children")
 
+    def is_in_cons_group(self):
+        return self.get_cons_group() is not None
+
 ScsiVolume.register(Volume)  # pylint: disable=no-member

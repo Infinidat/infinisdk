@@ -116,9 +116,3 @@ def test_get_members(cg, volume):
 @relevant_from_version('2.2')
 def test_get_rmr_snapshot_guid(cg):
     assert cg.get_rmr_snapshot_guid() is None
-
-
-
-@pytest.fixture
-def cg(pool):
-    return pool.system.cons_groups.create(pool=pool)

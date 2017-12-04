@@ -8,6 +8,11 @@ from infinisdk.infinibox.pool import Pool
 from infinisdk.infinibox.scsi_serial import SCSISerial
 
 
+def test_is_in_cons_group(volume, cg):
+    assert not volume.is_in_cons_group()
+    cg.add_member(volume)
+    assert volume.is_in_cons_group()
+
 def test_unmapping(mapped_volume):
     assert mapped_volume.is_mapped()
     assert mapped_volume.get_logical_units()

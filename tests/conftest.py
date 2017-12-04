@@ -163,6 +163,10 @@ def pool(infinibox):
 def volume(infinibox, pool):
     return create_volume(infinibox, pool_id=pool.id)
 
+@pytest.fixture
+def cg(pool):
+    return pool.system.cons_groups.create(pool=pool)
+
 def _map_to_cluster(infinibox, volume):
     host = infinibox.hosts.create()
     cluster = infinibox.host_clusters.create()

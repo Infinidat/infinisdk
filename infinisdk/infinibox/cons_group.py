@@ -196,6 +196,7 @@ class ConsGroup(InfiniBoxObject):
                 trigger_hook('infinidat.sdk.cons_group_add_member_failure')
         trigger_hook('infinidat.sdk.post_cons_group_add_member')
         self.invalidate_cache('members_count')
+        member.invalidate_cache('cons_group')
 
     def remove_member(self, member, retain_staging_area=False, create_replica=False, replica_name=OMIT,
                       force_if_no_remote_credentials=False, force_if_remote_error=False, force_on_target=False):
