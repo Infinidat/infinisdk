@@ -20,6 +20,9 @@ class TreeQBinder(TypeBinder):
     def get_url_path(self):
         return self._filesystem.get_this_url_path().add_path('treeqs')
 
+    def __repr__(self):
+        return "<{0}.{1}>".format(self._filesystem, self.object_type.get_plural_name())
+
 
 class TreeQ(SystemObject):
     FIELDS = [
