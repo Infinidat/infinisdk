@@ -8,6 +8,7 @@ from infinisdk.infinibox.pool import Pool
 from infinisdk.infinibox.scsi_serial import SCSISerial
 
 
+@pytest.mark.skip(reason="INFRADEV-10175")
 def test_is_in_cons_group(volume, cg):
     assert not volume.is_in_cons_group()
     cg.add_member(volume)
