@@ -7,9 +7,8 @@ class User(SystemObject):
     FIELDS = [
         Field("id", type=int, is_identity=True, is_filterable=True, is_sortable=True),
         Field("type"),
-        Field("role", creation_parameter=True, mutable=True, is_filterable=True, is_sortable=True,
-              default="PoolAdmin"), # For backwards compatibility
-        Field("roles", type=list, mutable=True),
+        Field("role", creation_parameter=True, mutable=True, is_filterable=True, is_sortable=True, optional=True),
+        Field("roles", creation_parameter=True, type=list, mutable=True, optional=True),
         Field("email", creation_parameter=True, mutable=True, default=Autogenerate("user_{uuid}@infinidat.com")),
         Field("name", creation_parameter=True, mutable=True, is_filterable=True, is_sortable=True,
               default=Autogenerate("user_{uuid}")),
@@ -18,6 +17,11 @@ class User(SystemObject):
               optional=True),
     ]
 
+    @classmethod
+    def create(cls, system, **fields):
+        if 'role' not in fields and 'roles' not in fields:
+            fields['role'] = 'PoolAdmin' # For backwards compatibility
+        return super(User, cls).create(system, **fields)
 
     def get_owned_pools(self):
         """Returns the pools that are owned by this user
