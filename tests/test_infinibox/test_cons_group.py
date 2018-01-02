@@ -19,6 +19,8 @@ def test_create_cg(infinibox, pool):
 @relevant_from_version('2.2')
 @pytest.mark.parametrize('field', ConsGroup.FIELDS)
 def test_get_cg_fields(cg, field):
+    if not cg.system.is_field_supported(field):
+        return
     field_value = cg.get_field(field.name)
     if field.name in {'parent', 'rmr_snapshot_guid', 'data_snapshot_guid'}:
         assert field_value is None
