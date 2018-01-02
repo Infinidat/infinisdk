@@ -31,6 +31,7 @@ class ConsGroup(InfiniBoxObject):
         Field("created_at", type=MillisecondsDatetimeType, is_sortable=True, is_filterable=True),
         Field("updated_at", type=MillisecondsDatetimeType, is_sortable=True, is_filterable=True),
         Field('rmr_snapshot_guid', is_filterable=True, is_sortable=True),
+        Field('pool_name', is_sortable=True, is_filterable=True, new_to="4.0.10"),
     ]
 
     @classmethod

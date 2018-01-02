@@ -98,8 +98,8 @@ class Dataset(InfiniBoxObject):
               is_filterable=True, binding=RelatedObjectBinding('qos_policies'), feature_name='qos', cached=False),
         Field('qos_shared_policy', type='infinisdk.infinibox.qos_policy:QosPolicy', api_name='qos_shared_policy_id',
               is_sortable=True, is_filterable=True, binding=RelatedObjectBinding('qos_policies'),
-              feature_name='qos', cached=False)
-
+              feature_name='qos', cached=False),
+        Field('pool_name', is_sortable=True, is_filterable=True, new_to="4.0.10"),
     ]
 
     PROVISIONING = namedtuple('Provisioning', ['Thick', 'Thin'])('THICK', 'THIN')
