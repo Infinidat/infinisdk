@@ -22,8 +22,8 @@ class FieldFilter(object):
 
     def add_to_url(self, urlobj):
         if isinstance(self.value, Iterable) and not isinstance(self.value, string_types):
-            value = "({0})".format(",".join(str(self._translate(val))
-                                            for val in self.value))
+            value = "({0})".format(",".join(str('null' if val is None else val) for val in [self._translate(val)
+                                                                                            for val in self.value]))
         else:
             value = self._translate(self.value)
 
