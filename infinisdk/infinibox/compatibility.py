@@ -151,6 +151,10 @@ class Compatibility(object):
     def has_treeq(self):
         return self.has_feature('treeq')
 
+    def has_openvms(self):
+        return self.get_parsed_system_version() >= '4.0.10'
+
+
 _VERSION_TUPLE_LEN = 5
 
 
