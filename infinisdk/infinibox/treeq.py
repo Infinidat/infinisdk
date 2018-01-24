@@ -43,7 +43,8 @@ class TreeQ(SystemObject):
               default=Autogenerate("treeq_{uuid}")),
         Field("path", creation_parameter=True, cached=True, is_filterable=True, is_sortable=True,
               default=Autogenerate('/{prefix}treeq_{uuid}')),
-        Field("filesystem", api_name="filesystem_id", cached=True, type=int, binding=RelatedObjectBinding()),
+        Field("filesystem", api_name="filesystem_id", cached=True, type=int, binding=RelatedObjectBinding(),
+              use_in_repr=True),
         Field("soft_capacity", type=CapacityType, mutable=True, creation_parameter=True, optional=True,
               is_filterable=True, is_sortable=True),
         Field("soft_inodes", type=int, mutable=True, creation_parameter=True, optional=True,
@@ -65,6 +66,13 @@ class TreeQ(SystemObject):
         super(TreeQ, self).__init__(system, initial_data)
         self._binder = system.filesystems.get_treeq_binder_by_id(
             initial_data.get('filesystem_id'))
+
+    def __eq__(self, other):
+        return super(TreeQ, self).__eq__(other) and \
+            self.get_filesystem(from_cache=True) == other.get_filesystem(from_cache=True)
+
+    def get_unique_key(self):
+        return (self.system, type(self).__name__, self.get_filesystem(), self.id)
 
     @classmethod
     def create(cls, system, binder, **fields): # pylint: disable=arguments-differ
