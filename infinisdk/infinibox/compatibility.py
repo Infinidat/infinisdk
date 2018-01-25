@@ -152,7 +152,7 @@ class Compatibility(object):
         return self.has_feature('treeq')
 
     def has_openvms(self):
-        return self.get_parsed_system_version() >= '4.0.5'
+        return self.has_feature('open_vms')
 
 
 _VERSION_TUPLE_LEN = 5
