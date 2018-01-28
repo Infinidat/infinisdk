@@ -68,8 +68,10 @@ class TreeQ(SystemObject):
             initial_data.get('filesystem_id'))
 
     def __eq__(self, other):
-        return super(TreeQ, self).__eq__(other) and \
-            self.get_filesystem(from_cache=True) == other.get_filesystem(from_cache=True)
+        return type(other) == type(self) and other.get_unique_key() == self.get_unique_key()  # pylint: disable=unidiomatic-typecheck
+
+    def __hash__(self):
+        return hash(self.get_unique_key())
 
     def get_unique_key(self):
         return (self.system, type(self).__name__, self.get_filesystem(), self.id)
