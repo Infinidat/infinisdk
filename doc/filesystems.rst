@@ -57,6 +57,7 @@ Use :meth:`.Filesystem.move_pool` to move a filesystem between pools:
 Resizing Filesystems
 --------------------
 Use :meth:`.Filesystem.resize` to resize the filesystem by the given delta:
+
 .. code-block:: python
 
 		>>> fs.resize(delta=2*GB)
@@ -187,7 +188,59 @@ Each filesystem has a ``treeqs`` member, which is a collection of its TreeQ's:
 
    >>> fs.treeqs.to_list()
    []
-   >>> treeq = fs.treeqs.create(path='/path', soft_capacity=GB, hard_inodes=200)
-   >>> print(treeq.get_capacity_state())
+   >>> treeq1 = fs.treeqs.create(path='/path1', soft_capacity=GB, hard_inodes=200)
+   >>> print(treeq1.get_capacity_state())
    BELOW_SOFT
 
+TreeQ's can be queried, filtered and sorted:
+
+.. code-block:: python
+                
+   >>> treeq2 = fs.treeqs.create(path='/path2', soft_capacity=GB, hard_inodes=300)
+   >>> treeq3 = fs.treeqs.create(path='/path3', soft_capacity=GB, hard_inodes=400)
+   >>> from infinisdk import Q
+   >>> for treeq in fs.treeqs.find(Q.hard_inodes>200).sort(-fs.treeqs.fields.hard_inodes):
+   ...     print(treeq.get_path())
+   /path3
+   /path2
+
+When creating a snapshot, all TreeQ's are copied to the child dataset. The new TreeQ's are separate and distinct objects:
+
+.. code-block:: python
+
+   >>> fs2 = fs.create_child()
+   >>> for treeq in fs2.treeqs:
+   ...     print(treeq.get_path())
+   /path1
+   /path2
+   /path3
+   >>> fs.treeqs.get(path='/path1') == fs2.treeqs.get(path='/path1')
+   False
+
+A single update request can modify either TreeQ limits or its name:
+
+.. code-block:: python
+
+   >>> treeq1.update_fields(soft_inodes=5, soft_capacity=GB)
+   >>> treeq1.update_fields(name='path1')
+   >>> treeq1.update_fields(soft_inodes=5, name='path1') # doctest: +IGNORE_EXCEPTION_DETAIL
+   Traceback (most recent call last):
+		  ...
+   APICommandFailed: ...
+
+Refreshing a snapshot or restoring a filesystem from a snapshot modifies its TreeQ's accordingly:
+
+.. code-block:: python
+
+   >>> treeq1.delete()
+   >>> print(fs.treeqs.count())
+   2
+   >>> fs.restore(fs2)
+   >>> print(fs.treeqs.count())
+   3
+   >>> print(fs2.treeqs.count())
+   3
+   >>> fs.treeqs.choose().delete()
+   >>> fs2.refresh_snapshot()
+   >>> print(fs2.treeqs.count())
+   2
