@@ -3,7 +3,7 @@ from sentinels import NOTHING
 from munch import Munch
 from .api.special_values import SpecialValue, RawValue
 from .translators_and_types import address_type_factory, host_port_from_api
-
+from .._compat import string_types
 # pylint: disable=abstract-method
 
 class InfiniSDKBinding(ObjectAPIBinding):
@@ -64,6 +64,12 @@ class RelatedObjectBinding(InfiniSDKBinding):
             return None
         return getattr(system, self._collection_name).get_by_id_lazy(api_value)
 
+class RelatedObjectNamedBinding(RelatedObjectBinding):
+
+    def get_api_value_from_value(self, system, objtype, obj, value):
+        if isinstance(value, string_types):
+            value = system.objects[self._collection_name].get(name=value)
+        return super(RelatedObjectNamedBinding, self).get_api_value_from_value(system, objtype, obj, value)
 
 class ListOfRelatedObjectIDsBinding(RelatedObjectBinding):
     """

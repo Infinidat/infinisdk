@@ -10,7 +10,7 @@ from ..core.utils import end_reraise_context, DONT_CARE, handle_possible_replica
 from ..core.exceptions import ObjectNotFound, TooManyObjectsFound
 from ..core.type_binder import TypeBinder, PolymorphicBinder
 from ..core import Field, CapacityType, MillisecondsDatetimeType
-from ..core.bindings import RelatedObjectBinding
+from ..core.bindings import RelatedObjectBinding, RelatedObjectNamedBinding
 from ..core.api.special_values import OMIT
 from .system_object import InfiniBoxObject
 
@@ -73,7 +73,7 @@ class Dataset(InfiniBoxObject):
         Field("allocated", type=CapacityType, is_sortable=True, is_filterable=True),
         Field("tree_allocated", type=CapacityType),
         Field("pool", type='infinisdk.infinibox.pool:Pool', api_name="pool_id", creation_parameter=True,
-              is_filterable=True, is_sortable=True, binding=RelatedObjectBinding()),
+              is_filterable=True, is_sortable=True, binding=RelatedObjectNamedBinding()),
         Field("type", cached=True, is_filterable=True, is_sortable=True),
         Field("family_id", type=int, cached=True, is_filterable=True, is_sortable=True, new_to="3.0"),
         Field("provisioning", api_name="provtype", mutable=True, creation_parameter=True,

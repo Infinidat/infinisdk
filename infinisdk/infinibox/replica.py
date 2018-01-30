@@ -7,7 +7,7 @@ import functools
 from ..core.utils import end_reraise_context
 from ..core import Field, MillisecondsDatetimeType
 from ..core.api.special_values import OMIT
-from ..core.bindings import RelatedObjectBinding
+from ..core.bindings import RelatedObjectNamedBinding
 from ..core.exceptions import CannotGetReplicaState, InvalidUsageException, TooManyObjectsFound, UnknownSystem
 from ..core.translators_and_types import MillisecondsDeltaType, CapacityType
 from ..core.type_binder import TypeBinder
@@ -189,7 +189,7 @@ class Replica(SystemObject):
         Field('description', is_filterable=True, mutable=True),
         Field('updated_at', type=MillisecondsDatetimeType, is_filterable=True, is_sortable=True),
         Field('created_at', type=MillisecondsDatetimeType, is_sortable=True, is_filterable=True, cached=True),
-        Field('link', api_name='link_id', binding=RelatedObjectBinding('links'),
+        Field('link', api_name='link_id', binding=RelatedObjectNamedBinding('links'),
               type='infinisdk.infinibox.link:Link', creation_parameter=True),
         Field('entity_pairs', type=list, creation_parameter=True),
         Field('entity_type', type=str, cached=True, creation_parameter=True, default='VOLUME', is_filterable=True),

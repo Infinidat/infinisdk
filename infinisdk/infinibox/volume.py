@@ -2,12 +2,13 @@ import logbook
 from storage_interfaces.scsi.abstracts import ScsiVolume
 from ..core import Field
 from ..core.exceptions import InfiniSDKException
-from ..core.api.special_values import Autogenerate, SpecialValue, OMIT
+from ..core.api.special_values import Autogenerate, OMIT
 from ..core.bindings import RelatedObjectBinding
 from ..core.utils import end_reraise_context
 from .dataset import Dataset, DatasetTypeBinder
 from .lun import LogicalUnit, LogicalUnitContainer
 from .scsi_serial import SCSISerial
+from .system_object import InfiniBoxObject
 
 _logger = logbook.Logger(__name__)
 
@@ -73,7 +74,7 @@ class Volume(Dataset):
     @classmethod
     def create(cls, system, **fields):
         pool = fields.get('pool')
-        if pool and not isinstance(pool, SpecialValue):
+        if pool and isinstance(pool, InfiniBoxObject):
             pool.invalidate_cache('allocated_physical_capacity', 'free_physical_capacity', 'free_virtual_capacity',
                                   'reserved_capacity')
         return super(Volume, cls).create(system, **fields)

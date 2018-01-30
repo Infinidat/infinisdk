@@ -23,6 +23,14 @@ def test_replica_sync_interval(replica):
     replica.update_sync_interval(interval)
     assert interval == replica.get_sync_interval()
 
+@relevant_from_version('2.0')
+def test_create_replica_with_link_name(infinibox, secondary_infinibox, link, replica_creation_kwargs):
+    infinibox.register_related_system(secondary_infinibox)
+    secondary_infinibox.register_related_system(infinibox)
+    replica = infinibox.replicas.create(
+        link=link.get_name(), **replica_creation_kwargs)
+
+    assert replica.get_link() == link
 
 @relevant_from_version('2.0')
 def test_get_remote_entity_pairs(replica, remote_replica):

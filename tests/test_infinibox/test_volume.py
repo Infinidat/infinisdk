@@ -7,7 +7,7 @@ from infinisdk.infinibox.volume import Volume
 from infinisdk.infinibox.pool import Pool
 from infinisdk.infinibox.scsi_serial import SCSISerial
 
-from ..conftest import relevant_from_version
+from ..conftest import relevant_from_version, create_volume
 
 @relevant_from_version('2.2')
 def test_is_in_cons_group(volume, cg):
@@ -99,3 +99,7 @@ def test_move_volume(infinibox, with_capacity):
     else:
         assert oldpool.get_virtual_capacity(from_cache=False) == old_virt_capacity
         assert newpool.get_virtual_capacity(from_cache=False) == new_virt_capacity
+
+def test_create_volume_with_pool_name(infinibox, pool):
+    volume = create_volume(infinibox, pool=pool.get_name())
+    assert volume.get_pool() == pool
