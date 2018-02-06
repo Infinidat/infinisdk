@@ -1,6 +1,6 @@
 import sys
 import arrow
-import dateparser
+import dateutil
 import pkg_resources
 import click
 import logbook
@@ -71,7 +71,7 @@ def events():
 TIME_TEPMPLATE = 'YYYY-MM-DD HH:mm:ss'
 
 def _convert_time_string_to_arrow(time_string, tzinfo):
-    datetime_obj = dateparser.parse(time_string)
+    datetime_obj = dateutil.parser.parse(time_string)
     return arrow.get(datetime_obj, tzinfo=tzinfo)
 
 @events.command(name='query')
