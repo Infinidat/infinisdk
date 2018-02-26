@@ -95,8 +95,7 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
     def __eq__(self, other):
         if type(self) is not type(other):
             return NotImplemented
-
-        return self.system == other.system and self.id == other.id
+        return self.get_unique_key() == other.get_unique_key()
 
     def __ne__(self, other):
         return not (self == other) # pylint: disable=superfluous-parens
