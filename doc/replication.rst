@@ -35,7 +35,7 @@ As for the remote entity, it depends on the scenario being used to create the re
 
 * Using a base snapshot (`_use_base`) requires a remote and local snapshots
 * Creating a new entity on the remote side (`_create_target` or default) requires the remote pool to be provided
-* Creating over an existing, formatted target (`_existing_target`) requires the remote target to be provided via ``
+* Creating over an existing, formatted target (`_existing_target`) requires the remote target to be provided via ``remote_entity`` parameter
 
 
 
