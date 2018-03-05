@@ -26,7 +26,7 @@ def _change_cached_context(component, field_name, new_value):
 
 def test_component_id_field(component_collection, component):
     assert isinstance(component.id, str)
-    assert component.get_field('id') == component.id
+    assert component.get_field('uid') == component.id
     assert component_collection.get_by_id(component.id) is component
 
 
@@ -216,10 +216,12 @@ def test_get_all_first_drives(infinibox):
     get_expected_drive_id = lambda enc: 'system:0_rack:1_enclosure:{0}_drive:1'.format(enc.get_index())
     assert set(get_expected_drive_id(enc) for enc in enclosures) == set(drive.get_id() for drive in drives_list)
 
-def test_get_index(infinibox):
-    node = infinibox.components.nodes.get(index=3)
-    assert node.get_index() == 3
+@pytest.mark.parametrize('id_field', ['index', 'api_id'])
+def test_get_index(infinibox, id_field):
+    node = infinibox.components.nodes.get(**{id_field: 3})
+    assert node.get_field(id_field) == 3
     assert node.get_id() == 'system:0_rack:1_node:3'
+    assert node.get_uid() == 'system:0_rack:1_node:3'
 
 def test_get_by_id_lazy(infinibox):
     with pytest.raises(NotImplementedError):
@@ -228,6 +230,10 @@ def test_get_by_id_lazy(infinibox):
         infinibox.components.nodes.get_by_id_lazy(123456)
     node = infinibox.components.nodes.choose()
     assert node is infinibox.components.nodes.get_by_id_lazy(node.id)
+
+def test_refresh_nodes_fields(infinibox):
+    nodes = infinibox.components.nodes.refresh_fields(['services', 'state'])
+    assert [node.get_uid() for node in nodes] == [node.get_uid() for node in infinibox.components.nodes]
 
 @pytest.mark.parametrize('component_binder_name', ['nodes', 'enclosures', 'drives', 'local_drives'])
 def test_get_components_sorted_by_index_and_parent_index(infinibox, component_binder_name):

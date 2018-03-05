@@ -8,7 +8,7 @@ from infinisdk.infinibox.components import Enclosure, Node
 
 NO_OF_ENCLOSURES_DRIVES = config.get_path('infinibox.defaults.enlosure_drives.total_count.mock')
 
-get_id = lambda obj: obj.get_id()
+get_api_id = lambda obj: obj.get_api_id()
 get_state = lambda obj: obj.get_state()
 
 def test_get_all_items_of_specific_component(infinibox):
@@ -26,16 +26,16 @@ def test_get_all_items_of_all_the_components(infinibox):
 
 def test_sort_results_asc(infinibox):
     enclosures = infinibox.components.enclosures
-    sorting = enclosures.find().sort(+enclosures.object_type.fields.id)
+    sorting = enclosures.find().sort(+enclosures.object_type.fields.api_id)
 
-    sorted_enclosures = sorted(enclosures.find(), key=get_id, reverse=False)
+    sorted_enclosures = sorted(enclosures.find(), key=get_api_id, reverse=False)
     assert sorted_enclosures == list(sorting)
 
 def test_sort_results_desc(infinibox):
     enclosures = infinibox.components.enclosures
-    sorting = enclosures.find().sort(-enclosures.object_type.fields.id)
+    sorting = enclosures.find().sort(-enclosures.object_type.fields.api_id)
 
-    sorted_enclosures = sorted(enclosures.find(), key=get_id, reverse=True)
+    sorted_enclosures = sorted(enclosures.find(), key=get_api_id, reverse=True)
     assert sorted_enclosures == list(sorting)
 
 def test_sort_results_where_key_is_equal(infinibox):
@@ -132,12 +132,13 @@ def test_system_component_find_no_type(infinibox):
                 continue
         assert(component_type in fetched_types)
 
-def test_component_not_found(infinibox):
+@pytest.mark.parametrize('id_field', ['id', 'uid'])
+def test_component_not_found(infinibox, id_field):
     rack_id = infinibox.components.get_rack_1().id
     with pytest.raises(ObjectNotFound) as caught:
-        infinibox.components.fc_ports.get(Q.parent_id == rack_id, id='fake_id')
+        infinibox.components.fc_ports.get(Q.parent_id == rack_id, **{id_field: 'fake_id'})
     exc_msg = str(caught.value)
-    assert '(id=fake_id)' in exc_msg
+    assert '(uid=fake_id)' in exc_msg
     assert '(parent_id={})'.format(rack_id) in exc_msg
 
 

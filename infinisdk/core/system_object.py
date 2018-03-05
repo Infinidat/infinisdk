@@ -34,6 +34,7 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
 
     FIELDS = []
     URL_PATH = None
+    UID_FIELD = "id"
     #: specifies which :class:`.TypeBinder` subclass is to be used for this type
     BINDER_CLASS = TypeBinder
 
@@ -42,8 +43,8 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
         #: the system to which this object belongs
         self._system = system
         self._cache = initial_data
-        self._uid = self.fields.id.binding.get_value_from_api_object(
-            system, type(self), self, self._cache)
+        uid_field = self.fields[self.UID_FIELD]
+        self._uid = uid_field.binding.get_value_from_api_object(system, type(self), self, self._cache)
 
     @property
     def id(self):
@@ -340,7 +341,7 @@ class SystemObject(BaseSystemObject):
         Returns whether or not the object actually exists
         """
         try:
-            self.get_field("id", from_cache=False)
+            self.get_field(self.UID_FIELD, from_cache=False)
         except APICommandFailed as e:
             if e.status_code != httplib.NOT_FOUND:
                 raise
