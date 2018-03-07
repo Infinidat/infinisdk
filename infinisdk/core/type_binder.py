@@ -91,7 +91,7 @@ class BaseBinder(object):
             return None
 
     def count(self, *predicates, **kw):
-        return len(self.find(*predicates, **kw).page_size(1))
+        return self.find(*predicates, **kw).count()
 
     def __iter__(self):
         return iter(self.find())

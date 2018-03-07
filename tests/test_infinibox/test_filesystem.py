@@ -52,3 +52,9 @@ def test_filesystem_children_deletion_without_approval(filesystem):
 def test_field_types():
     assert Filesystem.fields.parent.type.type is Filesystem  # pylint: disable=no-member
     assert Filesystem.fields.pool.type.type is Pool  # pylint: disable=no-member
+
+
+def test_count_inside_fetch_once_context(filesystem):
+    system = filesystem.system
+    with system.filesystems.fetch_once_context():
+        assert system.filesystems.count() == 1
