@@ -53,10 +53,10 @@ class TreeQ(SystemObject):
               is_filterable=True, is_sortable=True),
         Field("hard_inodes", type=int, mutable=True, creation_parameter=True, optional=True,
               is_filterable=True, is_sortable=True),
-        Field("used_capacity", type=CapacityType, is_filterable=True, is_sortable=True),
-        Field("used_inodes", type=int, is_filterable=True, is_sortable=True),
-        Field("capacity_state", is_filterable=True, is_sortable=True),
-        Field("inodes_state", is_filterable=True, is_sortable=True),
+        Field("used_capacity", type=CapacityType, cached=False, is_filterable=True, is_sortable=True),
+        Field("used_inodes", type=int, cached=False, is_filterable=True, is_sortable=True),
+        Field("capacity_state", cached=False, is_filterable=True, is_sortable=True),
+        Field("inodes_state", cached=False, is_filterable=True, is_sortable=True),
         Field("mode", type=str, creation_parameter=True, optional=True, hidden=True)
     ]
 
