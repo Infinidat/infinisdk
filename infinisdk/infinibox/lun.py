@@ -12,6 +12,7 @@ class LogicalUnit(object):
         self.host_cluster_id = host_cluster_id
         self.volume_id = volume_id
         self.host_id = host_id
+        self.udid = kwargs.pop('udid', None)
         self.additional_data = kwargs
         self.mapping_object = self.get_host() or self.get_cluster()
 
