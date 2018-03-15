@@ -56,7 +56,7 @@ class Host(InfiniBoxLURelatedObject):
         Field("ports", type=HostPortListType, add_updater=False),
         Field("cluster", api_name="host_cluster_id", type='infinisdk.infinibox.host_cluster:HostCluster',
               is_filterable=True, binding=RelatedObjectBinding('host_clusters')),
-        Field("host_type", creation_parameter=True, optional=True, mutable=True, is_sortable=True, is_filterable=True,
+        Field("host_type", creation_parameter=True, optional=True, mutable=False, is_sortable=True, is_filterable=True,
               feature_name='openvms'),
         Field("security_method", feature_name='iscsi', creation_parameter=True, optional=True, mutable=True,
               is_sortable=True, is_filterable=True),

@@ -13,7 +13,7 @@ class HostCluster(InfiniBoxLURelatedObject):
         Field("luns", type=list, add_getter=False, add_updater=False),
         Field("san_client_type", new_to="3.0"),
         Field("hosts", type=list, add_updater=False, binding=ListOfRelatedObjectBinding()),
-        Field("host_type", creation_parameter=True, optional=True, mutable=True, is_sortable=True, is_filterable=True,
+        Field("host_type", creation_parameter=True, optional=True, mutable=False, is_sortable=True, is_filterable=True,
               feature_name='openvms'),
         Field("created_at", type=MillisecondsDatetimeType, is_sortable=True, is_filterable=True),
         Field("updated_at", type=MillisecondsDatetimeType, is_sortable=True, is_filterable=True),
