@@ -23,6 +23,13 @@ def test_replica_sync_interval(replica):
     replica.update_sync_interval(interval)
     assert interval == replica.get_sync_interval()
 
+
+@relevant_from_version('2.0')
+def test_replica_zero_sync_interval(replica):
+    replica.update_sync_interval(0)
+    assert replica.get_sync_interval() == timedelta(seconds=0)
+
+
 @relevant_from_version('2.0')
 def test_create_replica_with_link_name(infinibox, secondary_infinibox, link, replica_creation_kwargs):
     infinibox.register_related_system(secondary_infinibox)
