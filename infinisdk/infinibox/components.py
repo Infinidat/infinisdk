@@ -248,10 +248,6 @@ class InfiniBoxSystemComponent(BaseSystemObject):
         data = self.system.api.get(self.get_this_url_path()).get_result()
         self.construct(self.system, data, self.get_parent_id())
 
-    @deprecated(message='Use refresh_cache()', since='65.0')
-    def refresh(self): # pylint: disable=arguments-differ
-        self.refresh_cache()
-
     @classmethod
     def construct(cls, system, data, parent_id, allow_partial_fields=False):    # pylint: disable=arguments-differ
         # pylint: disable=protected-access

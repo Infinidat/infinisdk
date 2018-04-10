@@ -5,7 +5,6 @@ import gadget
 from contextlib import contextmanager
 
 from mitba import cached_method
-from vintage import deprecated
 from urlobject import URLObject as URL
 
 from .exceptions import APICommandFailed
@@ -67,10 +66,6 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
                     field_name).api_name, None)
         else:
             self._cache.clear()
-
-    @deprecated(message='use invalidate_cache instead', since='65.0')
-    def refresh(self, *field_names):
-        return self.invalidate_cache(*field_names)
 
     @classmethod
     def is_supported(cls, system): # pylint: disable=unused-argument
