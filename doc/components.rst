@@ -47,11 +47,8 @@ For each Node, you can use the :meth:`.Node.get_fc_ports` method to obtain the F
 
 		>>> for node in system.components.nodes:
 		...     for fc_port in node.get_fc_ports():
-		...         if fc_port.is_link_up():
-		...             print('Port', fc_port.get_index(), 'of node', node.get_index(), 'is UP')
-                Port 1 of node 1 is UP
-                Port 1 of node 2 is UP
-                Port 1 of node 3 is UP
+		...         if not fc_port.is_link_up():
+		...             print('Port', fc_port.get_field('wwpn'), 'of', node, 'is down!')
 
 
 Services
