@@ -4,6 +4,7 @@ from ..core import Field
 from ..core.exceptions import InfiniSDKException
 from ..core.api.special_values import Autogenerate, OMIT
 from ..core.bindings import RelatedObjectBinding
+from ..core.object_query import LazyQuery
 from ..core.utils import end_reraise_context
 from .dataset import Dataset, DatasetTypeBinder
 from .lun import LogicalUnit, LogicalUnitContainer
@@ -88,8 +89,7 @@ class Volume(Dataset):
         return child
 
     def _get_luns_data_from_url(self):
-        res = self.system.api.get(self.get_this_url_path().add_path('luns'))
-        return res.get_result()
+        return LazyQuery(self.system, self.get_this_url_path().add_path('luns')).to_list()
 
     def get_lun(self, mapping_object):
         """Given either a host or a host cluster object, returns the single LUN object mapped to this volume.
