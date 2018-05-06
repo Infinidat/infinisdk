@@ -113,7 +113,9 @@ def _install_filter_factories():
     for operator_name, operator_function_name in [("in", "in_"),
                                                   ("notin", "not_in"),
                                                   ("between", "between"),
-                                                  ("like", "like")]:
+                                                  ("like", "like"),
+                                                  ("is", "is_"),
+                                                  ("isnot", "is_not")]:
         _install_filter_factory(operator_name, operator_function_name)
 
 _install_filter_factories()

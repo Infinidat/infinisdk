@@ -118,6 +118,14 @@ def test_querying_not_in(infinibox, field):
         infinibox.volumes.find(field.not_in(id_range)), expected)
 
 
+def test_querying_is_filtering(infinibox, field):
+    field = infinibox.objects.volumes.fields.parent
+    assert_query_equals(
+        infinibox.volumes.find(field.is_(None)), "parent_id=is%3Anull")
+    assert_query_equals(
+        infinibox.volumes.find(field.is_not(None)), "parent_id=isnot%3Anull")
+
+
 def test_sorting(infinibox):
     # pylint: disable=no-member
     Volume = infinibox.volumes.object_type
