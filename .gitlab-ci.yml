@@ -14,17 +14,6 @@ py27:
     - pylint --rcfile .pylintrc -j $(nproc) infinisdk tests
     - pytest
 
-py34:
-  image: python:3.4
-  tags:
-    - infradev
-  except:
-    - /^customer-.*$/
-  script:
-    - pip install -U --pre -i https://pypi.infinidat.com/simple -e .[testing]
-    - pylint --rcfile .pylintrc -j $(nproc) infinisdk tests
-    - pytest
-
 py35:
   image: python:3.5
   tags:
