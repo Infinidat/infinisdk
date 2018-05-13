@@ -48,3 +48,30 @@ Determining if an object is of a certain type
        >>> assert isinstance(pool, system.pools.object_type)
        >>> assert not isinstance(pool, system.volumes.object_type)
 
+
+Error Handling
+--------------
+
+Adding Retries for Specific Errors
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+InfiniSDK supports automatic retries on various errors. This can come in handy for scripts
+performing maintenance operations which might fail API commands intermittently. To add a custom
+retry, use the ``add_auto_retry`` method:
+
+
+.. code-block:: python
+
+   def service_unavailable_predicate(e):
+       return isinstance(e, APICommandFailed) and e.status_code == httplib.SERVICE_UNAVAILABLE
+
+
+   # the following makes InfiniSDK retry automatically on 503 Service Unavailable errors, up to 10
+   # retries with 30 seconds between attempts
+   self.system.api.add_auto_retry(service_unavailable_predicate, max_retries=10, sleep_seconds=30)
+   try:
+       ... # <-- operation here
+   finally:
+       self.system.api.remove_auto_retry(service_unavailable_predicate)
+
+
