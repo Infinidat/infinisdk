@@ -593,12 +593,16 @@ class Replica(SystemObject):
         return self._any_sync_job_state_contains('stalled')
 
     def is_active(self, *args, **kwargs):
+        """Returns whether or not the replica is currently active
+        """
         self._validate_can_check_state()
         if self.system.compat.has_sync_job_states():
             return self.get_state().lower() == 'active'
         return self.get_state(*args, **kwargs).lower() in ['idle', 'initiating', 'initial_replication', 'replicating']
 
     def change_role(self, entity_pairs=OMIT):
+        """Changes the role of this replica from source to target or vice-versa
+        """
         data = {'entity_pairs': entity_pairs} if entity_pairs is not OMIT else None
         gossip.trigger_with_tags('infinidat.sdk.pre_replica_change_role', {'replica': self}, tags=['infinibox'])
         try:
@@ -611,9 +615,13 @@ class Replica(SystemObject):
         self.invalidate_cache()
 
     def is_source(self, *args, **kwargs):
+        """A predicate returning whether or not the replica is currently in the "source" role
+        """
         return self.get_role(*args, **kwargs).lower() == 'source'
 
     def is_target(self, *args, **kwargs):
+        """A predicate returning whether or not the replica is currently in the "target" role
+        """
         return not self.is_source(*args, **kwargs)
 
     def has_local_entity(self, entity):
@@ -626,6 +634,8 @@ class Replica(SystemObject):
     # pylint: disable=arguments-differ
     def delete(self, retain_staging_area=False, force_if_remote_error=False, force_on_target=False,
                force_if_no_remote_credentials=False):
+        """Deletes this replica
+        """
         path = self.get_this_url_path()
         if retain_staging_area:
             path = path.add_query_param('retain_staging_area', 'true')
