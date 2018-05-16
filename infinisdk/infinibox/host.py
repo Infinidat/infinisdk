@@ -22,7 +22,7 @@ class HostBinder(TypeBinder):
           None if none exists
         """
         try:
-            res = self.system.api.get("hosts/host_id_by_initiator_address/{0}".format(address), check_version=False)
+            res = self.system.api.get("hosts/host_id_by_initiator_address/{}".format(address), check_version=False)
             return res.get_result()
         except APICommandFailed as e:
             if e.response.response.status_code != requests.codes.not_found:

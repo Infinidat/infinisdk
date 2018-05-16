@@ -99,7 +99,7 @@ class Link(InfiniBoxObject):
         if safe:
             return None
 
-        raise UnknownSystem("Could not find a related machine with IP address {0}".format(remote_host))
+        raise UnknownSystem("Could not find a related machine with IP address {}".format(remote_host))
 
     def get_remote_link(self, safe=False):
         """Get the corresponsing link object in the remote machine"""

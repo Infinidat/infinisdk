@@ -26,7 +26,7 @@ class User(SystemObject):
     def get_owned_pools(self):
         """Returns the pools that are owned by this user
         """
-        pools_url = "{0}/pools".format(self.get_this_url_path())
+        pools_url = "{}/pools".format(self.get_this_url_path())
         resp = self.system.api.get(pools_url)
         return [self.system.pools.get_by_id(pool_info['id'])
                 for pool_info in resp.get_result()]

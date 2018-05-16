@@ -21,12 +21,12 @@ def test_extending(infinibox, different_name):
     if different_name:
         @extensions.add_method(InfiniBox, 'new_method')
         def some_other_name(self, a, b, c):
-            return "{0} {1} {2} {3}".format(type(self).__name__, a, b, c)
+            return "{} {} {} {}".format(type(self).__name__, a, b, c)
 
     else:
         @extensions.add_method(InfiniBox)
         def new_method(self, a, b, c):
-            return "{0} {1} {2} {3}".format(type(self).__name__, a, b, c)
+            return "{} {} {} {}".format(type(self).__name__, a, b, c)
 
     assert infinibox.new_method(1, 2, 3) == 'InfiniBox 1 2 3'
     assert infinibox.new_method.__self__ is infinibox

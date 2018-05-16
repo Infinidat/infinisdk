@@ -84,7 +84,7 @@ def test_multiple_metadata_creation(volume):
 
 
 def _validate_single_metadata_support(obj):
-    _logger.debug("Validating {0}'s metadata support", type(obj).__name__)
+    _logger.debug("Validating {}'s metadata support", type(obj).__name__)
     key, value = 'some_key', 'some_value'
     obj.set_metadata(key, value)
     all_metadata = obj.get_all_metadata()

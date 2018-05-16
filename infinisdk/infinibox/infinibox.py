@@ -92,7 +92,7 @@ class InfiniBox(APITarget):
             if address is None:
                 section = 'infinibox'
             else:
-                section = 'infinibox:{0}'.format(address[0])
+                section = 'infinibox:{}'.format(address[0])
             returned = get_ini_option(section, key, NOTHING)
             if returned is not NOTHING:
                 return returned

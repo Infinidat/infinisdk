@@ -213,7 +213,7 @@ def test_get_all_first_drives(infinibox):
     drives_list = infinibox.components.drives.find(index=1)
     enclosures = infinibox.components.enclosures
     assert len(drives_list) == len(enclosures.get_all())
-    get_expected_drive_id = lambda enc: 'system:0_rack:1_enclosure:{0}_drive:1'.format(enc.get_index())
+    get_expected_drive_id = lambda enc: 'system:0_rack:1_enclosure:{}_drive:1'.format(enc.get_index())
     assert set(get_expected_drive_id(enc) for enc in enclosures) == set(drive.get_id() for drive in drives_list)
 
 @pytest.mark.parametrize('id_field', ['index', 'api_id'])

@@ -44,11 +44,9 @@ def assert_fetched(result, pages, page_size):
     # pylint: disable=protected-access
     for i in range(0, len(result), page_size):
         if i // page_size in pages:
-            assert result._fetched[
-                i] is not None, 'Object {0} not fetched as expected'.format(i)
+            assert result._fetched[i] is not None, 'Object {} not fetched as expected'.format(i)
         else:
-            assert result._fetched.get(
-                i) is None, "Object {0} unexpectedly fetched".format(i)
+            assert result._fetched.get(i) is None, "Object {} unexpectedly fetched".format(i)
 
 
 @pytest.fixture

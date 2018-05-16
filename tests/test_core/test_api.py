@@ -269,11 +269,11 @@ def test_deprecated_api(infinibox):
     user = infinibox.users.create(role='POOL_ADMIN')
     warnings.simplefilter('always')
     with warnings.catch_warnings(record=True) as recorded:
-        infinibox.api.post('pools/{0}/owners/{1}'.format(pool.get_id(), user.get_id()))
+        infinibox.api.post('pools/{}/owners/{}'.format(pool.get_id(), user.get_id()))
     assert len(recorded) == 1
     assert recorded[0].category == DeprecationWarning
     assert 'Deprecation warning' in str(recorded[0].message)
-    infinibox.api.delete('pools/{0}/owners/{1}'.format(pool.get_id(), user.get_id()))
+    infinibox.api.delete('pools/{}/owners/{}'.format(pool.get_id(), user.get_id()))
     user.delete()
     pool.delete()
 

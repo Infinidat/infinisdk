@@ -46,7 +46,7 @@ class VolumesBinder(DatasetTypeBinder):
             for v in volumes:
                 snap = snaps_by_parent_id.get(v.id)
                 if snap is None:
-                    _logger.warning('No snapshot was created for {0} in group snapshot operation', v)
+                    _logger.warning('No snapshot was created for {} in group snapshot operation', v)
                     v.trigger_cancel_fork()
                 else:
                     v.trigger_finish_fork(snap)

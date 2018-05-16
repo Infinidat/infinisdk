@@ -124,13 +124,13 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
 
     @classmethod
     def get_plural_name(cls):
-        return "{0}s".format(cls.get_type_name())
+        return "{}s".format(cls.get_type_name())
 
     @classmethod
     def get_url_path(cls, system): # pylint: disable=unused-argument
         url_path = cls.URL_PATH
         if url_path is None:
-            url_path = "/api/rest/{0}".format(cls.get_plural_name())
+            url_path = "/api/rest/{}".format(cls.get_plural_name())
         return url_path
 
     def get_field(self, field_name, from_cache=DONT_CARE, fetch_if_not_cached=True, raw_value=False):
@@ -235,7 +235,7 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
                 returned[field_name] = value
         if missed:
             raise CacheMiss(
-                "The following fields could not be obtained from cache: {0}".format(
+                "The following fields could not be obtained from cache: {}".format(
                     ", ".join(repr(field) for field in missed)))
 
         return returned
@@ -299,7 +299,7 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
         return URL(self.get_url_path(self.system)).add_path(str(self.id))
 
     def __repr__(self):
-        id_string = 'id={0}'.format(self.id)
+        id_string = 'id={}'.format(self.id)
         for field in self.FIELDS:
             if field.use_in_repr:
                 try:
@@ -307,7 +307,7 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
                         field.name, from_cache=True, fetch_if_not_cached=False)
                 except CacheMiss:
                     value = '?'
-                id_string += ', {0}={1}'.format(field.name, value)
+                id_string += ', {}={}'.format(field.name, value)
 
         return "<{system_name}:{typename} {id_string}>".format(
             typename=type(self).__name__,

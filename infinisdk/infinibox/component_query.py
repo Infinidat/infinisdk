@@ -88,7 +88,7 @@ class InfiniBoxComponentQuery(ComponentQueryBase):
             try:
                 op_func = getattr(operator, predicate.operator_name)
             except AttributeError:
-                raise NotImplementedError("Filtering by {0} operator is not supported".format(predicate.operator_name))
+                raise NotImplementedError("Filtering by {} operator is not supported".format(predicate.operator_name))
             item_value = item.get_field(predicate.field.name)
             if not op_func(item_value, predicate.value):
                 return False

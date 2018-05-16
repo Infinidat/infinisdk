@@ -562,7 +562,7 @@ class Replica(SystemObject):
         """
         self._validate_can_check_state()
         if not self.system.compat.has_sync_job_states():
-            raise NotImplementedError("This system ({0}) doesn't support replica \"pending\" state".format(self.system))
+            raise NotImplementedError("This system ({}) doesn't support replica \"pending\" state".format(self.system))
         return self.is_active() and self._any_sync_job_state_contains('pending')
 
     def _get_jobs(self):
@@ -715,11 +715,11 @@ class Replica(SystemObject):
     def _get_local_remote_snapshots(self, result, collection_name, remote_replica, field_name_template):
         local_reclaimed_id = result.get(field_name_template.format('local'))
         if local_reclaimed_id is None:
-            _logger.debug('Could not get local reclaimed id (missing {0} in {1})',
+            _logger.debug('Could not get local reclaimed id (missing {} in {})',
                           field_name_template.format('local'), result)
         remote_reclaimed_id = result.get(field_name_template.format('remote'))
         if remote_reclaimed_id is None:
-            _logger.debug('Could not get remote reclaimed id (missing {0} in {1})',
+            _logger.debug('Could not get remote reclaimed id (missing {} in {})',
                           field_name_template.format('remote'), result)
 
         local = remote = None
@@ -756,6 +756,6 @@ class Replica(SystemObject):
         .. note:: this uses the remote command execution API to run the command over the inter-system
           link
         """
-        return self.system.api.get('remote/{0}/api/rest/replicas/{1}'.format(
+        return self.system.api.get('remote/{}/api/rest/replicas/{}'.format(
             self.get_link().id,
             self.get_remote_replica_id(from_cache=True))).get_result()['entity_pairs']

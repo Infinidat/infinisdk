@@ -38,7 +38,7 @@ class NetworkInterface(InfiniBoxObject):
         return self.system.api.post(url, data=data).get_result()
 
     def remove_port(self, port):
-        url = self.get_this_url_path().add_path("ports").add_path("{0}".format(port))
+        url = self.get_this_url_path().add_path("ports").add_path("{}".format(port))
         return self.system.api.delete(url).get_result()
 
     def disable(self):

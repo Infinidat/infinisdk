@@ -51,7 +51,7 @@ class DatasetTypeBinder(TypeBinder):
         if name is None:
             name = self.fields.name.generate_default().generate()
         count = kwargs.pop('count', 1)
-        return [self.create(*args, name='{0}_{1}'.format(name, i), **kwargs)
+        return [self.create(*args, name='{}_{}'.format(name, i), **kwargs)
                 for i in range(1, count + 1)]
 
     def calculate_reclaimable_space(self, entities):

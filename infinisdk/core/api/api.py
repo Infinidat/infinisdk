@@ -33,7 +33,7 @@ def _get_request_delegate(http_method):
     def returned(self, path, **kwargs):
         return self.request(http_method, path=path, **kwargs)
     returned.__name__ = http_method
-    returned.__doc__ = "Shortcut for :func:`.request({0!r}) <API.request>`".format(http_method)
+    returned.__doc__ = "Shortcut for :func:`.request({!r}) <API.request>`".format(http_method)
     return returned
 
 def _join_path(url, path):
@@ -185,7 +185,7 @@ class API(object):
     @property
     def url(self):
         if not self._urls:
-            raise RuntimeError('No URLs configured for {0}'.format(self.system))
+            raise RuntimeError('No URLs configured for {}'.format(self.system))
         return self._urls[0]
 
     @contextmanager
@@ -292,7 +292,7 @@ class API(object):
             self.set_auth(*auth, login=login)
             yield
         finally:
-            _logger.debug('Changing credentials back to {[0]}', prev)
+            _logger.debug('Changing credentials back to {[]}', prev)
             self.set_auth(*prev, login=False)
             _logger.trace('Restoring cookies for user: {}', prev_cookies)
             self._session.cookies.clear()
@@ -384,7 +384,7 @@ class API(object):
                 preprocessor(api_request)
 
 
-            _logger.trace("{0} <-- {1} {2}", hostname, http_method.upper(), api_request.url)
+            _logger.trace("{} <-- {} {}", hostname, http_method.upper(), api_request.url)
             if data is not NOTHING:
                 if data != api_request.data:
                     sent_json_object = json.loads(api_request.data)
@@ -397,7 +397,7 @@ class API(object):
                 response = self._session.send(prepared, **kwargs)
             except _RETRY_REQUESTS_EXCEPTION_TYPES as e:  # pylint: disable=catching-non-exception
                 request_kwargs = dict(url=path, method=http_method, **kwargs)
-                _logger.debug('Exception while sending API command to {0}: {1}', self.system, e)
+                _logger.debug('Exception while sending API command to {}: {}', self.system, e)
                 error_str = str(e)
                 if 'gaierror' in error_str or 'nodename nor servname' in error_str or \
                     'Name or service not known' in error_str:
@@ -408,7 +408,7 @@ class API(object):
             gossip.trigger('infinidat.sdk.after_api_request', request=prepared, response=response)
 
             elapsed = response.elapsed.total_seconds()
-            _logger.trace("{0} --> {1} {2} (took {3:.04f}s)", hostname, response.status_code, response.reason, elapsed)
+            _logger.trace("{} --> {} {} (took {:.04f}s)", hostname, response.status_code, response.reason, elapsed)
             returned = Response(response, data, start_time, end_time)
             resp_data = returned.get_json()
             if self._no_reponse_logs:
@@ -417,7 +417,7 @@ class API(object):
                 logged_response_data = json.dumps(resp_data, indent=4, separators=(',', ': '))
             else:
                 logged_response_data = resp_data
-            _logger.trace("{0} --> {1}", hostname, logged_response_data)
+            _logger.trace("{} --> {}", hostname, logged_response_data)
             if response.status_code != httplib.SERVICE_UNAVAILABLE:
                 if specified_address is None: # need to remember our next API target
                     self._active_url = url
@@ -433,7 +433,7 @@ class API(object):
                     )
         except (ValueError, TypeError):
             pass
-        _logger.trace("{0} <-- DATA: {1}", hostname, data)
+        _logger.trace("{} <-- DATA: {}", hostname, data)
 
     @contextmanager
     def limited_interaction_context(self, disable_post=False, disable_get=False,
@@ -478,11 +478,11 @@ class API(object):
         if sleep_seconds is None: # backwards compatibility
             sleep_seconds = config.root.defaults.retry_sleep_seconds
         assert retry_predicate not in self._auto_retry_predicates
-        _logger.debug("Add auto-retry predicate {0} for {1} retries", retry_predicate, max_retries)
+        _logger.debug("Add auto-retry predicate {} for {} retries", retry_predicate, max_retries)
         self._auto_retry_predicates[retry_predicate] = (max_retries, sleep_seconds)
 
     def remove_auto_retry(self, retry_predicate):
-        _logger.debug("Remove auto-retry predicate {0}", retry_predicate)
+        _logger.debug("Remove auto-retry predicate {}", retry_predicate)
         del self._auto_retry_predicates[retry_predicate]
 
     def is_auto_retry_active(self, retry_predicate):
@@ -504,7 +504,7 @@ class API(object):
         """Sends HTTP API request to the remote system
         """
         if http_method in self._disabled_http_methods:
-            raise MethodDisabled("Request \"{0} {1}\" aborted, method is disabled".format(http_method.upper(), path))
+            raise MethodDisabled("Request \"{} {}\" aborted, method is disabled".format(http_method.upper(), path))
         did_interactive_confirmation = False
         did_login = False
         had_cookies = bool(self._session.cookies)
@@ -549,8 +549,8 @@ class API(object):
 
     def _ask_approval_interactively(self, method, path, reason):
         if not reason:
-            reason = "API operation requires approval: {0} {1}".format(method, path)
-        msg = "{0} Approve? [y/N] ".format(reason)
+            reason = "API operation requires approval: {} {}".format(method, path)
+        msg = "{} Approve? [y/N] ".format(reason)
         if sys.stdout.isatty():
             msg = colorama.Fore.YELLOW + msg + colorama.Fore.RESET
         # note: call through module to allow stubbing
@@ -584,7 +584,7 @@ class API(object):
 
     def _url_from_address(self, address, use_ssl):
         hostname, port = address
-        return URL("{0}://{1}:{2}".format("https" if use_ssl else "http", hostname, port)).add_path("/api/rest")
+        return URL("{}://{}:{}".format("https" if use_ssl else "http", hostname, port)).add_path("/api/rest")
 
 
 class Response(object):
@@ -660,12 +660,9 @@ class Response(object):
             self.response.raise_for_status()
         except _REQUESTS_HTTP_EXCEPTION_TYPES: # pylint: disable=catching-non-exception
             if self.sent_data is not NOTHING and self.sent_data:
-                if isinstance(self.sent_data, bytes):
-                    if b'password' in self.sent_data:
-                        self.sent_data = '<HIDDEN>'
-                else:
-                    if 'password' in self.sent_data:
-                        self.sent_data = '<HIDDEN>'
+                password = b'password' if isinstance(self.sent_data, bytes) else 'password'
+                if password in self.sent_data:
+                    self.sent_data = '<HIDDEN>'
             raise APICommandFailed.raise_from_response(self)
 
 
@@ -685,7 +682,7 @@ class _AutoRetryContext(object):
             if retry_predicate(exc):
                 max_retries, retry_sleep_seconds = self._global_retries_dict[retry_predicate]
                 retried_count = max_retries - retries_left + 1
-                _logger.debug("Auto retry API ({0} of {1}) by {2}: {3}",
+                _logger.debug("Auto retry API ({} of {}) by {}: {}",
                               retried_count, max_retries, retry_predicate, exc)
                 self._retries_dict[retry_predicate] -= 1
                 return retry_sleep_seconds

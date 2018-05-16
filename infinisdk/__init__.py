@@ -3,7 +3,7 @@ from .core.q import Q
 from .infinibox import InfiniBox
 from .infinibox.treeq import TreeQ
 
-_SDK_HOOK = 'infinidat.sdk.{0}'.format
+_SDK_HOOK = 'infinidat.sdk.{}'.format
 
 def _install_hooks():
     import gossip

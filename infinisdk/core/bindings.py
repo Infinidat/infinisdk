@@ -43,7 +43,7 @@ class RelatedObjectBinding(InfiniSDKBinding):
     def set_field(self, field):
         super(RelatedObjectBinding, self).set_field(field)
         if not self._collection_name:
-            self._collection_name = "{0}s".format(field.name)
+            self._collection_name = "{}s".format(field.name)
 
     def get_api_value_from_value(self, system, objtype, obj, value):
         if value is None:
@@ -101,7 +101,7 @@ class RelatedComponentBinding(InfiniSDKBinding):
     def set_field(self, field):
         super(RelatedComponentBinding, self).set_field(field)
         if not self._collection_name:
-            self._collection_name = "{0}s".format(field.name)
+            self._collection_name = "{}s".format(field.name)
         if not self._api_index_name:
             self._api_index_name = 'index'
 

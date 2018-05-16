@@ -144,7 +144,7 @@ class LazyQuery(QueryBase):
         return str(self.query)
 
     def __repr__(self):
-        return "<Query {0}>".format(self)
+        return "<Query {}>".format(self)
 
     def page(self, page_index):
         """

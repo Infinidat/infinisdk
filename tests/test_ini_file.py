@@ -12,17 +12,17 @@ def test_auth_saving(infinibox_simulator, ini_path, use_username, use_password, 
     hostname = infinibox_simulator.get_floating_addresses()[0]
     with ini_path.open("w") as f:
         if specific_section:
-            f.write("[infinibox:{0}]\n".format(hostname))
+            f.write("[infinibox:{}]\n".format(hostname))
         else:
             f.write("[infinibox]\n")
 
         if use_username:
-            f.write("username={0}\n".format(new_username))
+            f.write("username={}\n".format(new_username))
             expected_username = new_username
         else:
             expected_username = "admin"
         if use_password:
-            f.write("password={0}".format(new_password))
+            f.write("password={}".format(new_password))
             expected_password = new_password
         else:
             expected_password = ""

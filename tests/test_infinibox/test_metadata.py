@@ -22,7 +22,7 @@ def test_metadata_paging(infinibox, volume, forge):
     infinibox.get_simulator().api.set_default_page_size(page_size)
     forge.replace_with(object_query, '_DEFAULT_SYSTEM_PAGE_SIZE', page_size)
     for i in range(page_size * 2):
-        volume.set_metadata_from_dict({'key{0}'.format(i): 'value{0}'.format(i)})
+        volume.set_metadata_from_dict({'key{}'.format(i): 'value{}'.format(i)})
 
     assert len(list(infinibox.get_all_metadata())) == page_size * 2
 

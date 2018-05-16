@@ -104,7 +104,7 @@ def host_port_to_api(value):
     elif isinstance(value, iSCSIName):
         port_type = 'iscsi'
     else:
-        assert False, "Unknown type of {0}".format(value)
+        assert False, "Unknown type of {}".format(value)
     return {'type': port_type, 'address': str(value)}
 
 

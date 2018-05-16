@@ -102,9 +102,9 @@ class ComputedIDBinding(InfiniSDKBinding):
 
     def get_value_from_api_object(self, system, objtype, obj, api_obj):
         parent_id = api_obj.get('parent_id', '')
-        returned = "{0}_".format(parent_id) if parent_id else ""
+        returned = "{}_".format(parent_id) if parent_id else ""
         index = objtype.fields.index.binding.get_value_from_api_object(system, objtype, obj, api_obj)
-        returned += '{0}:{1}'.format(objtype.get_type_name(), index)
+        returned += '{}:{}'.format(objtype.get_type_name(), index)
         return returned
 
     def get_value_from_api_value(self, system, objtype, obj, api_value):
@@ -160,12 +160,12 @@ class InfiniBoxComponentBinder(MonomorphicBinder):
         is_forced_cache = self.should_force_fetching_from_cache()
         if not is_forced_cache:
             if with_logging:
-                _logger.debug('Entering fetch tree once of {0}', self)
+                _logger.debug('Entering fetch tree once of {}', self)
             self._fetch_tree(force_fetch)
         with self._force_fetching_tree_from_cache_context():
             yield
         if not is_forced_cache and with_logging:
-            _logger.debug('Exiting fetch tree once of {0}', self)
+            _logger.debug('Exiting fetch tree once of {}', self)
 
 
     def _fetch_tree(self, force_fetch):
@@ -388,7 +388,7 @@ class Node(InfiniBoxSystemComponent):
         return self.get_service('core')
 
     def _get_tags(self):
-        return ['infinibox', 'node{0}'.format(self.get_index())]
+        return ['infinibox', 'node{}'.format(self.get_index())]
 
 
 @InfiniBoxSystemComponents.install_component_type
@@ -572,7 +572,7 @@ class Service(InfiniBoxSystemComponent):
         try:
             return self.system.components.service_clusters.get(name=self.get_name())
         except ObjectNotFound:
-            raise NotImplementedError("This service ({0}) doesn't support CLM".format(self.get_name()))
+            raise NotImplementedError("This service ({}) doesn't support CLM".format(self.get_name()))
 
     def is_active(self):
         return self.get_state() == 'ACTIVE'

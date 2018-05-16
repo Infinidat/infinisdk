@@ -106,7 +106,7 @@ def _install_filter_factories():
     # Installing operators that python has overloading functions for them
     # between operators exists as __between__ for backward compatibility only
     for operator_name in ["eq", "gt", "lt", "ge", "le", "ne", "between"]:
-        operator_function_name = "__{0}__".format(operator_name)
+        operator_function_name = "__{}__".format(operator_name)
         _install_filter_factory(operator_name, operator_function_name)
 
     # Installing operators that python doesn't have overloading functions for them

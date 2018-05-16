@@ -20,13 +20,13 @@ class HostCluster(InfiniBoxLURelatedObject):
     ]
 
     def add_host(self, host):
-        url = "{0}/hosts".format(self.get_this_url_path())
+        url = "{}/hosts".format(self.get_this_url_path())
         self.system.api.post(url, data={"id" : host.id})
         self.invalidate_cache('hosts')
         host.invalidate_cache('host_cluster_id')
 
     def remove_host(self, host):
-        url = "{0}/hosts/{1}".format(self.get_this_url_path(), host.id)
+        url = "{}/hosts/{}".format(self.get_this_url_path(), host.id)
         self.system.api.delete(url)
         self.invalidate_cache('hosts')
         host.invalidate_cache('host_cluster_id')

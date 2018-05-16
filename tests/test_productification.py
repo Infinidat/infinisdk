@@ -42,8 +42,7 @@ def test_no_infinipy_string():
                         continue
 
                     if s in line:
-                        errors.append(
-                            "{0}, line {1}: contains {2!r}".format(filename, lineno, s))
+                        errors.append("{}, line {}: contains {!r}".format(filename, lineno, s))
 
     for error in errors:
         print(error)
@@ -75,4 +74,4 @@ def _check_forbidden_strings(entity, str_for_check, errors):
     str_for_check = str_for_check.lower()
     for forbidden_str in _FORBIDDEN_STRINGS:
         if forbidden_str in str_for_check:
-            errors.append("{0}: contains {1}".format(entity, forbidden_str))
+            errors.append("{}: contains {}".format(entity, forbidden_str))

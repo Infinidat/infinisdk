@@ -49,4 +49,4 @@ class NotificationTarget(SystemObject):
             if not isinstance(recipients, list):
                 recipients = [recipients]
             data['recipients'] = recipients
-        return self.system.api.post('notifications/targets/{0}/test'.format(self.id), data=data)
+        return self.system.api.post('notifications/targets/{}/test'.format(self.id), data=data)

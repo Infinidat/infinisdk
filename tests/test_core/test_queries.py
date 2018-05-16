@@ -16,7 +16,7 @@ def test_querying_length(infinibox):
 
 def test_get_too_many_items(infinibox):
     for i in range(2):
-        create_volume(infinibox, name="vol{0}".format(i))
+        create_volume(infinibox, name="vol{}".format(i))
     with pytest.raises(TooManyObjectsFound):
         infinibox.objects.volumes.get()
 
@@ -83,7 +83,7 @@ def test_unknown_fields(infinibox):
 def test_querying_operation(infinibox, field, operator):
     operand = 123
     assert_query_equals(infinibox.volumes.find(operator(field, operand)),
-                        "id={0}%3A{1}".format(operator.__name__, operand))
+                        "id={}%3A{}".format(operator.__name__, operand))
 
 
 def _get_expectation_with_range(field_name, operator_name, iterable):
@@ -158,7 +158,7 @@ def test_pagination(infinibox):
 
 def assert_query_equals(q, expected):
     if expected is not None:
-        expected = "?{0}".format(expected)
+        expected = "?{}".format(expected)
     else:
         expected = ""
     assert q.query == ('/api/rest/volumes' + expected)

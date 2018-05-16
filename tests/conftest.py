@@ -69,7 +69,7 @@ def system(infinibox):
 def validate_unittest_compatibility_with_infinibox_version(system, **kwargs):
     relevant_from = kwargs.pop('relevant_from', None)
     relevant_up_to = kwargs.pop('relevant_up_to', None)
-    assert not kwargs, "Version marker got unexpected kwargs: {0}".format(list(kwargs))
+    assert not kwargs, "Version marker got unexpected kwargs: {}".format(list(kwargs))
     sys_version = system.compat.normalize_version_string(system.get_version())
 
     if relevant_from is not None and sys_version < relevant_from:
