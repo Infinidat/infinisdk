@@ -292,7 +292,7 @@ class API(object):
             self.set_auth(*auth, login=login)
             yield
         finally:
-            _logger.debug('Changing credentials back to {[]}', prev)
+            _logger.debug('Changing credentials back to {}', prev[0])
             self.set_auth(*prev, login=False)
             _logger.trace('Restoring cookies for user: {}', prev_cookies)
             self._session.cookies.clear()
