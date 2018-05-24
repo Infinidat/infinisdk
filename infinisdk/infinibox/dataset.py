@@ -123,6 +123,8 @@ class Dataset(InfiniBoxObject):
             family_master_id = self.get_family_id()
         else:
             family_master_id = self._get_family_master_id()
+        if family_master_id is None:
+            return None
         return self.get_binder().get_by_id_lazy(family_master_id)
 
     def is_master(self):
