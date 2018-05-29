@@ -46,6 +46,7 @@ def hooks(forge, request):
 def test_creation_hook(hooks, forge, infinibox):
     hooks.pre_object_creation_hook(
         system=Is(infinibox),
+        parent=None,
         data=HasKeyValue("name", "test_pool"),
         cls=infinibox.pools.object_type
     )
@@ -53,6 +54,7 @@ def test_creation_hook(hooks, forge, infinibox):
         obj=And(
             IsA(infinibox.pools.object_type),
             HasAttributeValue("system", infinibox)),
+        parent=None,
         data=HasKeyValue("name", "test_pool"),
         response_dict=HasKeyValue("name", "test_pool"),
     )
@@ -65,6 +67,7 @@ def test_creation_failure_hook(hooks, forge, infinibox):
 
     hooks.pre_object_creation_hook(
         system=Is(infinibox),
+        parent=None,
         data=HasKeyValue("name", "test_pool"),
         cls=infinibox.pools.object_type
     )
@@ -74,6 +77,7 @@ def test_creation_failure_hook(hooks, forge, infinibox):
         data=HasKeyValue("name", "test_pool"),
         exception=IsA(APICommandFailed),
         system=Is(infinibox),
+        parent=None,
         cls=infinibox.pools.object_type
     )
 

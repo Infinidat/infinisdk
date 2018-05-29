@@ -190,7 +190,7 @@ class Dataset(InfiniBoxObject):
             data['ssd_enabled'] = ssd_enabled
         try:
             child = self._create(self.system, self.get_url_path(self.system), data=data,
-                                 tags=self.get_tags_for_object_operations(self.system))
+                                 tags=self.get_tags_for_object_operations(self.system), parent=self)
         except Exception as e:  # pylint: disable=broad-except
             with end_reraise_context():
                 gossip.trigger_with_tags('infinidat.sdk.entity_child_failure',

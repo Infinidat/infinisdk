@@ -352,9 +352,10 @@ class SystemObject(BaseSystemObject):
         return self.get_binder().is_caching_enabled() or super(SystemObject, self)._is_caching_enabled()
 
     @classmethod
-    def _create(cls, system, url, data, tags=None):
+    def _create(cls, system, url, data, tags=None, parent=None):
         hook_tags = tags or cls.get_tags_for_object_operations(system)
-        gossip.trigger_with_tags('infinidat.sdk.pre_object_creation', {'data': data, 'system': system, 'cls': cls},
+        gossip.trigger_with_tags('infinidat.sdk.pre_object_creation',
+                                 {'data': data, 'system': system, 'cls': cls, 'parent': parent},
                                  tags=hook_tags)
         try:
             returned = system.api.post(url, data=data).get_result()
@@ -362,10 +363,11 @@ class SystemObject(BaseSystemObject):
         except Exception as e:  # pylint: disable=broad-except
             with end_reraise_context():
                 gossip.trigger_with_tags('infinidat.sdk.object_creation_failure',
-                                         {'cls': cls, 'system': system, 'data': data, 'exception': e},
+                                         {'cls': cls, 'system': system, 'data': data, 'parent': parent, 'exception': e},
                                          tags=hook_tags)
         gossip.trigger_with_tags('infinidat.sdk.post_object_creation',
-                                 {'obj': obj, 'data': data, 'response_dict': returned}, tags=hook_tags)
+                                 {'obj': obj, 'data': data, 'response_dict': returned, 'parent': parent},
+                                 tags=hook_tags)
         gadget.log_entity_creation(entity=obj, params=data)
         return obj
 
