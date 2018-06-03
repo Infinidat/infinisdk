@@ -72,3 +72,7 @@ def secondary_pool(secondary_infinibox):
 @pytest.fixture(params=[True, False])
 def create_remote(request):
     return request.param
+
+@pytest.fixture
+def volume_qos_policy(infinibox):
+    return infinibox.qos_policies.create(type='VOLUME', max_ops=1000000)
