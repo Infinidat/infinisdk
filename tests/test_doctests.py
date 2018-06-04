@@ -10,8 +10,6 @@ _DOCS_ROOT = os.path.abspath(os.path.join(_HERE, "..", "doc"))
 
 
 def test_sphinx_doctest(doctest_path):
-    if 'qos' in doctest_path:
-        pytest.skip('INFRADEV-8715')
     context_filename = doctest_path + ".doctest_context"
     context = {}
     if os.path.exists(context_filename):
