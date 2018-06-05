@@ -476,11 +476,12 @@ class IbPort(InfiniBoxSystemComponent):
         return "ib_port"
 
     def is_link_up(self):
-        if self.get_state() != 'OK':
+        self.refresh_cache()
+        if self.get_state(from_cache=True) != 'OK':
             return False
         if not self.is_field_supported('link_state'):
             return True
-        link_state = self.get_link_state()
+        link_state = self.get_link_state(from_cache=True)
         return link_state and link_state.lower() == "up"
 
 
