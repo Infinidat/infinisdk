@@ -283,7 +283,7 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
         except Exception as e:  # pylint: disable=broad-except
             with end_reraise_context():
                 gossip.trigger_with_tags('infinidat.sdk.object_update_failure',
-                                         {'obj': self, 'exception': e, 'system': self.system},
+                                         {'obj': self, 'exception': e, 'system': self.system, 'data': update_dict},
                                          tags=hook_tags)
         response_dict = res.get_result()
         if len(update_dict) == 1 and not isinstance(response_dict, dict):
