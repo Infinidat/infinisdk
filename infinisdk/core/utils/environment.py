@@ -1,4 +1,5 @@
 import os
+import pkg_resources
 
 from mitba import cached_function
 
@@ -19,3 +20,10 @@ def get_logged_in_username():
 def get_hostname():
     import socket
     return socket.getfqdn()
+
+@cached_function
+def get_infinisdk_version():
+    try:
+        return pkg_resources.get_distribution('infinisdk').version, # pylint: disable=no-member
+    except pkg_resources.DistributionNotFound:
+        return 'N/A'
