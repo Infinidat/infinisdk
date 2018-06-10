@@ -41,7 +41,7 @@ class Link(InfiniBoxObject):
         Field('is_local_link_ready_for_sync', type=bool, feature_name="sync_replication"),
         Field('async_only', type=bool, feature_name="sync_replication"),
 
-        Field('is_preferred', type=bool, optional=True, is_filterable=True, is_sortable=True,
+        Field('preferred', api_name='is_preferred', type=bool, optional=True, is_filterable=True, is_sortable=True,
               creation_parameter=True, feature_name="active_active"),
         Field('witness_address', type=str, optional=True, is_filterable=True, is_sortable=True,
               creation_parameter=True, feature_name="active_active"),
