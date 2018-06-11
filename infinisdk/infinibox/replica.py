@@ -1,7 +1,6 @@
 # pylint: disable=no-member
 import logbook
 import gossip
-import gadget
 import functools
 
 from ..core.utils import end_reraise_context
@@ -327,7 +326,6 @@ class Replica(SystemObject):
         returned = self._get_entity_collection().get_by_id_lazy(snapshot_id)
         gossip.trigger_with_tags('infinidat.sdk.replica_snapshot_created', {'snapshot': returned}, tags=['infinibox'])
         self._notify_post_exposure(self, returned)
-        gadget.log_operation(self, "expose last consistent snapshot")
         return returned
 
 
@@ -399,7 +397,6 @@ class Replica(SystemObject):
                                          {'replica': self, 'exception': e}, tags=['infinibox'])
         gossip.trigger_with_tags('infinidat.sdk.post_replica_suspend', {'replica': self}, tags=['infinibox'])
         self.invalidate_cache('state')
-        gadget.log_operation(self, "suspend")
 
     def sync(self):
         """Starts a sync job
@@ -407,7 +404,6 @@ class Replica(SystemObject):
         returned = self.system.api.post(self.get_this_url_path().add_path('sync'),
                                         headers={'X-INFINIDAT-RAW-RESPONSE': 'true'})
         result = returned.get_result()
-        gadget.log_operation(self, "sync", params=result)
         return result
 
     def resume(self):
@@ -422,7 +418,6 @@ class Replica(SystemObject):
                                          {'replica': self, 'exception': e}, tags=['infinibox'])
         gossip.trigger_with_tags('infinidat.sdk.post_replica_resume', {'replica': self}, tags=['infinibox'])
         self.invalidate_cache('state')
-        gadget.log_operation(self, "resume")
 
     @require_sync_replication
     def switch_role(self):
@@ -437,7 +432,6 @@ class Replica(SystemObject):
                                          {'replica': self, 'exception': e}, tags=['infinibox'])
         gossip.trigger_with_tags('infinidat.sdk.post_replica_switch_role', {'replica': self}, tags=['infinibox'])
         self.invalidate_cache()
-        gadget.log_operation(self, "switch role")
 
     def is_type_sync(self):
         if self.system.compat.has_sync_replication():
@@ -485,7 +479,6 @@ class Replica(SystemObject):
         :param params: Optional dictionary containing additional parameters for the type change
          """
         self._change_type(new_type='async', params=params)
-        gadget.log_operation(self, "change type to async")
 
     @require_sync_replication
     def change_type_to_sync(self, params=None):
@@ -494,7 +487,6 @@ class Replica(SystemObject):
         :param params: Optional dictionary containing additional parameters for the type change
          """
         self._change_type(new_type='sync', params=params)
-        gadget.log_operation(self, "change type to sync")
 
     def _change_type(self, new_type, params=None):
         if params is None:
@@ -657,7 +649,6 @@ class Replica(SystemObject):
             self._notify_pre_exposure(self)
             self._notify_pre_exposure(remote_replica)
 
-        gadget.log_entity_deletion(self)
         with self._get_delete_context():
             try:
                 resp = self.system.api.delete(path)
