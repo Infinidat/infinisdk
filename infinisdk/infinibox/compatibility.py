@@ -157,6 +157,9 @@ class Compatibility(object):
     def has_dot_snapshot(self):
         return self.has_feature('dot_snapshots')
 
+    def has_snapshot_lock(self):
+        return self.get_parsed_system_version() >= '4.0.30'
+
 
 _VERSION_TUPLE_LEN = 5
 

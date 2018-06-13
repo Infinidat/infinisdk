@@ -1,9 +1,10 @@
 from ..core.q import Q
 from ..core import Field
-from ..core.api.special_values import Autogenerate
+from ..core.api.special_values import Autogenerate, OMIT
 from ..core.bindings import RelatedObjectBinding
 from .dataset import Dataset, DatasetTypeBinder
 from .treeq import TreeQBinder
+
 
 
 class FilesystemBinder(DatasetTypeBinder):
@@ -45,8 +46,8 @@ class Filesystem(Dataset):
         super(Filesystem, self).__init__(system, initial_data)
         self.treeqs = self.system.filesystems.get_or_create_treeq_binder(self)
 
-    def delete(self):
-        super(Filesystem, self).delete()
+    def delete(self, force_if_snapshot_locked=OMIT):
+        super(Filesystem, self).delete(force_if_snapshot_locked=force_if_snapshot_locked)
         self.system.filesystems.delete_treeq_binder(self)
 
     @classmethod

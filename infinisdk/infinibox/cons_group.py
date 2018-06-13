@@ -31,6 +31,9 @@ class ConsGroup(InfiniBoxObject):
         Field("updated_at", type=MillisecondsDatetimeType, is_sortable=True, is_filterable=True),
         Field('rmr_snapshot_guid', is_filterable=True, is_sortable=True),
         Field('pool_name', is_sortable=True, is_filterable=True, new_to="4.0.10"),
+        Field("lock_expires_at", type=MillisecondsDatetimeType, creation_parameter=True, optional=True,
+              mutable=True, feature_name='snapshot_lock'),
+        Field("lock_state", type=str, feature_name='snapshot_lock'),
     ]
 
     @classmethod
@@ -60,7 +63,7 @@ class ConsGroup(InfiniBoxObject):
 
     get_snapgroups = get_children
 
-    def create_snapgroup(self, name=None, prefix=None, suffix=None):
+    def create_snapgroup(self, name=None, prefix=None, suffix=None, lock_expires_at=None):
         """Create a snapshot group out of the consistency group.
         """
         hook_tags = self.get_tags_for_object_operations(self)
@@ -74,6 +77,8 @@ class ConsGroup(InfiniBoxObject):
         if not prefix and not suffix:
             suffix = _CG_SUFFIX.generate()
         data = {'snap_prefix': prefix, 'parent_id': self.get_id(), 'snap_suffix': suffix, 'name': name}
+        for key, val in [('lock_expires_at', lock_expires_at)]:
+            data[key] = self.fields.get(key).binding.get_api_value_from_value(self.system, type(self), None, val)
         members = self.get_members()
         for member in members:
             member.trigger_begin_fork()
@@ -129,7 +134,7 @@ class ConsGroup(InfiniBoxObject):
 
     refresh_snapshot = refresh_snapgroup
 
-    def delete(self, delete_members=None): # pylint: disable=arguments-differ
+    def delete(self, delete_members=None, force_if_snapshot_locked=OMIT): # pylint: disable=arguments-differ
         """Deletes the consistency group
 
         :param delete_members: if True, deletes the member datasets as well as the group itself
@@ -137,7 +142,8 @@ class ConsGroup(InfiniBoxObject):
         path = self.get_this_url_path()
         if delete_members is not None:
             path = path.add_query_param('delete_members', str(delete_members).lower())
-
+        if force_if_snapshot_locked is not OMIT:
+            path = path.add_query_param('force_if_snapshot_locked', force_if_snapshot_locked)
         trigger_hook = functools.partial(gossip.trigger_with_tags,
                                          kwargs={'cons_group': self, 'delete_members': delete_members},
                                          tags=self.get_tags_for_object_operations(self.system))

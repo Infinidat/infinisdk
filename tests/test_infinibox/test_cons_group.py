@@ -22,7 +22,7 @@ def test_get_cg_fields(cg, field):
     if not cg.system.is_field_supported(field):
         return
     field_value = cg.get_field(field.name)
-    if field.name in {'parent', 'rmr_snapshot_guid', 'data_snapshot_guid'}:
+    if field.name in {'parent', 'rmr_snapshot_guid', 'data_snapshot_guid', 'lock_expires_at'}:
         assert field_value is None
     else:
         assert loose_isinstance(field_value, field.type.type)

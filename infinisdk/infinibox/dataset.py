@@ -100,6 +100,9 @@ class Dataset(InfiniBoxObject):
               is_sortable=True, is_filterable=True, binding=RelatedObjectBinding('qos_policies'),
               feature_name='qos', cached=False),
         Field('pool_name', is_sortable=True, is_filterable=True, new_to="4.0.10"),
+        Field("lock_expires_at", type=MillisecondsDatetimeType, mutable=True, creation_parameter=True,
+              optional=True, feature_name='snapshot_lock'),
+        Field("lock_state", type=str, feature_name='snapshot_lock'),
     ]
 
     PROVISIONING = namedtuple('Provisioning', ['Thick', 'Thin'])('THICK', 'THIN')
@@ -171,7 +174,7 @@ class Dataset(InfiniBoxObject):
     def create_child(self, name=None, write_protected=None, ssd_enabled=None):
         return self._create_child(name, write_protected, ssd_enabled)
 
-    def _create_child(self, name=None, write_protected=None, ssd_enabled=None):
+    def _create_child(self, name=None, write_protected=None, ssd_enabled=None, lock_expires_at=None):
         hook_tags = self.get_tags_for_object_operations(self.system)
         gossip.trigger_with_tags('infinidat.sdk.pre_entity_child_creation',
                                  {'source': self, 'system': self.system},
@@ -182,6 +185,8 @@ class Dataset(InfiniBoxObject):
         if not name:
             name = self.fields.name.generate_default().generate()
         data = {'name': name, 'parent_id': self.get_id()}
+        for key, val in [('lock_expires_at', lock_expires_at)]:
+            data[key] = self.fields.get(key).binding.get_api_value_from_value(self.system, type(self), None, val)
         if write_protected is not None:
             assert self.system.compat.has_writable_snapshots(), \
                 'write_protected parameter is not supported for this version'
@@ -204,6 +209,13 @@ class Dataset(InfiniBoxObject):
 
         handle_possible_replication_snapshot(child)
         return child
+
+    def delete(self, force_if_snapshot_locked=OMIT): # pylint: disable=arguments-differ
+        path = self.get_this_url_path()
+        if force_if_snapshot_locked is not OMIT:
+            path = path.add_query_param('force_if_snapshot_locked', force_if_snapshot_locked)
+        with self._get_delete_context():
+            self.system.api.delete(path)
 
     def _is_synced_remote_entity(self):
         if not self.system.compat.has_sync_replication() or not self.is_rmr_target():
@@ -238,10 +250,10 @@ class Dataset(InfiniBoxObject):
         gossip.trigger_with_tags(_FINISH_FORK_HOOK, {'obj': self._forked_obj, 'child': child}, tags=hook_tags)
         self._forked_obj = None
 
-    def create_snapshot(self, name=None, write_protected=None, ssd_enabled=None):
+    def create_snapshot(self, name=None, write_protected=None, ssd_enabled=None, lock_expires_at=None):
         """Creates a snapshot from this entity, if supported by the system
         """
-        return self._create_child(name, write_protected, ssd_enabled)
+        return self._create_child(name, write_protected, ssd_enabled, lock_expires_at)
 
     def restore(self, snapshot):
         """Restores this entity from a given snapshot object
