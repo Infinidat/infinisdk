@@ -77,8 +77,9 @@ class ConsGroup(InfiniBoxObject):
         if not prefix and not suffix:
             suffix = _CG_SUFFIX.generate()
         data = {'snap_prefix': prefix, 'parent_id': self.get_id(), 'snap_suffix': suffix, 'name': name}
-        for key, val in [('lock_expires_at', lock_expires_at)]:
-            data[key] = self.fields.get(key).binding.get_api_value_from_value(self.system, type(self), None, val)
+        if self.system.compat.has_snapshot_lock():
+            for key, val in [('lock_expires_at', lock_expires_at)]:
+                data[key] = self.fields.get(key).binding.get_api_value_from_value(self.system, type(self), None, val)
         members = self.get_members()
         for member in members:
             member.trigger_begin_fork()

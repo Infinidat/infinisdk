@@ -185,8 +185,9 @@ class Dataset(InfiniBoxObject):
         if not name:
             name = self.fields.name.generate_default().generate()
         data = {'name': name, 'parent_id': self.get_id()}
-        for key, val in [('lock_expires_at', lock_expires_at)]:
-            data[key] = self.fields.get(key).binding.get_api_value_from_value(self.system, type(self), None, val)
+        if self.system.compat.has_snapshot_lock():
+            for key, val in [('lock_expires_at', lock_expires_at)]:
+                data[key] = self.fields.get(key).binding.get_api_value_from_value(self.system, type(self), None, val)
         if write_protected is not None:
             assert self.system.compat.has_writable_snapshots(), \
                 'write_protected parameter is not supported for this version'
