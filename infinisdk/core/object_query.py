@@ -194,7 +194,7 @@ class PolymorphicQuery(LazyQuery):
         for pred in predicates:
             if isinstance(pred.field, QField):
                 pred = FieldFilter(self._get_or_fabricate_field(pred.field.name), pred.operator_name, pred.value)
-            url = pred.add_to_url(url)
+            url = pred.add_to_url(url, self.system)
         self.query = url
         return self
 

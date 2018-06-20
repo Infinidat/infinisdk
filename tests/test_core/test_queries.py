@@ -2,7 +2,7 @@ import operator
 import pytest
 
 from infinisdk.core.exceptions import ObjectNotFound, TooManyObjectsFound
-from ..conftest import create_volume
+from ..conftest import create_volume, create_pool
 
 # pylint: disable=redefined-outer-name
 
@@ -12,6 +12,18 @@ def test_querying_length(infinibox):
     assert len(Volume.find(infinibox)) == 0
     create_volume(infinibox, name="vol1")
     assert len(Volume.find(infinibox)) == 1
+
+
+def test_querying_with_name(infinibox):
+    pool_name = 'p1'
+    nonexisting_pool_name = 'p2'
+    Volume = infinibox.volumes.object_type
+    pool = create_pool(infinibox, name=pool_name)
+    vol = create_volume(infinibox, name="vol1", pool=pool)
+    assert len(Volume.find(infinibox, pool=pool_name)) == 1
+    assert Volume.find(infinibox, pool=pool_name).to_list()[0] == vol
+    with pytest.raises(ObjectNotFound):
+        Volume.find(infinibox, pool=nonexisting_pool_name)
 
 
 def test_get_too_many_items(infinibox):

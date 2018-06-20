@@ -20,15 +20,15 @@ class FieldFilter(object):
         self.operator_name = operator_name
         self.value = value
 
-    def _translate(self, value):
+    def _translate(self, value, system):
         if isinstance(self.value, Iterable) and not isinstance(self.value, string_types):
-            value = "({})".format(",".join(str(self._translate_single_value(val)) for val in self.value))
+            value = "({})".format(",".join(str(self._translate_single_value(val, system)) for val in self.value))
         else:
-            value = self._translate_single_value(value)
+            value = self._translate_single_value(value, system)
         return value
 
-    def add_to_url(self, urlobj):
-        value = self._translate(self.value)
+    def add_to_url(self, urlobj, system):
+        value = self._translate(self.value, system)
         return urlobj.add_query_param(self.field.api_name,
                                       "{}:{}".format(self.operator_name, value))
 
@@ -39,10 +39,10 @@ class FieldFilter(object):
     def __repr__(self):
         return "<{0.__class__.__name__}: {0}>".format(self)
 
-    def _translate_single_value(self, value):
+    def _translate_single_value(self, value, system):
         if value is None and self.operator_name.startswith('is'):
             return 'null'
-        value = self.field.binding.get_api_value_from_value(None, None, None, value)
+        value = self.field.binding.get_api_value_from_value(system, None, None, value)
         if value is None:
             value = 'null'
         return value
