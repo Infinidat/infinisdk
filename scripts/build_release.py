@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 from __future__ import print_function
 import datetime
-import itertools
 import os
 import shutil
 import subprocess
@@ -21,7 +20,8 @@ _logger = logbook.Logger(__name__)
 @click.option("--path", default=None)
 @click.option("--version", required=True)
 def main(verbose, quiet, version, path):
-    with logbook.NullHandler(), logbook.StreamHandler(sys.stderr, level=logbook.WARNING - verbose + quiet, bubble=False):
+    with logbook.NullHandler(), \
+         logbook.StreamHandler(sys.stderr, level=logbook.WARNING - verbose + quiet, bubble=False):
         repo = Checkout(version=version, path=path)
         repo.clone()
         repo.start_release()
@@ -52,7 +52,6 @@ class Checkout(object):
 
     def start_release(self):
         self._execute('git flow release start {}'.format(self._version), cwd=self.path)
-
 
     def fetch_ours(self):
         self._execute('git fetch {}'.format(os.path.abspath('.')))
@@ -142,6 +141,7 @@ def _normalize_version(version):
     while version.count('.') < 2:
         version += '.0'
     return version
+
 
 if __name__ == "__main__":
     main()  # pylint: disable=no-value-for-parameter

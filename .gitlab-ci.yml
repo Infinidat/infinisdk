@@ -11,7 +11,7 @@ py27:
     - /^customer-.*$/
   script:
     - pip install -U --pre -i https://pypi.infinidat.com/simple -e .[testing]
-    - pylint --rcfile .pylintrc -j $(nproc) infinisdk tests
+    - pylint --rcfile .pylintrc -j $(nproc) infinisdk scripts tests
     - pytest
 
 py35:
@@ -22,7 +22,7 @@ py35:
     - /^customer-.*$/
   script:
     - pip install -U --pre -i https://pypi.infinidat.com/simple -e .[testing]
-    - pylint --rcfile .pylintrc -j $(nproc) infinisdk tests
+    - pylint --rcfile .pylintrc -j $(nproc) infinisdk scripts tests
     - pytest
 
 py36:
@@ -33,7 +33,7 @@ py36:
     - /^customer-.*$/
   script:
     - pip install -U --pre -i https://pypi.infinidat.com/simple -e .[testing]
-    - pylint --rcfile .pylintrc -j $(nproc) infinisdk tests
+    - pylint --rcfile .pylintrc -j $(nproc) infinisdk scripts tests
     - pytest
 
 pypi:
