@@ -1,3 +1,15 @@
+Version 116.1.1 (Released 2018-06-28)
+-------------------------------------
+
+* #10538 Delete deprecated refresh method of objects
+* #10527 Support Zero value for MillisecondsDeltaTranslator
+* #10503 `Volume._get_luns_data_from_url` now returns luns from all pages
+* #10268 Added support for the new "udid" field for volumes (part of OpenVMS support)
+* #10235 Support passing TreeQ limits to creation command
+* #10208 dataset and cons_group return pool_name field
+* #10084 Volume now has `is_in_cons_group()` method
+* #9037 Add TreeQ support to InfisiSDK and Infinisim
+
 Version 103.0.0 (Released 2017-11-16)
 -------------------------------------
 

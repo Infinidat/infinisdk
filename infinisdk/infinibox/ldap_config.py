@@ -59,13 +59,13 @@ class LDAPConfig(SystemObject):
                 post_dict.setdefault('schema_definition', {})[key.split('_', 1)[1]] = value
             else:
                 post_dict[key] = value
-        self.system.api.put('config/ldap/{0}'.format(self.id), data=post_dict)
+        self.system.api.put('config/ldap/{}'.format(self.id), data=post_dict)
 
 
     def test(self):
         """Tests the LDAP configuration
         """
-        self.system.api.post('config/ldap/{0}/test'.format(self.id), data={})
+        self.system.api.post('config/ldap/{}/test'.format(self.id), data={})
 
     @deprecated("Use create_group instead", since='54.0')
     def create_local_group(self, name, role, dn):

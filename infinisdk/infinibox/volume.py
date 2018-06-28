@@ -2,12 +2,14 @@ import logbook
 from storage_interfaces.scsi.abstracts import ScsiVolume
 from ..core import Field
 from ..core.exceptions import InfiniSDKException
-from ..core.api.special_values import Autogenerate, SpecialValue, OMIT
+from ..core.api.special_values import Autogenerate, OMIT
 from ..core.bindings import RelatedObjectBinding
+from ..core.object_query import LazyQuery
 from ..core.utils import end_reraise_context
 from .dataset import Dataset, DatasetTypeBinder
 from .lun import LogicalUnit, LogicalUnitContainer
 from .scsi_serial import SCSISerial
+from .system_object import InfiniBoxObject
 
 _logger = logbook.Logger(__name__)
 
@@ -44,7 +46,7 @@ class VolumesBinder(DatasetTypeBinder):
             for v in volumes:
                 snap = snaps_by_parent_id.get(v.id)
                 if snap is None:
-                    _logger.warning('No snapshot was created for {0} in group snapshot operation', v)
+                    _logger.warning('No snapshot was created for {} in group snapshot operation', v)
                     v.trigger_cancel_fork()
                 else:
                     v.trigger_finish_fork(snap)
@@ -62,6 +64,8 @@ class Volume(Dataset):
         Field("name", creation_parameter=True, mutable=True, is_filterable=True,
               is_sortable=True, default=Autogenerate("vol_{uuid}")),
         Field("serial", type=SCSISerial, is_filterable=True, is_sortable=True),
+        Field("udid", type=int, creation_parameter=True, optional=True, mutable=True, is_filterable=True,
+              feature_name='openvms'),
         Field("cons_group", type='infinisdk.infinibox.cons_group:ConsGroup', api_name="cg_id",
               is_filterable=True, is_sortable=True, binding=RelatedObjectBinding('cons_groups', None)),
         Field("parent", type='infinisdk.infinibox.volume:Volume', cached=True, api_name="parent_id",
@@ -72,7 +76,7 @@ class Volume(Dataset):
     @classmethod
     def create(cls, system, **fields):
         pool = fields.get('pool')
-        if pool and not isinstance(pool, SpecialValue):
+        if pool and isinstance(pool, InfiniBoxObject):
             pool.invalidate_cache('allocated_physical_capacity', 'free_physical_capacity', 'free_virtual_capacity',
                                   'reserved_capacity')
         return super(Volume, cls).create(system, **fields)
@@ -85,8 +89,7 @@ class Volume(Dataset):
         return child
 
     def _get_luns_data_from_url(self):
-        res = self.system.api.get(self.get_this_url_path().add_path('luns'))
-        return res.get_result()
+        return LazyQuery(self.system, self.get_this_url_path().add_path('luns')).to_list()
 
     def get_lun(self, mapping_object):
         """Given either a host or a host cluster object, returns the single LUN object mapped to this volume.
@@ -117,5 +120,8 @@ class Volume(Dataset):
 
     def has_children(self):
         return self.get_field("has_children")
+
+    def is_in_cons_group(self):
+        return self.get_cons_group() is not None
 
 ScsiVolume.register(Volume)  # pylint: disable=no-member

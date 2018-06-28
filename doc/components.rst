@@ -10,7 +10,7 @@ Nodes
 
 .. code-block:: python
 
-		>>> print('System has {0} nodes'.format(len(system.components.nodes)))
+		>>> print('System has {} nodes'.format(len(system.components.nodes)))
 		System has 3 nodes
 
 Drives

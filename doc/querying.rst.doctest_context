@@ -12,7 +12,7 @@ def doctest_context():
     simulator = Simulator()
     pool = simulator.pools.create("pool", physical_capacity=TiB, virtual_capacity=TiB)
     for i in range(5):
-        simulator.volumes.create(pool=pool, name="vol{0}".format(i), size=GiB)
+        simulator.volumes.create(pool=pool, name="vol{}".format(i), size=GiB)
     simulator.activate()
     system = InfiniBox(simulator, auth=('infinidat', '123456'))
     system.login()

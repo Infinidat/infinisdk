@@ -13,6 +13,7 @@ logbook>=0.11.0
 munch
 mitba
 pact>=1.0.0
+python-dateutil
 requests>=2.4.0
 sentinels
 storage_interfaces

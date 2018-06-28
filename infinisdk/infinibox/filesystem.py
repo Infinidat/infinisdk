@@ -3,10 +3,25 @@ from ..core import Field
 from ..core.api.special_values import Autogenerate
 from ..core.bindings import RelatedObjectBinding
 from .dataset import Dataset, DatasetTypeBinder
+from .treeq import TreeQBinder
 
 
 class FilesystemBinder(DatasetTypeBinder):
-    pass
+    def __init__(self, object_type, system):
+        super(FilesystemBinder, self).__init__(object_type, system)
+        self._treeq_binders = {}
+
+    def get_or_create_treeq_binder(self, filesystem):
+        filesystem_id = filesystem.get_id()
+        if filesystem_id not in self._treeq_binders:
+            self._treeq_binders[filesystem_id] = TreeQBinder(self.system, filesystem)
+        return self._treeq_binders[filesystem_id]
+
+    def delete_treeq_binder(self, filesystem):
+        self._treeq_binders.pop(filesystem.get_id(), None)
+
+    def get_treeq_binder_by_id(self, filesystem_id):
+        return self._treeq_binders[filesystem_id]
 
 
 class Filesystem(Dataset):
@@ -22,6 +37,14 @@ class Filesystem(Dataset):
     ]
 
     BINDER_CLASS = FilesystemBinder
+
+    def __init__(self, system, initial_data):
+        super(Filesystem, self).__init__(system, initial_data)
+        self.treeqs = self.system.filesystems.get_or_create_treeq_binder(self)
+
+    def delete(self):
+        super(Filesystem, self).delete()
+        self.system.filesystems.delete_treeq_binder(self)
 
     @classmethod
     def is_supported(cls, system):

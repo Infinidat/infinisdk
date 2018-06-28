@@ -91,7 +91,7 @@ class BaseBinder(object):
             return None
 
     def count(self, *predicates, **kw):
-        return len(self.find(*predicates, **kw).page_size(1))
+        return self.find(*predicates, **kw).count()
 
     def __iter__(self):
         return iter(self.find())
@@ -137,7 +137,7 @@ class MonomorphicBinder(BaseBinder): # pylint: disable=abstract-method
         self.object_type = object_type
 
     def __repr__(self):
-        return "<{0}.{1}>".format(self.system, self.object_type.get_plural_name())
+        return "<{}.{}>".format(self.system, self.object_type.get_plural_name())
 
     @property
     def fields(self):
