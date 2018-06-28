@@ -18,6 +18,6 @@ def add_comma_separated_query_param(url, param_name, value):
         value = ",".join(value)
     existing_sort = url.query_dict.get(param_name, "")
     if existing_sort:
-        existing_sort = "{0},".format(existing_sort)
+        existing_sort = "{},".format(existing_sort)
 
-    return url.set_query_param(param_name, "{0}{1}".format(existing_sort, value))
+    return url.set_query_param(param_name, "{}{}".format(existing_sort, value))

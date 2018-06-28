@@ -7,7 +7,7 @@ import functools
 from ..core.utils import end_reraise_context
 from ..core import Field, MillisecondsDatetimeType
 from ..core.api.special_values import OMIT
-from ..core.bindings import RelatedObjectBinding
+from ..core.bindings import RelatedObjectNamedBinding
 from ..core.exceptions import CannotGetReplicaState, InvalidUsageException, TooManyObjectsFound, UnknownSystem
 from ..core.translators_and_types import MillisecondsDeltaType, CapacityType
 from ..core.type_binder import TypeBinder
@@ -189,7 +189,7 @@ class Replica(SystemObject):
         Field('description', is_filterable=True, mutable=True),
         Field('updated_at', type=MillisecondsDatetimeType, is_filterable=True, is_sortable=True),
         Field('created_at', type=MillisecondsDatetimeType, is_sortable=True, is_filterable=True, cached=True),
-        Field('link', api_name='link_id', binding=RelatedObjectBinding('links'),
+        Field('link', api_name='link_id', binding=RelatedObjectNamedBinding('links'),
               type='infinisdk.infinibox.link:Link', creation_parameter=True),
         Field('entity_pairs', type=list, creation_parameter=True),
         Field('entity_type', type=str, cached=True, creation_parameter=True, default='VOLUME', is_filterable=True),
@@ -428,7 +428,14 @@ class Replica(SystemObject):
     def switch_role(self):
         """Switches replica role - sync replicas only
         """
-        self.system.api.post(self.get_this_url_path().add_path('switch_role'))
+        gossip.trigger_with_tags('infinidat.sdk.pre_replica_switch_role', {'replica': self}, tags=['infinibox'])
+        try:
+            self.system.api.post(self.get_this_url_path().add_path('switch_role'))
+        except Exception as e: # pylint: disable=broad-except
+            with end_reraise_context():
+                gossip.trigger_with_tags('infinidat.sdk.replica_switch_role_failure',
+                                         {'replica': self, 'exception': e}, tags=['infinibox'])
+        gossip.trigger_with_tags('infinidat.sdk.post_replica_switch_role', {'replica': self}, tags=['infinibox'])
         self.invalidate_cache()
         gadget.log_operation(self, "switch role")
 
@@ -477,10 +484,7 @@ class Replica(SystemObject):
 
         :param params: Optional dictionary containing additional parameters for the type change
          """
-        if params is None:
-            params = {}
-        self.system.api.post(self.get_this_url_path().add_path('change_type_to_async'), data=params)
-        self.invalidate_cache()
+        self._change_type(new_type='async', params=params)
         gadget.log_operation(self, "change type to async")
 
     @require_sync_replication
@@ -489,11 +493,30 @@ class Replica(SystemObject):
 
         :param params: Optional dictionary containing additional parameters for the type change
          """
+        self._change_type(new_type='sync', params=params)
+        gadget.log_operation(self, "change type to sync")
+
+    def _change_type(self, new_type, params=None):
         if params is None:
             params = {}
-        self.system.api.post(self.get_this_url_path().add_path('change_type_to_sync'), data=params)
+        old_type = self.get_replication_type().lower()
+        new_type = new_type.lower()
+        gossip.trigger_with_tags('infinidat.sdk.pre_replica_change_type',
+                                 {'replica': self, 'old_type': old_type, 'new_type': new_type},
+                                 tags=['infinibox'])
+        try:
+            url = self.get_this_url_path().add_path('change_type_to_async') if new_type == 'async' \
+                  else self.get_this_url_path().add_path('change_type_to_sync')
+            self.system.api.post(url, data=params)
+        except Exception as e: # pylint: disable=broad-except
+            with end_reraise_context():
+                gossip.trigger_with_tags('infinidat.sdk.replica_change_type_failure',
+                                         {'replica': self, 'old_type': old_type, 'new_type': new_type, 'exception': e},
+                                         tags=['infinibox'])
+        gossip.trigger_with_tags('infinidat.sdk.post_replica_change_type',
+                                 {'replica': self, 'old_type': old_type, 'new_type': new_type},
+                                 tags=['infinibox'])
         self.invalidate_cache()
-        gadget.log_operation(self, "change type to sync")
 
     def _validate_can_check_state(self):
         if self.is_target():
@@ -539,7 +562,7 @@ class Replica(SystemObject):
         """
         self._validate_can_check_state()
         if not self.system.compat.has_sync_job_states():
-            raise NotImplementedError("This system ({0}) doesn't support replica \"pending\" state".format(self.system))
+            raise NotImplementedError("This system ({}) doesn't support replica \"pending\" state".format(self.system))
         return self.is_active() and self._any_sync_job_state_contains('pending')
 
     def _get_jobs(self):
@@ -570,27 +593,35 @@ class Replica(SystemObject):
         return self._any_sync_job_state_contains('stalled')
 
     def is_active(self, *args, **kwargs):
+        """Returns whether or not the replica is currently active
+        """
         self._validate_can_check_state()
         if self.system.compat.has_sync_job_states():
             return self.get_state().lower() == 'active'
         return self.get_state(*args, **kwargs).lower() in ['idle', 'initiating', 'initial_replication', 'replicating']
 
     def change_role(self, entity_pairs=OMIT):
+        """Changes the role of this replica from source to target or vice-versa
+        """
         data = {'entity_pairs': entity_pairs} if entity_pairs is not OMIT else None
-        gossip.trigger_with_tags('infinidat.sdk.replica_before_change_role', {'replica': self}, tags=['infinibox'])
+        gossip.trigger_with_tags('infinidat.sdk.pre_replica_change_role', {'replica': self}, tags=['infinibox'])
         try:
             self.system.api.post(self.get_this_url_path().add_path('change_role'), data=data)
         except Exception as e: # pylint: disable=broad-except
             with end_reraise_context():
                 gossip.trigger_with_tags('infinidat.sdk.replica_change_role_failure',
                                          {'replica': self, 'exception': e}, tags=['infinibox'])
-        gossip.trigger_with_tags('infinidat.sdk.replica_after_change_role', {'replica': self}, tags=['infinibox'])
+        gossip.trigger_with_tags('infinidat.sdk.post_replica_change_role', {'replica': self}, tags=['infinibox'])
         self.invalidate_cache()
 
     def is_source(self, *args, **kwargs):
+        """A predicate returning whether or not the replica is currently in the "source" role
+        """
         return self.get_role(*args, **kwargs).lower() == 'source'
 
     def is_target(self, *args, **kwargs):
+        """A predicate returning whether or not the replica is currently in the "target" role
+        """
         return not self.is_source(*args, **kwargs)
 
     def has_local_entity(self, entity):
@@ -603,6 +634,8 @@ class Replica(SystemObject):
     # pylint: disable=arguments-differ
     def delete(self, retain_staging_area=False, force_if_remote_error=False, force_on_target=False,
                force_if_no_remote_credentials=False):
+        """Deletes this replica
+        """
         path = self.get_this_url_path()
         if retain_staging_area:
             path = path.add_query_param('retain_staging_area', 'true')
@@ -614,7 +647,9 @@ class Replica(SystemObject):
             path = path.add_query_param('force_if_no_remote_credentials', 'true')
 
         try:
-            remote_replica = self.get_remote_replica()
+            remote_replica = self.get_remote_replica(safe=True)
+            if remote_replica is None:
+                _logger.debug('Failed to get remote replica during delete operation')
         except UnknownSystem:
             remote_replica = None
 
@@ -680,11 +715,11 @@ class Replica(SystemObject):
     def _get_local_remote_snapshots(self, result, collection_name, remote_replica, field_name_template):
         local_reclaimed_id = result.get(field_name_template.format('local'))
         if local_reclaimed_id is None:
-            _logger.debug('Could not get local reclaimed id (missing {0} in {1})',
+            _logger.debug('Could not get local reclaimed id (missing {} in {})',
                           field_name_template.format('local'), result)
         remote_reclaimed_id = result.get(field_name_template.format('remote'))
         if remote_reclaimed_id is None:
-            _logger.debug('Could not get remote reclaimed id (missing {0} in {1})',
+            _logger.debug('Could not get remote reclaimed id (missing {} in {})',
                           field_name_template.format('remote'), result)
 
         local = remote = None
@@ -721,6 +756,6 @@ class Replica(SystemObject):
         .. note:: this uses the remote command execution API to run the command over the inter-system
           link
         """
-        return self.system.api.get('remote/{0}/api/rest/replicas/{1}'.format(
+        return self.system.api.get('remote/{}/api/rest/replicas/{}'.format(
             self.get_link().id,
             self.get_remote_replica_id(from_cache=True))).get_result()['entity_pairs']

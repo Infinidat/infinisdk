@@ -1,9 +1,9 @@
 import itertools
 import os
-import pkg_resources
 import weakref
 
 import gossip
+from mitba import cached_method
 from sentinels import NOTHING
 from urlobject import URLObject as URL
 
@@ -12,7 +12,7 @@ from ..core.api import APITarget
 from ..core.config import config, get_ini_option
 from ..core.exceptions import CacheMiss, VersionNotSupported
 from ..core.object_query import LazyQuery
-from ..core.utils.environment import get_hostname, get_logged_in_username
+from ..core.utils.environment import get_hostname, get_logged_in_username, get_infinisdk_version
 from .capacities import InfiniBoxSystemCapacity
 from .compatibility import Compatibility
 from .components import InfiniBoxSystemComponents
@@ -92,7 +92,7 @@ class InfiniBox(APITarget):
             if address is None:
                 section = 'infinibox'
             else:
-                section = 'infinibox:{0}'.format(address[0])
+                section = 'infinibox:{}'.format(address[0])
             returned = get_ini_option(section, key, NOTHING)
             if returned is not NOTHING:
                 return returned
@@ -252,9 +252,10 @@ class InfiniBox(APITarget):
         self.api.clear_cookies()
         return returned
 
+    @cached_method
     def _get_client_id(self):
         return 'infinisdk.v{}.{}.{}.{}'.format(
-            pkg_resources.get_distribution('infinisdk').version, # pylint: disable=no-member
+            get_infinisdk_version(),
             get_hostname(),
             get_logged_in_username(),
             os.getpid())

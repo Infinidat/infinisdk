@@ -43,5 +43,5 @@ def _parse_hex_long(s):
     if len(s) < min_size:
         s = s.rjust(min_size, '0')
     elif len(s) % 2 != 0:
-        s = '0{0}'.format(s)
+        s = '0{}'.format(s)
     return struct.unpack('>Q', binascii.a2b_hex(s))[0]

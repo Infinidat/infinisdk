@@ -31,6 +31,7 @@ class ConsGroup(InfiniBoxObject):
         Field("created_at", type=MillisecondsDatetimeType, is_sortable=True, is_filterable=True),
         Field("updated_at", type=MillisecondsDatetimeType, is_sortable=True, is_filterable=True),
         Field('rmr_snapshot_guid', is_filterable=True, is_sortable=True),
+        Field('pool_name', is_sortable=True, is_filterable=True, new_to="4.0.10"),
     ]
 
     @classmethod
@@ -140,7 +141,7 @@ class ConsGroup(InfiniBoxObject):
 
         trigger_hook = functools.partial(gossip.trigger_with_tags,
                                          kwargs={'cons_group': self, 'delete_members': delete_members},
-                                         tags=['cons_group'])
+                                         tags=self.get_tags_for_object_operations(self.system))
         trigger_hook('infinidat.sdk.pre_cons_group_deletion')
         gadget.log_entity_deletion(self)
         try:
@@ -196,6 +197,7 @@ class ConsGroup(InfiniBoxObject):
                 trigger_hook('infinidat.sdk.cons_group_add_member_failure')
         trigger_hook('infinidat.sdk.post_cons_group_add_member')
         self.invalidate_cache('members_count')
+        member.invalidate_cache('cons_group')
 
     def remove_member(self, member, retain_staging_area=False, create_replica=False, replica_name=OMIT,
                       force_if_no_remote_credentials=False, force_if_remote_error=False, force_on_target=False):

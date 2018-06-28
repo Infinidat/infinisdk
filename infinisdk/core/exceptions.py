@@ -33,11 +33,11 @@ class SystemNotFoundException(APICommandException):
         self.err = err
         self.api_request = api_request
         self.address = URL(api_request.url).hostname
-        super(SystemNotFoundException, self).__init__("Cannot connect {0}".format(self.address))
+        super(SystemNotFoundException, self).__init__("Cannot connect {}".format(self.address))
 
 class APITransportFailure(APICommandException):
     def __init__(self, system, request_kwargs, err, api_request, start_timestamp):
-        super(APITransportFailure, self).__init__('APITransportFailure: {0}'.format(err))
+        super(APITransportFailure, self).__init__('APITransportFailure: {}'.format(err))
         self.start_timestamp = start_timestamp
         self.err = err
         self.api_request = api_request
@@ -68,7 +68,7 @@ class APICommandFailed(APICommandException):
         error = response.get_error()
         self.error_code = error.get('code') if error else None
         if json is None:
-            message = "[{0}]".format(response.response.content)
+            message = "[{}]".format(response.response.content)
         else:
             message = (json.get("error") or {}).get("message", "?")
         self.reasons = self._parse_reasons(error or {})
@@ -104,7 +104,7 @@ class APICommandFailed(APICommandException):
         if self.reasons:
             returned += "\n\tReasons:"
             for reason in self.reasons:
-                returned += "\n\t\t{0}".format(reason)
+                returned += "\n\t\t{}".format(reason)
         return returned
 
     @property
@@ -151,7 +151,7 @@ class CommandNotApproved(APICommandFailed):
         self.reason = reason
 
     def __repr__(self):
-        return "Command forbidden without explicit approval ({0})".format(self.reason)
+        return "Command forbidden without explicit approval ({})".format(self.reason)
 
 class CapacityUnavailable(APICommandException):
     pass
@@ -171,12 +171,12 @@ class AttributeAlreadyExists(InfiniSDKException):
     def __init__(self, obj, attr):
         self._obj = obj
         self._attr = attr
-        msg = "{0} already exists for {1}".format(attr, obj)
+        msg = "{} already exists for {}".format(attr, obj)
         super(AttributeAlreadyExists, self).__init__(msg)
 
 class VersionNotSupported(InfiniSDKException):
     def __init__(self, version):
-        msg = "System version '{0}' is not supported by this version of InfiniSDK".format(version)
+        msg = "System version '{}' is not supported by this version of InfiniSDK".format(version)
         super(VersionNotSupported, self).__init__(msg)
 
 class MethodDisabled(InfiniSDKException):
