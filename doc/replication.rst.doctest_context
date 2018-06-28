@@ -8,6 +8,7 @@ from tests.conftest import create_rmr_network_space
 from ecosystem import SimulationContext
 from infinisdk.infinibox import InfiniBox
 from infinisim.infinibox import Infinibox as Simulator
+from waiting import wait
 
 _AUTH = ('infinidat', '123456')
 
@@ -40,10 +41,15 @@ def doctest_context():
             remote_host=secondary_ns.get_mgmt_ip().ip_address,
         )
 
+        vol = primary.volumes.create(pool=primary.pools.create())
+        async_replica = primary.replicas.replicate_entity(vol, link=link, remote_pool=secondary.pools.create())
+        wait(async_replica.is_idle)
+
         yield {
             'link': link,
             'primary': primary,
             'primary_ip': primary_ns.get_mgmt_ip(),
             'secondary': secondary,
             'secondary_ip': secondary_ns.get_mgmt_ip(),
+            'async_replica': async_replica,
         }

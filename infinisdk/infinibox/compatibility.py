@@ -53,7 +53,7 @@ class Compatibility(object):
     def is_feature_supported(self, feature_name):
         if feature_name is NOTHING:
             return True
-        return getattr(self, 'has_{0}'.format(feature_name))()
+        return getattr(self, 'has_{}'.format(feature_name))()
 
     def normalize_version_string(self, version):
         return _InfiniboxVersion.parse(version)
@@ -148,6 +148,13 @@ class Compatibility(object):
     def has_qos(self):
         return self.has_feature('qos')
 
+    def has_treeq(self):
+        return self.has_feature('treeq')
+
+    def has_openvms(self):
+        return self.has_feature('open_vms')
+
+
 _VERSION_TUPLE_LEN = 5
 
 
@@ -220,4 +227,4 @@ class _InfiniboxVersion(object):
             extra_info += " dev version"
         if not self._is_odd_version:
             extra_info += " (unknown structure)"
-        return "<InfiniboxVersion: {0}{1}>".format(self.version, extra_info)
+        return "<InfiniboxVersion: {}{}>".format(self.version, extra_info)

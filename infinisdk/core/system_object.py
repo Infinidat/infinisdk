@@ -5,7 +5,6 @@ import gadget
 from contextlib import contextmanager
 
 from mitba import cached_method
-from vintage import deprecated
 from urlobject import URLObject as URL
 
 from .exceptions import APICommandFailed
@@ -34,6 +33,7 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
 
     FIELDS = []
     URL_PATH = None
+    UID_FIELD = "id"
     #: specifies which :class:`.TypeBinder` subclass is to be used for this type
     BINDER_CLASS = TypeBinder
 
@@ -42,8 +42,8 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
         #: the system to which this object belongs
         self._system = system
         self._cache = initial_data
-        self._uid = self.fields.id.binding.get_value_from_api_object(
-            system, type(self), self, self._cache)
+        uid_field = self.fields[self.UID_FIELD]
+        self._uid = uid_field.binding.get_value_from_api_object(system, type(self), self, self._cache)
 
     @property
     def id(self):
@@ -66,10 +66,6 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
                     field_name).api_name, None)
         else:
             self._cache.clear()
-
-    @deprecated(message='use invalidate_cache instead', since='65.0')
-    def refresh(self, *field_names):
-        return self.invalidate_cache(*field_names)
 
     @classmethod
     def is_supported(cls, system): # pylint: disable=unused-argument
@@ -95,8 +91,7 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
     def __eq__(self, other):
         if type(self) is not type(other):
             return NotImplemented
-
-        return self.system == other.system and self.id == other.id
+        return self.get_unique_key() == other.get_unique_key()
 
     def __ne__(self, other):
         return not (self == other) # pylint: disable=superfluous-parens
@@ -129,13 +124,13 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
 
     @classmethod
     def get_plural_name(cls):
-        return "{0}s".format(cls.get_type_name())
+        return "{}s".format(cls.get_type_name())
 
     @classmethod
     def get_url_path(cls, system): # pylint: disable=unused-argument
         url_path = cls.URL_PATH
         if url_path is None:
-            url_path = "/api/rest/{0}".format(cls.get_plural_name())
+            url_path = "/api/rest/{}".format(cls.get_plural_name())
         return url_path
 
     def get_field(self, field_name, from_cache=DONT_CARE, fetch_if_not_cached=True, raw_value=False):
@@ -240,7 +235,7 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
                 returned[field_name] = value
         if missed:
             raise CacheMiss(
-                "The following fields could not be obtained from cache: {0}".format(
+                "The following fields could not be obtained from cache: {}".format(
                     ", ".join(repr(field) for field in missed)))
 
         return returned
@@ -304,7 +299,7 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
         return URL(self.get_url_path(self.system)).add_path(str(self.id))
 
     def __repr__(self):
-        id_string = 'id={0}'.format(self.id)
+        id_string = 'id={}'.format(self.id)
         for field in self.FIELDS:
             if field.use_in_repr:
                 try:
@@ -312,7 +307,7 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
                         field.name, from_cache=True, fetch_if_not_cached=False)
                 except CacheMiss:
                     value = '?'
-                id_string += ', {0}={1}'.format(field.name, value)
+                id_string += ', {}={}'.format(field.name, value)
 
         return "<{system_name}:{typename} {id_string}>".format(
             typename=type(self).__name__,
@@ -341,7 +336,7 @@ class SystemObject(BaseSystemObject):
         Returns whether or not the object actually exists
         """
         try:
-            self.get_field("id", from_cache=False)
+            self.get_field(self.UID_FIELD, from_cache=False)
         except APICommandFailed as e:
             if e.status_code != httplib.NOT_FOUND:
                 raise

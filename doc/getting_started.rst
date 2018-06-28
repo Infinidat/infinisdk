@@ -1,6 +1,8 @@
 Getting Started
 ===============
 
+.. note:: As a convention throughout this documentation, whenever we write an entity such as ``pool``, ``volume``, ``system`` etc., it will *always* refer to a Python object -- never to a name string or to an object identifier. When we want to indicate a name or an id we will name variables accordingly (e.g. ``volume_id``, ``pool_name`` etc.).
+
 Installation
 ------------
 

@@ -76,6 +76,8 @@ MillisecondsDatetimeType = TypeInfo(type=arrow.Arrow,
 class MillisecondsDeltaTranslator(ValueTranslator):
 
     def _to_api(self, value):
+        if value == 0:
+            return 0
         # for python 2.6 compatibility...
         total_seconds = (value.microseconds + (value.seconds + value.days * 24 * 3600) * 10**6) / 10**6
         return int(total_seconds * 1000.0)
@@ -102,7 +104,7 @@ def host_port_to_api(value):
     elif isinstance(value, iSCSIName):
         port_type = 'iscsi'
     else:
-        assert False, "Unknown type of {0}".format(value)
+        assert False, "Unknown type of {}".format(value)
     return {'type': port_type, 'address': str(value)}
 
 

@@ -10,7 +10,7 @@ from ..core.utils import end_reraise_context, DONT_CARE, handle_possible_replica
 from ..core.exceptions import ObjectNotFound, TooManyObjectsFound
 from ..core.type_binder import TypeBinder, PolymorphicBinder
 from ..core import Field, CapacityType, MillisecondsDatetimeType
-from ..core.bindings import RelatedObjectBinding
+from ..core.bindings import RelatedObjectBinding, RelatedObjectNamedBinding
 from ..core.api.special_values import OMIT
 from .system_object import InfiniBoxObject
 
@@ -51,7 +51,7 @@ class DatasetTypeBinder(TypeBinder):
         if name is None:
             name = self.fields.name.generate_default().generate()
         count = kwargs.pop('count', 1)
-        return [self.create(*args, name='{0}_{1}'.format(name, i), **kwargs)
+        return [self.create(*args, name='{}_{}'.format(name, i), **kwargs)
                 for i in range(1, count + 1)]
 
     def calculate_reclaimable_space(self, entities):
@@ -73,7 +73,7 @@ class Dataset(InfiniBoxObject):
         Field("allocated", type=CapacityType, is_sortable=True, is_filterable=True),
         Field("tree_allocated", type=CapacityType),
         Field("pool", type='infinisdk.infinibox.pool:Pool', api_name="pool_id", creation_parameter=True,
-              is_filterable=True, is_sortable=True, binding=RelatedObjectBinding()),
+              is_filterable=True, is_sortable=True, binding=RelatedObjectNamedBinding()),
         Field("type", cached=True, is_filterable=True, is_sortable=True),
         Field("family_id", type=int, cached=True, is_filterable=True, is_sortable=True, new_to="3.0"),
         Field("provisioning", api_name="provtype", mutable=True, creation_parameter=True,
@@ -98,8 +98,8 @@ class Dataset(InfiniBoxObject):
               is_filterable=True, binding=RelatedObjectBinding('qos_policies'), feature_name='qos', cached=False),
         Field('qos_shared_policy', type='infinisdk.infinibox.qos_policy:QosPolicy', api_name='qos_shared_policy_id',
               is_sortable=True, is_filterable=True, binding=RelatedObjectBinding('qos_policies'),
-              feature_name='qos', cached=False)
-
+              feature_name='qos', cached=False),
+        Field('pool_name', is_sortable=True, is_filterable=True, new_to="4.0.10"),
     ]
 
     PROVISIONING = namedtuple('Provisioning', ['Thick', 'Thin'])('THICK', 'THIN')
@@ -170,7 +170,7 @@ class Dataset(InfiniBoxObject):
         return self._create_child(name, write_protected, ssd_enabled)
 
     def _create_child(self, name=None, write_protected=None, ssd_enabled=None):
-        hook_tags = self.get_tags_for_object_operations(self)
+        hook_tags = self.get_tags_for_object_operations(self.system)
         gossip.trigger_with_tags('infinidat.sdk.pre_entity_child_creation',
                                  {'source': self, 'system': self.system},
                                  tags=hook_tags)

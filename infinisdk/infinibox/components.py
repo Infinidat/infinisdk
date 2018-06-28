@@ -2,6 +2,7 @@ import copy
 
 from .._compat import ExitStack, zip  # pylint: disable=redefined-builtin
 from ..core.field import Field
+from ..core.field_filter import FieldFilter
 from ..core.system_component import SystemComponentsBinder
 from ..core.system_object import BaseSystemObject
 from ..core.exceptions import ObjectNotFound
@@ -15,11 +16,17 @@ from collections import defaultdict
 from contextlib import contextmanager
 from logbook import Logger
 from urlobject import URLObject as URL
-from vintage import deprecated
+from vintage import deprecated, warn_deprecation
 
 # pylint: disable=attribute-defined-outside-init,no-member,super-on-old-class,no-init,abstract-method
 _logger = Logger(__name__)
+_UID_DEPRECATION_MSG = "Direct usage of the 'id' field is deprecated. Use 'uid' field instead"
 
+def _normalize_id_predicate(predicate, component_type):
+    if predicate.field.name == 'id' and isinstance(predicate.value, str):
+        warn_deprecation(_UID_DEPRECATION_MSG)
+        return FieldFilter(component_type.fields.uid, predicate.operator_name, predicate.value)
+    return predicate
 
 class InfiniBoxSystemComponents(SystemComponentsBinder):
 
@@ -95,9 +102,9 @@ class ComputedIDBinding(InfiniSDKBinding):
 
     def get_value_from_api_object(self, system, objtype, obj, api_obj):
         parent_id = api_obj.get('parent_id', '')
-        returned = "{0}_".format(parent_id) if parent_id else ""
+        returned = "{}_".format(parent_id) if parent_id else ""
         index = objtype.fields.index.binding.get_value_from_api_object(system, objtype, obj, api_obj)
-        returned += '{0}:{1}'.format(objtype.get_type_name(), index)
+        returned += '{}:{}'.format(objtype.get_type_name(), index)
         return returned
 
     def get_value_from_api_value(self, system, objtype, obj, api_value):
@@ -119,7 +126,12 @@ class InfiniBoxComponentBinder(MonomorphicBinder):
         return returned
 
     def find(self, *predicates, **kw):
-        return InfiniBoxComponentQuery(self.system, self.object_type, *predicates, **kw)
+        if isinstance(kw.get('id', None), str):
+            warn_deprecation(_UID_DEPRECATION_MSG)
+            kw['uid'] = kw.pop('id')
+        return InfiniBoxComponentQuery(self.system, self.object_type,
+                                       *(_normalize_id_predicate(pred, self.object_type) for pred in predicates),
+                                       **kw)
 
     @deprecated(message="Use to_list/count instead", since='63.0')
     def __len__(self):
@@ -148,12 +160,12 @@ class InfiniBoxComponentBinder(MonomorphicBinder):
         is_forced_cache = self.should_force_fetching_from_cache()
         if not is_forced_cache:
             if with_logging:
-                _logger.debug('Entering fetch tree once of {0}', self)
+                _logger.debug('Entering fetch tree once of {}', self)
             self._fetch_tree(force_fetch)
         with self._force_fetching_tree_from_cache_context():
             yield
         if not is_forced_cache and with_logging:
-            _logger.debug('Exiting fetch tree once of {0}', self)
+            _logger.debug('Exiting fetch tree once of {}', self)
 
 
     def _fetch_tree(self, force_fetch):
@@ -189,10 +201,15 @@ class InfiniBoxComponentBinder(MonomorphicBinder):
 class InfiniBoxSystemComponent(BaseSystemObject):
     BINDER_CLASS = InfiniBoxComponentBinder
     BASE_URL = URL("components")
+    UID_FIELD = "uid"
     FIELDS = [
-        Field("id", binding=ComputedIDBinding(), is_identity=True, cached=True),
+        Field("uid", binding=ComputedIDBinding(), is_identity=True, cached=True),
         Field("parent_id", cached=True, add_updater=False, is_identity=True),
     ]
+
+    @deprecated(message="Use get_uid() instead", since='112.0.0')
+    def get_id(self):
+        return self.get_uid()
 
     def __deepcopy__(self, memo):
         return self.construct(self.system, copy.deepcopy(self._cache, memo), self.get_parent_id())
@@ -231,15 +248,11 @@ class InfiniBoxSystemComponent(BaseSystemObject):
         data = self.system.api.get(self.get_this_url_path()).get_result()
         self.construct(self.system, data, self.get_parent_id())
 
-    @deprecated(message='Use refresh_cache()', since='65.0')
-    def refresh(self): # pylint: disable=arguments-differ
-        self.refresh_cache()
-
     @classmethod
     def construct(cls, system, data, parent_id, allow_partial_fields=False):    # pylint: disable=arguments-differ
         # pylint: disable=protected-access
         data['parent_id'] = parent_id
-        component_id = cls.fields.id.binding.get_value_from_api_object(system, cls, None, data)
+        component_id = cls.fields[cls.UID_FIELD].binding.get_value_from_api_object(system, cls, None, data)
         returned = system.components.try_get_component_by_id(component_id)
         if returned is None:
             component_type = cls.get_type_name()
@@ -296,6 +309,7 @@ class Rack(InfiniBoxSystemComponent):
 @InfiniBoxSystemComponents.install_component_type
 class Enclosure(InfiniBoxSystemComponent):
     FIELDS = [
+        Field("api_id", api_name="id", type=int, cached=True),
         Field("index", api_name="id", type=int, cached=True),
         Field("drives", type=list, binding=ListOfRelatedComponentBinding()),
         Field("state", cached=False),
@@ -323,7 +337,7 @@ class Nodes(InfiniBoxComponentBinder):
         field_names_str = ",".join(set(field_names).union(['id']))
         url = self.object_type.get_url_path(self.system).set_query_param('fields', field_names_str)
         data = self.system.api.get(url).get_result()
-        parent_id = self.system.components.get_rack_1().get_id()
+        parent_id = self.system.components.get_rack_1().get_uid()
         return [self.object_type.construct(self.system, obj_data, parent_id, True) for obj_data in data]
 
 
@@ -331,6 +345,7 @@ class Nodes(InfiniBoxComponentBinder):
 class Node(InfiniBoxSystemComponent):
     BINDER_CLASS = Nodes
     FIELDS = [
+        Field("api_id", api_name="id", type=int, cached=True),
         Field("index", api_name="id", type=int, cached=True),
         Field("name", cached=True),
         Field("model", cached=True),
@@ -373,7 +388,7 @@ class Node(InfiniBoxSystemComponent):
         return self.get_service('core')
 
     def _get_tags(self):
-        return ['infinibox', 'node{0}'.format(self.get_index())]
+        return ['infinibox', 'node{}'.format(self.get_index())]
 
 
 @InfiniBoxSystemComponents.install_component_type
@@ -409,6 +424,7 @@ class LocalDrive(InfiniBoxSystemComponent):
 @InfiniBoxSystemComponents.install_component_type
 class EthPort(InfiniBoxSystemComponent):
     FIELDS = [
+        Field("api_id", api_name="id", type=int, cached=True),
         Field("hw_addr", is_identity=True),
         Field("connection_speed", type=int),
         Field("max_speed", type=int, feature_name="max_speed"),
@@ -441,6 +457,7 @@ class EthPort(InfiniBoxSystemComponent):
 @InfiniBoxSystemComponents.install_component_type
 class IbPort(InfiniBoxSystemComponent):
     FIELDS = [
+        Field("api_id", api_name="id", type=int, cached=True),
         Field("index", api_name="id", type=int, cached=True),
         Field("firmware"),
         Field("last_probe_timestamp", type=int),
@@ -482,6 +499,7 @@ class FcPorts(InfiniBoxComponentBinder):
 class FcPort(InfiniBoxSystemComponent):
     BINDER_CLASS = FcPorts
     FIELDS = [
+        Field("api_id", api_name="id", type=int, cached=True),
         Field("index", api_name="id", type=int, cached=True),
         Field("wwpn", is_identity=True, cached=True, type=WWNType),
         Field("node", api_name="node_index", type=int, cached=True, binding=RelatedComponentBinding()),
@@ -554,7 +572,7 @@ class Service(InfiniBoxSystemComponent):
         try:
             return self.system.components.service_clusters.get(name=self.get_name())
         except ObjectNotFound:
-            raise NotImplementedError("This service ({0}) doesn't support CLM".format(self.get_name()))
+            raise NotImplementedError("This service ({}) doesn't support CLM".format(self.get_name()))
 
     def is_active(self):
         return self.get_state() == 'ACTIVE'
@@ -612,6 +630,7 @@ class ServiceCluster(InfiniBoxSystemComponent):
 @InfiniBoxSystemComponents.install_component_type
 class BBU(InfiniBoxSystemComponent):
     FIELDS = [
+        Field("api_id", api_name="id", type=int, cached=True),
         Field("index", api_name="id", type=int, cached=True),
         Field("state", cached=False),
         Field("on_battery", api_name="onBattery", type=bool, cached=False),
@@ -630,6 +649,7 @@ class BBU(InfiniBoxSystemComponent):
 @InfiniBoxSystemComponents.install_component_type
 class System(InfiniBoxSystemComponent):
     FIELDS = [
+        Field("api_id", api_name="id", type=int, cached=True),
         Field("index", api_name="id", type=int, cached=True),
         Field("operational_state", type=dict, cached=False),
     ]

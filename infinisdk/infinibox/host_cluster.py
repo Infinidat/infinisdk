@@ -13,18 +13,20 @@ class HostCluster(InfiniBoxLURelatedObject):
         Field("luns", type=list, add_getter=False, add_updater=False),
         Field("san_client_type", new_to="3.0"),
         Field("hosts", type=list, add_updater=False, binding=ListOfRelatedObjectBinding()),
+        Field("host_type", creation_parameter=True, optional=True, mutable=False, is_sortable=True, is_filterable=True,
+              feature_name='openvms'),
         Field("created_at", type=MillisecondsDatetimeType, is_sortable=True, is_filterable=True),
         Field("updated_at", type=MillisecondsDatetimeType, is_sortable=True, is_filterable=True),
     ]
 
     def add_host(self, host):
-        url = "{0}/hosts".format(self.get_this_url_path())
+        url = "{}/hosts".format(self.get_this_url_path())
         self.system.api.post(url, data={"id" : host.id})
         self.invalidate_cache('hosts')
         host.invalidate_cache('host_cluster_id')
 
     def remove_host(self, host):
-        url = "{0}/hosts/{1}".format(self.get_this_url_path(), host.id)
+        url = "{}/hosts/{}".format(self.get_this_url_path(), host.id)
         self.system.api.delete(url)
         self.invalidate_cache('hosts')
         host.invalidate_cache('host_cluster_id')

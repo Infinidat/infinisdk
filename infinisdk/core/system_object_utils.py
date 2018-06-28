@@ -49,7 +49,7 @@ def make_field_updaters(field):
     updater_func = make_updater(field)
     if field.type._type is bool:  # pylint: disable=protected-access
         updaters_list = make_enable_disable_methods(field)
-        deprecation_msg = "Use {0} instead".format("/".join(func.__name__ for func in updaters_list))
+        deprecation_msg = "Use {} instead".format("/".join(func.__name__ for func in updaters_list))
         updaters_list.append(deprecated(updater_func, deprecation_msg))
     else:
         updaters_list = [updater_func]
@@ -62,7 +62,7 @@ def _format_type_doc(_type):
         return '`Capacity <https://github.com/vmalloc/capacity#usage>`_'
 
     if isinstance(_type, type) and issubclass(_type, SystemObject):
-        _type = '{0}.{1}'.format(_type.__module__, _type.__name__)
+        _type = '{}.{}'.format(_type.__module__, _type.__name__)
 
     if isinstance(_type, string_types):
         return ':class:`{0} object <{0}>`'.format(_type.replace(':', '.'))
@@ -86,7 +86,7 @@ def get_data_for_object_creation(object_type, system, fields):
         if field_value is NOTHING and field_api_value is NOTHING:
             field_value = field.generate_default()
         if field_value is not NOTHING and field_api_value is not NOTHING:
-            raise ValueError("Multiple colliding arguments: {0} and {1}".format(field.name, field.api_name))
+            raise ValueError("Multiple colliding arguments: {} and {}".format(field.name, field.api_name))
         if field_value is NOTHING and field_api_value is NOTHING and system.is_field_supported(field):
             missing_fields.add(field.name)
         if field_value is not NOTHING:
@@ -96,7 +96,7 @@ def get_data_for_object_creation(object_type, system, fields):
             returned[field.api_name] = field_api_value
 
     if missing_fields:
-        raise MissingFields("Following fields were not specified: {0}".format(
+        raise MissingFields("Following fields were not specified: {}".format(
             ", ".join(sorted(missing_fields))))
     returned.update(extra_fields)
     return returned

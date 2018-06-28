@@ -2,7 +2,7 @@ from ..core import Field, CapacityType, MillisecondsDatetimeType
 from ..core.api.special_values import Autogenerate
 from ..core.translators_and_types import MunchListType
 from .system_object import InfiniBoxObject
-from ..core.bindings import RelatedObjectBinding
+from ..core.bindings import RelatedObjectNamedBinding
 
 
 class _Field(Field):
@@ -17,7 +17,7 @@ class Export(InfiniBoxObject):
         _Field("export_path", creation_parameter=True, default=Autogenerate("/{prefix}export_{uuid}")),
         _Field("inner_path", creation_parameter=True, optional=True),
         Field("filesystem", api_name="filesystem_id", creation_parameter=True, cached=True, type=int,
-              binding=RelatedObjectBinding()),
+              binding=RelatedObjectNamedBinding()),
         _Field("enabled", type=bool, mutable=True, creation_parameter=True, optional=True),
         _Field("make_all_users_anonymous", type=bool, mutable=True, creation_parameter=True, optional=True),
         _Field("anonymous_gid", type=int, mutable=True, creation_parameter=True, optional=True),

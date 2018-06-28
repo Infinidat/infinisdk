@@ -9,7 +9,7 @@ from .metadata_holder import MetadataHolder
 class InfiniBoxObject(SystemObject, MetadataHolder):
 
     def _get_metadata_uri(self):
-        return URL("metadata/{0}".format(self.id))
+        return URL("metadata/{}".format(self.id))
 
 class InfiniBoxLURelatedObject(InfiniBoxObject):
 
@@ -20,9 +20,9 @@ class InfiniBoxLURelatedObject(InfiniBoxObject):
                 return self.get_luns(from_cache=from_cache, fetch_if_not_cached=False)[lun]
             except (KeyError, CacheMiss):
                 if not fetch_if_not_cached:
-                    raise CacheMiss('LUN {0} is not cached'.format(int(lun)))
+                    raise CacheMiss('LUN {} is not cached'.format(int(lun)))
 
-        url = self.get_this_url_path().add_path('luns/{0}'.format(lun))
+        url = self.get_this_url_path().add_path('luns/{}'.format(lun))
         lun_info = self.system.api.get(url).get_result()
         lu = LogicalUnit(system=self.system, **lun_info)
         luns = self._cache.get('luns')

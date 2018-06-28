@@ -91,7 +91,7 @@ class Attachment(object):
         active.remove(self)
 
     def __repr__(self):
-        return "<{0}:{1}>".format(self._objtype.__name__, self._name)
+        return "<{}:{}>".format(self._objtype.__name__, self._name)
 
 
 class Method(Attachment):

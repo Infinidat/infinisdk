@@ -12,6 +12,7 @@ class LogicalUnit(object):
         self.host_cluster_id = host_cluster_id
         self.volume_id = volume_id
         self.host_id = host_id
+        self.udid = kwargs.pop('udid', None)
         self.additional_data = kwargs
         self.mapping_object = self.get_host() or self.get_cluster()
 
@@ -46,7 +47,7 @@ class LogicalUnit(object):
 
     @classmethod
     def _unmap(cls, obj, lun):
-        url = obj.get_this_url_path().add_path('luns/lun/{0}'.format(lun))
+        url = obj.get_this_url_path().add_path('luns/lun/{}'.format(lun))
         try:
             obj.system.api.delete(url)
         except APICommandFailed as e:
@@ -76,7 +77,7 @@ class LogicalUnit(object):
         return self.get_lun()
 
     def __repr__(self):
-        return "<LUN {0}: {1}->{2}>".format(self.get_lun(), self.get_mapping_object(), self.get_volume())
+        return "<LUN {}: {}->{}>".format(self.get_lun(), self.get_mapping_object(), self.get_volume())
 
     def __eq__(self, other):
         return type(other) == type(self) and other.get_unique_key() == self.get_unique_key()  # pylint: disable=unidiomatic-typecheck
@@ -149,9 +150,9 @@ class LogicalUnitContainer(object):
             items = self.get_lus_for_lun(item)
 
         if len(items) == 0:
-            raise KeyError('{0} has no logical units'.format(item))
+            raise KeyError('{} has no logical units'.format(item))
         if len(items) > 1:
-            raise ValueError('{0} have too many logical units'.format(item))
+            raise ValueError('{} have too many logical units'.format(item))
         return items[0]
 
     def get(self, item, default=None):
@@ -170,4 +171,4 @@ class LogicalUnitContainer(object):
         return item in self.luns
 
     def __repr__(self):
-        return "<LogicalUnitsContainer: [{0}]>".format(", ".join([str(x) for x in self]))
+        return "<LogicalUnitsContainer: [{}]>".format(", ".join([str(x) for x in self]))

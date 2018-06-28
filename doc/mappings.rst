@@ -107,7 +107,7 @@ Iterating over available mappings of a host is fairly simple:
 		<LogicalUnitsContainer: [<LUN 5: <...:Host id=1008>-><...:Volume id=1007>>]>
 
 		>>> for lun in host.get_luns():
-		...     print("{0} is mapped to {1}".format(lun, lun.volume)) # doctest: +ELLIPSIS
+		...     print("{} is mapped to {}".format(lun, lun.volume)) # doctest: +ELLIPSIS
 		<LUN 5: <...:Host id=1008>-><...:Volume id=1007>> is mapped to <...:Volume id=1007>
 
 There is also a shortcut to iterate over all mappings in the entire system:
@@ -115,7 +115,7 @@ There is also a shortcut to iterate over all mappings in the entire system:
 .. code-block:: python
 
 		>>> for lun in system.luns:
-		...     print("{0} belongs to {1} and is mapped to {2}".format(lun, lun.mapping_object, lun.volume)) # doctest: +ELLIPSIS
+		...     print("{} belongs to {} and is mapped to {}".format(lun, lun.mapping_object, lun.volume)) # doctest: +ELLIPSIS
 		<LUN 5: <...:Host id=1008>-><...:Volume id=1007>> belongs to <...:Host id=1008> and is mapped to <...:Volume id=1007>
 
 
