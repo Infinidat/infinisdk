@@ -1,8 +1,12 @@
 language: python
 python:
-  - "2.6"
-  - "2.7"
-  - "3.3"
-  - "pypy"
-script: 
-  - "python scripts/test.py"
+- '3.6'
+deploy:
+  provider: pypi
+  user: vmalloc
+  password:
+    secure: Wb97nlSquFINBnjTggkAeIkPlCQkaRU+Pf82kd7P9k0fSisxvtEo2wBh9fwVNOCqtRmYzYKNUay2N/UGaVSv9E7XhDTIDw7xEERZ7tWM1bc6M1tTIhVNcHjatrbCLGTQvLCSlU7K78JRpCwixsibnTyyUSTC0jAg+9W103Y3xwg870A141g6c93ApwwnaLw6NMnGCeSoqqZ4AwVAv5wyU5n5xH/ohR0rktmkCeb5k9wqFBTBCLouqIelwHnErHA4wpDWWW2eYNB/EvlPeNCrX97E8AJRvCT318KBBPl6Apxj1+EIyv4pWIWqBD+ao5K2fuU3gLm2BEVAw73PsLLSSM19mu/tYkPg6jPEwDw73fpN5Ohsgn0YLlsf3txm/2BqDhhqoIGctU/6twfrD8QYSAUkyUf6rO+58TDoIrkt2RIVNSwRgr5fMYLLt/L0X2S1dUPSOYFHevQS1Q40PNE0LGDU2df8ubFMEDJ6FnJZ9khqauS/TrCRJ86eUU8/fonGLtXnRCB1UhOAtvRJsfvpU4hK7GOww14wQ08a4piAyAkgrVU+KJ9NFW8zfhWsNP/TuCKHUcEWrafuo59y3HaqmugJO8hKSA7A8qTCLlBvCjFYMf46wpEQooNuanOv4bt0Rd/lI4TY2rkGxDzRlbBvb2BtApwWEfn3hutPefLX/mM=
+  on:
+    tags: true
+    distributions: sdist bdist_wheel
+    repo: Infinidat/infinisdk
