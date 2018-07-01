@@ -22,6 +22,7 @@ _logger = logbook.Logger(__name__)
 def main(verbose, quiet, version, path):
     with logbook.NullHandler(), \
          logbook.StreamHandler(sys.stderr, level=logbook.WARNING - verbose + quiet, bubble=False):
+        _validate_prerequisites()
         repo = Checkout(version=version, path=path)
         repo.clone()
         repo.start_release()
@@ -35,6 +36,15 @@ def main(verbose, quiet, version, path):
         click.secho('git push master:master develop:develop && git push --tags', fg='yellow')
         input('[Press any key to continue]')
 
+
+
+def _validate_prerequisites():
+    proc = subprocess.Popen('git flow version', stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
+    if proc.wait() != 0:
+        raise click.ClickException(
+            click.style('git-flow is not installed. '
+                        'Please install git-flow-avh through your package manager',
+                        fg='red'))
 
 
 class Checkout(object):
