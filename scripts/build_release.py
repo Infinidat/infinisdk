@@ -29,7 +29,12 @@ def main(verbose, quiet, version, path):
         repo.reshape()
         repo.generate_changelog()
         repo.commit()
-        input('Committed and tagged under {} [Press Enter to continue]'.format(repo.path))
+        repo.finish_release()
+        click.secho('Repository committed and tagged under {}'.format(repo.path), fg='green')
+        click.echo('Examine changes, then push them using ', nl=False)
+        click.secho('git push master:master develop:develop && git push --tags', fg='yellow')
+        input('[Press any key to continue]')
+
 
 
 class Checkout(object):
@@ -52,6 +57,9 @@ class Checkout(object):
 
     def start_release(self):
         self._execute('git flow release start {}'.format(self._version), cwd=self.path)
+
+    def finish_release(self):
+        self._execute('git flow release finish {0} -mv{0}'.format(self._version), cwd=self.path)
 
     def fetch_ours(self):
         self._execute('git fetch {}'.format(os.path.abspath('.')))
