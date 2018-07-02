@@ -8,10 +8,10 @@ Use the :meth:`.create_child`
 
 .. code-block:: python
 
-		>>> snap = volume.create_child()
+		>>> snap = volume.create_snapshot()
 		>>> snap.id
 		1008
-		>>> snap_of_snap = snap.create_child()
+		>>> snap_of_snap = snap.create_snapshot()
 		>>> snap_of_snap.id
 		1009
 

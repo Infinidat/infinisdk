@@ -3,7 +3,7 @@ from infinisdk import Q
 
 
 def test_query_by_parent(infinibox, volume):
-    snapshot = volume.create_child()
+    snapshot = volume.create_snapshot()
 
     [s] = infinibox.volumes.find(parent=volume)
     assert s == snapshot

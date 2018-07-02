@@ -73,7 +73,7 @@ def test_get_pool(data_entity, pool):
 
 
 def test_snapshot_creation_time(data_entity):
-    snap = data_entity.create_child()
+    snap = data_entity.create_snapshot()
     assert isinstance(snap.get_creation_time(), arrow.Arrow)
 
 
@@ -111,20 +111,20 @@ def test_clones_and_snapshots(infinibox, data_entity):
 
 
 def test_create_child(infinibox, data_entity):
-    child1 = data_entity.create_child()
+    child1 = data_entity.create_snapshot()
     assert child1.get_parent() == data_entity
 
-    child2 = child1.create_child()
+    child2 = child1.create_snapshot()
     assert child2.get_parent() == child1
 
     if infinibox.compat.has_writable_snapshots():
-        child3 = data_entity.create_child(write_protected=False)
+        child3 = data_entity.create_snapshot(write_protected=False)
         assert not child3.get_field('write_protected')
-        child4 = data_entity.create_child(write_protected=True)
+        child4 = data_entity.create_snapshot(write_protected=True)
         assert child4.get_field('write_protected')
     else:
         with pytest.raises(AssertionError):
-            child3 = data_entity.create_child(write_protected=True)
+            child3 = data_entity.create_snapshot(write_protected=True)
 
 @pytest.mark.parametrize('current_time', [1406113997.675789, 1406114887.452333])
 def test_created_at_field_type_conversion(current_time):
@@ -139,7 +139,7 @@ def test_created_at_field_type_conversion(current_time):
 def test_snapshot_creation_time_filtering(data_entity):
     flux.current_timeline.sleep(1) # set a differentiator between filesystem creation time and snapshot time
     data_entity_binder = data_entity.get_collection()
-    snap = data_entity.create_child()
+    snap = data_entity.create_snapshot()
     query = data_entity_binder.find(data_entity_binder.fields.created_at < snap.get_creation_time())
 
     for fs in query:
@@ -180,21 +180,21 @@ def test_object_creation_hooks_for_child_entities(data_entity):
     for fork_hook in [_BEGIN_FORK_HOOK, _FINISH_FORK_HOOK, _CANCEL_FORK_HOOK]:
         gossip.register(partial(save_fork_callback, fork_hook), fork_hook)
 
-    snapshot = data_entity.create_child('a_snap')
+    snapshot = data_entity.create_snapshot('a_snap')
     assert l == ['pre_a_snap', 'post_a_snap']
     assert fork_callbacks == [_BEGIN_FORK_HOOK, _FINISH_FORK_HOOK]
 
-    snapshot.create_child('a_clone')
+    snapshot.create_snapshot('a_clone')
     assert l == ['pre_a_snap', 'post_a_snap', 'pre_a_clone', 'post_a_clone']
     assert fork_callbacks == [_BEGIN_FORK_HOOK, _FINISH_FORK_HOOK]*2
 
     with data_entity.system.api.get_auth_context(username, password):
         with pytest.raises(APICommandFailed):
-            data_entity.create_child('failed_snap')
+            data_entity.create_snapshot('failed_snap')
 
     with data_entity.system.api.get_auth_context(username, password):
         with pytest.raises(APICommandFailed):
-            snapshot.create_child('failed_clone')
+            snapshot.create_snapshot('failed_clone')
 
     assert l == ['pre_a_snap', 'post_a_snap',
                  'pre_a_clone', 'post_a_clone',
@@ -224,7 +224,7 @@ def test_data_restore(data_entity):
     def restore_failure(source, target, exc):  # pylint: disable=unused-variable,unused-argument
         callbacks.append("restore_failure_{}_from_{}".format(target.id, source.id))
 
-    snapshot = data_entity.create_child('some_snapshot_to_restore_from')
+    snapshot = data_entity.create_snapshot('some_snapshot_to_restore_from')
     assert callbacks == []
 
     data_entity.restore(snapshot)
@@ -253,9 +253,9 @@ def test_data_restore(data_entity):
 
 
 def test_get_children_snapshots_and_clones(data_entity):
-    snap = data_entity.create_child()
-    clone = snap.create_child()
-    snap2 = clone.create_child()
+    snap = data_entity.create_snapshot()
+    clone = snap.create_snapshot()
+    snap2 = clone.create_snapshot()
 
     assert set(data_entity.get_children()) == set(data_entity.get_snapshots()) == set([snap])
     if not data_entity.get_system().compat.has_writable_snapshots():
@@ -279,13 +279,13 @@ def test_calculate_reclaimable_space(data_entity):
 
 @relevant_from_version('3.0')
 def test_calculate_entities_reclaimable_space(data_entity):
-    snap = data_entity.create_child()
+    snap = data_entity.create_snapshot()
     assert isinstance(data_entity.get_collection().calculate_reclaimable_space([data_entity, snap]), Capacity)
 
 
 def test_get_family_master(data_entity):
     assert data_entity.get_family_master() is data_entity
-    child = data_entity.create_child()
+    child = data_entity.create_snapshot()
     assert child.get_family_master() == data_entity
     assert child.get_family_master().get_id() == data_entity.get_id()
 
@@ -318,7 +318,7 @@ def test_create_multiple_datasets(data_entity, name):
 
 @relevant_from_version('2.2')
 def test_datasets_queries(infinibox, volume, filesystem):
-    dataset_list = [volume, volume.create_child(), filesystem, filesystem.create_child()]
+    dataset_list = [volume, volume.create_snapshot(), filesystem, filesystem.create_snapshot()]
     assert set(infinibox.datasets.to_list()) == set(dataset_list)
     assert set(infinibox.datasets.find(type='MASTER').to_list()) == set([volume, filesystem])
 
@@ -326,7 +326,7 @@ def test_datasets_queries(infinibox, volume, filesystem):
 @relevant_from_version('3.0')
 def test_refresh_snapshot(data_entity):
     assert data_entity.is_master()
-    child = data_entity.create_child()
+    child = data_entity.create_snapshot()
     with pytest.raises(AssertionError):
         data_entity.refresh_snapshot()
     child.refresh_snapshot()

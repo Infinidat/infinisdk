@@ -25,7 +25,7 @@ def test_unmapping(mapped_volume):
 
 def test_has_children(volume):
     assert not volume.has_children()
-    child = volume.create_child()
+    child = volume.create_snapshot()
     assert child.get_parent() == volume
     assert volume.has_children()
 
