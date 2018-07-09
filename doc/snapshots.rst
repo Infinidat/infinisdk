@@ -4,7 +4,7 @@ Snapshots
 Creating Snapshots
 -----------------------------
 
-Use the :meth:`.create_child`
+Use the :meth:`.create_snapshot`
 
 .. code-block:: python
 
