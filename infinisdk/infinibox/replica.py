@@ -635,14 +635,14 @@ class Replica(SystemObject):
     def is_source(self, from_cache=DONT_CARE):
         """A predicate returning whether or not the replica is currently in the "source" role
         """
-        if self.is_active_active_mode(from_cache=from_cache):
+        if self.is_type_active_active(from_cache=from_cache):
             return False
         return self.get_role(from_cache=from_cache).lower() == 'source'
 
     def is_target(self, from_cache=DONT_CARE):
         """A predicate returning whether or not the replica is currently in the "target" role
         """
-        if self.is_active_active_mode(from_cache=from_cache):
+        if self.is_type_active_active(from_cache=from_cache):
             return False
         return not self.is_source(from_cache=from_cache)
 
