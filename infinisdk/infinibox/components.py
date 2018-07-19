@@ -390,9 +390,6 @@ class Node(InfiniBoxSystemComponent):
         """
         return self.get_service('core')
 
-    def _get_tags(self):
-        return ['infinibox', 'node{}'.format(self.get_index())]
-
 
 @InfiniBoxSystemComponents.install_component_type
 class LocalDrive(InfiniBoxSystemComponent):
