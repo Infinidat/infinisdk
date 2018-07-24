@@ -2,7 +2,7 @@
 import logbook
 import gossip
 import functools
-from ..core.utils import end_reraise_context, DONT_CARE
+from ..core.utils import end_reraise_context
 from ..core import Field, MillisecondsDatetimeType
 from ..core.api.special_values import OMIT
 from ..core.bindings import RelatedObjectNamedBinding
@@ -438,16 +438,10 @@ class Replica(SystemObject):
         return False
 
 
-    def is_type_active_active(self, from_cache=DONT_CARE):
+    def is_type_active_active(self):
         if self.system.compat.has_sync_replication():
-            return self.get_replication_type(from_cache=from_cache).lower() == 'active_active'
+            return self.get_replication_type(from_cache=True).lower() == 'active_active'
         return False
-
-    def is_active_active_mode(self, from_cache=DONT_CARE):
-        if self.system.compat.has_sync_replication():
-            return self.is_type_active_active(from_cache=from_cache) and not self.is_async_mode(from_cache=from_cache)
-        return False
-
 
     def is_type_async(self):
         if self.system.compat.has_sync_replication():
@@ -481,7 +475,7 @@ class Replica(SystemObject):
     def is_out_of_sync(self):
         """Returns True if the replica sync state is 'OUT_OF_SYNC'
          """
-        if self.is_active_active_mode():
+        if self.is_type_active_active() and not self.is_async_mode():
             return False
         return self._is_in_sync_state('out_of_sync')
 
@@ -530,7 +524,7 @@ class Replica(SystemObject):
     def is_suspended(self, *args, **kwargs):
         """Returns whether or not this replica is currently suspended
         """
-        if self.is_active_active_mode():
+        if self.is_type_active_active() and not self.is_async_mode():
             return False
         self._validate_can_check_state()
         return self.get_state(*args, **kwargs).lower() in ['suspended', 'auto_suspended']
@@ -538,7 +532,7 @@ class Replica(SystemObject):
     def is_user_suspended(self, *args, **kwargs):
         """Returns whether or not this replica is currently suspended due to a user request
         """
-        if self.is_active_active_mode():
+        if self.is_type_active_active() and not self.is_async_mode():
             return False
         self._validate_can_check_state()
         return self.get_state(*args, **kwargs).lower() == 'suspended'
@@ -555,7 +549,7 @@ class Replica(SystemObject):
     def is_auto_suspended(self, *args, **kwargs):
         """Returns whether or not this replica is in auto_suspended state
         """
-        if self.is_active_active_mode():
+        if self.is_type_active_active() and not self.is_async_mode():
             return False
         self._validate_can_check_state()
         return self.get_state(*args, **kwargs).lower() == 'auto_suspended'
@@ -563,7 +557,7 @@ class Replica(SystemObject):
     def is_initial_replication(self, *args, **kwargs):
         """Returns whether or not this replica is in initiating state
         """
-        if self.is_active_active_mode():
+        if self.is_type_active_active() and not self.is_async_mode():
             return self.get_sync_state().lower() in ["initializing", "initializing_pending"]
         self._validate_can_check_state()
         if self.system.compat.has_sync_job_states():
@@ -599,24 +593,24 @@ class Replica(SystemObject):
             return self.is_active() and self._any_sync_job_state_contains('replicating')
         return self.get_state(*args, **kwargs).lower() == 'replicating'
 
-    def is_stalled(self, from_cache=DONT_CARE):
-        if self.is_active_active_mode(from_cache=from_cache):
+    def is_stalled(self):
+        if self.is_type_active_active() and not self.is_async_mode():
             return self.get_sync_state().lower() == "sync stalled"
         self._validate_can_check_state()
         if not self.system.compat.has_sync_job_states():
             raise NotImplementedError("Checking for stalled is not supported on systems without sync job states")
         return self._any_sync_job_state_contains('stalled')
 
-    def is_active(self, from_cache=False):
+    def is_active(self, *args, **kwargs):
         """Returns whether or not the replica is currently active
         """
-        if self.is_active_active_mode(from_cache=from_cache):
+        if self.is_type_active_active() and not self.is_async_mode():
             return self.get_sync_state().lower() in ['synchronized', 'initializing',\
                                                      'initializing_pending', 'sync_in_progress']
         self._validate_can_check_state()
         if self.system.compat.has_sync_job_states():
             return self.get_state().lower() == 'active'
-        return self.get_state().lower() in ['idle', 'initiating', 'initial_replication', 'replicating']
+        return self.get_state(*args, **kwargs).lower() in ['idle', 'initiating', 'initial_replication', 'replicating']
 
     def change_role(self, entity_pairs=OMIT):
         """Changes the role of this replica from source to target or vice-versa
@@ -632,19 +626,19 @@ class Replica(SystemObject):
         gossip.trigger_with_tags('infinidat.sdk.post_replica_change_role', {'replica': self}, tags=['infinibox'])
         self.invalidate_cache()
 
-    def is_source(self, from_cache=DONT_CARE):
+    def is_source(self, *args, **kwargs):
         """A predicate returning whether or not the replica is currently in the "source" role
         """
-        if self.is_type_active_active(from_cache=from_cache):
+        if self.is_type_active_active():
             return False
-        return self.get_role(from_cache=from_cache).lower() == 'source'
+        return self.get_role(*args, **kwargs).lower() == 'source'
 
-    def is_target(self, from_cache=DONT_CARE):
+    def is_target(self, *args, **kwargs):
         """A predicate returning whether or not the replica is currently in the "target" role
         """
-        if self.is_type_active_active(from_cache=from_cache):
+        if self.is_type_active_active():
             return False
-        return not self.is_source(from_cache=from_cache)
+        return not self.is_source(*args, **kwargs)
 
     def has_local_entity(self, entity):
         pairs = self.get_field('entity_pairs', from_cache=True)
