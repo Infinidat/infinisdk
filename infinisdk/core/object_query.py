@@ -65,6 +65,16 @@ class LazyQuery(QueryBase):
     def safe_get_by_id_from_cache(self, id): # pylint: disable=redefined-builtin
         return self._objects_by_id.get(id)
 
+    def extend_url(self, *args, **kw):
+        assert self._mutable, "Cannot modify query after fetching"
+        if args:
+            raise NotImplementedError("Positional arguments are not supported for LazyQuery")
+        url = URL(self.query)
+        if kw:
+            url = url.add_query_params(**kw)
+        self.query = url
+        return self
+
     def __iter__(self):
         if self._total_num_objects is None:
             self._fetch()

@@ -73,6 +73,13 @@ def test_get_all_metadata(infinibox, volume, pool):
     actual = list(infinibox.get_all_metadata())
     assert sorted(expected, cmp=_metadata_cmp) == sorted(actual, cmp=_metadata_cmp)
 
+    expected = [
+        {'object_id': pool.id, 'key': 'b', 'value': 'c'},
+        {'object_id': volume.id, 'key': 'b', 'value': 'b'},
+    ]
+    actual = list(infinibox.get_all_metadata(key='b'))
+    assert sorted(expected, cmp=_metadata_cmp) == sorted(actual, cmp=_metadata_cmp)
+
 
 @relevant_from_version('3.0')
 def test_set_system_metadata(infinibox):

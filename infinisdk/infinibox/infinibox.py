@@ -7,7 +7,6 @@ from mitba import cached_method
 from sentinels import NOTHING
 from urlobject import URLObject as URL
 
-from .._compat import iteritems
 from ..core.api import APITarget
 from ..core.config import config, get_ini_option
 from ..core.exceptions import CacheMiss, VersionNotSupported
@@ -260,21 +259,13 @@ class InfiniBox(APITarget):
             get_logged_in_username(),
             os.getpid())
 
-    def _get_v1_metadata_generator(self):
-        system_metadata = self.api.get('metadata').get_result()
-        for object_id, object_dict in iteritems(system_metadata):
-            for key, value in iteritems(object_dict):
-                yield {'object_id': int(object_id), 'key': key, 'value': value}
-
-    def _get_v2_metadata_generator(self):
-        for metadata_item in LazyQuery(self, URL('metadata')):
+    def _get_v2_metadata_generator(self, **raw_filters):
+        for metadata_item in LazyQuery(self, URL('metadata')).extend_url(**raw_filters):
             metadata_item.pop('id', None)
             yield metadata_item
 
-    def get_all_metadata(self):
-        if self.compat.get_metadata_version() < 2:
-            return self._get_v1_metadata_generator()
-        return self._get_v2_metadata_generator()
+    def get_all_metadata(self, **raw_filters):
+        return self._get_v2_metadata_generator(**raw_filters)
 
     def is_active(self):
         return self.components.system_component.is_active()
