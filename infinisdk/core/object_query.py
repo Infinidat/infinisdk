@@ -51,8 +51,9 @@ class QueryBase(object):
         return [self[index] for index in indexes]
 
 class LazyQuery(QueryBase):
-    def __init__(self, system, url):
+    def __init__(self, system, url, factory=None):
         super(LazyQuery, self).__init__()
+        self.factory = factory
         self.system = system
         self.query = url
         self._requested_page = None
@@ -104,7 +105,13 @@ class LazyQuery(QueryBase):
         return self._total_num_objects % self._requested_page_size
 
     def _translate_item_if_needed(self, item_index):
-        pass
+        if self.factory is None:
+            return
+
+        received_item = self._fetched.get(item_index)
+        if isinstance(received_item, dict):
+            obj = self._fetched[item_index] = self.factory(self.system, received_item)
+            self._objects_by_id[obj.id] = obj
 
     def __getitem__(self, index):
         if isinstance(index, Number) and index < 0:
@@ -176,16 +183,10 @@ class LazyQuery(QueryBase):
 
 class PolymorphicQuery(LazyQuery):
     def __init__(self, system, url, object_types, factory):
-        super(PolymorphicQuery, self).__init__(system, url)
+        super(PolymorphicQuery, self).__init__(system, url, factory)
         assert isinstance(object_types, (list, tuple)), "object_types must be tuple or list"
         self.object_types = object_types
-        self.factory = factory
-
-    def _translate_item_if_needed(self, item_index):
-        received_item = self._fetched.get(item_index)
-        if isinstance(received_item, dict):
-            obj = self._fetched[item_index] = self.factory(self.system, received_item)
-            self._objects_by_id[obj.id] = obj
+        assert callable(self.factory), "A callable factory must be provided for PolymorphicQuery"
 
     def _get_or_fabricate_field(self, field_name):
         for obj_type in self.object_types:

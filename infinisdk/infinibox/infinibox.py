@@ -7,7 +7,7 @@ from mitba import cached_method
 from sentinels import NOTHING
 from urlobject import URLObject as URL
 
-from ..core.api import APITarget
+from ..core.api import APITarget, OMIT
 from ..core.config import config, get_ini_option
 from ..core.exceptions import CacheMiss, VersionNotSupported
 from ..core.object_query import LazyQuery
@@ -35,6 +35,7 @@ from .notification_rule import NotificationRule
 from .notification_target import NotificationTarget
 from .pool import Pool
 from .replica import Replica
+from .search_utils import get_search_query_object
 from .user import User
 from .volume import Volume
 from .metadata import SystemMetadata
@@ -272,6 +273,18 @@ class InfiniBox(APITarget):
 
     def is_read_only(self, **kwargs):
         return self.components.system_component.get_operational_state(**kwargs)['read_only_system']
+
+    def search(self, query=OMIT, type_name=OMIT):
+        search_query = get_search_query_object(self)
+        search_kwargs = {}
+
+        if query is not OMIT:
+            search_kwargs['query'] = query
+
+        if type_name is not OMIT:
+            search_kwargs['type'] = type_name
+
+        return search_query.extend_url(**search_kwargs)
 
     def __hash__(self):
         return hash(self.get_name())
