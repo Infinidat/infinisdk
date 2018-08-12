@@ -38,8 +38,8 @@ class LDAPConfig(SystemObject):
     ]
 
     @classmethod
-    def get_plural_name(cls):
-        return 'ldap_configs'
+    def get_type_name(cls):
+        return 'ldap_config'
 
     def create_group(self, name, dn, role):
         """Maps a specified group in the LDAP directory to a specified role in the system

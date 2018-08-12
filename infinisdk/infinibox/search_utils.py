@@ -6,13 +6,13 @@ _type_map = {'cg': 'cons_group',
              'interfaces': 'network_interface',
              'ipd': 'network_space',
              'links': 'link',
-             'notification_smtp_target': 'notificationtarget',
-             'notification_snap_target': 'notificationtarget',
-             'notification_syslog_target': 'notificationtarget',
+             'notification_smtp_target': 'notification_target',
+             'notification_snap_target': 'notification_target',
+             'notification_syslog_target': 'notification_target',
              'qos': 'qos_policy',
              'replicas': 'replica',
              'switch': 'fc_switch',
-             'users_repository': 'ldapconfig'}
+             'users_repository': 'ldap_config'}
 
 
 class UnknownSearchObject(object):
