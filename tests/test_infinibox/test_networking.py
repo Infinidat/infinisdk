@@ -6,7 +6,6 @@ from infinisdk.core.exceptions import APICommandFailed
 from infinisdk.core.api.special_values import OMIT
 
 
-@relevant_from_version('2.0')
 def test_disable_enable_network_interface(network_interface):
     assert network_interface.is_enabled()
     network_interface.disable()
@@ -63,18 +62,15 @@ def test_disable_enable_network_space_ip(network_space):
     assert network_space.get_ips() == []
 
 
-@relevant_from_version('2.0')
 def test_network_space_get_links_no_links(network_space):
     assert list(network_space.get_links()) == []
 
 
-@relevant_from_version('2.0')
 def test_network_space_get_links_with_links(infinibox, link):
     [ns] = infinibox.network_spaces
     assert [link] == list(ns.get_links())
 
 
-@relevant_from_version('2.0')
 def test_update_interface_list_of_network_space(infinibox):
     def create_interfaces(port_name):
         return [infinibox.network_interfaces.create(node_id=index, name=port_name, type='PORT')
@@ -87,7 +83,6 @@ def test_update_interface_list_of_network_space(infinibox):
     assert network_space.get_interfaces() == new_interfaces
 
 
-@relevant_from_version('2.0')
 @pytest.mark.parametrize('network_config_type', [Munch, dict])
 def test_network_configuration_type(infinibox, network_config_type):
     ip_address = '127.0.0.1'
@@ -100,7 +95,7 @@ def test_network_configuration_type(infinibox, network_config_type):
     assert ip_obj.ip_address == ip_obj['ip_address']
 
 
-@versioning_requiremnts(relevant_from='2.0', relevant_up_to='3.0')
+@versioning_requiremnts(relevant_up_to='3.0')
 @pytest.mark.parametrize('service_value', [None, OMIT])
 def test_create_network_space_with_no_service_until_3_0(infinibox, service_value):
     network_space = create_network_space(infinibox, service=service_value)

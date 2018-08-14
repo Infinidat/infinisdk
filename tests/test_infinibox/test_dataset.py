@@ -316,7 +316,6 @@ def test_create_multiple_datasets(data_entity, name):
         assert vol.is_master()
 
 
-@relevant_from_version('2.2')
 def test_datasets_queries(infinibox, volume, filesystem):
     dataset_list = [volume, volume.create_snapshot(), filesystem, filesystem.create_snapshot()]
     assert set(infinibox.datasets.to_list()) == set(dataset_list)

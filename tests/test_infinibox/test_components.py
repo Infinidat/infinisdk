@@ -10,7 +10,6 @@ from infinisdk.core.config import config
 from infinisdk.core.exceptions import MethodDisabled
 from infinisdk.infinibox.components import (Drive, Enclosure, FcPort, Node, EthPort, LocalDrive,
                                             Rack, Service, System, ServiceCluster)
-from ..conftest import relevant_from_version
 
 NO_OF_ENCLOSURES_DRIVES = config.get_path('infinibox.defaults.enlosure_drives.total_count.simulator')
 
@@ -188,13 +187,11 @@ def test_node_component(infinibox):
 def test_service_component(infinibox):
     _basic_check_for_component(infinibox, Service, Node)
 
-@relevant_from_version('2.0')
 def test_service_component_with_service_cluster(infinibox):
     service = infinibox.components.service_clusters.choose().get_services()[0]
     assert service.get_node().get_index() == 1
     assert service.is_master()
 
-@relevant_from_version('2.0')
 def test_service_cluster(infinibox):
     _basic_check_for_component(infinibox, ServiceCluster, None)
     service_cluster = infinibox.components.service_clusters.choose()

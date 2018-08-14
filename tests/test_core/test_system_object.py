@@ -5,7 +5,6 @@ from infinisdk.core.exceptions import (APICommandFailed,
                                        AttributeAlreadyExists, CacheMiss,
                                        MissingFields)
 
-from ..conftest import relevant_from_version
 
 # pylint: disable=misplaced-comparison-constant, unused-argument
 
@@ -206,7 +205,6 @@ def test__equality(system):
     assert NotImplemented == diff_type1.__eq__(diff_type2)
 
 
-@relevant_from_version('2.2')
 def test_get_fields_without_field_names(infinibox):
     user = infinibox.users.choose()
     fields = user.get_fields()

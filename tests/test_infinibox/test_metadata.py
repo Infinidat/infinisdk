@@ -16,7 +16,6 @@ def test_get_nonexisting_metadata_default(volume):
     value = object()
     assert volume.get_metadata_value('key', value) is value
 
-@relevant_from_version('2.0')
 def test_metadata_paging(infinibox, volume, forge):
     page_size = 3
     infinibox.get_simulator().api.set_default_page_size(page_size)
