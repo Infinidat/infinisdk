@@ -6,10 +6,10 @@ from infinisdk.core import object_query
 from ..conftest import relevant_from_version
 
 
-def test_name(user, user_name_field):
+def test_name(user):
     curr_name = user.get_name()
     new_name = 'other_user_name'
-    user.update_field(user_name_field, new_name)
+    user.update_name(new_name)
 
     assert curr_name.startswith('user_')
     assert curr_name != new_name

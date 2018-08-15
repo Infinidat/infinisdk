@@ -81,8 +81,6 @@ def test_delete_delted_object(volume):
 
 @pytest.mark.parametrize('with_capacity', [True, False])
 def test_move_volume(infinibox, with_capacity):
-    if with_capacity and int(infinibox.compat.get_version_major()) < 2:
-        pytest.skip('infinisim does not support with_capacity for this version')
     oldpool = infinibox.pools.create(virtual_capacity=10*TB, physical_capacity=10*TB)
     volume = infinibox.volumes.create(pool=oldpool, size=TB)
     old_virt_capacity = oldpool.get_virtual_capacity()

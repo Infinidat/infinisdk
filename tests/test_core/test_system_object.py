@@ -222,11 +222,11 @@ def test_get_url_path(system, user):
     assert system.users.get_url_path() == user.get_url_path(system)
 
 
-def test_update_field_updates_its_cache(system, user, user_name_field):
+def test_update_field_updates_its_cache(user):
     new_name = "testing_update_field_caching"
-    assert user.get_field(user_name_field, from_cache=True) != new_name
-    user.update_field(user_name_field, new_name)
-    assert user.get_field(user_name_field, from_cache=True) == new_name
+    assert user.get_name(from_cache=True) != new_name
+    user.update_name(new_name)
+    assert user.get_name(from_cache=True) == new_name
 
 
 def test_update_field_does_not_update_other_fields_cache(user):

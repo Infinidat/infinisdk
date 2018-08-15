@@ -125,13 +125,6 @@ def mapping_object(host, cluster, mapping_object_type):
 def user(infinibox):
     return infinibox.users.create()
 
-@pytest.fixture
-def user_name_field(infinibox):
-    # InfiniSim workaround: There were a bug in user's name that was fix in v2.0 but wasn't backported...
-    if int(infinibox.compat.get_version_major()) >= 2:
-        return 'name'
-    return 'username'
-
 
 def create_volume(infinibox, **kwargs):
     if not kwargs.get('pool_id') and not kwargs.get('pool'):
@@ -203,13 +196,10 @@ def export(infinibox, filesystem):
 def data_entity_type(request):
     return request.param
 
+
 @pytest.fixture
-def data_entity(infinibox, volume, filesystem, data_entity_type):
-    if data_entity_type == 'volume':
-        return volume
-    if infinibox.compat.get_version_as_float() < 2.2:
-        pytest.skip('System does not have NAS')
-    return filesystem
+def data_entity(volume, filesystem, data_entity_type):
+    return volume if data_entity_type == 'volume' else filesystem
 
 
 def create_network_interface(infinibox, **kwargs):
@@ -291,14 +281,7 @@ def type_binder(request, infinibox):
     object_type = request.param
     if not object_type.is_supported(infinibox):
         pytest.skip('not supported')
-    # Workaround: LdapConfig exist on the Infinibox for 1.5/1.7 but not on infinisim
-    elif object_type.get_type_name() == 'ldapconfig' and \
-        infinibox.compat.get_version_major() == '1':
-        pytest.skip('not supported by infinisim')
     elif object_type.get_type_name() == 'fc_soft_target' and \
         infinibox.compat.get_version_major() < '3':
-        pytest.skip('not supported by infinisim')
-    elif object_type.get_type_name() == 'fc_switch' and \
-        infinibox.compat.get_version_as_float() < 2.2:
         pytest.skip('not supported by infinisim')
     return infinibox.objects[request.param]
