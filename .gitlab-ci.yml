@@ -36,6 +36,16 @@ py36:
     - pylint --rcfile .pylintrc -j $(nproc) infinisdk scripts tests
     - pytest
 
+py37:
+  image: python:3.7
+  tags:
+    - infradev
+  except:
+    - /^customer-.*$/
+  script:
+    - pip install -U --pre -i https://pypi.infinidat.com/simple -e .[testing]
+    - pytest
+
 pypi:
   image: python
   tags:
