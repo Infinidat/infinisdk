@@ -538,6 +538,14 @@ class FcPort(InfiniBoxSystemComponent):
             return self.get_soft_target_addresses()
         return set([self.get_wwpn()])
 
+    def enable(self, role):
+        self.system.api.post(self.get_this_url_path().add_path('enable'), data={'role': role})
+        self.invalidate_cache('enabled')
+
+    def disable(self):
+        self.system.api.post(self.get_this_url_path().add_path('disable'), data={})
+        self.invalidate_cache('enabled')
+
 
 @InfiniBoxSystemComponents.install_component_type
 class Drive(InfiniBoxSystemComponent):

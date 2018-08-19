@@ -51,6 +51,23 @@ For each Node, you can use the :meth:`.Node.get_fc_ports` method to obtain the F
 		...             print('Port', fc_port.get_field('wwpn'), 'of', node, 'is down!')
 
 
+Use :meth:`fc_port.disable` method to disable an FC port
+
+.. code-block:: python
+
+        >>> fc_port.disable()
+        >>> fc_port.is_enabled()
+        False
+
+Use :meth:`fc_port.enable` method to enable an FC port with a given role
+
+.. code-block:: python
+
+        >>> fc_port.enable(role='HARD_PORT')
+        >>> fc_port.is_enabled()
+        True
+
+
 Services
 --------
 
