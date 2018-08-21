@@ -44,6 +44,7 @@ Contents:
    faq
    api
    advanced_usage
+   hooks
 
 
 Indices and tables
