@@ -21,7 +21,7 @@ from .utils import DONT_CARE, end_reraise_context
 class FieldsMeta(FieldsMetaBase):
 
     @classmethod
-    def FIELD_FACTORY(mcs, name):
+    def FIELD_FACTORY(mcs, name):  # pylint: disable=bad-mcs-classmethod-argument
         return Field(name, binding=PassthroughBinding())
 
 

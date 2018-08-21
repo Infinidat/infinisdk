@@ -77,11 +77,11 @@ class InfiniBoxSystemComponents(SystemComponentsBinder):
     def get_rack_1(self):
         return self._rack_1
 
-    def find(self, component_type=None, *predicates, **kw): # pylint: disable=arguments-differ
-        # component_type is the name of the component
-        if component_type is None:
+    def find(self, *predicates, **kw):
+        component_name = kw.pop('component_type', None)
+        if component_name is None:
             return InfiniBoxGenericComponentQuery(self.system, *predicates, **kw)
-        component_type = self._COMPONENTS_BY_TYPE_NAME[component_type]
+        component_type = self._COMPONENTS_BY_TYPE_NAME[component_name]  # pylint: disable=unsubscriptable-object
         component_collection = self.system.components[component_type]
         return component_collection.find(*predicates, **kw)
 
