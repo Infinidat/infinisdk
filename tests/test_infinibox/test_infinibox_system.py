@@ -151,6 +151,13 @@ def test_get_name(infinibox):
     assert infinibox.get_name().startswith('simulator-')
 
 
+def test_update_dns(infinibox):
+    infinibox.update_dns_servers('1.1.1.1', '2.2.2.2')
+    assert infinibox.get_dns_servers() == ['1.1.1.1', '2.2.2.2']
+    infinibox.update_dns_servers('3.3.3.3')
+    assert infinibox.get_dns_servers() == ['3.3.3.3']
+
+
 @pytest.mark.parametrize('from_cache', [True, False])
 @pytest.mark.parametrize('invalidate_cache', [True, False])
 def test_get_field_raw_value(volume, from_cache, invalidate_cache):

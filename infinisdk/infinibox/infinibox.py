@@ -46,6 +46,9 @@ except ImportError:
     lookup_simulator_by_address = None
 
 
+_DNS_SERVERS_CONFIG_PATH = 'config/mgmt/environment.dns_servers'
+
+
 class InfiniBox(APITarget):
     OBJECT_TYPES = [Volume, Pool, Host, HostCluster, User, Filesystem, Export,
                     NetworkSpace, NetworkInterface, Link, Replica, LDAPConfig,
@@ -171,6 +174,13 @@ class InfiniBox(APITarget):
         Returns the product version of the system
         """
         return self.get_system_info('version')
+
+    def get_dns_servers(self):
+        ip_addresses = self.api.get(_DNS_SERVERS_CONFIG_PATH).get_result()
+        return [ip_address.strip() for ip_address in ip_addresses.split(',')]
+
+    def update_dns_servers(self, *ip_addresses):
+        self.api.put(_DNS_SERVERS_CONFIG_PATH, data=','.join(ip_addresses))
 
     def get_revision(self):
         return self.get_system_info('release')['system']['revision']
