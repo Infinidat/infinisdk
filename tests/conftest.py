@@ -80,22 +80,34 @@ def validate_unittest_compatibility_with_infinibox_version(system, **kwargs):
 
 _DEFAULT_REQUIRED_VERSION = Munch(kwargs={})
 
-@pytest.fixture
-def infinibox(request, infinibox_simulator):
-    user = infinibox_simulator.auth.get_current_user()
-    infinibox = InfiniBox(infinibox_simulator, auth=(user.get_username(), user.get_password()))
-    infinibox.login()
-    required_version_kwargs = getattr(request.function, 'required_version', _DEFAULT_REQUIRED_VERSION).kwargs
-    validate_unittest_compatibility_with_infinibox_version(infinibox, **required_version_kwargs)
-    return infinibox
 
-@pytest.fixture
-def infinibox_simulator(request):
+def create_infinibox_simulator(request):
     returned = InfiniboxSimulator()
     returned.api.set_propagate_exceptions(True)
     returned.activate()
     request.addfinalizer(returned.deactivate)
     return returned
+
+
+def create_infinibox(request, simulator=None):
+    if simulator is None:
+        simulator = create_infinibox_simulator(request)
+
+    user = simulator.auth.get_current_user()
+    infinibox = InfiniBox(simulator, auth=(user.get_username(), user.get_password()))
+    infinibox.login()
+    required_version_kwargs = request.node.get_closest_marker('required_version', _DEFAULT_REQUIRED_VERSION).kwargs
+    validate_unittest_compatibility_with_infinibox_version(infinibox, **required_version_kwargs)
+    return infinibox
+
+
+@pytest.fixture
+def infinibox(request, infinibox_simulator):
+    return create_infinibox(request, infinibox_simulator)
+
+@pytest.fixture
+def infinibox_simulator(request):
+    return create_infinibox_simulator(request)
 
 @pytest.fixture
 def cluster(infinibox):
@@ -271,7 +283,7 @@ def mocked_ecosystem(request):
 @pytest.fixture
 def secondary_infinibox(request):
     # pylint: disable=unused-variable
-    returned = infinibox(request=request, infinibox_simulator=infinibox_simulator(request=request))
+    returned = create_infinibox(request)
     unused = returned.get_simulator().hosts.create('unused_host') # make sure ids are not aligned
     return returned
 

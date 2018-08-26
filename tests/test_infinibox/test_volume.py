@@ -34,7 +34,7 @@ def test_has_children(volume):
 
 def test_write_protection(volume):
     assert not volume.is_write_protected()
-    volume.update_write_protected(True)
+    volume.enable_write_protection()
     assert volume.is_write_protected()
 
 

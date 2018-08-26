@@ -26,7 +26,7 @@ def _change_cached_context(component, field_name, new_value):
 def test_component_id_field(component_collection, component):
     assert isinstance(component.id, str)
     assert component.get_field('uid') == component.id
-    assert component_collection.get_by_id(component.id) is component
+    assert component_collection.get_by_uid(component.id) is component
 
 
 def _basic_check_for_component(infinibox, component_type, parent_type, blacklist=None):
@@ -209,15 +209,14 @@ def test_local_drive_component(infinibox):
 def test_get_all_first_drives(infinibox):
     drives_list = infinibox.components.drives.find(index=1)
     enclosures = infinibox.components.enclosures
-    assert len(drives_list) == len(enclosures.get_all())
+    assert len(drives_list) == enclosures.count()
     get_expected_drive_id = lambda enc: 'system:0_rack:1_enclosure:{}_drive:1'.format(enc.get_index())
-    assert set(get_expected_drive_id(enc) for enc in enclosures) == set(drive.get_id() for drive in drives_list)
+    assert {get_expected_drive_id(enc) for enc in enclosures} == {drive.get_uid() for drive in drives_list}
 
 @pytest.mark.parametrize('id_field', ['index', 'api_id'])
 def test_get_index(infinibox, id_field):
     node = infinibox.components.nodes.get(**{id_field: 3})
     assert node.get_field(id_field) == 3
-    assert node.get_id() == 'system:0_rack:1_node:3'
     assert node.get_uid() == 'system:0_rack:1_node:3'
 
 def test_get_by_id_lazy(infinibox):
@@ -226,7 +225,7 @@ def test_get_by_id_lazy(infinibox):
     with pytest.raises(NotImplementedError):
         infinibox.components.nodes.get_by_id_lazy(123456)
     node = infinibox.components.nodes.choose()
-    assert node is infinibox.components.nodes.get_by_id_lazy(node.id)
+    assert node is infinibox.components.nodes.get_by_uid(node.id)
 
 def test_refresh_nodes_fields(infinibox):
     nodes = infinibox.components.nodes.refresh_fields(['services', 'state'])
@@ -252,4 +251,4 @@ def component_collection(request, infinibox):
 
 @pytest.fixture
 def component(component_collection):
-    return list(component_collection)[0]
+    return component_collection.choose()

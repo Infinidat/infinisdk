@@ -5,8 +5,7 @@ from infinisdk.core.exceptions import (CannotGetReplicaState,
                                        InfiniSDKException, ObjectNotFound,
                                        TooManyObjectsFound, UnknownSystem)
 
-from ..conftest import secondary_infinibox as secondary_infinibox_fx
-from ..conftest import relevant_from_version
+from ..conftest import relevant_from_version, create_infinibox
 import flux
 
 SECOND = SECONDS = timedelta(seconds=1)
@@ -182,7 +181,7 @@ def test_get_remote_system(replica, secondary_infinibox):
 
 
 def test_remote_replica(request, replica, secondary_volume, secondary_infinibox):
-    third_system = secondary_infinibox_fx(request)
+    third_system = create_infinibox(request)
     replica.system.register_related_system(third_system)
     remote_replica = replica.get_remote_replica()
     assert remote_replica.get_system().get_name() == secondary_infinibox.get_name()

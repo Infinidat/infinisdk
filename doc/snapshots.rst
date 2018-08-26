@@ -57,7 +57,7 @@ Example: Deleting Snapshots by Creation Time
 
 .. code-block:: python
 
-		>>> cutoff = current_time.replace(days=-10)
+		>>> cutoff = current_time.shift(days=-10)
 		>>> for snapshot in system.volumes.find(system.volumes.fields.created_at < cutoff, parent_id=volume.id):
 		...     print("Deleting snapshot with id:", snapshot.id)
 		...     snapshot.delete()

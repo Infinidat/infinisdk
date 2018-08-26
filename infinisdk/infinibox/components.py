@@ -118,6 +118,9 @@ class InfiniBoxComponentBinder(MonomorphicBinder):
     def should_force_fetching_from_cache(self):
         return self._force_fetching_from_cache
 
+    def get_by_uid(self, uid):
+        return self.get(uid=uid)
+
     def get_by_id_lazy(self, id):  # pylint: disable=redefined-builtin
         returned = self.safe_get_by_id(id)
         if returned is None:
