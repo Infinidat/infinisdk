@@ -157,6 +157,13 @@ class InfiniBox(APITarget):
         except CacheMiss:
             return self._get_received_name_or_ip()
 
+    def update_name(self, name):
+        """
+        Update the name of the system
+        """
+        self.api.put('/api/rest/system/name/', data=name)
+        self.components.system_component.update_field_cache({'name': name})
+
     def get_serial(self, **kwargs):
         """
         Returns the serial number of the system

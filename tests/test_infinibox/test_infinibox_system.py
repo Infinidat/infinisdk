@@ -151,6 +151,13 @@ def test_get_name(infinibox):
     assert infinibox.get_name().startswith('simulator-')
 
 
+def test_update_name(infinibox):
+    new_name = 'new_system_name'
+    assert infinibox.get_name() != new_name
+    infinibox.update_name(new_name)
+    assert infinibox.get_name() == new_name
+
+
 def test_update_dns(infinibox):
     infinibox.update_dns_servers('1.1.1.1', '2.2.2.2')
     assert infinibox.get_dns_servers() == ['1.1.1.1', '2.2.2.2']
