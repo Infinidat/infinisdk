@@ -35,7 +35,7 @@ from .notification_rule import NotificationRule
 from .notification_target import NotificationTarget
 from .pool import Pool
 from .replica import Replica
-from .search_utils import get_search_query_object
+from .search_utils import get_search_query_object, safe_get_object_by_id_and_type_lazy
 from .user import User
 from .volume import Volume
 from .metadata import SystemMetadata
@@ -272,7 +272,9 @@ class InfiniBox(APITarget):
 
     def _get_v2_metadata_generator(self, **raw_filters):
         for metadata_item in LazyQuery(self, URL('metadata')).extend_url(**raw_filters):
-            metadata_item.pop('id', None)
+            metadata_item['object'] = safe_get_object_by_id_and_type_lazy(type_name=metadata_item.get('object_type'),
+                                                                          object_id=metadata_item['object_id'],
+                                                                          system=self)
             yield metadata_item
 
     def get_all_metadata(self, **raw_filters):

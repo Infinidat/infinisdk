@@ -58,5 +58,18 @@ def object_factory(system, received_item):
     return factory(system, construct_data)
 
 
+def safe_get_object_by_id_and_type_lazy(type_name, object_id, system):
+    if not type_name:
+        return None
+
+    if type_name.lower() == 'system':
+        return system
+
+    binder = system.objects.get_binder_by_type_name(_type_map.get(type_name, type_name))
+    if not binder:
+        return None
+    return binder.get_by_id_lazy(object_id)
+
+
 def get_search_query_object(system):
     return LazyQuery(system, URLObject('search'), object_factory)
