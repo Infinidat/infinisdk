@@ -60,7 +60,7 @@ def test_metadata_creation(volume):
 
 def _get_object_extras(system, obj):
     if system.compat.get_parsed_system_version() < '4.0.30':
-        return {}
+        return {'object': None}
     return {'object': obj, 'object_type': obj.get_type_name()}
 
 
