@@ -46,7 +46,7 @@ def _install_hooks():
     gossip.define(_SDK_HOOK('pre_data_restore'), tags=['infinibox', 'volume', 'filesystem'],
                   arg_names=('source', 'target'))
     gossip.define(_SDK_HOOK('post_data_restore'), tags=['infinibox', 'volume', 'filesystem'],
-                  arg_names=('source', 'target'))
+                  arg_names=('source', 'target', 'require_real_data', 'reason'))
     gossip.define(_SDK_HOOK('data_restore_failure'), tags=['infinibox', 'volume', 'filesystem'],
                   arg_names=('source', 'target', 'exc'))
 

@@ -283,7 +283,9 @@ class Dataset(InfiniBoxObject):
 
     def trigger_after_restore(self, source):
         hook_tags = self.get_tags_for_object_operations(self.system)
-        gossip.trigger_with_tags('infinidat.sdk.post_data_restore', {'source': source, 'target': self}, tags=hook_tags)
+        gossip.trigger_with_tags('infinidat.sdk.post_data_restore',
+                                 {'source': source, 'target': self, 'require_real_data': False, 'reason': None},
+                                 tags=hook_tags)
         gossip.trigger_with_tags('infinidat.sdk.post_object_restore', {'source': source, 'target': self},
                                  tags=hook_tags)
 
