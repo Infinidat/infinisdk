@@ -37,7 +37,7 @@ def _install_hooks():
     gossip.define(_SDK_HOOK('post_treeq_creation'), tags=['infinibox', 'treeq'],
                   arg_names=('fields', 'system', 'filesystem', 'treeq'))
     gossip.define(_SDK_HOOK('treeq_creation_failure'), tags=['infinibox', 'treeq'],
-                  arg_names=('fields', 'system', 'filesystem'))
+                  arg_names=('fields', 'system', 'filesystem', 'exception'))
 
     gossip.define(_SDK_HOOK("begin_fork"), tags=['infinibox', 'volume', 'filesystem'], arg_names=('obj',))
     gossip.define(_SDK_HOOK("cancel_fork"), tags=['infinibox', 'volume', 'filesystem'], arg_names=('obj',))
