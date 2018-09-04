@@ -151,6 +151,7 @@ def test_get_name(infinibox):
     assert infinibox.get_name().startswith('simulator-')
 
 
+@relevant_from_version('4.30')
 def test_update_name(infinibox):
     new_name = 'new_system_name'
     assert infinibox.get_name() != new_name
