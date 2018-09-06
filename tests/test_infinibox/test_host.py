@@ -41,17 +41,17 @@ def test_fc_port_operations(host):
     address1 = "00:01:02:03:04:05:06:07"
     address2 = "07:06:05:04:03:02:01:00"
 
-    assert host.get_fc_ports() == []
-    host.add_fc_port(address1)
-    host.add_fc_port(address2)
+    assert host.get_ports() == []
+    host.add_port(address1)
+    host.add_port(address2)
 
-    assert sorted([address1, address2]) == sorted(host.get_fc_ports())
+    assert sorted([address1, address2]) == sorted(host.get_ports())
 
-    host.remove_fc_port(address1)
-    assert [address2] == host.get_fc_ports()
+    host.remove_port(address1)
+    assert [address2] == host.get_ports()
 
-    host.remove_fc_port(address2)
-    assert [] == host.get_fc_ports()
+    host.remove_port(address2)
+    assert host.get_ports() == []
 
 
 def test_get_host_by_initiator_address(infinibox, host, registered_port_address):
@@ -88,5 +88,5 @@ def test_get_host_initiator_without_auth(host, registered_port_address, backup_c
 @pytest.fixture
 def registered_port_address(host):
     returned = "00:01:02:03:04:05:06:07"
-    host.add_fc_port(returned)
+    host.add_port(returned)
     return returned

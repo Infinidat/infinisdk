@@ -8,6 +8,7 @@ import pytest
 from ..conftest import relevant_from_version
 from infinibox_sysdefs.defs import latest as defs
 from infinisdk._compat import iteritems, string_types
+from infinisdk.core.api import OMIT
 from infinisdk.core.exceptions import (APITransportFailure,
                                        SystemNotFoundException)
 from infinisdk.infinibox import InfiniBox
@@ -150,6 +151,21 @@ def test_get_name(infinibox):
     assert infinibox.get_name().startswith('simulator-')
 
 
+@relevant_from_version('4.30')
+def test_update_name(infinibox):
+    new_name = 'new_system_name'
+    assert infinibox.get_name() != new_name
+    infinibox.update_name(new_name)
+    assert infinibox.get_name() == new_name
+
+
+def test_update_dns(infinibox):
+    infinibox.update_dns_servers('1.1.1.1', '2.2.2.2')
+    assert infinibox.get_dns_servers() == ['1.1.1.1', '2.2.2.2']
+    infinibox.update_dns_servers('3.3.3.3')
+    assert infinibox.get_dns_servers() == ['3.3.3.3']
+
+
 @pytest.mark.parametrize('from_cache', [True, False])
 @pytest.mark.parametrize('invalidate_cache', [True, False])
 def test_get_field_raw_value(volume, from_cache, invalidate_cache):
@@ -166,7 +182,6 @@ def test_get_field_raw_value(volume, from_cache, invalidate_cache):
         volume.get_size(from_cache=from_cache, raw_value=True), int)
 
 
-@relevant_from_version('2.0')
 def test_current_user_proxy(infinibox):
     assert isinstance(infinibox.current_user.get_owned_pools().to_list(), list)
 
@@ -213,3 +228,15 @@ def test_no_default_values_for_optional_fields(type_binder):
             broken_fields.append(field.name)
     type_name = type_binder.object_type.get_type_name().replace('_', ' ').title()
     assert not broken_fields, "{}'s broken fields:\n{}".format(type_name, '\n'.join(broken_fields))
+
+
+@pytest.mark.parametrize('with_query', [True, False])
+@pytest.mark.parametrize('type_name', ['volume', OMIT])
+def test_system_search(infinibox, volume, with_query, type_name):
+    search_params = {'type_name': type_name}
+
+    if with_query:
+        search_params['query'] = volume.get_name()
+
+    returned_query = infinibox.search(**search_params)
+    assert volume in (system_object for system_object in returned_query)

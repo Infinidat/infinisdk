@@ -5,32 +5,27 @@ from infinisdk.core.exceptions import (CannotGetReplicaState,
                                        InfiniSDKException, ObjectNotFound,
                                        TooManyObjectsFound, UnknownSystem)
 
-from ..conftest import secondary_infinibox as secondary_infinibox_fx
-from ..conftest import relevant_from_version
+from ..conftest import relevant_from_version, create_infinibox
 import flux
 
 SECOND = SECONDS = timedelta(seconds=1)
 
 
-@relevant_from_version('2.0')
 def test_replica_creation(replica):  # pylint: disable=unused-argument
     pass
 
 
-@relevant_from_version('2.0')
 def test_replica_sync_interval(replica):
     interval = 30 * SECONDS
     replica.update_sync_interval(interval)
     assert interval == replica.get_sync_interval()
 
 
-@relevant_from_version('2.0')
 def test_replica_zero_sync_interval(replica):
     replica.update_sync_interval(0)
     assert replica.get_sync_interval() == timedelta(seconds=0)
 
 
-@relevant_from_version('2.0')
 def test_create_replica_with_link_name(infinibox, secondary_infinibox, link, replica_creation_kwargs):
     infinibox.register_related_system(secondary_infinibox)
     secondary_infinibox.register_related_system(infinibox)
@@ -39,7 +34,7 @@ def test_create_replica_with_link_name(infinibox, secondary_infinibox, link, rep
 
     assert replica.get_link() == link
 
-@relevant_from_version('2.0')
+
 def test_get_remote_entity_pairs(replica, remote_replica):
     local = replica.get_field('entity_pairs')
     remote = remote_replica.get_field('entity_pairs')
@@ -47,20 +42,17 @@ def test_get_remote_entity_pairs(replica, remote_replica):
     assert remote == replica.get_remote_entity_pairs()
 
 
-@relevant_from_version('2.0')
 def test_replica_get_fields(replica):
     fields = replica.get_fields()
     assert isinstance(fields, dict)
 
 
-@relevant_from_version('2.0')
 @pytest.mark.parametrize('method_name', ['get_local_volume', 'get_local_entity'])
 def test_replica_get_local_entity(replica, volume, method_name):
     method = getattr(replica, method_name)
     assert method() == volume
 
 
-@relevant_from_version('2.0')
 @pytest.mark.parametrize('method_name', ['get_local_volume', 'get_local_entity'])
 def test_replica_get_local_entity_more_than_one(replica, method_name):
     method = getattr(replica, method_name)
@@ -69,7 +61,6 @@ def test_replica_get_local_entity_more_than_one(replica, method_name):
         method()
 
 
-@relevant_from_version('2.0')
 @pytest.mark.parametrize('force_params', [True, False])
 @pytest.mark.parametrize('retain_staging_area', [True, False])
 def test_replica_deletion(replica, retain_staging_area, force_params):
@@ -87,7 +78,6 @@ def test_replica_deletion(replica, retain_staging_area, force_params):
         assert volume.get_children()
 
 
-@relevant_from_version('2.2')
 def test_replica_deletion_unknown_system(replica, forge):
     def raise_unknown_system(safe=False):
         if safe:
@@ -97,14 +87,14 @@ def test_replica_deletion_unknown_system(replica, forge):
     replica.delete()
     assert not replica.is_in_system()
 
-@relevant_from_version('2.0')
+
 @pytest.mark.parametrize('retain_staging_area', [True, False])
 def test_replica_deletion_remote_first(replica, retain_staging_area):
     replica.get_remote_replica().delete(force_on_target=True)
     assert replica.is_in_system()
     replica.delete(retain_staging_area=retain_staging_area)
 
-@relevant_from_version('2.0')
+
 @pytest.mark.parametrize('create_remote_volume', [True, False])
 def test_replicate_volume_shortcut(infinibox, secondary_infinibox, link, create_remote_volume, volume):
     remote_pool = secondary_infinibox.pools.create()
@@ -124,7 +114,6 @@ def test_replicate_volume_shortcut(infinibox, secondary_infinibox, link, create_
         assert remote_replica.has_local_entity(remote_volume)
 
 
-@relevant_from_version('2.0')
 def test_replica_change_role(synced_replica):
     synced_replica.suspend()
     assert synced_replica.is_source()
@@ -143,36 +132,30 @@ def test_replica_user_suspended(replica):
     assert not replica.is_user_suspended()
 
 
-@relevant_from_version('2.0')
 def test_replica_change_role_with_entity_pairs(replica):
     pytest.skip('wait for sync before changing role')
     replica.get_remote_replica().change_role(entity_pairs=replica.get_entity_pairs())
 
 
-@relevant_from_version('2.0')
 def test_replica_has_local_entity(infinibox, replica, volume):
     assert replica.has_local_entity(volume)
     assert not replica.has_local_entity(infinibox.pools.create())
 
 
-@relevant_from_version('2.0')
 def test_volume_get_replicas(replica, volume):
     assert volume.get_replicas() == [replica]
 
 
-@relevant_from_version('2.0')
 def test_volume_get_replica_single(volume, replica):
     assert volume.get_replica() == replica
 
 
-@relevant_from_version('2.0')
 def test_is_rmr_source(volume, replica):  # pylint: disable=unused-argument
     volume.invalidate_cache()
     assert not volume.is_rmr_target()
     assert volume.is_rmr_source()
 
 
-@relevant_from_version('2.0')
 def test_is_replicated(volume, replica):
     volume.invalidate_cache()
     assert volume.is_replicated()
@@ -181,28 +164,24 @@ def test_is_replicated(volume, replica):
     assert not volume.is_replicated()
 
 
-@relevant_from_version('2.0')
 def test_regtulard_volume_is_not_rmr_source_target(volume):
     assert not volume.is_rmr_source()
     assert not volume.is_rmr_target()
 
 
-@relevant_from_version('2.0')
 def test_is_rmr_target(volume, replica, secondary_volume):  # pylint: disable=unused-argument
     secondary_volume.invalidate_cache()
     assert secondary_volume.is_rmr_target()
     assert not secondary_volume.is_rmr_source()
 
 
-@relevant_from_version('2.0')
 def test_get_remote_system(replica, secondary_infinibox):
     assert replica.get_remote_system() == secondary_infinibox
     assert replica.get_remote_replica().get_remote_system() == replica.system
 
 
-@relevant_from_version('2.0')
 def test_remote_replica(request, replica, secondary_volume, secondary_infinibox):
-    third_system = secondary_infinibox_fx(request)
+    third_system = create_infinibox(request)
     replica.system.register_related_system(third_system)
     remote_replica = replica.get_remote_replica()
     assert remote_replica.get_system().get_name() == secondary_infinibox.get_name()
@@ -215,7 +194,6 @@ def test_remote_replica(request, replica, secondary_volume, secondary_infinibox)
         remote_replica.is_active()
 
 
-@relevant_from_version('2.0')
 def test_remote_replica_without_remote_system(replica, secondary_infinibox):  # pylint: disable=unused-argument
     remote_replica = replica.get_remote_replica()
     replica.system.unregister_related_system(remote_replica.system)  # pylint: disable=protected-access
@@ -231,14 +209,11 @@ def test_remote_replica_without_remote_system(replica, secondary_infinibox):  # 
         remote_replica.is_suspended()
 
 
-
-@relevant_from_version('2.0')
 def test_volume_get_replica_no_replicas(volume):
     with pytest.raises(ObjectNotFound):
         volume.get_replica()
 
 
-@relevant_from_version('2.0')
 def test_replica_suspend_resume(replica):
     assert not replica.is_suspended()
     replica.suspend()
@@ -246,7 +221,7 @@ def test_replica_suspend_resume(replica):
     replica.resume()
     assert not replica.is_suspended()
 
-@relevant_from_version('2.0')
+
 def test_replica_get_remote_entity(replica):
     local = replica.get_local_entity()
     remote = replica.get_remote_entity()
@@ -254,6 +229,7 @@ def test_replica_get_remote_entity(replica):
     assert remote.system != replica.system
     assert local != remote
     assert local.get_remote_entity() == remote
+
 
 def test_get_remote_entity_no_replica(data_entity):
     assert data_entity.get_remote_entity() is None

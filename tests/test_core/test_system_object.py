@@ -5,7 +5,6 @@ from infinisdk.core.exceptions import (APICommandFailed,
                                        AttributeAlreadyExists, CacheMiss,
                                        MissingFields)
 
-from ..conftest import relevant_from_version
 
 # pylint: disable=misplaced-comparison-constant, unused-argument
 
@@ -206,7 +205,6 @@ def test__equality(system):
     assert NotImplemented == diff_type1.__eq__(diff_type2)
 
 
-@relevant_from_version('2.2')
 def test_get_fields_without_field_names(infinibox):
     user = infinibox.users.choose()
     fields = user.get_fields()
@@ -224,11 +222,11 @@ def test_get_url_path(system, user):
     assert system.users.get_url_path() == user.get_url_path(system)
 
 
-def test_update_field_updates_its_cache(system, user, user_name_field):
+def test_update_field_updates_its_cache(user):
     new_name = "testing_update_field_caching"
-    assert user.get_field(user_name_field, from_cache=True) != new_name
-    user.update_field(user_name_field, new_name)
-    assert user.get_field(user_name_field, from_cache=True) == new_name
+    assert user.get_name(from_cache=True) != new_name
+    user.update_name(new_name)
+    assert user.get_name(from_cache=True) == new_name
 
 
 def test_update_field_does_not_update_other_fields_cache(user):

@@ -79,7 +79,7 @@ class APICommandFailed(APICommandException):
     def raise_from_response(cls, response):
         error = response.get_error() or {}
         if error.get('is_remote', False):
-            cls = RemoteAPICommandFailed
+            cls = RemoteAPICommandFailed  # pylint: disable=self-cls-assignment
         raise cls(response)
 
     def _parse_reasons(self, error):

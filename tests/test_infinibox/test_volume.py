@@ -7,9 +7,9 @@ from infinisdk.infinibox.volume import Volume
 from infinisdk.infinibox.pool import Pool
 from infinisdk.infinibox.scsi_serial import SCSISerial
 
-from ..conftest import relevant_from_version, create_volume
+from ..conftest import create_volume
 
-@relevant_from_version('2.2')
+
 def test_is_in_cons_group(volume, cg):
     assert not volume.is_in_cons_group()
     cg.add_member(volume)
@@ -34,7 +34,7 @@ def test_has_children(volume):
 
 def test_write_protection(volume):
     assert not volume.is_write_protected()
-    volume.update_write_protected(True)
+    volume.enable_write_protection()
     assert volume.is_write_protected()
 
 
@@ -81,8 +81,6 @@ def test_delete_delted_object(volume):
 
 @pytest.mark.parametrize('with_capacity', [True, False])
 def test_move_volume(infinibox, with_capacity):
-    if with_capacity and int(infinibox.compat.get_version_major()) < 2:
-        pytest.skip('infinisim does not support with_capacity for this version')
     oldpool = infinibox.pools.create(virtual_capacity=10*TB, physical_capacity=10*TB)
     volume = infinibox.volumes.create(pool=oldpool, size=TB)
     old_virt_capacity = oldpool.get_virtual_capacity()

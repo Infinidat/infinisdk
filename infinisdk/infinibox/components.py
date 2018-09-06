@@ -77,11 +77,11 @@ class InfiniBoxSystemComponents(SystemComponentsBinder):
     def get_rack_1(self):
         return self._rack_1
 
-    def find(self, component_type=None, *predicates, **kw): # pylint: disable=arguments-differ
-        # component_type is the name of the component
-        if component_type is None:
+    def find(self, *predicates, **kw):
+        component_name = kw.pop('component_type', None)
+        if component_name is None:
             return InfiniBoxGenericComponentQuery(self.system, *predicates, **kw)
-        component_type = self._COMPONENTS_BY_TYPE_NAME[component_type]
+        component_type = self._COMPONENTS_BY_TYPE_NAME[component_name]  # pylint: disable=unsubscriptable-object
         component_collection = self.system.components[component_type]
         return component_collection.find(*predicates, **kw)
 
@@ -117,6 +117,9 @@ class InfiniBoxComponentBinder(MonomorphicBinder):
 
     def should_force_fetching_from_cache(self):
         return self._force_fetching_from_cache
+
+    def get_by_uid(self, uid):
+        return self.get(uid=uid)
 
     def get_by_id_lazy(self, id):  # pylint: disable=redefined-builtin
         returned = self.safe_get_by_id(id)
@@ -537,6 +540,14 @@ class FcPort(InfiniBoxSystemComponent):
         if self.is_soft_port():
             return self.get_soft_target_addresses()
         return set([self.get_wwpn()])
+
+    def enable(self, role):
+        self.system.api.post(self.get_this_url_path().add_path('enable'), data={'role': role})
+        self.invalidate_cache('enabled')
+
+    def disable(self):
+        self.system.api.post(self.get_this_url_path().add_path('disable'), data={})
+        self.invalidate_cache('enabled')
 
 
 @InfiniBoxSystemComponents.install_component_type

@@ -1,6 +1,8 @@
 import pytest
 import logbook
 import random
+import vintage
+
 from infinisdk import Q
 from infinisdk.core.config import config
 from infinisdk.core.exceptions import ObjectNotFound
@@ -96,7 +98,7 @@ def test_rack_refresh(infinibox):
     assert comp_no == 2
     assert not any(isinstance(comp, (Node, Enclosure)) for comp in components._components_by_id)
 
-    nodes_no = len(components.nodes)
+    nodes_no = components.nodes.count()
     comp_with_nodes_no = len(components._components_by_id)
     assert comp_no + nodes_no < comp_with_nodes_no
     assert not any(isinstance(comp, Enclosure) for comp in components._components_by_id)
@@ -136,7 +138,8 @@ def test_system_component_find_no_type(infinibox):
 def test_component_not_found(infinibox, id_field):
     rack_id = infinibox.components.get_rack_1().id
     with pytest.raises(ObjectNotFound) as caught:
-        infinibox.components.fc_ports.get(Q.parent_id == rack_id, **{id_field: 'fake_id'})
+        with vintage.get_no_deprecations_context():
+            infinibox.components.fc_ports.get(Q.parent_id == rack_id, **{id_field: 'fake_id'})
     exc_msg = str(caught.value)
     assert '(uid=fake_id)' in exc_msg
     assert '(parent_id={})'.format(rack_id) in exc_msg
@@ -144,4 +147,4 @@ def test_component_not_found(infinibox, id_field):
 
 def test_component_sample(infinibox):
     nodes = infinibox.components.nodes.sample(Q.index != 1, sample_count=2)
-    assert set(node.get_index() for node in nodes) == set([2, 3])
+    assert {node.get_index() for node in nodes} == {2, 3}

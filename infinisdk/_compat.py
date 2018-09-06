@@ -20,6 +20,7 @@ else:
 if PY2:
 
     import httplib
+    import collections as abc_module
 
     string_types = (basestring, )
     integer_types = (int, long)
@@ -55,6 +56,7 @@ else:
 
     import functools
     import http.client as httplib
+    import collections.abc as abc_module
 
     string_types = (str, bytes)
     integer_types = (int,)

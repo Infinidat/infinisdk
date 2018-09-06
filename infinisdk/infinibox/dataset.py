@@ -170,10 +170,6 @@ class Dataset(InfiniBoxObject):
         assert isinstance(delta, Capacity), "Delta must be an instance of Capacity"
         return self.update_field('size', self.get_size() + delta)
 
-    @deprecated(message="Use create_snapshot instead", since='95.0.1')
-    def create_child(self, name=None, write_protected=None, ssd_enabled=None):
-        return self._create_child(name, write_protected, ssd_enabled)
-
     def _create_child(self, name=None, write_protected=None, ssd_enabled=None, lock_expires_at=None):
         hook_tags = self.get_tags_for_object_operations(self.system)
         gossip.trigger_with_tags('infinidat.sdk.pre_entity_child_creation',
@@ -287,7 +283,9 @@ class Dataset(InfiniBoxObject):
 
     def trigger_after_restore(self, source):
         hook_tags = self.get_tags_for_object_operations(self.system)
-        gossip.trigger_with_tags('infinidat.sdk.post_data_restore', {'source': source, 'target': self}, tags=hook_tags)
+        gossip.trigger_with_tags('infinidat.sdk.post_data_restore',
+                                 {'source': source, 'target': self, 'require_real_data': False, 'reason': None},
+                                 tags=hook_tags)
         gossip.trigger_with_tags('infinidat.sdk.post_object_restore', {'source': source, 'target': self},
                                  tags=hook_tags)
 

@@ -10,7 +10,7 @@ Nodes
 
 .. code-block:: python
 
-		>>> print('System has {} nodes'.format(len(system.components.nodes)))
+		>>> print('System has {} nodes'.format(system.components.nodes.count()))
 		System has 3 nodes
 
 Drives
@@ -49,6 +49,23 @@ For each Node, you can use the :meth:`.Node.get_fc_ports` method to obtain the F
 		...     for fc_port in node.get_fc_ports():
 		...         if not fc_port.is_link_up():
 		...             print('Port', fc_port.get_field('wwpn'), 'of', node, 'is down!')
+
+
+Use :meth:`fc_port.disable` method to disable an FC port
+
+.. code-block:: python
+
+        >>> fc_port.disable()
+        >>> fc_port.is_enabled()
+        False
+
+Use :meth:`fc_port.enable` method to enable an FC port with a given role
+
+.. code-block:: python
+
+        >>> fc_port.enable(role='HARD_PORT')
+        >>> fc_port.is_enabled()
+        True
 
 
 Services

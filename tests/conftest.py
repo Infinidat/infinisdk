@@ -80,22 +80,34 @@ def validate_unittest_compatibility_with_infinibox_version(system, **kwargs):
 
 _DEFAULT_REQUIRED_VERSION = Munch(kwargs={})
 
-@pytest.fixture
-def infinibox(request, infinibox_simulator):
-    user = infinibox_simulator.auth.get_current_user()
-    infinibox = InfiniBox(infinibox_simulator, auth=(user.get_username(), user.get_password()))
-    infinibox.login()
-    required_version_kwargs = getattr(request.function, 'required_version', _DEFAULT_REQUIRED_VERSION).kwargs
-    validate_unittest_compatibility_with_infinibox_version(infinibox, **required_version_kwargs)
-    return infinibox
 
-@pytest.fixture
-def infinibox_simulator(request):
+def create_infinibox_simulator(request):
     returned = InfiniboxSimulator()
     returned.api.set_propagate_exceptions(True)
     returned.activate()
     request.addfinalizer(returned.deactivate)
     return returned
+
+
+def create_infinibox(request, simulator=None):
+    if simulator is None:
+        simulator = create_infinibox_simulator(request)
+
+    user = simulator.auth.get_current_user()
+    infinibox = InfiniBox(simulator, auth=(user.get_username(), user.get_password()))
+    infinibox.login()
+    required_version_kwargs = request.node.get_closest_marker('required_version', _DEFAULT_REQUIRED_VERSION).kwargs
+    validate_unittest_compatibility_with_infinibox_version(infinibox, **required_version_kwargs)
+    return infinibox
+
+
+@pytest.fixture
+def infinibox(request, infinibox_simulator):
+    return create_infinibox(request, infinibox_simulator)
+
+@pytest.fixture
+def infinibox_simulator(request):
+    return create_infinibox_simulator(request)
 
 @pytest.fixture
 def cluster(infinibox):
@@ -124,13 +136,6 @@ def mapping_object(host, cluster, mapping_object_type):
 @pytest.fixture
 def user(infinibox):
     return infinibox.users.create()
-
-@pytest.fixture
-def user_name_field(infinibox):
-    # InfiniSim workaround: There were a bug in user's name that was fix in v2.0 but wasn't backported...
-    if int(infinibox.compat.get_version_major()) >= 2:
-        return 'name'
-    return 'username'
 
 
 def create_volume(infinibox, **kwargs):
@@ -203,13 +208,10 @@ def export(infinibox, filesystem):
 def data_entity_type(request):
     return request.param
 
+
 @pytest.fixture
-def data_entity(infinibox, volume, filesystem, data_entity_type):
-    if data_entity_type == 'volume':
-        return volume
-    if infinibox.compat.get_version_as_float() < 2.2:
-        pytest.skip('System does not have NAS')
-    return filesystem
+def data_entity(volume, filesystem, data_entity_type):
+    return volume if data_entity_type == 'volume' else filesystem
 
 
 def create_network_interface(infinibox, **kwargs):
@@ -281,7 +283,7 @@ def mocked_ecosystem(request):
 @pytest.fixture
 def secondary_infinibox(request):
     # pylint: disable=unused-variable
-    returned = infinibox(request=request, infinibox_simulator=infinibox_simulator(request=request))
+    returned = create_infinibox(request)
     unused = returned.get_simulator().hosts.create('unused_host') # make sure ids are not aligned
     return returned
 
@@ -291,14 +293,7 @@ def type_binder(request, infinibox):
     object_type = request.param
     if not object_type.is_supported(infinibox):
         pytest.skip('not supported')
-    # Workaround: LdapConfig exist on the Infinibox for 1.5/1.7 but not on infinisim
-    elif object_type.get_type_name() == 'ldapconfig' and \
-        infinibox.compat.get_version_major() == '1':
-        pytest.skip('not supported by infinisim')
     elif object_type.get_type_name() == 'fc_soft_target' and \
         infinibox.compat.get_version_major() < '3':
-        pytest.skip('not supported by infinisim')
-    elif object_type.get_type_name() == 'fc_switch' and \
-        infinibox.compat.get_version_as_float() < 2.2:
         pytest.skip('not supported by infinisim')
     return infinibox.objects[request.param]

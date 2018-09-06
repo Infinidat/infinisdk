@@ -217,7 +217,7 @@ def test_data_restore(data_entity):
         callbacks.append("pre_restore_{}_from_{}".format(target.id, source.id))
 
     @gossip.register('infinidat.sdk.post_data_restore', token=hook_ident)
-    def post_restore(source, target):  # pylint: disable=unused-variable
+    def post_restore(source, target, **_):  # pylint: disable=unused-variable
         callbacks.append("post_restore_{}_from_{}".format(target.id, source.id))
 
     @gossip.register('infinidat.sdk.data_restore_failure', token=hook_ident)
@@ -316,7 +316,6 @@ def test_create_multiple_datasets(data_entity, name):
         assert vol.is_master()
 
 
-@relevant_from_version('2.2')
 def test_datasets_queries(infinibox, volume, filesystem):
     dataset_list = [volume, volume.create_snapshot(), filesystem, filesystem.create_snapshot()]
     assert set(infinibox.datasets.to_list()) == set(dataset_list)

@@ -12,7 +12,7 @@ py27:
   script:
     - pip install -U --pre -i https://pypi.infinidat.com/simple -e .[testing]
     - pylint --rcfile .pylintrc -j $(nproc) infinisdk scripts tests
-    - pytest
+    - pytest -ra -W error::DeprecationWarning
 
 py35:
   image: python:3.5
@@ -23,7 +23,7 @@ py35:
   script:
     - pip install -U --pre -i https://pypi.infinidat.com/simple -e .[testing]
     - pylint --rcfile .pylintrc -j $(nproc) infinisdk scripts tests
-    - pytest
+    - pytest -ra -W error::DeprecationWarning
 
 py36:
   image: python:3.6
@@ -34,7 +34,18 @@ py36:
   script:
     - pip install -U --pre -i https://pypi.infinidat.com/simple -e .[testing]
     - pylint --rcfile .pylintrc -j $(nproc) infinisdk scripts tests
-    - pytest
+    - pytest -ra -W error::DeprecationWarning
+
+py37:
+  image: python:3.7
+  tags:
+    - infradev
+  except:
+    - /^customer-.*$/
+  script:
+    - pip install -U --pre -i https://pypi.infinidat.com/simple -e .[testing]
+    - pylint --rcfile .pylintrc -j $(nproc) infinisdk scripts tests
+    - pytest -ra -W error::DeprecationWarning
 
 pypi:
   image: python

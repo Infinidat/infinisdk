@@ -1,5 +1,4 @@
-from collections import Iterable
-from .._compat import string_types
+from .._compat import string_types, abc_module
 
 _operator_name_to_sign_str = {
     "eq": '=',
@@ -8,8 +7,6 @@ _operator_name_to_sign_str = {
     "ge": '>=',
     "le": '<=',
     "ne": '!='}
-
-
 
 
 class FieldFilter(object):
@@ -21,7 +18,7 @@ class FieldFilter(object):
         self.value = value
 
     def _translate(self, value, system):
-        if isinstance(self.value, Iterable) and not isinstance(self.value, string_types):
+        if isinstance(self.value, abc_module.Iterable) and not isinstance(self.value, string_types):
             value = "({})".format(",".join(str(self._translate_single_value(val, system)) for val in self.value))
         else:
             value = self._translate_single_value(value, system)

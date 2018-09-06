@@ -50,7 +50,7 @@ class InfiniBoxComponentQuery(ComponentQueryBase):
         self.object_type = object_type
         self.sort_criteria = tuple()
         self._force_fetch = bool(self.predicates) or \
-            any(self.object_type.fields.get_or_fabricate(field_name).cached != True for field_name in self.kw)
+            any(self.object_type.fields.get_or_fabricate(field_name).cached is not True for field_name in self.kw)
 
 
     def _get_items(self):

@@ -16,7 +16,6 @@ def test_get_nonexisting_metadata_default(volume):
     value = object()
     assert volume.get_metadata_value('key', value) is value
 
-@relevant_from_version('2.0')
 def test_metadata_paging(infinibox, volume, forge):
     page_size = 3
     infinibox.get_simulator().api.set_default_page_size(page_size)
@@ -59,18 +58,37 @@ def test_metadata_creation(volume):
     assert len(volume.get_all_metadata()) == 0
 
 
+def _get_object_extras(system, obj):
+    if system.compat.get_parsed_system_version() < '4.0.30':
+        return {'object': None}
+    return {'object': obj, 'object_type': obj.get_type_name()}
+
+
+def _remove_id_keys(info_list):
+    for info in info_list:
+        info.pop('id')
+
 def test_get_all_metadata(infinibox, volume, pool):
     def _metadata_cmp(d_1, d_2):
         return cmp(d_1['object_id'], d_2['object_id']) or cmp(d_1['key'], d_2['key'])
     pool.set_metadata_from_dict({'b': 'c', 'd': 'd'})
     volume.set_metadata_from_dict({'a': 'a', 'b': 'b'})
     expected = [
-        {'object_id': pool.id, 'key': 'b', 'value': 'c'},
-        {'object_id': pool.id, 'key': 'd', 'value': 'd'},
-        {'object_id': volume.id, 'key': 'a', 'value': 'a'},
-        {'object_id': volume.id, 'key': 'b', 'value': 'b'},
+        dict(object_id=pool.id, key='b', value='c', **_get_object_extras(infinibox, pool)),
+        dict(object_id=pool.id, key='d', value='d', **_get_object_extras(infinibox, pool)),
+        dict(object_id=volume.id, key='a', value='a', **_get_object_extras(infinibox, volume)),
+        dict(object_id=volume.id, key='b', value='b', **_get_object_extras(infinibox, volume)),
         ]
     actual = list(infinibox.get_all_metadata())
+    _remove_id_keys(actual)
+    assert sorted(expected, cmp=_metadata_cmp) == sorted(actual, cmp=_metadata_cmp)
+
+    expected = [
+        dict(object_id=pool.id, key='b', value='c', **_get_object_extras(infinibox, pool)),
+        dict(object_id=volume.id, key='b', value='b', **_get_object_extras(infinibox, volume)),
+    ]
+    actual = list(infinibox.get_all_metadata(key='b'))
+    _remove_id_keys(actual)
     assert sorted(expected, cmp=_metadata_cmp) == sorted(actual, cmp=_metadata_cmp)
 
 
