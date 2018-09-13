@@ -270,10 +270,6 @@ class Dataset(InfiniBoxObject):
         gossip.trigger_with_tags('infinidat.sdk.pre_object_restore', {'source': source, 'target': self}, tags=hook_tags)
         gossip.trigger_with_tags('infinidat.sdk.pre_data_restore', {'source': source, 'target': self}, tags=hook_tags)
 
-    @deprecated("Use trigger_restore_failure() instead", since='78.0')
-    def trigger_data_restore_failure(self, source, e):
-        self.trigger_data_restore_failure(source, e)
-
     def trigger_restore_failure(self, source, e):
         hook_tags = self.get_tags_for_object_operations(self.system)
         gossip.trigger_with_tags('infinidat.sdk.data_restore_failure', {'source': source, 'target': self, 'exc': e},

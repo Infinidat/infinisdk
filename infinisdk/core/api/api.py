@@ -470,10 +470,6 @@ class API(object):
         finally:
             self._no_reponse_logs -= 1
 
-    @deprecated(message="Use get_no_response_logs_context instead", since='46.0')
-    def no_response_logs_context(self):
-        return self.get_no_response_logs_context()
-
     def add_auto_retry(self, retry_predicate, max_retries=1, sleep_seconds=None):
         if sleep_seconds is None: # backwards compatibility
             sleep_seconds = config.root.defaults.retry_sleep_seconds
