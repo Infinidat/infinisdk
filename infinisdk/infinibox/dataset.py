@@ -138,7 +138,7 @@ class Dataset(InfiniBoxObject):
     def refresh_snapshot(self, force_if_replicated_on_target=OMIT):
         """Refresh a snapshot with the most recent data from the parent
         :param force_if_replicated_on_target: (Only required on some InfiniBox versions) allows the refresh operation
-                                                to occur on a dataset that is currently a replication target.
+        to occur on a dataset that is currently a replication target.
         """
         parent = self.get_parent()
         assert parent, "Cannot refresh_snapshot on master volume"
