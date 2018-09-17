@@ -314,6 +314,8 @@ class Dataset(InfiniBoxObject):
         return self.get_field("created_at", from_cache=True)
 
     def calculate_reclaimable_space(self):
+        """Returns the space to be reclaimed if the dataset would be deleted according to delete simulation api
+        """
         url = URL(self.get_url_path(self.system)).add_path('delete_simulation')
         res = self.system.api.post(url, data=dict(entities=[self.id]))
         return res.get_result()['space_reclaimable'] * byte
