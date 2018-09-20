@@ -206,6 +206,7 @@ class ConsGroup(InfiniBoxObject):
 
     def remove_member(self, member, retain_staging_area=False, create_replica=False, replica_name=OMIT,
                       force_if_no_remote_credentials=False, force_if_remote_error=False, force_on_target=False):
+        """Removes specified member from this cg"""
 
         path = self._get_members_url().add_path(str(member.id))
 

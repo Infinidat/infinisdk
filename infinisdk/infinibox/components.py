@@ -542,10 +542,12 @@ class FcPort(InfiniBoxSystemComponent):
         return set([self.get_wwpn()])
 
     def enable(self, role):
+        """Enables the FC port with the specified role (SOFT_PORT/HARD_PORT)"""
         self.system.api.post(self.get_this_url_path().add_path('enable'), data={'role': role})
         self.invalidate_cache('enabled')
 
     def disable(self):
+        """Disables the FC Port"""
         self.system.api.post(self.get_this_url_path().add_path('disable'), data={})
         self.invalidate_cache('enabled')
 

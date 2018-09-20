@@ -60,6 +60,7 @@ class QosPolicy(InfiniBoxObject):
         return system.compat.has_qos()
 
     def get_assigned_entities(self):
+        """Returns the assigned entities of this QOS policy"""
         return self._get_assigned_entities_query(self.system, self.get_this_url_path().add_path('assigned_entities'))
 
     def _assign_unassign_operation(self, entity, operation_name):
