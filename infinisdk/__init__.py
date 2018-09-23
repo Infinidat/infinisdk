@@ -142,6 +142,20 @@ def _install_hooks():
     gossip.define(_SDK_HOOK('post_pool_unlock'), tags=['infinibox', 'pool'], arg_names=('pool',))
     gossip.define(_SDK_HOOK('pool_unlock_failure'), tags=['infinibox', 'pool'], arg_names=('pool', 'exception'))
 
+    gossip.define(_SDK_HOOK('pre_cluster_add_host'), tags=['infinibox', 'host_cluster'],
+                  arg_names=('host', 'cluster'))
+    gossip.define(_SDK_HOOK('post_cluster_add_host'), tags=['infinibox', 'host_cluster'],
+                  arg_names=('host', 'cluster'))
+    gossip.define(_SDK_HOOK('cluster_add_host_failure'), tags=['infinibox', 'host_cluster'],
+                  arg_names=('host', 'cluster', 'exception'))
+
+    gossip.define(_SDK_HOOK('pre_cluster_remove_host'), tags=['infinibox', 'host_cluster'],
+                  arg_names=('host', 'cluster'))
+    gossip.define(_SDK_HOOK('post_cluster_remove_host'), tags=['infinibox', 'host_cluster'],
+                  arg_names=('host', 'cluster'))
+    gossip.define(_SDK_HOOK('cluster_remove_host_failure'), tags=['infinibox', 'host_cluster'],
+                  arg_names=('host', 'cluster', 'exception'))
+
     gossip.define(_SDK_HOOK('pre_qos_policy_assign'), tags=['infinibox', 'qos_policy'],
                   arg_names=('qos_policy', 'entity'))
     gossip.define(_SDK_HOOK('post_qos_policy_assign'), tags=['infinibox', 'qos_policy'],
