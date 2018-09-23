@@ -252,21 +252,6 @@ def test_data_restore(data_entity):
     gossip.unregister_token(hook_ident)
 
 
-def test_get_children_snapshots_and_clones(data_entity):
-    snap = data_entity.create_snapshot()
-    clone = snap.create_snapshot()
-    snap2 = clone.create_snapshot()
-
-    assert set(data_entity.get_children()) == set(data_entity.get_snapshots()) == set([snap])
-    if not data_entity.get_system().compat.has_writable_snapshots():
-        assert set(snap.get_clones()) == set(snap.get_children()) == set([clone])
-        assert set(clone.get_clones()) == set()
-        assert set(snap.get_snapshots()) == set()
-    else:
-        assert set(snap.get_snapshots()) == set(snap.get_children()) == set([clone])
-
-    assert set(clone.get_children()) == set(clone.get_snapshots()) == set([snap2])
-
 def test_get_capacity_field_with_null_value(data_entity):
     assert isinstance(data_entity.get_size(), Capacity)
     data_entity.update_field_cache({'size': None})

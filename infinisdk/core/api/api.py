@@ -10,7 +10,7 @@ import gossip
 from logbook import Logger
 from sentinels import NOTHING
 from urlobject import URLObject as URL
-from vintage import deprecated, warn_deprecation
+from vintage import warn_deprecation
 
 import colorama
 
@@ -303,10 +303,6 @@ class API(object):
         _logger.trace('Clearing cookies: {}', self._session.cookies)
         self._session.cookies.clear()
 
-
-    @deprecated(message="Use get_auth_context instead", since='46.0')
-    def auth_context(self, *args, **kwargs):
-        return self.get_auth_context(*args, **kwargs)
 
     get = _get_request_delegate("get")
     put = _get_request_delegate("put")

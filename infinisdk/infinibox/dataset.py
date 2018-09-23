@@ -5,7 +5,6 @@ from capacity import Capacity, byte, GB
 from urlobject import URLObject as URL
 from collections import namedtuple
 from mitba import cached_method
-from vintage import deprecated
 from ..core.utils import end_reraise_context, DONT_CARE, handle_possible_replication_snapshot
 from ..core.exceptions import ObjectNotFound, TooManyObjectsFound
 from ..core.type_binder import TypeBinder, PolymorphicBinder
@@ -289,14 +288,6 @@ class Dataset(InfiniBoxObject):
         """Retrieves all snapshot children of this entity
         """
         return self.get_children(type=self._get_snapshot_type())
-
-    @deprecated(since='64.0.1')
-    def get_clones(self):
-        """Retrieves all clone children of this entity
-        """
-        assert not self.system.compat.has_writable_snapshots(), \
-            '{}.get_clones() with snapclones is not supported'.format(self.__class__.__name__)
-        return self.get_children(type='CLONE')
 
     def get_children(self, **kwargs):
         """Retrieves all child entities for this entity (either clones or snapshots)
