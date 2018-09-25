@@ -35,9 +35,9 @@ class Filesystem(Dataset):
         Field("atime_mode", is_filterable=True, is_sortable=True),
         Field("established", api_name="_is_established", type=bool, is_filterable=True, is_sortable=True, new_to="4.0"),
         Field('data_snapshot_guid', is_filterable=True, is_sortable=True, feature_name="nas_replication"),
-        Field("snapshot_dir_name", creation_parameter=True, optional=True, is_filterable=True, is_sortable=True,
+        Field("snapdir_name", creation_parameter=True, optional=True, is_filterable=True, is_sortable=True,
               feature_name="dot_snapshot"),
-        Field("visible_in_snapshot_dir", type=bool, is_filterable=True, is_sortable=True, feature_name="dot_snapshot")
+        Field("visible_in_snapdir", type=bool, is_filterable=True, is_sortable=True, feature_name="dot_snapshot")
     ]
 
     BINDER_CLASS = FilesystemBinder
