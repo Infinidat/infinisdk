@@ -88,6 +88,9 @@ class Volume(Dataset):
         child = self._create(self.system, self.get_this_url_path().add_path('own_snapshot'), data=data)
         return child
 
+    def reset_serial(self):
+        return self.system.api.post(self.get_this_url_path().add_path('reset_serial'))
+
     def _get_luns_data_from_url(self):
         return LazyQuery(self.system, self.get_this_url_path().add_path('luns')).to_list()
 
