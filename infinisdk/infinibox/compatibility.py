@@ -156,7 +156,7 @@ class Compatibility(object):
         return self.get_parsed_system_version() >= '4.0.30'
 
     def has_active_active(self):
-        return self.has_feature('active_active')
+        return self._has_feature('active_active')
 
 _VERSION_TUPLE_LEN = 5
 
