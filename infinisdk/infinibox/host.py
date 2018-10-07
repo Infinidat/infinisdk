@@ -1,5 +1,4 @@
 from __future__ import absolute_import
-from vintage import deprecated
 
 from .._compat import requests
 
@@ -10,7 +9,7 @@ from ..core.exceptions import APICommandFailed
 from ..core.translators_and_types import host_port_to_api, HostPortListType
 from ..core.type_binder import TypeBinder
 from .system_object import InfiniBoxLURelatedObject
-from infi.dtypes.wwn import WWN
+
 
 class HostBinder(TypeBinder):
     """Implements *system.hosts*
@@ -97,7 +96,3 @@ class Host(InfiniBoxLURelatedObject):
               .add_path(data['type']) \
               .add_path(data['address'])
         self.system.api.delete(url)
-
-    @deprecated("Use get_ports() instead", since='58.0')
-    def get_fc_ports(self):
-        return [port for port in self.get_ports() if isinstance(port, WWN)]

@@ -33,7 +33,7 @@ Use ``infinibox.users.create`` to create new users:
 
        >>> user = system.users.create(name='testuser', password='testpassword')
 
-Deleting users is done like any other InfiniSDK object, using :func:`.User.delete`:
+Deleting users is done like any other InfiniSDK object, using :meth:`.User.delete`:
 
 .. code-block:: python
 
@@ -54,7 +54,7 @@ You can modify users configured on the system using any of the :class:`.User` cl
 Setting User Roles
 ~~~~~~~~~~~~~~~~~~
 
-You can set a user's role using :func:`.User.update_role`:
+You can set a user's role using :meth:`.User.update_role`:
 
 .. code-block:: python
 
@@ -96,7 +96,7 @@ Once the LDAP directory is defined, we need to map the LDAP group to a local rol
 Updating LDAP Configuration
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Updating LDAP configurations can be easily done with :func:`.LDAPConfig.modify`:
+Updating LDAP configurations can be easily done with :meth:`.LDAPConfig.modify`:
 
 .. code-block:: python
 

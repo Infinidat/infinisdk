@@ -72,7 +72,7 @@ A dataset can also have a shared QoS policy, from its pool:
     >>> print(volume.get_qos_shared_policy().get_name())
     vol_policy
 
-As a pool can have 2 policies, the :func:`get_qos_policies` method is used.
+As a pool can have 2 policies, the :func:`get_qos_policy <infinisdk.infinibox.volume.Volume.get_qos_policy>` method is used.
 
 Also, these convenience methods exist:
 
@@ -81,7 +81,7 @@ Also, these convenience methods exist:
     >>> print(pool.get_volume_qos_policy().get_name())
     vol_policy
 
-It is possible to get all entities assigned to a QoS policy, using :func:`get_assigned_entities`:
+It is possible to get all entities assigned to a QoS policy, using :func:`get_assigned_entities <infinisdk.infinibox.qos_policy.QosPolicy.get_assigned_entities>`:
 
 .. code-block:: python
 

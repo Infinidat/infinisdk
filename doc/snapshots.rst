@@ -4,7 +4,7 @@ Snapshots
 Creating Snapshots
 -----------------------------
 
-Use the :meth:`.create_snapshot`
+Use the :meth:`.create_snapshot <.Dataset.create_snapshot>`
 
 .. code-block:: python
 

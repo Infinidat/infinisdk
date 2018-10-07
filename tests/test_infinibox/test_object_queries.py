@@ -1,5 +1,7 @@
 import pytest
 from infinisdk import Q
+from sentinels import NOTHING
+
 
 
 def test_query_with_q(infinibox, volume):
@@ -55,3 +57,8 @@ def test_page_size_mutability(volume):
     next(iter(query))
     with pytest.raises(AssertionError):
         query.page_size(2)
+
+
+def test_safe_get_field(volume):
+    assert volume.safe_get_field('fake_field_name') is NOTHING
+    assert volume.safe_get_field('fake_field_name', 'imaginary_field') == 'imaginary_field'

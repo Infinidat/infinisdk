@@ -5,7 +5,6 @@ from capacity import Capacity, byte, GB
 from urlobject import URLObject as URL
 from collections import namedtuple
 from mitba import cached_method
-from vintage import deprecated
 from ..core.utils import end_reraise_context, DONT_CARE, handle_possible_replication_snapshot
 from ..core.exceptions import ObjectNotFound, TooManyObjectsFound
 from ..core.type_binder import TypeBinder, PolymorphicBinder
@@ -138,7 +137,7 @@ class Dataset(InfiniBoxObject):
     def refresh_snapshot(self, force_if_replicated_on_target=OMIT):
         """Refresh a snapshot with the most recent data from the parent
         :param force_if_replicated_on_target: (Only required on some InfiniBox versions) allows the refresh operation
-                                                to occur on a dataset that is currently a replication target.
+        to occur on a dataset that is currently a replication target.
         """
         parent = self.get_parent()
         assert parent, "Cannot refresh_snapshot on master volume"
@@ -270,10 +269,6 @@ class Dataset(InfiniBoxObject):
         gossip.trigger_with_tags('infinidat.sdk.pre_object_restore', {'source': source, 'target': self}, tags=hook_tags)
         gossip.trigger_with_tags('infinidat.sdk.pre_data_restore', {'source': source, 'target': self}, tags=hook_tags)
 
-    @deprecated("Use trigger_restore_failure() instead", since='78.0')
-    def trigger_data_restore_failure(self, source, e):
-        self.trigger_data_restore_failure(source, e)
-
     def trigger_restore_failure(self, source, e):
         hook_tags = self.get_tags_for_object_operations(self.system)
         gossip.trigger_with_tags('infinidat.sdk.data_restore_failure', {'source': source, 'target': self, 'exc': e},
@@ -294,14 +289,6 @@ class Dataset(InfiniBoxObject):
         """
         return self.get_children(type=self._get_snapshot_type())
 
-    @deprecated(since='64.0.1')
-    def get_clones(self):
-        """Retrieves all clone children of this entity
-        """
-        assert not self.system.compat.has_writable_snapshots(), \
-            '{}.get_clones() with snapclones is not supported'.format(self.__class__.__name__)
-        return self.get_children(type='CLONE')
-
     def get_children(self, **kwargs):
         """Retrieves all child entities for this entity (either clones or snapshots)
         """
@@ -318,6 +305,8 @@ class Dataset(InfiniBoxObject):
         return self.get_field("created_at", from_cache=True)
 
     def calculate_reclaimable_space(self):
+        """Returns the space to be reclaimed if the dataset would be deleted according to delete simulation api
+        """
         url = URL(self.get_url_path(self.system)).add_path('delete_simulation')
         res = self.system.api.post(url, data=dict(entities=[self.id]))
         return res.get_result()['space_reclaimable'] * byte

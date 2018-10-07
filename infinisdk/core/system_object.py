@@ -4,6 +4,7 @@ import functools
 from contextlib import contextmanager
 
 from mitba import cached_method
+from sentinels import NOTHING
 from urlobject import URLObject as URL
 
 from .exceptions import APICommandFailed
@@ -131,6 +132,15 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
         if url_path is None:
             url_path = "/api/rest/{}".format(cls.get_plural_name())
         return url_path
+
+    def safe_get_field(self, field_name, default=NOTHING, **kwargs):
+        """
+        Like :meth:`.get_field`, only returns 'default' parameter if no result was found
+        """
+        try:
+            return self.get_field(field_name, **kwargs)
+        except CacheMiss:
+            return default
 
     def get_field(self, field_name, from_cache=DONT_CARE, fetch_if_not_cached=True, raw_value=False):
         """
