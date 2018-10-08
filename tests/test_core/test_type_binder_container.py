@@ -8,8 +8,11 @@ def test_unknown_attributes_raise_attribute_error(system):
         objects.nonexisting  # pylint: disable=pointless-statement
 
 def test_get_types(system):
-    assert [] != system.objects.get_types()
-    assert all(issubclass(x, SystemObject) for x in system.objects.get_types())
+    all_types = system.objects.get_types()
+    assert [] != all_types
+    exclude_type_names = ['nlm_lock']
+    system_object_types = set(all_types) - set([x for x in all_types if x.get_type_name() in exclude_type_names])
+    assert all(issubclass(x, SystemObject) for x in system_object_types)
 
 
 def test_get_all_collections(system):
