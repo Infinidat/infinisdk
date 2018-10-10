@@ -158,6 +158,9 @@ class Compatibility(object):
     def has_active_active(self):
         return False
 
+    def has_nlm(self):
+        return False
+
 
 _VERSION_TUPLE_LEN = 5
 
