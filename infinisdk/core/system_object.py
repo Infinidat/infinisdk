@@ -1,7 +1,6 @@
 import copy
 import gossip
 import functools
-from contextlib import contextmanager
 
 from mitba import cached_method
 from sentinels import NOTHING
@@ -421,21 +420,21 @@ class SystemObject(BaseSystemObject):
         """
         Deletes this object.
         """
-        with self._get_delete_context():
-            self.system.api.delete(self.get_this_url_path())
+        self._send_delete_with_hooks_tirggering(self.get_this_url_path())
 
-    @contextmanager
-    def _get_delete_context(self):
+    def _send_delete_with_hooks_tirggering(self, url):
+        url = URL(url)
         hook_tags = self.get_tags_for_object_operations(self.system)
-        gossip.trigger_with_tags('infinidat.sdk.pre_object_deletion', {'obj': self}, tags=hook_tags)
+        gossip.trigger_with_tags('infinidat.sdk.pre_object_deletion', {'obj': self, 'url': url}, tags=hook_tags)
         try:
-            yield
+            resp = self.system.api.delete(url)
         except Exception as e:       # pylint: disable=broad-except
             with end_reraise_context():
                 gossip.trigger_with_tags('infinidat.sdk.object_deletion_failure',
-                                         {'obj': self, 'exception': e, 'system': self.system},
+                                         {'obj': self, 'exception': e, 'system': self.system, 'url': url},
                                          tags=hook_tags)
-        gossip.trigger_with_tags('infinidat.sdk.post_object_deletion', {'obj': self}, tags=hook_tags)
+        gossip.trigger_with_tags('infinidat.sdk.post_object_deletion', {'obj': self, 'url': url}, tags=hook_tags)
+        return resp
 
 
 @gossip.register('infinidat.sdk.object_creation_failure')

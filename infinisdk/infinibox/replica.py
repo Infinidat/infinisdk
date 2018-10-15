@@ -649,14 +649,13 @@ class Replica(SystemObject):
             self._notify_pre_exposure(self)
             self._notify_pre_exposure(remote_replica)
 
-        with self._get_delete_context():
-            try:
-                resp = self.system.api.delete(path)
-            except Exception as e:  # pylint: disable=broad-except
-                with end_reraise_context():
-                    if retain_staging_area:
-                        self._notify_exposure_failure(self, e)
-                        self._notify_exposure_failure(remote_replica, e)
+        try:
+            resp = self._send_delete_with_hooks_tirggering(path)
+        except Exception as e:  # pylint: disable=broad-except
+            with end_reraise_context():
+                if retain_staging_area:
+                    self._notify_exposure_failure(self, e)
+                    self._notify_exposure_failure(remote_replica, e)
 
         result = resp.get_result()
         entity_pairs = result.get('entity_pairs') if result else None

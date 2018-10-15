@@ -210,8 +210,7 @@ class Dataset(InfiniBoxObject):
         path = self.get_this_url_path()
         if force_if_snapshot_locked is not OMIT:
             path = path.add_query_param('force_if_snapshot_locked', force_if_snapshot_locked)
-        with self._get_delete_context():
-            self.system.api.delete(path)
+        self._send_delete_with_hooks_tirggering(path)
 
     def _is_synced_remote_entity(self):
         if not self.system.compat.has_sync_replication() or not self.is_rmr_target():
