@@ -34,6 +34,8 @@ from .network_space import NetworkSpace
 from .notification_rule import NotificationRule
 from .notification_target import NotificationTarget
 from .pool import Pool
+from .plugin import Plugin
+from .tenant import Tenant
 from .replica import Replica
 from .search_utils import get_search_query_object, safe_get_object_by_id_and_type_lazy
 from .user import User
@@ -53,7 +55,8 @@ class InfiniBox(APITarget):
     OBJECT_TYPES = [Volume, Pool, Host, HostCluster, User, Filesystem, Export,
                     NetworkSpace, NetworkInterface, Link, Replica, LDAPConfig,
                     NotificationTarget, NotificationRule, ConsGroup, Initiator,
-                    FcSwitch, FcSoftTarget, QosPolicy]
+                    FcSwitch, FcSoftTarget, QosPolicy, Plugin, Tenant]
+
     SYSTEM_EVENTS_TYPE = Events
     SYSTEM_COMPONENTS_TYPE = InfiniBoxSystemComponents
 

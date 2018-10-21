@@ -1,6 +1,6 @@
 from ..core import Field
 from ..core.translators_and_types import MunchType, MunchListType
-from ..core.bindings import ListOfRelatedObjectIDsBinding
+from ..core.bindings import ListOfRelatedObjectIDsBinding, RelatedObjectBinding
 from ..core.api.special_values import Autogenerate
 from .system_object import InfiniBoxObject
 
@@ -20,6 +20,9 @@ class NetworkSpace(InfiniBoxObject):
         Field("automatic_ip_failback", creation_parameter=True, mutable=True, optional=True, type=bool),
         Field("mtu", type=int, creation_parameter=True, mutable=True, optional=True),
         Field("rate_limit", type=int, creation_parameter=True, mutable=True, optional=True),
+        Field("tenant", api_name="tenant_id", binding=RelatedObjectBinding('tenants'),
+              type='infinisdk.infinibox.tenant:Tenant', feature_name='tenants',
+              is_filterable=True, is_sortable=True),
     ]
 
     @classmethod

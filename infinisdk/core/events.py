@@ -1,5 +1,6 @@
 from .._compat import abc_module
 from ..core import Field, SystemObject, TypeBinder, MillisecondsDatetimeType
+from ..core.bindings import RelatedObjectBinding
 
 
 class Events(TypeBinder):
@@ -55,6 +56,9 @@ class Event(SystemObject):
         Field("source_node_id", type=int, cached=True, is_filterable=True, is_sortable=True),
         Field("description_template", type=str, cached=True, is_filterable=True, is_sortable=True),
         Field("affected_entity_id", type=str, cached=True, is_filterable=True, is_sortable=True),
+        Field("tenant", api_name="tenant_id", binding=RelatedObjectBinding('tenants'),
+              type='infinisdk.infinibox.tenant:Tenant', feature_name='tenants',
+              is_filterable=True, is_sortable=True),
     ]
 
     BINDER_CLASS = Events
