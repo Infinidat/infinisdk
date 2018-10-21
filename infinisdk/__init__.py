@@ -21,9 +21,10 @@ def _install_hooks():
     gossip.define(_SDK_HOOK('object_creation_failure'), tags=obj_type_names,
                   arg_names=('data', 'system', 'cls', 'parent', 'exception'))
 
-    gossip.define(_SDK_HOOK('pre_object_deletion'), tags=obj_type_names, arg_names=('obj',))
-    gossip.define(_SDK_HOOK('post_object_deletion'), tags=obj_type_names, arg_names=('obj',))
-    gossip.define(_SDK_HOOK('object_deletion_failure'), tags=obj_type_names, arg_names=('obj', 'exception', 'system'))
+    gossip.define(_SDK_HOOK('pre_object_deletion'), tags=obj_type_names, arg_names=('obj', 'url'))
+    gossip.define(_SDK_HOOK('post_object_deletion'), tags=obj_type_names, arg_names=('obj', 'url'))
+    gossip.define(_SDK_HOOK('object_deletion_failure'), tags=obj_type_names,
+                  arg_names=('obj', 'exception', 'system', 'url'))
 
     gossip.define(_SDK_HOOK('pre_object_update'), tags=obj_type_names, arg_names=('obj', 'data'))
     gossip.define(_SDK_HOOK('post_object_update'), tags=obj_type_names, arg_names=('obj', 'data', 'response_dict'))

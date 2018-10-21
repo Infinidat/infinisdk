@@ -677,22 +677,19 @@ class Replica(SystemObject):
             self._notify_pre_exposure(self)
             self._notify_pre_exposure(remote_replica)
 
-        with self._get_delete_context():
-            try:
-                resp = self.system.api.delete(path)
-                entity_pairs = None
-                result = resp.get_result()
-                if result:
-                    entity_pairs = result.get('entity_pairs')
-                gossip.trigger_with_tags(
-                    'infinidat.sdk.replica_deleted',
-                    {'replica': self, 'entity_pairs': entity_pairs},
-                    tags=['infinibox'])
-            except Exception as e:  # pylint: disable=broad-except
-                with end_reraise_context():
-                    if retain_staging_area:
-                        self._notify_exposure_failure(self, e)
-                        self._notify_exposure_failure(remote_replica, e)
+        try:
+            resp = self._send_delete_with_hooks_tirggering(path)
+        except Exception as e:  # pylint: disable=broad-except
+            with end_reraise_context():
+                if retain_staging_area:
+                    self._notify_exposure_failure(self, e)
+                    self._notify_exposure_failure(remote_replica, e)
+
+        result = resp.get_result()
+        entity_pairs = result.get('entity_pairs') if result else None
+        gossip.trigger_with_tags('infinidat.sdk.replica_deleted',
+                                 {'replica': self, 'entity_pairs': entity_pairs},
+                                 tags=['infinibox'])
 
         if retain_staging_area:
             local, remote = self._get_deletion_result(resp.get_result(), remote_replica)

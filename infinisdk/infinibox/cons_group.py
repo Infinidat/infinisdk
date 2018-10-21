@@ -149,9 +149,9 @@ class ConsGroup(InfiniBoxObject):
                                          kwargs={'cons_group': self, 'delete_members': delete_members},
                                          tags=self.get_tags_for_object_operations(self.system))
         trigger_hook('infinidat.sdk.pre_cons_group_deletion')
+
         try:
-            with self._get_delete_context():
-                self.system.api.delete(path)
+            self._send_delete_with_hooks_tirggering(path)
         except Exception:  # pylint: disable=broad-except
             with end_reraise_context():
                 trigger_hook('infinidat.sdk.cons_group_deletion_failure')
