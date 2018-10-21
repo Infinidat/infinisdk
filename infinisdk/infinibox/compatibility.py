@@ -152,6 +152,9 @@ class Compatibility(object):
     def has_dot_snapshot(self):
         return self._has_feature('dot_snapshots')
 
+    def has_tenants(self):
+        return self._has_feature('tenants')
+
     def has_snapshot_lock(self):
         return self.get_parsed_system_version() >= '4.0.30'
 

@@ -2,7 +2,7 @@ from ..core import Field, CapacityType, MillisecondsDatetimeType
 from ..core.api.special_values import Autogenerate
 from ..core.translators_and_types import MunchListType
 from .system_object import InfiniBoxObject
-from ..core.bindings import RelatedObjectNamedBinding
+from ..core.bindings import RelatedObjectNamedBinding, RelatedObjectBinding
 
 
 class _Field(Field):
@@ -35,7 +35,9 @@ class Export(InfiniBoxObject):
         _Field("created_at", type=MillisecondsDatetimeType),
         _Field("updated_at", type=MillisecondsDatetimeType),
         _Field("snapdir_visible", type=bool, creation_parameter=True, optional=True, mutable=True,
-               feature_name="dot_snapshot")
+               feature_name="dot_snapshot"),
+        _Field("tenant", api_name="tenant_id", binding=RelatedObjectBinding('tenants'),
+               type='infinisdk.infinibox.tenant:Tenant', feature_name='tenants'),
     ]
 
     @classmethod

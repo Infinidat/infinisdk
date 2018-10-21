@@ -73,6 +73,9 @@ class Host(InfiniBoxLURelatedObject):
         Field("updated_at", type=MillisecondsDatetimeType, is_sortable=True, is_filterable=True),
         Field("optimized", type=bool, mutable=True, is_sortable=True, is_filterable=True,
               creation_parameter=True, optional=True, new_to="5.0"),
+        Field("tenant", api_name="tenant_id", binding=RelatedObjectBinding('tenants'),
+              type='infinisdk.infinibox.tenant:Tenant', feature_name='tenants',
+              is_filterable=True, is_sortable=True),
     ]
 
     @InfiniBoxLURelatedObject.requires_cache_invalidation("ports")

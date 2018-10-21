@@ -3,7 +3,7 @@ from contextlib import contextmanager
 from ..core import Field, MillisecondsDatetimeType
 from ..core.api.special_values import Autogenerate
 from .system_object import InfiniBoxLURelatedObject
-from ..core.bindings import ListOfRelatedObjectBinding
+from ..core.bindings import ListOfRelatedObjectBinding, RelatedObjectBinding
 from ..core.utils import end_reraise_context
 
 
@@ -20,6 +20,9 @@ class HostCluster(InfiniBoxLURelatedObject):
               feature_name='openvms'),
         Field("created_at", type=MillisecondsDatetimeType, is_sortable=True, is_filterable=True),
         Field("updated_at", type=MillisecondsDatetimeType, is_sortable=True, is_filterable=True),
+        Field("tenant", api_name="tenant_id", binding=RelatedObjectBinding('tenants'),
+              type='infinisdk.infinibox.tenant:Tenant', feature_name='tenants',
+              is_filterable=True, is_sortable=True),
     ]
 
     @classmethod
