@@ -11,6 +11,7 @@ class _Field(Field):
         kwargs.setdefault('is_filterable', True)
         super(_Field, self).__init__(*args, **kwargs)
 
+
 class Export(InfiniBoxObject):
     FIELDS = [
         _Field("id", is_identity=True, type=int),
@@ -30,12 +31,11 @@ class Export(InfiniBoxObject):
         _Field("pref_write", creation_parameter=True, optional=True, type=CapacityType, mutable=True),
         _Field("max_read", creation_parameter=True, optional=True, type=CapacityType, mutable=True),
         _Field("max_write", creation_parameter=True, optional=True, type=CapacityType, mutable=True),
-        _Field("permissions", type=MunchListType, creation_parameter=True, optional=True, mutable=True,
-               is_filterable=False, is_sortable=False),
+        Field("permissions", type=MunchListType, creation_parameter=True, optional=True, mutable=True),
         _Field("created_at", type=MillisecondsDatetimeType),
         _Field("updated_at", type=MillisecondsDatetimeType),
-        Field("snapdir_visible", type=bool, creation_parameter=True, optional=True, mutable=True,
-              is_filterable=True, is_sortable=True, feature_name="dot_snapshot")
+        _Field("snapdir_visible", type=bool, creation_parameter=True, optional=True, mutable=True,
+               feature_name="dot_snapshot")
     ]
 
     @classmethod
