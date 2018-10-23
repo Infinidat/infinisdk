@@ -169,7 +169,7 @@ class Dataset(InfiniBoxObject):
         assert isinstance(delta, Capacity), "Delta must be an instance of Capacity"
         return self.update_field('size', self.get_size() + delta)
 
-    def _create_child(self, name=None, write_protected=None, ssd_enabled=None, lock_expires_at=None):
+    def _create_child(self, name=None, **kwargs):
         hook_tags = self.get_tags_for_object_operations(self.system)
         gossip.trigger_with_tags('infinidat.sdk.pre_entity_child_creation',
                                  {'source': self, 'system': self.system},
@@ -180,15 +180,9 @@ class Dataset(InfiniBoxObject):
         if not name:
             name = self.fields.name.generate_default().generate()
         data = {'name': name, 'parent_id': self.get_id()}
-        if self.system.compat.has_snapshot_lock():
-            for key, val in [('lock_expires_at', lock_expires_at)]:
-                data[key] = self.fields.get(key).binding.get_api_value_from_value(self.system, type(self), None, val)
-        if write_protected is not None:
-            assert self.system.compat.has_writable_snapshots(), \
-                'write_protected parameter is not supported for this version'
-            data['write_protected'] = write_protected
-        if ssd_enabled is not None:
-            data['ssd_enabled'] = ssd_enabled
+        for key, value in kwargs.items():
+            if value is not OMIT:
+                data[key] = self.fields.get(key).binding.get_api_value_from_value(self.system, type(self), None, value)
         try:
             child = self._create(self.system, self.get_url_path(self.system), data=data,
                                  tags=self.get_tags_for_object_operations(self.system), parent=self)
@@ -245,10 +239,11 @@ class Dataset(InfiniBoxObject):
         gossip.trigger_with_tags(_FINISH_FORK_HOOK, {'obj': self._forked_obj, 'child': child}, tags=hook_tags)
         self._forked_obj = None
 
-    def create_snapshot(self, name=None, write_protected=None, ssd_enabled=None, lock_expires_at=None):
+    def create_snapshot(self, name=None, **kwargs):
         """Creates a snapshot from this entity, if supported by the system
+        Supports passing name, write_protected and all other snapshots creation fields
         """
-        return self._create_child(name, write_protected, ssd_enabled, lock_expires_at)
+        return self._create_child(name, **kwargs)
 
     def restore(self, snapshot):
         """Restores this entity from a given snapshot object
