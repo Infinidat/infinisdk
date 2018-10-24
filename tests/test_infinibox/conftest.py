@@ -1,5 +1,6 @@
 import flux
 import pytest
+from datetime import timedelta
 
 
 @pytest.fixture
@@ -20,8 +21,11 @@ def cg_replica(infinibox, secondary_infinibox, cg, secondary_pool, link):
     infinibox.register_related_system(secondary_infinibox)
     secondary_infinibox.register_related_system(infinibox)
     cg.add_member(infinibox.volumes.create(pool=cg.get_pool()))
+    kwargs = {'link': link, 'remote_pool': secondary_pool}
+    if not infinibox.compat.has_sync_replication():
+        kwargs['sync_interval'] = timedelta(4000)
     return infinibox.replicas.replicate_cons_group(
-        cg, link=link, remote_pool=secondary_pool)
+        cg, **kwargs)
 
 @pytest.fixture
 def cg(infinibox, volume):
@@ -58,10 +62,13 @@ def replica_creation_kwargs(volume, create_remote, secondary_pool):
             'remote_base_action': 'NO_BASE_DATA',
         })
 
-    return {
+    kwargs = {
         'remote_pool_id': secondary_pool.id,
         'entity_pairs': [entity_pair],
     }
+    if not volume.system.compat.has_sync_replication():
+        kwargs['sync_interval'] = timedelta(4000)
+    return kwargs
 
 
 @pytest.fixture

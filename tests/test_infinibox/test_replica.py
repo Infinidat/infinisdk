@@ -98,7 +98,7 @@ def test_replica_deletion_remote_first(replica, retain_staging_area):
 @pytest.mark.parametrize('create_remote_volume', [True, False])
 def test_replicate_volume_shortcut(infinibox, secondary_infinibox, link, create_remote_volume, volume):
     remote_pool = secondary_infinibox.pools.create()
-    kwargs = {}
+    kwargs = {} if infinibox.compat.has_sync_replication() else {'sync_interval': timedelta(4000)}
     if create_remote_volume:
         kwargs['remote_pool'] = remote_pool
     else:
