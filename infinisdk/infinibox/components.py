@@ -637,6 +637,9 @@ class ServiceCluster(InfiniBoxSystemComponent):
     def is_inactive(self):
         return self.get_state() in ('INACTIVE', 'SHUTDOWN')
 
+    def is_degraded(self):
+        return self.get_state() == 'DEGRADED'
+
 
 @InfiniBoxSystemComponents.install_component_type
 class BBU(InfiniBoxSystemComponent):
