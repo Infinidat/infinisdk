@@ -71,6 +71,7 @@ class Volume(Dataset):
         Field("parent", type='infinisdk.infinibox.volume:Volume', cached=True, api_name="parent_id",
               binding=RelatedObjectBinding('volumes'), is_filterable=True),
         Field('data_snapshot_guid', is_filterable=True, is_sortable=True, feature_name="nas_replication"),
+        Field('paths_available', type=bool, new_to="5.0"),
     ]
 
     @classmethod

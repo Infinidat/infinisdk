@@ -102,6 +102,8 @@ class Dataset(InfiniBoxObject):
         Field("lock_expires_at", type=MillisecondsDatetimeType, mutable=True, creation_parameter=True,
               optional=True, feature_name='snapshot_lock'),
         Field("lock_state", type=str, feature_name='snapshot_lock'),
+        Field('rmr_active_active_peer', type=bool, is_sortable=True, is_filterable=True, feature_name='active_active'),
+        Field('replica_ids', type=list, is_sortable=True, is_filterable=True, new_to="5.0"),
     ]
 
     PROVISIONING = namedtuple('Provisioning', ['Thick', 'Thin'])('THICK', 'THIN')
