@@ -27,18 +27,19 @@ class NlmLock(BaseSystemObject):
         return 'nlm_lock'
 
     FIELDS = [
+        Field("id", api_name='lock_id', type=str, is_identity=True, is_filterable=True, is_sortable=True),
         Field("lock_id", type=str, is_identity=True, is_filterable=True, is_sortable=True),
         Field("filesystem", type='infinisdk.infinibox.filesystem:Filesystem', api_name="filesystem_id",
-              is_filterable=True, is_sortable=True, binding=RelatedObjectNamedBinding()),
-        Field("file_path", type=str, is_filterable=True, is_sortable=True),
+              is_filterable=True, is_sortable=True, binding=RelatedObjectNamedBinding(), cached=True),
+        Field("file_path", type=str, is_filterable=True, is_sortable=True, cached=True),
         Field("file_path_status", type=str, is_filterable=True, is_sortable=True),
-        Field("client", type=str, is_filterable=True, is_sortable=True),
+        Field("client", type=str, is_filterable=True, is_sortable=True, cached=True),
         Field("state", type=str, is_filterable=True, is_sortable=True),
-        Field("offset", type=int),
-        Field("length", type=int),
-        Field("lock_type", type=str, is_filterable=True, is_sortable=True),
-        Field("granted_at", type=int, is_filterable=True, is_sortable=True),
-        Field("owner", type=str, is_filterable=True, is_sortable=True),
+        Field("offset", type=int, cached=True),
+        Field("length", type=int, cached=True),
+        Field("lock_type", type=str, is_filterable=True, is_sortable=True, cached=True),
+        Field("granted_at", type=int, is_filterable=True, is_sortable=True, cached=True),
+        Field("owner", type=str, is_filterable=True, is_sortable=True, cached=True),
     ]
 
     @classmethod
