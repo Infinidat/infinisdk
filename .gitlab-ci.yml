@@ -8,30 +8,6 @@ stages:
   - deploy
   - post
 
-py27:
-  image: python:2.7
-  tags:
-    - infradev
-  except:
-    - /^customer-.*$/
-  script:
-    - curl -sL $RUN_ITZIK | python2.7 - $RUN_ITZIK_PARAMETERS
-    - source $INSTALL_DIR/env/bin/activate
-    - pylint --rcfile .pylintrc -j $(nproc) infinisdk scripts tests
-    - pytest -ra -W error::DeprecationWarning
-
-py35:
-  image: python:3.5
-  tags:
-    - infradev
-  except:
-    - /^customer-.*$/
-  script:
-    - curl -sL $RUN_ITZIK | python3.5 - $RUN_ITZIK_PARAMETERS
-    - source $INSTALL_DIR/env/bin/activate
-    - pylint --rcfile .pylintrc -j $(nproc) infinisdk scripts tests
-    - pytest -ra -W error::DeprecationWarning
-
 py36:
   image: python:3.6
   tags:
