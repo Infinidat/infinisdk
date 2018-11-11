@@ -40,6 +40,11 @@ class Link(InfiniBoxObject):
         Field('state_description', type=str, feature_name="sync_replication"),
         Field('is_local_link_ready_for_sync', type=bool, feature_name="sync_replication"),
         Field('async_only', type=bool, feature_name="sync_replication"),
+
+        Field('preferred', api_name='is_preferred', type=bool, optional=True, is_filterable=True, is_sortable=True,
+              creation_parameter=True, feature_name="active_active"),
+        Field('witness_address', type=str, optional=True, is_filterable=True, is_sortable=True,
+              creation_parameter=True, feature_name="active_active"),
     ]
 
     def is_up(self, from_cache=DONT_CARE):
@@ -106,3 +111,14 @@ class Link(InfiniBoxObject):
         if linked_system is None:
             return None
         return linked_system.links.get_by_id_lazy(self.get_remote_link_id())
+
+    def set_witness_address(self, witness_address):
+        url = self.get_this_url_path().add_path('set_witness_address')
+        self.system.api.post(url, data={'witness_address': witness_address})
+        self.invalidate_cache('witness_address')
+        self.invalidate_cache('is_preferred')
+
+    def set_preferred(self):
+        url = self.get_this_url_path().add_path('set_preferred')
+        self.system.api.post(url)
+        self.invalidate_cache('is_preferred')

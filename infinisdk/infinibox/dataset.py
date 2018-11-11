@@ -102,6 +102,8 @@ class Dataset(InfiniBoxObject):
         Field("lock_expires_at", type=MillisecondsDatetimeType, mutable=True, creation_parameter=True,
               optional=True, feature_name='snapshot_lock'),
         Field("lock_state", type=str, feature_name='snapshot_lock'),
+        Field('rmr_active_active_peer', type=bool, is_sortable=True, is_filterable=True, feature_name='active_active'),
+        Field('replica_ids', type=list, is_sortable=True, is_filterable=True, new_to="5.0"),
     ]
 
     PROVISIONING = namedtuple('Provisioning', ['Thick', 'Thin'])('THICK', 'THIN')
@@ -374,7 +376,10 @@ class Dataset(InfiniBoxObject):
     def is_replicated(self, from_cache=DONT_CARE):
         """Returns True if this volume is a part of a replica, whether as source or as target
         """
-        return any(self.get_fields(['rmr_source', 'rmr_target'], from_cache=from_cache).values())
+        fields = ['rmr_source', 'rmr_target']
+        if self.system.compat.has_active_active():
+            fields.append('rmr_active_active_peer')
+        return any(self.get_fields(fields, from_cache=from_cache).values())
 
     def assign_qos_policy(self, qos_policy):
         assert self.system.compat.has_qos(), 'QoS is not supported in this version'

@@ -205,8 +205,8 @@ class ConsGroup(InfiniBoxObject):
         member.invalidate_cache('cons_group')
 
     def remove_member(self, member, retain_staging_area=False, create_replica=False, replica_name=OMIT,
-                      force_if_no_remote_credentials=False, force_if_remote_error=False, force_on_target=False):
-        """Removes specified member from this cg"""
+                      force_if_no_remote_credentials=False, force_if_remote_error=False, force_on_target=False,
+                      force_on_local=OMIT, keep_serial_on_local=OMIT):
 
         path = self._get_members_url().add_path(str(member.id))
 
@@ -223,6 +223,10 @@ class ConsGroup(InfiniBoxObject):
 
         if replica_name is not OMIT:
             path = path.set_query_param('replica_name', replica_name)
+        if force_on_local is not OMIT:
+            path = path.set_query_param('force_on_local', force_on_local)
+        if keep_serial_on_local is not OMIT:
+            path = path.set_query_param('keep_serial_on_local', keep_serial_on_local)
 
         trigger_hook = functools.partial(gossip.trigger_with_tags,
                                          kwargs={'cons_group': self, 'member': member},

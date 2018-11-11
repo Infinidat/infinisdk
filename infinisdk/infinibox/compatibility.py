@@ -156,11 +156,10 @@ class Compatibility(object):
         return self.get_parsed_system_version() >= '4.0.30'
 
     def has_active_active(self):
-        return False
+        return self._has_feature('active_active')
 
     def has_nlm(self):
-        return False
-
+        return self._has_feature('nlm')
 
 _VERSION_TUPLE_LEN = 5
 
