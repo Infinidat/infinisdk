@@ -9,11 +9,13 @@ class NlmLockTypeBinder(TypeBinder):
     def break_lock(self, lock_id=OMIT, filesystem_id=OMIT, file_path=OMIT, client=OMIT):
         data = {'lock_id': lock_id, 'filesystem_id': filesystem_id, 'file_path': file_path, 'client': client}
         url = URL(self.object_type.get_url_path(self.system))
-        return self.system.api.post(url.add_path('break'), data=data)
+        res = self.system.api.post(url.add_path('break'), data=data)
+        return res.get_result()
 
     def remove_orphan(self):
         url = URL(self.object_type.get_url_path(self.system))
-        return self.system.api.post(url.add_path('remove_orphan'))
+        res = self.system.api.post(url.add_path('remove_orphan'))
+        return res.get_result()
 
 class NlmLock(BaseSystemObject):
     BINDER_CLASS = NlmLockTypeBinder
