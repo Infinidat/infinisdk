@@ -586,7 +586,7 @@ class Replica(SystemObject):
 
     def is_stalled(self):
         if self.is_type_active_active():
-            return self.get_sync_state().lower() == "sync stalled"
+            return self.get_sync_state().lower() == "sync_stalled"
         self._validate_can_check_state()
         if not self.system.compat.has_sync_job_states():
             raise NotImplementedError("Checking for stalled is not supported on systems without sync job states")
