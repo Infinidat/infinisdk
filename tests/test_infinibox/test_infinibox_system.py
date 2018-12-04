@@ -99,7 +99,9 @@ def _validate_single_metadata_support(obj):
 
 def test_get_collections_names(infinibox):
     collections_names = infinibox.get_collections_names()
-    assert len(collections_names) == len(infinibox.OBJECT_TYPES)
+    relevant_object_types = \
+        [object_type for object_type in infinibox.OBJECT_TYPES if object_type.is_supported(infinibox)]
+    assert len(collections_names) == len(relevant_object_types)
     assert 'volumes' in collections_names
 
 

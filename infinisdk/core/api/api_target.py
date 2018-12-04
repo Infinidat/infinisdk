@@ -70,10 +70,10 @@ class APITarget(with_metaclass(abc.ABCMeta)):
         raise NotImplementedError() # pragma: no cover
 
     def get_collections_names(self):
-        return [obj_type.get_plural_name() for obj_type in self.OBJECT_TYPES]
+        return [obj_type.get_plural_name() for obj_type in self.OBJECT_TYPES if obj_type.is_supported(self)]
 
     def get_collections(self):
-        return list(self.objects)
+        return [obj_type for obj_type in self.objects if obj_type.is_supported()]
 
     def _normalize_addresses(self, addresses, use_ssl):
         if not isinstance(addresses[0], (list, tuple)):
