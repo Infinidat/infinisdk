@@ -103,7 +103,7 @@ class Dataset(InfiniBoxObject):
               optional=True, feature_name='snapshot_lock'),
         Field("lock_state", type=str, feature_name='snapshot_lock'),
         Field('rmr_active_active_peer', type=bool, is_sortable=True, is_filterable=True, feature_name='active_active'),
-        Field('replica_ids', type=list, is_sortable=True, is_filterable=True, new_to="5.0"),
+        Field('replica_ids', type=list, new_to="5.0"),
         Field("tenant", api_name="tenant_id", binding=RelatedObjectBinding('tenants'),
               type='infinisdk.infinibox.tenant:Tenant', feature_name='tenants', is_filterable=True, is_sortable=True),
     ]
