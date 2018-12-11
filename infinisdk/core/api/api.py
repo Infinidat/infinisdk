@@ -152,7 +152,10 @@ class API(object):
 
     def __del__(self):
         if self._session is not None:
-            self._session.close()
+            try:
+                self._session.close()
+            except ReferenceError:
+                pass
 
     def reinitialize_session(self, auth=None):
         prev_auth = self._auth
