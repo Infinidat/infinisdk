@@ -6,8 +6,10 @@ from ..core import Field
 from urlobject import URLObject as URL
 
 class NlmLockTypeBinder(TypeBinder):
-    def break_lock(self, lock_id=OMIT, filesystem_id=OMIT, file_path=OMIT, client=OMIT):
-        data = {'lock_id': lock_id, 'filesystem_id': filesystem_id, 'file_path': file_path, 'client': client}
+    def break_lock(self, lock=OMIT, filesystem=OMIT, file_path=OMIT, client=OMIT):
+        data = {'file_path': file_path, 'client': client}
+        data['filesystem_id'] = filesystem.get_id() if filesystem is not OMIT else OMIT
+        data['lock_id'] = lock.get_id() if lock is not OMIT else OMIT
         url = URL(self.object_type.get_url_path(self.system))
         res = self.system.api.post(url.add_path('break'), data=data)
         return res.get_result()
