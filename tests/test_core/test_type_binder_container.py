@@ -16,9 +16,7 @@ def test_get_types(system):
 
 
 def test_get_all_collections(system):
-    relevant_object_types = \
-        [object_type for object_type in system.objects if object_type.is_supported()]
     assert [] != system.get_collections()
     assert all(isinstance(collection, TypeBinder) for collection in system.get_collections())
-    assert list(relevant_object_types) == system.get_collections()
-    assert len(system.get_collections_names()) == len(relevant_object_types) == len(system.get_collections())
+    assert list(system.objects) == system.get_collections()
+    assert len(system.get_collections_names()) == len(system.objects) == len(system.get_collections())
