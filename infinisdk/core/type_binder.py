@@ -136,8 +136,11 @@ class MonomorphicBinder(BaseBinder): # pylint: disable=abstract-method
         super(MonomorphicBinder, self).__init__(system)
         self.object_type = object_type
 
+    def get_name(self):
+        return self.object_type.get_plural_name()
+
     def __repr__(self):
-        return "<{}.{}>".format(self.system, self.object_type.get_plural_name())
+        return "<{}.{}>".format(self.system, self.get_name())
 
     @property
     def fields(self):

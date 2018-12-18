@@ -53,3 +53,7 @@ def test_cached_get_by_id_lazy(volume):
         volume2 = volume.get_binder().create(pool=volume.get_pool())
         assert volume.get_binder().get_by_id_lazy(volume2.id) is not volume2
         assert volume.get_binder().get_by_id_lazy(volume2.id) == volume2
+
+
+def test_type_binder_name(binder):
+    assert binder.get_name() == 'sampleobjects'
