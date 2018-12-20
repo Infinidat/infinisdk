@@ -2,7 +2,7 @@ from ..core.system_object import BaseSystemObject
 from ..core.type_binder import TypeBinder
 from ..core.api.special_values import OMIT
 from ..core.bindings import RelatedObjectNamedBinding
-from ..core import Field
+from ..core import Field, MillisecondsDatetimeType
 from urlobject import URLObject as URL
 
 class NlmLockTypeBinder(TypeBinder):
@@ -42,7 +42,7 @@ class NlmLock(BaseSystemObject):
         Field("offset", type=int, cached=True),
         Field("length", type=int, cached=True),
         Field("lock_type", type=str, is_filterable=True, is_sortable=True, cached=True),
-        Field("granted_at", type=int, is_filterable=True, is_sortable=True, cached=True),
+        Field("granted_at", type=MillisecondsDatetimeType, is_filterable=True, is_sortable=True, cached=True),
         Field("owner", type=str, is_filterable=True, is_sortable=True, cached=True),
     ]
 
