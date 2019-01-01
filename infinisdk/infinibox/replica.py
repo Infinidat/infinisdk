@@ -689,7 +689,7 @@ class Replica(SystemObject):
         result = resp.get_result()
         entity_pairs = result.get('entity_pairs') if result else None
         gossip.trigger_with_tags('infinidat.sdk.replica_deleted',
-                                 {'replica': self, 'entity_pairs': entity_pairs},
+                                 {'replica': self, 'entity_pairs': entity_pairs, 'deletion_params': path.query_dict},
                                  tags=['infinibox'])
 
         if retain_staging_area:

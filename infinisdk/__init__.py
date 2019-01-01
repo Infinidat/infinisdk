@@ -99,7 +99,8 @@ def _install_hooks():
                   arg_names=('cons_group', 'member'))
 
     gossip.define(_SDK_HOOK('replica_snapshot_created'), tags=['infinibox'], arg_names=('snapshot',))
-    gossip.define(_SDK_HOOK('replica_deleted'), tags=['infinibox'], arg_names=('replica', 'entity_pairs'))
+    gossip.define(_SDK_HOOK('replica_deleted'), tags=['infinibox'], arg_names=('replica', 'entity_pairs',\
+                                                                               'deletion_params'))
 
     gossip.define(_SDK_HOOK('pre_replication_snapshot_expose'), tags=['volume', 'filesystem', 'cons_group'])
     gossip.define(_SDK_HOOK('post_replication_snapshot_expose'), tags=['volume', 'filesystem', 'cons_group'])
