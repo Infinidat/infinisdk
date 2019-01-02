@@ -84,19 +84,19 @@ class Link(InfiniBoxObject):
             url = url.add_query_param('force_if_no_remote_credentials', 'true')
         self._send_delete_with_hooks_tirggering(url)
 
-    def get_linked_system(self, safe=False):
+    def get_linked_system(self, safe=False, from_cache=DONT_CARE):
         """Get the corresponsing system object at the remote and of the link. For this to work, the SDK user should
         call the register_related_system method of the Infinibox object when a link to a remote system is consructed
         for the first time"""
         related_system = self.system.links.get_cached_related_system(self)
         if related_system is not None:
             return related_system
-        remote_host = self.get_remote_host()
+        remote_host = self.get_remote_host(from_cache=from_cache)
         for related_system in self.get_system().iter_related_systems():
             if safe and not related_system.is_active():
                 continue
             for network_space in related_system.network_spaces.get_all():
-                for ip in network_space.get_ips():
+                for ip in network_space.get_ips(from_cache=True):
                     if ip.ip_address == remote_host:
                         self.system.links.set_cached_related_system(self, related_system)
                         return related_system

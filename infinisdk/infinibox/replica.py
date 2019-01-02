@@ -247,20 +247,28 @@ class Replica(SystemObject):
             return self.system.volumes
         return self.system.cons_groups
 
-    def get_local_entity(self):
-        """Returns the local entity used for replication, be it a volume, filesystem or a consistency group
-        """
+    def _get_entity(self, is_local, from_cache=False, safe=False):
+        system = self.system if is_local else self.get_remote_system(from_cache=from_cache, safe=safe)
+        if system is None:
+            return None
+        side = 'local' if is_local else 'remote'
+
         if self.is_consistency_group():
-            return self.system.cons_groups.get_by_id_lazy(self.get_field('local_cg_id'))
+            return system.cons_groups.get_by_id_lazy(self.get_field('{}_cg_id'.format(side)))
 
         pairs = self.get_entity_pairs(from_cache=True)
         if len(pairs) > 1:
             raise TooManyObjectsFound('Entity pairs for {}'.format(self))
         [pair] = pairs
         if self.is_filesystem():
-            return self.system.filesystems.get_by_id_lazy(pair['local_entity_id'])
+            return system.filesystems.get_by_id_lazy(pair['{}_entity_id'.format(side)])
         else:
-            return self.system.volumes.get_by_id_lazy(pair['local_entity_id'])
+            return system.volumes.get_by_id_lazy(pair['{}_entity_id'.format(side)])
+
+    def get_local_entity(self):
+        """Returns the local entity used for replication, be it a volume, filesystem or a consistency group
+        """
+        return self._get_entity(is_local=True)
 
     def _get_entity_tags(self):
         if self.is_consistency_group():
@@ -738,24 +746,21 @@ class Replica(SystemObject):
         return local, remote
 
     def get_remote_system(self, from_cache=True, safe=False):
-        return self.get_link(from_cache=from_cache).get_linked_system(safe=safe)
+        return self.get_link(from_cache=from_cache).get_linked_system(from_cache=from_cache, safe=safe)
 
     def get_remote_replica(self, from_cache=False, safe=False):
         """Get the corresponsing replica object in the remote machine. For this to work, the SDK user should
         call the register_related_system method of the Infinibox object when a link to a remote system is consructed
         for the first time"""
-        linked_system = self.get_link(from_cache=from_cache).get_linked_system(safe=safe)
+        linked_system = self.get_remote_system(from_cache=from_cache, safe=safe)
         if linked_system is None:
             return None
         return linked_system.replicas.get_by_id_lazy(self.get_remote_replica_id(from_cache=from_cache))
 
-    def get_remote_entity(self):
+    def get_remote_entity(self, from_cache=False, safe=False):
         """Fetches the remote replicated entity if available
         """
-        peer = self.get_remote_replica()
-        if peer is None:
-            return None
-        return peer.get_local_entity()
+        return self._get_entity(is_local=False, from_cache=from_cache, safe=safe)
 
     def get_remote_entity_pairs(self):
         """Returns the entity_pairs configuration as held by the remote replica
