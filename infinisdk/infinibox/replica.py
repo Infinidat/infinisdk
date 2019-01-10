@@ -324,7 +324,9 @@ class Replica(SystemObject):
         if snapshot_id is None:
             return None
         returned = self._get_entity_collection().get_by_id_lazy(snapshot_id)
-        gossip.trigger_with_tags('infinidat.sdk.replica_snapshot_created', {'snapshot': returned}, tags=['infinibox'])
+        gossip.trigger_with_tags('infinidat.sdk.replica_snapshot_created',
+                                 {'snapshot': returned, 'replica_deleted': False},
+                                 tags=['infinibox'])
         self._notify_post_exposure(self, returned)
         return returned
 
@@ -699,7 +701,8 @@ class Replica(SystemObject):
         for replica, snap in (self, local), (remote_replica, remote):
             if snap is not None:
                 gossip.trigger_with_tags(
-                    'infinidat.sdk.replica_snapshot_created', {'snapshot': snap}, tags=['infinibox'])
+                    'infinidat.sdk.replica_snapshot_created', {'snapshot': snap, 'replica_deleted': True},
+                    tags=['infinibox'])
 
                 self._notify_post_exposure(replica, snap)
         return local, remote
