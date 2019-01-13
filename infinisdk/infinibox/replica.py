@@ -695,29 +695,34 @@ class Replica(SystemObject):
                 return True
         return False
 
+    def _should_retain_staging_area(self, retain_value=OMIT):
+        if retain_value is not OMIT:
+            return retain_value
+        return self.system.compat.has_replica_auto_create()
+
     # pylint: disable=arguments-differ
-    def delete(self, retain_staging_area=False, force_if_remote_error=False, force_on_target=False,
-               force_if_no_remote_credentials=False, force_on_local=OMIT, keep_serial_on_local=OMIT):
+    def delete(self, retain_staging_area=OMIT, force_if_remote_error=OMIT, force_on_target=OMIT,
+               force_if_no_remote_credentials=OMIT, force_on_local=OMIT, keep_serial_on_local=OMIT):
         """Deletes this replica
         """
         path = self.get_this_url_path()
-        if retain_staging_area:
-            path = path.add_query_param('retain_staging_area', 'true')
-        if force_if_remote_error:
+        if force_if_remote_error is not OMIT:
             path = path.add_query_param('force_if_remote_error', 'true')
-        if force_on_target:
+        if force_on_target is not OMIT:
             path = path.add_query_param('force_on_target', 'true')
-        if force_if_no_remote_credentials:
+        if force_if_no_remote_credentials is not OMIT:
             path = path.add_query_param('force_if_no_remote_credentials', 'true')
         if force_on_local is not OMIT:
             path = path.add_query_param('force_on_local', force_on_local)
         if keep_serial_on_local is not OMIT:
             path = path.add_query_param('keep_serial_on_local', keep_serial_on_local)
+        if retain_staging_area is not OMIT:
+            path = path.add_query_param('retain_staging_area', retain_staging_area)
 
         remote_replica = self.get_remote_replica(safe=True)
         if remote_replica is None:
             _logger.debug('Failed to get remote replica during delete operation')
-
+        retain_staging_area = self._should_retain_staging_area(retain_value=retain_staging_area)
         if retain_staging_area:
             self._notify_pre_exposure(self)
             self._notify_pre_exposure(remote_replica)
