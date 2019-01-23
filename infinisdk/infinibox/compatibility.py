@@ -158,6 +158,9 @@ class Compatibility(object):
     def has_snapshot_lock(self):
         return self.get_parsed_system_version() >= '4.0.30'
 
+    def has_auto_respawn(self):
+        return self.get_parsed_system_version() >= '4.0.30'
+
     def has_active_active(self):
         return self._has_feature('active_active')
 
