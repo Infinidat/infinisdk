@@ -9,10 +9,10 @@ Replicating a volume or a filesystem to a remote system (mirroring) can be done 
 
 .. code-block:: python
 
-       >>> pool = primary.pools.create()
-       >>> vol = primary.volumes.create(pool=pool)
-       >>> remote_pool = secondary.pools.create()
-       >>> replica = primary.replicas.replicate_entity(vol, link=link, remote_pool=remote_pool)
+       >>> pool = primary_system.pools.create()
+       >>> vol = primary_system.volumes.create(pool=pool)
+       >>> remote_pool = secondary_system.pools.create()
+       >>> replica = primary_system.replicas.replicate_entity(vol, link=link, remote_pool=remote_pool)
 
 
 The default behavior for :meth:`.ReplicaBinder.replicate_entity` is to create the remote entity (receiving a remote pool as input).
@@ -20,7 +20,7 @@ You can also use an existing remote entity through the :meth:`.ReplicaBinder.rep
 
 .. code-block:: python
 
-       replica = primary.replicas.replicate_entity_use_base(
+       replica = primary_system.replicas.replicate_entity_use_base(
            local_entity,
            link=link,
            local_snapshot=snap,
@@ -52,8 +52,8 @@ Creating a CG replica is also straightforward, and is done via the ``replicate_c
 
 .. code-block:: python
 
-       >>> cg = primary.cons_groups.create(pool=pool)
-       >>> replica = primary.replicas.replicate_cons_group(cg, link=link, remote_pool=remote_pool)
+       >>> cg = primary_system.cons_groups.create(pool=pool)
+       >>> replica = primary_system.replicas.replicate_cons_group(cg, link=link, remote_pool=remote_pool)
 
 
 Creating Synchronous Replicas
@@ -64,9 +64,9 @@ Creating synchronous replicas is done by specifying ``"SYNC"`` for the ``replica
 
 .. code-block:: python
 
-       >>> pool = primary.pools.create()
-       >>> vol = primary.volumes.create(pool=pool)
-       >>> replica = primary.replicas.replicate_entity(
+       >>> pool = primary_system.pools.create()
+       >>> vol = primary_system.volumes.create(pool=pool)
+       >>> replica = primary_system.replicas.replicate_entity(
        ...     vol, link=link,
        ...     replication_type="SYNC", remote_pool=remote_pool)
 
