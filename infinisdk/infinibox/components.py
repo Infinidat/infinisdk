@@ -214,6 +214,9 @@ class InfiniBoxSystemComponent(BaseSystemObject):
     def get_id(self):
         return self.get_uid()
 
+    def is_in_system(self):
+        return True
+
     def __deepcopy__(self, memo):
         return self.construct(self.system, copy.deepcopy(self._cache, memo), self.get_parent_id())
 

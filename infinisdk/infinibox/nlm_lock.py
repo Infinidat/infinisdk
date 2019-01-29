@@ -5,6 +5,7 @@ from ..core.bindings import RelatedObjectNamedBinding
 from ..core import Field, MillisecondsDatetimeType
 from urlobject import URLObject as URL
 
+
 class NlmLockTypeBinder(TypeBinder):
     def break_lock(self, lock=OMIT, filesystem=OMIT, file_path=OMIT, client=OMIT):
         data = {'file_path': file_path, 'client': client}

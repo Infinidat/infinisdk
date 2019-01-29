@@ -70,6 +70,19 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
     def is_supported(cls, system): # pylint: disable=unused-argument
         return True
 
+    def is_in_system(self):
+        """
+        Returns whether or not the object actually exists
+        """
+        try:
+            self.get_field(self.UID_FIELD, from_cache=False)
+        except APICommandFailed as e:
+            if e.status_code != httplib.NOT_FOUND:
+                raise
+            return False
+        else:
+            return True
+
     @staticmethod
     def requires_cache_invalidation(*fields):
         invalidate_fields = fields
@@ -338,19 +351,6 @@ class SystemObject(BaseSystemObject):
 
     def get_collection(self):
         return self.get_binder()
-
-    def is_in_system(self):
-        """
-        Returns whether or not the object actually exists
-        """
-        try:
-            self.get_field(self.UID_FIELD, from_cache=False)
-        except APICommandFailed as e:
-            if e.status_code != httplib.NOT_FOUND:
-                raise
-            return False
-        else:
-            return True
 
     @classmethod
     def get_tags_for_object_operations(cls, system):
