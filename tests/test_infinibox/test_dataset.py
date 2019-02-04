@@ -5,6 +5,7 @@ import flux
 import gossip
 import pytest
 from capacity import GB, Capacity, KiB
+from infinisdk.core.q import Q
 from infinisdk.core.exceptions import APICommandFailed
 from infinisdk.core.translators_and_types import MillisecondsDatetimeTranslator
 from infinisdk.infinibox.dataset import (_BEGIN_FORK_HOOK, _CANCEL_FORK_HOOK,
@@ -305,6 +306,21 @@ def test_datasets_queries(infinibox, volume, filesystem):
     dataset_list = [volume, volume.create_snapshot(), filesystem, filesystem.create_snapshot()]
     assert set(infinibox.datasets.to_list()) == set(dataset_list)
     assert set(infinibox.datasets.find(type='MASTER').to_list()) == set([volume, filesystem])
+
+
+def test_query_datasets_of_specific_pool(infinibox, pool, volume, filesystem):
+    assert infinibox.datasets.find(pool=pool).to_list() == [volume, filesystem]
+    assert infinibox.datasets.find(Q.pool == pool).to_list() == [volume, filesystem]
+
+
+def test_query_by_field_api_name(infinibox, pool, volume, filesystem):
+    assert infinibox.datasets.find(pool_id=pool.id).to_list() == [volume, filesystem]
+    assert infinibox.volumes.find(pool_id=pool.id).to_list() == [volume]
+    assert infinibox.filesystems.find(pool_id=pool.id).to_list() == [filesystem]
+
+    assert infinibox.datasets.find(Q.pool_id == pool.id).to_list() == [volume, filesystem]
+    assert infinibox.volumes.find(Q.pool_id == pool.id).to_list() == [volume]
+    assert infinibox.filesystems.find(Q.pool_id == pool.id).to_list() == [filesystem]
 
 
 @relevant_from_version('3.0')

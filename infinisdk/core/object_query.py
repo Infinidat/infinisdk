@@ -193,7 +193,7 @@ class PolymorphicQuery(LazyQuery):
             field = obj_type.fields.get(field_name)
             if field is not None:
                 return field
-        self.object_types[0].fields.get_or_fabricate(field_name)
+        return self.object_types[0].fields.get_or_fabricate(field_name)
 
     def extend_url(self, *predicates, **kw):
         assert self._mutable, "Cannot modify query after fetching"
