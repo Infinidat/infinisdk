@@ -545,6 +545,11 @@ class Replica(SystemObject):
                 and not self.is_stalled() and self.is_active()
         return self.get_state(*args, **kwargs).lower() == 'idle'
 
+    def is_lagging(self):
+        if self.is_type_active_active():
+            return self.get_sync_state().lower() == "lagging"
+        return False
+
     def is_auto_suspended(self, *args, **kwargs):
         """Returns whether or not this replica is in auto_suspended state
         """
