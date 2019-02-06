@@ -45,6 +45,7 @@ class Link(InfiniBoxObject):
               creation_parameter=True, feature_name="active_active"),
         Field('witness_address', type=str, optional=True, is_filterable=True, is_sortable=True,
               creation_parameter=True, feature_name="active_active"),
+        Field('local_witness_state', type=str, feature_name="active_active"),
     ]
 
     def is_up(self, from_cache=DONT_CARE):
