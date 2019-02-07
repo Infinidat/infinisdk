@@ -6,7 +6,7 @@ from ..core.utils import end_reraise_context
 from ..core import Field, MillisecondsDatetimeType
 from ..core.api.special_values import OMIT
 from ..core.bindings import RelatedObjectNamedBinding
-from ..core.exceptions import CannotGetReplicaState, InvalidUsageException, TooManyObjectsFound, UnknownSystem
+from ..core.exceptions import CannotGetReplicaState, InvalidUsageException, TooManyObjectsFound
 from ..core.translators_and_types import MillisecondsDeltaType, CapacityType
 from ..core.type_binder import TypeBinder
 from ..core.system_object import SystemObject
@@ -670,12 +670,9 @@ class Replica(SystemObject):
         if keep_serial_on_local is not OMIT:
             path = path.add_query_param('keep_serial_on_local', keep_serial_on_local)
 
-        try:
-            remote_replica = self.get_remote_replica(safe=True)
-            if remote_replica is None:
-                _logger.debug('Failed to get remote replica during delete operation')
-        except UnknownSystem:
-            remote_replica = None
+        remote_replica = self.get_remote_replica(safe=True)
+        if remote_replica is None:
+            _logger.debug('Failed to get remote replica during delete operation')
 
         if retain_staging_area:
             self._notify_pre_exposure(self)
