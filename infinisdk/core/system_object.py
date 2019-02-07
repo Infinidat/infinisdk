@@ -433,6 +433,7 @@ class SystemObject(BaseSystemObject):
                 gossip.trigger_with_tags('infinidat.sdk.object_deletion_failure',
                                          {'obj': self, 'exception': e, 'system': self.system, 'url': url},
                                          tags=hook_tags)
+        self.update_field_cache(resp.get_result())
         gossip.trigger_with_tags('infinidat.sdk.post_object_deletion', {'obj': self, 'url': url}, tags=hook_tags)
         return resp
 
