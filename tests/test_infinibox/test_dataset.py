@@ -12,7 +12,7 @@ from infinisdk.infinibox.dataset import (_BEGIN_FORK_HOOK, _CANCEL_FORK_HOOK,
                                          _FINISH_FORK_HOOK)
 
 from ..conftest import create_pool, relevant_from_version
-
+FILESYSTEM_SIZE_GRANULARITY = 64 * KiB
 
 def test_creation(pool, data_entity):
     kwargs = {'name': 'some_data_entity_name',
@@ -24,7 +24,7 @@ def test_creation(pool, data_entity):
 
     assert obj.get_name() == kwargs['name']
     if isinstance(data_entity, data_entity.system.filesystems.object_type):
-        assert obj.get_size() == kwargs['size'].roundup(64 * KiB)
+        assert obj.get_size() == kwargs['size'].roundup(FILESYSTEM_SIZE_GRANULARITY)
     else:
         assert obj.get_size() == kwargs['size']
     assert obj.get_pool().id == kwargs['pool_id']
@@ -45,12 +45,19 @@ def test_is_master(data_entity):
 
 
 def test_resize(data_entity):
+    is_filesystem = data_entity.get_type_name() == 'filesystem'
     delta = 2 * GB
     initial_size = data_entity.get_size()
     data_entity.resize(delta)
-    assert data_entity.get_size() == initial_size + delta
+    expected_size = initial_size + delta
+    if is_filesystem:
+        expected_size = expected_size.roundup(FILESYSTEM_SIZE_GRANULARITY)
+    assert data_entity.get_size() == expected_size
     data_entity.resize(delta)
-    assert data_entity.get_size() == initial_size + delta * 2
+    expected_size = initial_size + delta * 2
+    if is_filesystem:
+        expected_size = expected_size.roundup(FILESYSTEM_SIZE_GRANULARITY)
+    assert data_entity.get_size() == expected_size
     with pytest.raises(APICommandFailed):
         data_entity.resize(-delta)
 
