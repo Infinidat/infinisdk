@@ -234,6 +234,8 @@ class Replica(SystemObject):
         Field('temporary_failure_retry_interval', type=MillisecondsDeltaType, mutable=True),
         Field('temporary_failure_retry_count', type=int, mutable=True),
         Field('started_at', type=MillisecondsDatetimeType),
+        Field('preferred', api_name='is_preferred', type=bool, optional=True, is_filterable=True, is_sortable=True,
+              creation_parameter=True, mutable=False, feature_name="active_active_preferred_on_replica"),
     ]
 
     @classmethod
