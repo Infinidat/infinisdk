@@ -44,6 +44,7 @@ def test_is_master(data_entity):
     assert data_entity.is_master()
 
 
+@relevant_from_version('5.0')
 def test_resize(data_entity):
     is_filesystem = data_entity.get_type_name() == 'filesystem'
     delta = 2 * GB
