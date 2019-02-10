@@ -42,7 +42,7 @@ class Link(InfiniBoxObject):
         Field('async_only', type=bool, feature_name="sync_replication"),
         Field('resiliency_mode', type=str, feature_name="active_active"),
         Field('preferred', api_name='is_preferred', type=bool, optional=True, is_filterable=True, is_sortable=True,
-              creation_parameter=True, feature_name="active_active"),
+              creation_parameter=True, feature_name="active_active_preferred_on_link"),
         Field('witness_address', type=str, optional=True, is_filterable=True, is_sortable=True,
               creation_parameter=True, feature_name="active_active"),
         Field('local_witness_state', type=str, feature_name="active_active"),
