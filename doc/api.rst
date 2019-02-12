@@ -22,8 +22,8 @@ infinibox.api
 .. autoclass:: Response
    :members:
 
-infinibox.dataset
-~~~~~~~~~~~~~~~~~
+infinibox.datasets
+~~~~~~~~~~~~~~~~~~
 .. automodule:: infinisdk.infinibox.dataset
 
 .. autoclass:: DatasetTypeBinder
