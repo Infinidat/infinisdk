@@ -5,6 +5,7 @@ import functools
 from mitba import cached_method
 from sentinels import NOTHING
 from urlobject import URLObject as URL
+from contextlib import contextmanager
 
 from .exceptions import APICommandFailed
 from .system_object_utils import get_data_for_object_creation
@@ -16,6 +17,9 @@ from .type_binder import TypeBinder
 from .bindings import PassthroughBinding
 from .api.special_values import translate_special_values
 from .utils import DONT_CARE, end_reraise_context
+from logbook import Logger
+
+_logger = Logger(__name__)
 
 
 class FieldsMeta(FieldsMetaBase):
@@ -43,6 +47,7 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
         self._cache = initial_data
         uid_field = self.fields[self.UID_FIELD]
         self._uid = uid_field.binding.get_value_from_api_object(system, type(self), self, self._cache)
+        self._use_cache_by_default = False
 
     @property
     def id(self):
@@ -216,8 +221,10 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
         if not field_names:
             return False
 
-        cache_enabled = self._is_caching_enabled()
+        if self._use_cache_by_default:
+            return True
 
+        cache_enabled = self._is_caching_enabled()
         for field_name in field_names:
             field = self.fields.get_or_fabricate(field_name)
             should_get_from_cache = field.cached
@@ -406,6 +413,17 @@ class SystemObject(BaseSystemObject):
             for field in cls.fields  # pylint: disable=no-member
             if field.creation_parameter and not field.optional))
 
+    @contextmanager
+    def using_cache_by_default(self):
+        self._use_cache_by_default = True
+        _logger.debug('Entered use cache by default context for object {}', self)
+        try:
+            yield
+        finally:
+            self._use_cache_by_default = False
+            _logger.debug('Exited use cache by default context for object {}', self)
+
+
     def safe_delete(self, *args, **kwargs):
         """
         Tries to delete the object, doing nothing if the object cannot be found on the system
@@ -428,6 +446,7 @@ class SystemObject(BaseSystemObject):
         gossip.trigger_with_tags('infinidat.sdk.pre_object_deletion', {'obj': self, 'url': url}, tags=hook_tags)
         try:
             resp = self.system.api.delete(url)
+            self._use_cache_by_default = True
         except Exception as e:       # pylint: disable=broad-except
             with end_reraise_context():
                 gossip.trigger_with_tags('infinidat.sdk.object_deletion_failure',

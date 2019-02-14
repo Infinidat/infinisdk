@@ -3,7 +3,7 @@ import pytest
 from infinisdk.core import Field, SystemObject
 from infinisdk.core.exceptions import (APICommandFailed,
                                        AttributeAlreadyExists, CacheMiss,
-                                       MissingFields)
+                                       MissingFields, MethodDisabled)
 
 
 # pylint: disable=misplaced-comparison-constant, unused-argument
@@ -19,6 +19,17 @@ class SampleBaseObject(FakeSystemObject):
     FIELDS = [
         Field("id", type=int),
         Field(name="name"),
+    ]
+
+class SampleBaseObjectCachingEnabled(FakeSystemObject):
+
+    def _is_caching_enabled(self):
+        return True
+
+    FIELDS = [
+        Field("id", type=int),
+        Field(name="name"),
+        Field(name="not_cached_by_default", cached=False),
     ]
 
 class SampleDerivedObject(SampleBaseObject):
@@ -83,6 +94,15 @@ def test_get_from_cache_miss(system):
     with pytest.raises(CacheMiss):
         obj.get_field("number", from_cache=True, fetch_if_not_cached=False)
 
+def test_get_from_cache_context(system):
+    not_cached_field_name, not_cached_field_value = "not_cached_by_default", "bla"
+    obj = SampleBaseObjectCachingEnabled(system, {"id": 1, not_cached_field_name: not_cached_field_value})
+    obj.invalidate_cache(not_cached_field_name)
+    with obj.using_cache_by_default():
+        with pytest.raises(CacheMiss):
+            obj.get_field(not_cached_field_name, fetch_if_not_cached=False)
+    with pytest.raises(APICommandFailed): #validate not going to cache
+        obj.get_field(not_cached_field_name, fetch_if_not_cached=False)
 
 def test_get_from_cache_hit(system):
     obj = SampleDerivedObject(FakeSystem(), {"id": 1, "number": 2})
@@ -211,6 +231,15 @@ def test_get_fields_without_field_names(infinibox):
     # "username" is the API name for "name" field
     assert "name" in fields
     assert "username" not in fields
+
+
+def test_is_in_system_with_get_from_cache_context(infinibox, volume):
+    assert volume.is_in_system()
+    with volume.using_cache_by_default():
+        assert volume.is_in_system()
+        with infinibox.api.disable_api_context():
+            with pytest.raises(MethodDisabled):
+                volume.is_in_system()
 
 
 def test_object_creation_missing_fields():
