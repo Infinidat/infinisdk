@@ -55,12 +55,14 @@ class ReplicaBinder(TypeBinder):
             return self.replicate_entity_create_target(entity, link, remote_pool=remote_pool, **kw)
         return self.replicate_entity_existing_target(entity, link, remote_entity=remote_entity, **kw)
 
-    def replicate_entity_create_target(self, entity, link, remote_pool=OMIT, **kw):
+    def replicate_entity_create_target(self, entity, link, remote_pool=OMIT, remote_entity_names=OMIT, **kw):
         """Replicates an entity, creating its remote replica on the specified pool
 
         :param remote_pool: Remote pool to use for entity creation on the remote side
         """
-        return self.system.replicas.create(link=link, entity_pairs=self._build_entity_pairs_create_target(entity),
+        return self.system.replicas.create(link=link,
+                                           entity_pairs=self._build_entity_pairs_create_target(remote_entity_names,
+                                                                                               entity),
                                            remote_pool_id=remote_pool.id if remote_pool is not OMIT else OMIT,
                                            **self._get_extra_replica_kwargs(kw, entity))
 
@@ -124,14 +126,19 @@ class ReplicaBinder(TypeBinder):
             return parent.id
         return entity.id
 
-    def _build_entity_pairs_create_target(self, entity):
+    def _build_entity_pairs_create_target(self, remote_entity_names, entity):
         returned = []
+        names_index = 0
         for sub_entity in self._get_sub_entities(entity):
-            returned.append({
+            new_pair = {
                 'remote_base_action': 'CREATE',
                 'local_entity_id': sub_entity.id,
                 'remote_entity_id': None,
-                })
+                }
+            if remote_entity_names is not OMIT and names_index < len(remote_entity_names):
+                new_pair['remote_entity_name'] = remote_entity_names[names_index]
+                names_index += 1
+            returned.append(new_pair)
         return returned
 
     def _build_entity_pairs_existing(self, local_entity, remote_entity, member_mappings, use_snapshots,
