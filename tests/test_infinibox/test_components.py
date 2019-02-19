@@ -244,11 +244,3 @@ def test_deepcopy(component):
     assert new_component is component
     assert new_component.system is component.system
     assert new_component._cache is component._cache # pylint: disable=protected-access
-
-@pytest.fixture(params=['racks', 'nodes', 'enclosures'])
-def component_collection(request, infinibox):
-    return getattr(infinibox.components, request.param)
-
-@pytest.fixture
-def component(component_collection):
-    return component_collection.choose()

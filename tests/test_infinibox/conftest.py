@@ -83,3 +83,18 @@ def create_remote(request):
 @pytest.fixture
 def volume_qos_policy(infinibox):
     return infinibox.qos_policies.create(type='VOLUME', max_ops=1000000)
+
+
+@pytest.fixture(params=['racks', 'systems', 'nodes', 'enclosures', 'ib_ports', 'drives'])
+def component_collection(request, infinibox):
+    # The params list includes:
+    # 1. Collections with single (top level) component: systems/racks
+    # 2. Collections with multiple components in API's top level (ex. nodes, enclosures)
+    # 3. Sub-component, eg. ib_ports, drives
+    # One should not remove a type from this list, because the handling of each type has different implementation
+    return infinibox.components[request.param]
+
+
+@pytest.fixture
+def component(component_collection):
+    return component_collection.choose()
