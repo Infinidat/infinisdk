@@ -21,6 +21,7 @@ from vintage import deprecated, warn_deprecation
 # pylint: disable=attribute-defined-outside-init,no-member,super-on-old-class,no-init,abstract-method
 _logger = Logger(__name__)
 _UID_DEPRECATION_MSG = "Direct usage of the 'id' field is deprecated. Use 'uid' field instead"
+_NON_INVALIDATED_FIELDS = ('id', 'parent_id', 'rack')
 
 def _normalize_id_predicate(predicate, component_type):
     if predicate.field.name == 'id' and isinstance(predicate.value, str):
@@ -32,14 +33,14 @@ class InfiniBoxSystemComponents(SystemComponentsBinder):
 
     def __init__(self, system):
         super(InfiniBoxSystemComponents, self).__init__(InfiniBoxSystemComponent, system)
-        self._initialize()
-
-    def _initialize(self):
         self.system_component = System(self.system, {'parent_id': "", 'id': 0})
         self.cache_component(self.system_component)
         RackType = self.racks.object_type
         self._rack_1 = RackType(self.system, {'parent_id': self.system_component.id, 'rack': 1})
         self.cache_component(self._rack_1)
+        self._initialize()
+
+    def _initialize(self):
         self._fetched_nodes = False
         self._fetched_others = False
         self._fetched_service_clusters = False
@@ -217,6 +218,14 @@ class InfiniBoxSystemComponent(BaseSystemObject):
     def __deepcopy__(self, memo):
         return self.construct(self.system, copy.deepcopy(self._cache, memo), self.get_parent_id())
 
+    def invalidate_cache(self, *field_names):
+        field_names_to_invalidate = set(field_names or self._cache.keys()) - set(_NON_INVALIDATED_FIELDS)
+        if field_names_to_invalidate:
+            super(InfiniBoxSystemComponent, self).invalidate_cache(*field_names_to_invalidate)
+        else:
+            assert not field_names, \
+                "Cannot invalidate only these fields: {}".format(', '.join(_NON_INVALIDATED_FIELDS))
+
     def _deduce_from_cache(self, field_names, from_cache):
         collection = self.system.components[self.get_plural_name()]
         if collection.should_force_fetching_from_cache():
@@ -241,11 +250,17 @@ class InfiniBoxSystemComponent(BaseSystemObject):
         return self.system.components[self.get_plural_name()]
     get_collection = get_binder
 
+    @classmethod
+    def _iter_sub_component_fields(cls, system):
+        for field in cls.fields:
+            if system.is_field_supported(field) and isinstance(field.binding, ListOfRelatedComponentBinding):
+                yield field
+
+
     def get_sub_components(self):
-        for field in self.fields:
-            if isinstance(field.binding, ListOfRelatedComponentBinding):
-                for component in self.get_field(field.name):
-                    yield component
+        for field in self._iter_sub_component_fields(self.system):
+            for component in self.get_field(field.name):
+                yield component
 
     def refresh_cache(self):
         data = self.system.api.get(self.get_this_url_path()).get_result()
@@ -265,13 +280,12 @@ class InfiniBoxSystemComponent(BaseSystemObject):
             system.components.cache_component(returned)
         else:
             returned.update_field_cache(data)
-        for field in cls.fields:
-            if isinstance(field.binding, ListOfRelatedComponentBinding):
-                try:
-                    field.binding.get_value_from_api_object(system, cls, returned, data)
-                except KeyError:
-                    if not allow_partial_fields:
-                        raise
+        for field in cls._iter_sub_component_fields(system):
+            try:
+                field.binding.get_value_from_api_object(system, cls, returned, data)
+            except KeyError:
+                if not allow_partial_fields:
+                    raise
         return returned
 
 

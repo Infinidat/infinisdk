@@ -13,7 +13,8 @@ class SystemComponentsBinder(TypeBinder):
         self._components_by_id = OrderedDict()
 
     def invalidate_cache(self):
-        self._components_by_id = OrderedDict()
+        for component in self._components_by_id.values():
+            component.invalidate_cache()
 
     def get_component_types(self):
         """
