@@ -1,5 +1,6 @@
 import pytest
 import requests
+from ipaddress import ip_address
 from munch import Munch
 from ..conftest import create_network_space, relevant_from_version, versioning_requiremnts
 from infinisdk.core.exceptions import APICommandFailed
@@ -108,3 +109,22 @@ def test_create_network_space_with_no_service(infinibox, service_value):
     with pytest.raises(APICommandFailed) as exception:
         create_network_space(infinibox, service=service_value)
     assert exception.value.status_code == requests.codes.bad_request
+
+
+@relevant_from_version('5.0')
+def test_network_space_routing(infinibox):
+    network_space = create_network_space(infinibox)
+    gateway = ip_address(network_space.get_network_config()['network']) + 1
+    route_data = {"destination": "1.2.3.32", "netmask": 27, "gateway": str(gateway)}
+    route = network_space.routes.create(**route_data)
+    assert route in network_space.routes.to_list()
+
+    new_gateway = str(gateway + 1)
+    route.update_field('gateway', new_gateway)
+    assert route.get_field('gateway') == new_gateway
+    route.delete()
+    assert not route.is_in_system()
+
+    with pytest.raises(APICommandFailed) as exception:
+        route.delete()
+    assert exception.value.error_code == 'ROUTE_NOT_FOUND'
