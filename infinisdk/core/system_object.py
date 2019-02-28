@@ -415,13 +415,14 @@ class SystemObject(BaseSystemObject):
 
     @contextmanager
     def using_cache_by_default(self):
+        prev_value = self._use_cache_by_default
         self._use_cache_by_default = True
         _logger.debug('Entered use cache by default context for object {}', self)
         try:
             yield
         finally:
-            self._use_cache_by_default = False
-            _logger.debug('Exited use cache by default context for object {}', self)
+            self._use_cache_by_default = prev_value
+            _logger.debug('Exited use cache by default for object {}, use_cache new value is {}', self, prev_value)
 
 
     def safe_delete(self, *args, **kwargs):
