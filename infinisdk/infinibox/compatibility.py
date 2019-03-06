@@ -173,6 +173,9 @@ class Compatibility(object):
     def has_nlm(self):
         return self._has_feature('nlm')
 
+    def has_local_users_auth(self):
+        return self._has_feature('local_users_auth')
+
 _VERSION_TUPLE_LEN = 5
 
 

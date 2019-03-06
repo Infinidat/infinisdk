@@ -16,6 +16,8 @@ class User(SystemObject):
         Field("password", creation_parameter=True, hidden=True, mutable=True, default="12345678"),
         Field("enabled", type=bool, mutable=True, feature_name='user_disabling', creation_parameter=True,
               optional=True),
+        Field("password_digest_version", type=int, is_filterable=True, is_sortable=True,
+              feature_name="local_users_auth"),
     ]
 
     @classmethod
