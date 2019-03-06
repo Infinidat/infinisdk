@@ -460,9 +460,16 @@ class Replica(SystemObject):
             return self.get_replication_type().lower() == 'async'
         return True
 
-    def _is_in_sync_state(self, sync_state):
+    def _is_in_sync_state(self, *sync_states):
         current_sync_state = self.get_sync_state()
-        return current_sync_state and current_sync_state.lower() == sync_state.lower()
+        return current_sync_state and current_sync_state.lower() in sync_states
+
+    def _is_in_state(self, *states):
+        current_state = self.get_state()
+        return current_state and current_state.lower() in states
+
+    def _get_state_lower(self, **kwargs):
+        return str(self.get_state(**kwargs)).lower()
 
     def is_synchronized(self):
         """Returns True if this replica sync state is 'SYNCHRONIZED'
@@ -531,61 +538,61 @@ class Replica(SystemObject):
         if self.is_target():
             raise CannotGetReplicaState('Replica state cannot be checked on target replica')
 
-    def is_suspended(self, *args, **kwargs):
+    def is_suspended(self, **kwargs):
         """Returns whether or not this replica is currently suspended
         """
         if self.is_type_active_active():
             return False
         self._validate_can_check_state()
-        return self.get_state(*args, **kwargs).lower() in ['suspended', 'auto_suspended']
+        return self._is_in_state('suspended', 'auto_suspended', **kwargs)
 
-    def is_user_suspended(self, *args, **kwargs):
+    def is_user_suspended(self, **kwargs):
         """Returns whether or not this replica is currently suspended due to a user request
         """
         if self.is_type_active_active():
             return False
         self._validate_can_check_state()
-        return self.get_state(*args, **kwargs).lower() == 'suspended'
+        return self._is_in_state('suspended', **kwargs)
 
-    def is_idle(self, *args, **kwargs):
+    def is_idle(self, **kwargs):
         """Returns whether or not this replica is in idle state
         """
         self._validate_can_check_state()
         if self.system.compat.has_sync_job_states():
             return not self.is_replicating() and not self.is_initial_replication()\
                 and not self.is_stalled() and self.is_active()
-        return self.get_state(*args, **kwargs).lower() == 'idle'
+        return self._is_in_state('idle', **kwargs)
 
-    def is_lagging(self):
+    def is_lagging(self, **kwargs):
         if self.is_type_active_active():
-            return self.get_sync_state().lower() == "lagging"
+            return self._is_in_sync_state("lagging", **kwargs)
         return False
 
-    def is_auto_suspended(self, *args, **kwargs):
+    def is_auto_suspended(self, **kwargs):
         """Returns whether or not this replica is in auto_suspended state
         """
         if self.is_type_active_active():
             return False
         self._validate_can_check_state()
-        return self.get_state(*args, **kwargs).lower() == 'auto_suspended'
+        return self._is_in_state('auto_suspended', **kwargs)
 
-    def is_initial_replication(self, *args, **kwargs):
+    def is_initial_replication(self, **kwargs):
         """Returns whether or not this replica is in initiating state
         """
         if self.is_type_active_active():
-            return self.get_sync_state().lower() in ["initializing", "initializing_pending"]
+            return self._is_in_sync_state("initializing", "initializing_pending", **kwargs)
         self._validate_can_check_state()
         if self.system.compat.has_sync_job_states():
-            return self.is_initial() and self._any_sync_job_state_contains(['initializing', 'stalled'])
-        return 'initial' in self.get_state(*args, **kwargs).lower()
+            return self.is_initial(**kwargs) and self._any_sync_job_state_contains(['initializing', 'stalled'])
+        return 'initial' in self._get_state_lower(**kwargs)
 
-    def is_pending(self):
+    def is_pending(self, **kwargs):
         """Returns whether or not this replication is waiting to start initializing
         """
         self._validate_can_check_state()
         if not self.system.compat.has_sync_job_states():
             raise NotImplementedError("This system ({}) doesn't support replica \"pending\" state".format(self.system))
-        return self.is_active() and self._any_sync_job_state_contains('pending')
+        return self.is_active(**kwargs) and self._any_sync_job_state_contains('pending')
 
     def _get_jobs(self):
         returned = self.get_field('jobs')
@@ -600,32 +607,34 @@ class Replica(SystemObject):
                 j['state'] = global_job_state
         return returned
 
-    def is_replicating(self, *args, **kwargs):
+    def is_replicating(self, **kwargs):
         """Returns whether or not this replica is in replicating state
         """
         self._validate_can_check_state()
         if self.system.compat.has_sync_job_states():
             return self.is_active() and self._any_sync_job_state_contains('replicating')
-        return self.get_state(*args, **kwargs).lower() == 'replicating'
+        return self._is_in_state('replicating', **kwargs)
 
-    def is_stalled(self):
+    def is_stalled(self, **kwargs):
         if self.is_type_active_active():
-            return self.get_sync_state().lower() == "sync_stalled"
+            return self._is_in_sync_state("sync_stalled", **kwargs)
         self._validate_can_check_state()
         if not self.system.compat.has_sync_job_states():
             raise NotImplementedError("Checking for stalled is not supported on systems without sync job states")
         return self._any_sync_job_state_contains('stalled')
 
-    def is_active(self, *args, **kwargs):
+    def is_active(self, **kwargs):
         """Returns whether or not the replica is currently active
         """
         if self.is_type_active_active():
-            return self.get_sync_state().lower() in ['synchronized', 'initializing',\
-                                                     'initializing_pending', 'sync_in_progress']
+            return self._is_in_sync_state('synchronized', 'initializing',
+                                          'initializing_pending', 'sync_in_progress',
+                                          **kwargs)
         self._validate_can_check_state()
+        state = self._get_state_lower(**kwargs)
         if self.system.compat.has_sync_job_states():
-            return self.get_state().lower() == 'active'
-        return self.get_state(*args, **kwargs).lower() in ['idle', 'initiating', 'initial_replication', 'replicating']
+            return state == 'active'
+        return state in ['idle', 'initiating', 'initial_replication', 'replicating']
 
     def change_role(self, entity_pairs=OMIT):
         """Changes the role of this replica from source to target or vice-versa
