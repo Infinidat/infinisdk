@@ -117,6 +117,7 @@ def _get_last_mailboxer_msg(simulator, mail_address):
     return msg[0]
 
 
+@relevant_from_version('5.0')
 def test_reset_password(infinibox_simulator, user):
     user_email = user.get_email()
     user.update_name(user.get_name()[-30:])
