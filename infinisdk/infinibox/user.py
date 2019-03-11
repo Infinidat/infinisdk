@@ -1,5 +1,6 @@
 from ..core import Field, SystemObject
 from ..core.api.special_values import Autogenerate
+from urlobject import URLObject
 
 
 class User(SystemObject):
@@ -31,13 +32,15 @@ class User(SystemObject):
         return [self.system.pools.get_by_id(pool_info['id'])
                 for pool_info in resp.get_result()]
 
+    def _get_reset_password_path(self):
+        return URLObject(self.get_url_path(system=self.system)).add_path(self.get_name()).add_path('reset_password')
+
     def reset_password(self, token):
-        url = self.get_this_url_path().add_path('reset_password').add_path(token)
+        url = self._get_reset_password_path().add_query_param('token', token)
         self.system.api.get(url)
 
     def request_reset_password(self):
-        url = self.get_this_url_path().add_path('reset_password')
-        self.system.api.post(url)
+        self.system.api.post(self._get_reset_password_path())
 
     def is_builtin(self):
         return self.get_id() < 0
