@@ -182,11 +182,14 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
         from_cache = self._deduce_from_cache(field_names, from_cache)
 
         if from_cache:
-            try:
+            if not fetch_if_not_cached:
                 return self._get_fields_from_cache(field_names, raw_value)
+            field_names_to_retrive = field_names or \
+                [field.name for field in self.fields if self.system.is_field_supported(field)]
+            try:
+                return self._get_fields_from_cache(field_names_to_retrive, raw_value)
             except CacheMiss:
-                if not fetch_if_not_cached:
-                    raise
+                pass
 
         query = self.get_this_url_path()
 
