@@ -1,5 +1,6 @@
 import gossip
 from contextlib import contextmanager
+from urlobject import URLObject
 from ..core import Field, MillisecondsDatetimeType
 from ..core.api.special_values import Autogenerate
 from .system_object import InfiniBoxLURelatedObject
@@ -31,7 +32,7 @@ class HostCluster(InfiniBoxLURelatedObject):
 
     @classmethod
     def get_url_path(cls, system):
-        return '/api/rest/clusters'
+        return URLObject('/api/rest/clusters')
 
     @contextmanager
     def _triggering_hooks(self, action_name, kwargs):

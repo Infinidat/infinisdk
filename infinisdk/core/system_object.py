@@ -148,7 +148,7 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
         url_path = cls.URL_PATH
         if url_path is None:
             url_path = "/api/rest/{}".format(cls.get_plural_name())
-        return url_path
+        return URL(url_path)
 
     def safe_get_field(self, field_name, default=NOTHING, **kwargs):
         """
