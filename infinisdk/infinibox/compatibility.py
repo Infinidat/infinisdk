@@ -176,6 +176,9 @@ class Compatibility(object):
     def has_local_users_auth(self):
         return self._has_feature('local_users_auth')
 
+    def has_fips(self):
+        return self._has_feature('fips')
+
 _VERSION_TUPLE_LEN = 5
 
 

@@ -7,7 +7,7 @@ from ..core.system_component import SystemComponentsBinder
 from ..core.system_object import BaseSystemObject
 from ..core.exceptions import ObjectNotFound
 from ..core.type_binder import MonomorphicBinder
-from ..core.translators_and_types import WWNType, CapacityType
+from ..core.translators_and_types import WWNType, CapacityType, MunchType
 from mitba import cached_method
 from .component_query import InfiniBoxComponentQuery, InfiniBoxGenericComponentQuery
 from ..core.bindings import InfiniSDKBinding, ListOfRelatedComponentBinding, RelatedComponentBinding
@@ -375,6 +375,8 @@ class Node(InfiniBoxSystemComponent):
         Field("drives", type=list, binding=ListOfRelatedComponentBinding("local_drives")),
         Field("services", type=list, binding=ListOfRelatedComponentBinding()),
         Field("state", cached=False),
+        Field("security", cached=False, type=MunchType, feature_name='fips'),
+        Field("tpm", cached=False, type=MunchType, feature_name='fips'),
     ]
 
     def is_active(self):
@@ -683,6 +685,7 @@ class System(InfiniBoxSystemComponent):
         Field("api_id", api_name="id", type=int, cached=True),
         Field("index", api_name="id", type=int, cached=True),
         Field("operational_state", type=dict, cached=False),
+        Field("security", type=dict, feature_name='fips'),
     ]
 
     @cached_method
