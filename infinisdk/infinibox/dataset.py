@@ -341,7 +341,13 @@ class Dataset(InfiniBoxObject):
             tags=hook_tags)
 
     def get_replicas(self):
-        return self.system.replicas.find(local_entity_id=self.id).to_list()
+        if isinstance(self, self.system.types.filesystem) and not self.system.compat.has_nas_replication():
+            return []
+        if isinstance(self, self.system.types.volume) and self.is_in_cons_group():
+            searched_id = self.get_cons_group().id
+        else:
+            searched_id = self.id
+        return self.system.replicas.find(local_entity_id=searched_id).to_list()
 
     def get_replica(self):
         returned = self.get_replicas()

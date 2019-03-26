@@ -196,7 +196,7 @@ class Replica(SystemObject):
         Field('created_at', type=MillisecondsDatetimeType, is_filterable=True, is_sortable=True, cached=True),
         Field('link', api_name='link_id', binding=RelatedObjectNamedBinding('links'),
               type='infinisdk.infinibox.link:Link', creation_parameter=True),
-        Field('entity_pairs', type=list, creation_parameter=True),
+        Field('entity_pairs', type=list, creation_parameter=True, optional=True),
         Field('entity_type', type=str, cached=True, creation_parameter=True, default='VOLUME', is_filterable=True),
         Field('remote_pool_id', type=int, creation_parameter=True, optional=True, is_filterable=True, is_sortable=True),
         Field('remote_replica_id', type=int, is_filterable=True, is_sortable=True, cached=True),
@@ -246,6 +246,16 @@ class Replica(SystemObject):
         Field('started_at', type=MillisecondsDatetimeType),
         Field('preferred', api_name='is_preferred', type=bool, optional=True, is_filterable=True, is_sortable=True,
               creation_parameter=True, mutable=False, feature_name="active_active_preferred_on_replica"),
+        Field('local_entity_id', type=int, creation_parameter=True, optional=True, is_filterable=True,
+              is_sortable=True, feature_name="replica_auto_create"),
+        Field('remote_entity_id', type=int, creation_parameter=True, optional=True, is_filterable=True,
+              is_sortable=True, feature_name="replica_auto_create"),
+        Field('local_entity_name', type=str, creation_parameter=True, optional=True, is_filterable=True,
+              is_sortable=True, feature_name="replica_auto_create"),
+        Field('remote_entity_name', type=str, creation_parameter=True, optional=True, is_filterable=True,
+              is_sortable=True, feature_name="replica_auto_create"),
+        Field('base_action', type=str, creation_parameter=True, optional=True,
+              feature_name="replica_auto_create"),
     ]
 
     @classmethod
