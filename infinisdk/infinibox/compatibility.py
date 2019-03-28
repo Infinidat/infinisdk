@@ -185,6 +185,10 @@ class Compatibility(object):
     def has_active_active_cg(self):
         return self._get_feature_version("active_active", 0) > 1
 
+    def has_events_db(self):
+        return self._has_feature('events_db')
+
+
 _VERSION_TUPLE_LEN = 5
 
 

@@ -45,6 +45,7 @@ class InfiniBoxSystemComponents(SystemComponentsBinder):
         self._fetched_nodes = False
         self._fetched_others = False
         self._fetched_service_clusters = False
+        self._fetched_external_clusters = False
         self._deps_by_compoents_tree = defaultdict(set)
         self._initialization_uuid = uuid.uuid4()
 
@@ -67,6 +68,9 @@ class InfiniBoxSystemComponents(SystemComponentsBinder):
     def should_fetch_service_clusters(self):
         return not self._fetched_service_clusters
 
+    def should_fetch_external_clusters(self):
+        return not self._fetched_external_clusters
+
     def mark_fetched_nodes(self):
         self._fetched_nodes = True
 
@@ -76,6 +80,9 @@ class InfiniBoxSystemComponents(SystemComponentsBinder):
 
     def mark_fetched_service_clusters(self):
         self._fetched_service_clusters = True
+
+    def mark_fetched_external_clusters(self):
+        self._fetched_external_clusters = True
 
     def get_rack_1(self):
         return self._rack_1
@@ -189,6 +196,9 @@ class InfiniBoxComponentBinder(MonomorphicBinder):
         elif self.object_type is components.service_clusters.object_type:
             if force_fetch or components.should_fetch_service_clusters():
                 self._fetch_service_clusters()
+        elif self.object_type is components.external_clusters.object_type:
+            if force_fetch or components.should_fetch_external_clusters():
+                self._fetch_external_clusters()
         else:
             if force_fetch or components.should_fetch_all():
                 rack_1 = components.get_rack_1()
@@ -200,6 +210,15 @@ class InfiniBoxComponentBinder(MonomorphicBinder):
         url = service_cluster_type.get_url_path(self.system)
         clusters_data = self.system.api.get(url).get_result()
         components.mark_fetched_service_clusters()
+        for cluster_data in clusters_data:
+            service_cluster_type.construct(self.system, cluster_data, None)
+
+    def _fetch_external_clusters(self):
+        components = self.system.components
+        service_cluster_type = components.external_clusters.object_type
+        url = service_cluster_type.get_url_path(self.system)
+        clusters_data = self.system.api.get(url).get_result()
+        components.mark_fetched_external_clusters()
         for cluster_data in clusters_data:
             service_cluster_type.construct(self.system, cluster_data, None)
 
@@ -665,6 +684,49 @@ class ServiceCluster(InfiniBoxSystemComponent):
 
     def is_degraded(self):
         return self.get_state() == 'DEGRADED'
+
+
+def _ensure_elastic(func):
+    def inner(self, *args, **kwargs):
+        if not self.get_name() == 'elastic':
+            raise NotImplementedError("The getter for cluster {} is not support".format(self.get_name()))
+        return func(self, *args, **kwargs)
+    return inner
+
+@InfiniBoxSystemComponents.install_component_type
+class ExternalServiceCluster(InfiniBoxSystemComponent):
+    FIELDS = [
+        Field("index", api_name="name", cached=True),
+        Field("name", is_identity=True, cached=True),
+        Field("state", api_name="cluster_state", cached=False),
+        Field("node_states", type=list),
+        ]
+
+    @classmethod
+    def get_type_name(cls):
+        return "external_cluster"
+
+    @classmethod
+    def get_url_path(cls, system):
+        return URL('external_services')
+
+    @cached_method
+    def get_this_url_path(self):
+        services_url = self.get_url_path(self.system)
+        this_url = services_url.add_path(str(self.get_index()))
+        return this_url
+
+    @classmethod
+    def is_supported(cls, system): # pylint: disable=unused-argument
+        return system.compat.has_events_db()
+
+    @_ensure_elastic
+    def is_active(self, **kwargs):
+        return self.get_state(**kwargs) == 'GREEN'
+
+    @_ensure_elastic
+    def is_degraded(self, **kwargs):
+        return self.get_state(**kwargs) == 'YELLOW'
 
 
 @InfiniBoxSystemComponents.install_component_type

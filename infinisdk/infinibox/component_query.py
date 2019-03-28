@@ -127,6 +127,8 @@ class InfiniBoxGenericComponentQuery(ComponentQueryBase):
         with self.system.components.fetch_tree_once_context(force_fetch=self._force_fetch, with_logging=False):
             fields = set(predicate.field.name for predicate in self.predicates) | set(self.kw)
             for component_type in self.system.components.get_component_types():
+                if not component_type.is_supported(self.system):
+                    continue
                 if not fields.issubset(set(field.name for field in component_type.fields)):
                     continue
                 assert component_type
