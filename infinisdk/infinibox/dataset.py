@@ -5,7 +5,6 @@ from capacity import Capacity, byte, GB
 from urlobject import URLObject as URL
 from collections import namedtuple
 from mitba import cached_method
-from vintage import deprecated
 from ..core.utils import end_reraise_context, DONT_CARE, handle_possible_replication_snapshot
 from ..core.exceptions import ObjectNotFound, TooManyObjectsFound
 from ..core.type_binder import TypeBinder, PolymorphicBinder
@@ -100,6 +99,11 @@ class Dataset(InfiniBoxObject):
               is_sortable=True, is_filterable=True, binding=RelatedObjectBinding('qos_policies'),
               feature_name='qos', cached=False),
         Field('pool_name', is_sortable=True, is_filterable=True, new_to="4.0.10"),
+        Field("lock_expires_at", type=MillisecondsDatetimeType, mutable=True, creation_parameter=True,
+              optional=True, feature_name='snapshot_lock'),
+        Field("lock_state", type=str, feature_name='snapshot_lock'),
+        Field("tenant", api_name="tenant_id", binding=RelatedObjectBinding('tenants'),
+              type='infinisdk.infinibox.tenant:Tenant', feature_name='tenants', is_filterable=True, is_sortable=True),
     ]
 
     PROVISIONING = namedtuple('Provisioning', ['Thick', 'Thin'])('THICK', 'THIN')
@@ -123,6 +127,8 @@ class Dataset(InfiniBoxObject):
             family_master_id = self.get_family_id()
         else:
             family_master_id = self._get_family_master_id()
+        if family_master_id is None:
+            return None
         return self.get_binder().get_by_id_lazy(family_master_id)
 
     def is_master(self):
@@ -133,7 +139,7 @@ class Dataset(InfiniBoxObject):
     def refresh_snapshot(self, force_if_replicated_on_target=OMIT):
         """Refresh a snapshot with the most recent data from the parent
         :param force_if_replicated_on_target: (Only required on some InfiniBox versions) allows the refresh operation
-                                                to occur on a dataset that is currently a replication target.
+        to occur on a dataset that is currently a replication target.
         """
         parent = self.get_parent()
         assert parent, "Cannot refresh_snapshot on master volume"
@@ -165,11 +171,7 @@ class Dataset(InfiniBoxObject):
         assert isinstance(delta, Capacity), "Delta must be an instance of Capacity"
         return self.update_field('size', self.get_size() + delta)
 
-    @deprecated(message="Use create_snapshot instead", since='95.0.1')
-    def create_child(self, name=None, write_protected=None, ssd_enabled=None):
-        return self._create_child(name, write_protected, ssd_enabled)
-
-    def _create_child(self, name=None, write_protected=None, ssd_enabled=None):
+    def _create_child(self, name=None, **kwargs):
         hook_tags = self.get_tags_for_object_operations(self.system)
         gossip.trigger_with_tags('infinidat.sdk.pre_entity_child_creation',
                                  {'source': self, 'system': self.system},
@@ -180,15 +182,12 @@ class Dataset(InfiniBoxObject):
         if not name:
             name = self.fields.name.generate_default().generate()
         data = {'name': name, 'parent_id': self.get_id()}
-        if write_protected is not None:
-            assert self.system.compat.has_writable_snapshots(), \
-                'write_protected parameter is not supported for this version'
-            data['write_protected'] = write_protected
-        if ssd_enabled is not None:
-            data['ssd_enabled'] = ssd_enabled
+        for key, value in kwargs.items():
+            if value is not OMIT:
+                data[key] = self.fields.get(key).binding.get_api_value_from_value(self.system, type(self), None, value)
         try:
             child = self._create(self.system, self.get_url_path(self.system), data=data,
-                                 tags=self.get_tags_for_object_operations(self.system))
+                                 tags=self.get_tags_for_object_operations(self.system), parent=self)
         except Exception as e:  # pylint: disable=broad-except
             with end_reraise_context():
                 gossip.trigger_with_tags('infinidat.sdk.entity_child_failure',
@@ -202,6 +201,12 @@ class Dataset(InfiniBoxObject):
 
         handle_possible_replication_snapshot(child)
         return child
+
+    def delete(self, force_if_snapshot_locked=OMIT): # pylint: disable=arguments-differ
+        path = self.get_this_url_path()
+        if force_if_snapshot_locked is not OMIT:
+            path = path.add_query_param('force_if_snapshot_locked', force_if_snapshot_locked)
+        self._send_delete_with_hooks_tirggering(path)
 
     def _is_synced_remote_entity(self):
         if not self.system.compat.has_sync_replication() or not self.is_rmr_target():
@@ -236,10 +241,11 @@ class Dataset(InfiniBoxObject):
         gossip.trigger_with_tags(_FINISH_FORK_HOOK, {'obj': self._forked_obj, 'child': child}, tags=hook_tags)
         self._forked_obj = None
 
-    def create_snapshot(self, name=None, write_protected=None, ssd_enabled=None):
+    def create_snapshot(self, name=None, **kwargs):
         """Creates a snapshot from this entity, if supported by the system
+        Supports passing name, write_protected and all other snapshots creation fields
         """
-        return self._create_child(name, write_protected, ssd_enabled)
+        return self._create_child(name, **kwargs)
 
     def restore(self, snapshot):
         """Restores this entity from a given snapshot object
@@ -259,10 +265,6 @@ class Dataset(InfiniBoxObject):
         gossip.trigger_with_tags('infinidat.sdk.pre_object_restore', {'source': source, 'target': self}, tags=hook_tags)
         gossip.trigger_with_tags('infinidat.sdk.pre_data_restore', {'source': source, 'target': self}, tags=hook_tags)
 
-    @deprecated("Use trigger_restore_failure() instead", since='78.0')
-    def trigger_data_restore_failure(self, source, e):
-        self.trigger_data_restore_failure(source, e)
-
     def trigger_restore_failure(self, source, e):
         hook_tags = self.get_tags_for_object_operations(self.system)
         gossip.trigger_with_tags('infinidat.sdk.data_restore_failure', {'source': source, 'target': self, 'exc': e},
@@ -272,7 +274,9 @@ class Dataset(InfiniBoxObject):
 
     def trigger_after_restore(self, source):
         hook_tags = self.get_tags_for_object_operations(self.system)
-        gossip.trigger_with_tags('infinidat.sdk.post_data_restore', {'source': source, 'target': self}, tags=hook_tags)
+        gossip.trigger_with_tags('infinidat.sdk.post_data_restore',
+                                 {'source': source, 'target': self, 'require_real_data': False, 'reason': None},
+                                 tags=hook_tags)
         gossip.trigger_with_tags('infinidat.sdk.post_object_restore', {'source': source, 'target': self},
                                  tags=hook_tags)
 
@@ -280,14 +284,6 @@ class Dataset(InfiniBoxObject):
         """Retrieves all snapshot children of this entity
         """
         return self.get_children(type=self._get_snapshot_type())
-
-    @deprecated(since='64.0.1')
-    def get_clones(self):
-        """Retrieves all clone children of this entity
-        """
-        assert not self.system.compat.has_writable_snapshots(), \
-            '{}.get_clones() with snapclones is not supported'.format(self.__class__.__name__)
-        return self.get_children(type='CLONE')
 
     def get_children(self, **kwargs):
         """Retrieves all child entities for this entity (either clones or snapshots)
@@ -305,6 +301,8 @@ class Dataset(InfiniBoxObject):
         return self.get_field("created_at", from_cache=True)
 
     def calculate_reclaimable_space(self):
+        """Returns the space to be reclaimed if the dataset would be deleted according to delete simulation api
+        """
         url = URL(self.get_url_path(self.system)).add_path('delete_simulation')
         res = self.system.api.post(url, data=dict(entities=[self.id]))
         return res.get_result()['space_reclaimable'] * byte

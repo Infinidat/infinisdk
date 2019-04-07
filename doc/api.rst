@@ -22,6 +22,16 @@ infinibox.api
 .. autoclass:: Response
    :members:
 
+infinibox.dataset
+~~~~~~~~~~~~~~~~~
+.. automodule:: infinisdk.infinibox.dataset
+
+.. autoclass:: DatasetTypeBinder
+   :members:
+
+.. autoclass:: Dataset
+   :members:
+
 infinibox.volumes
 ~~~~~~~~~~~~~~~~~
 
@@ -33,12 +43,14 @@ infinibox.volumes
 .. autoclass:: Volume
    :members:
    :inherited-members:
-   :exclude-members: create_clone, get_clones, is_clone
 
 infinibox.filesystems
 ~~~~~~~~~~~~~~~~~~~~~
 
 .. automodule:: infinisdk.infinibox.filesystem
+
+.. autoclass:: FilesystemBinder
+   :members:
 
 .. autoclass:: Filesystem
    :members:
@@ -102,6 +114,9 @@ infinibox.links
 
 .. automodule:: infinisdk.infinibox.link
 
+.. autoclass:: LinkBinder
+   :members:
+
 .. autoclass:: Link
    :members:
 
@@ -117,7 +132,15 @@ infinibox.events
 
 .. automodule:: infinisdk.core.events
 
+.. autoclass:: Events
+   :members:
+
 .. autoclass:: Event
+   :members:
+
+.. automodule:: infinisdk.infinibox.events
+
+.. autoclass:: Events
    :members:
 
 infinibox.users
@@ -131,6 +154,9 @@ infinibox.ldap_configs
 ~~~~~~~~~~~~~~~~~~~~~~
 
 .. automodule:: infinisdk.infinibox.ldap_config
+
+.. autoclass:: LDAPConfigBinder
+   :members:
 
 .. autoclass:: LDAPConfig
    :members:
@@ -157,6 +183,12 @@ infinibox.components
 
 .. automodule:: infinisdk.infinibox.components
 
+.. autoclass:: InfiniBoxSystemComponents
+   :members:
+
+.. autoclass:: Nodes
+   :members:
+
 .. autoclass:: Node
    :members:
 
@@ -166,11 +198,19 @@ infinibox.components
 .. autoclass:: Drive
    :members:
 
+.. autoclass:: FcPort
+   :members:
+
+.. autoclass:: FcPorts
+   :members:
 
 infinibox.qos_policies
 ~~~~~~~~~~~~~~~~~~~~~~
 
 .. automodule:: infinisdk.infinibox.qos_policy
+
+.. autoclass:: QosPolicyBinder
+   :members:
 
 .. autoclass:: QosPolicy
    :members:
@@ -205,6 +245,9 @@ Core Facilities
 .. automodule:: infinisdk.core.type_binder
 
 .. autoclass:: infinisdk.core.type_binder.TypeBinder
+  :members:
+
+.. autoclass:: infinisdk.core.type_binder.MonomorphicBinder
   :members:
 
 .. automodule:: infinisdk.core.system_object

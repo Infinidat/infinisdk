@@ -84,4 +84,3 @@ The replica must not be in ``INITIALIZING`` state. For example:
         >>> assert async_replica.is_type_sync()
         >>> async_replica.change_type_to_async()
         >>> assert async_replica.is_type_async()
-

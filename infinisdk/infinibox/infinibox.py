@@ -7,8 +7,7 @@ from mitba import cached_method
 from sentinels import NOTHING
 from urlobject import URLObject as URL
 
-from .._compat import iteritems
-from ..core.api import APITarget
+from ..core.api import APITarget, OMIT
 from ..core.config import config, get_ini_option
 from ..core.exceptions import CacheMiss, VersionNotSupported
 from ..core.object_query import LazyQuery
@@ -35,7 +34,10 @@ from .network_space import NetworkSpace
 from .notification_rule import NotificationRule
 from .notification_target import NotificationTarget
 from .pool import Pool
+from .plugin import Plugin
+from .tenant import Tenant
 from .replica import Replica
+from .search_utils import get_search_query_object, safe_get_object_by_id_and_type_lazy
 from .user import User
 from .volume import Volume
 from .metadata import SystemMetadata
@@ -46,11 +48,15 @@ except ImportError:
     lookup_simulator_by_address = None
 
 
+_DNS_SERVERS_CONFIG_PATH = 'config/mgmt/environment.dns_servers'
+
+
 class InfiniBox(APITarget):
     OBJECT_TYPES = [Volume, Pool, Host, HostCluster, User, Filesystem, Export,
                     NetworkSpace, NetworkInterface, Link, Replica, LDAPConfig,
                     NotificationTarget, NotificationRule, ConsGroup, Initiator,
-                    FcSwitch, FcSoftTarget, QosPolicy]
+                    FcSwitch, FcSoftTarget, QosPolicy, Plugin, Tenant]
+
     SYSTEM_EVENTS_TYPE = Events
     SYSTEM_COMPONENTS_TYPE = InfiniBoxSystemComponents
 
@@ -154,6 +160,13 @@ class InfiniBox(APITarget):
         except CacheMiss:
             return self._get_received_name_or_ip()
 
+    def update_name(self, name):
+        """
+        Update the name of the system
+        """
+        self.api.put('/api/rest/system/name/', data=name)
+        self.components.system_component.update_field_cache({'name': name})
+
     def get_serial(self, **kwargs):
         """
         Returns the serial number of the system
@@ -171,6 +184,13 @@ class InfiniBox(APITarget):
         Returns the product version of the system
         """
         return self.get_system_info('version')
+
+    def get_dns_servers(self):
+        ip_addresses = self.api.get(_DNS_SERVERS_CONFIG_PATH).get_result()
+        return [ip_address.strip() for ip_address in ip_addresses.split(',')]
+
+    def update_dns_servers(self, *ip_addresses):
+        self.api.put(_DNS_SERVERS_CONFIG_PATH, data=','.join(ip_addresses))
 
     def get_revision(self):
         return self.get_system_info('release')['system']['revision']
@@ -260,27 +280,33 @@ class InfiniBox(APITarget):
             get_logged_in_username(),
             os.getpid())
 
-    def _get_v1_metadata_generator(self):
-        system_metadata = self.api.get('metadata').get_result()
-        for object_id, object_dict in iteritems(system_metadata):
-            for key, value in iteritems(object_dict):
-                yield {'object_id': int(object_id), 'key': key, 'value': value}
-
-    def _get_v2_metadata_generator(self):
-        for metadata_item in LazyQuery(self, URL('metadata')):
-            metadata_item.pop('id', None)
+    def _get_v2_metadata_generator(self, **raw_filters):
+        for metadata_item in LazyQuery(self, URL('metadata')).extend_url(**raw_filters):
+            metadata_item['object'] = safe_get_object_by_id_and_type_lazy(type_name=metadata_item.get('object_type'),
+                                                                          object_id=metadata_item['object_id'],
+                                                                          system=self)
             yield metadata_item
 
-    def get_all_metadata(self):
-        if self.compat.get_metadata_version() < 2:
-            return self._get_v1_metadata_generator()
-        return self._get_v2_metadata_generator()
+    def get_all_metadata(self, **raw_filters):
+        return self._get_v2_metadata_generator(**raw_filters)
 
     def is_active(self):
         return self.components.system_component.is_active()
 
     def is_read_only(self, **kwargs):
         return self.components.system_component.get_operational_state(**kwargs)['read_only_system']
+
+    def search(self, query=OMIT, type_name=OMIT):
+        search_query = get_search_query_object(self)
+        search_kwargs = {}
+
+        if query is not OMIT:
+            search_kwargs['query'] = query
+
+        if type_name is not OMIT:
+            search_kwargs['type'] = type_name
+
+        return search_query.extend_url(**search_kwargs)
 
     def __hash__(self):
         return hash(self.get_name())

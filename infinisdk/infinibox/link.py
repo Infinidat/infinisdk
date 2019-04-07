@@ -77,8 +77,7 @@ class Link(InfiniBoxObject):
             url = url.add_query_param('force_if_remote_error', 'true')
         if force_if_no_remote_credentials:
             url = url.add_query_param('force_if_no_remote_credentials', 'true')
-        with self._get_delete_context():
-            self.system.api.delete(url)
+        self._send_delete_with_hooks_tirggering(url)
 
     def get_linked_system(self, safe=False):
         """Get the corresponsing system object at the remote and of the link. For this to work, the SDK user should

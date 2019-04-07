@@ -6,7 +6,7 @@ Introduction
 
 Quality of Service policies allow to flexibly define the performance level for a given entity (e.g. a pool or a dataset).
 
-Performance upper limit can be set in IOPS / FOPS (for volumes or filesystems, respectively) or in bandwidth (Mbps, Gbps, etc). Also, a burst can be defined, to allow the limits be exceeded for short periods.
+Performance upper limit can be set in IOPS or in bandwidth (Mbps, Gbps, etc). Also, a burst can be defined, to allow the limits be exceeded for short periods.
 
 Creation
 --------
@@ -15,9 +15,9 @@ Creating a policy is done by using the :func:`create <infinisdk.infinibox.qos_po
 
 .. code-block:: python
 
-		>>> qos_policy = system.qos_policies.create(type='volume', max_ops=1000, name='my_policy')
+	>>> qos_policy = system.qos_policies.create(type='volume', max_ops=1000, name='my_policy')
 
-The 'type' field must be one of: 'volume', 'filesystem', 'pool_volume', 'pool_filesystem'.
+The 'type' field must be one of: 'volume', 'pool_volume'.
 
 Manipulation
 ------------
@@ -27,9 +27,9 @@ Manipulation
 
     >>> qos_policy.get_max_ops()
     1000
-    >>> qos_policy.update_max_bps(10000000)
+    >>> qos_policy.update_max_bps(100000000)
     >>> qos_policy.get_max_bps()
-    10000000
+    100000000
     >>> from infinisdk import Q
     >>> print(', '.join([policy.get_name() for policy in system.qos_policies.find(Q.max_bps >= 1000).to_list()]))
     my_policy
@@ -47,16 +47,14 @@ The first one is by referencing the QoS policy object:
 
 The second one is by referencing the entity object and calling :func:`assign_qos_policy <infinisdk.infinibox.volume.Volume.get_qos_policy>`.
 
-A pool can be assigned to 2 QoS policies - one for volumes, and another one for filesystems, which do not override each other:
+A pool can be assigned to a 'pool_volume` QoS policy:
 
 .. code-block:: python
 
-    >>> qos_policy_1 = system.qos_policies.create(type='pool_volume', max_ops=132, burst_enabled=False, name='vol_policy')
-    >>> qos_policy_2 = system.qos_policies.create(type='pool_filesystem', max_ops=132, burst_enabled=False, name='fs_policy')
-    >>> pool.assign_qos_policy(qos_policy_1)
-    >>> pool.assign_qos_policy(qos_policy_2)
+    >>> pool_qos_policy = system.qos_policies.create(type='pool_volume', max_ops=10000, burst_enabled=False, name='vol_policy')
+    >>> pool.assign_qos_policy(pool_qos_policy)
     >>> print(', '.join([policy.get_name() for policy in pool.get_qos_policies()]))
-    vol_policy, fs_policy
+    vol_policy
 
 Querying
 --------
@@ -74,23 +72,28 @@ A dataset can also have a shared QoS policy, from its pool:
     >>> print(volume.get_qos_shared_policy().get_name())
     vol_policy
 
-As a pool can have 2 policies, the :func:`get_qos_policies` method is used.
+As a pool can have 2 policies, the :func:`get_qos_policy <infinisdk.infinibox.volume.Volume.get_qos_policy>` method is used.
 
 Also, these convenience methods exist:
 
 .. code-block:: python
 
-    >>> print(pool.get_filesystem_qos_policy().get_name())
-    fs_policy
     >>> print(pool.get_volume_qos_policy().get_name())
     vol_policy
 
-It is possible to get all entities assigned to a QoS policy, using :func:`get_assigned_entities`:
+It is possible to get all entities assigned to a QoS policy, using :func:`get_assigned_entities <infinisdk.infinibox.qos_policy.QosPolicy.get_assigned_entities>`:
 
 .. code-block:: python
 
     >>> print(', '.join([entity.get_name() for entity in qos_policy.get_assigned_entities()]))
     my_volume
+
+All entities assigned to QoS policies can be fetched as well:
+
+.. code-block:: python
+
+   >>> print(', '.join([entity.get_name() for entity in system.qos_policies.get_assigned_entities()]))
+   my_volume, my_pool
 
 Unassignment
 ------------
@@ -106,7 +109,6 @@ For pools:
 
 .. code-block:: python
 
-    >>> pool.unassign_qos_policy(qos_policy_2)
     >>> pool.unassign_qos_policies()
 
 Misc

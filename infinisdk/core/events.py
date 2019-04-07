@@ -1,6 +1,7 @@
-import collections
-
+from .._compat import abc_module
 from ..core import Field, SystemObject, TypeBinder, MillisecondsDatetimeType
+from ..core.bindings import RelatedObjectBinding
+
 
 class Events(TypeBinder):
     def __init__(self, system):
@@ -55,6 +56,9 @@ class Event(SystemObject):
         Field("source_node_id", type=int, cached=True, is_filterable=True, is_sortable=True),
         Field("description_template", type=str, cached=True, is_filterable=True, is_sortable=True),
         Field("affected_entity_id", type=str, cached=True, is_filterable=True, is_sortable=True),
+        Field("tenant", api_name="tenant_id", binding=RelatedObjectBinding('tenants'),
+              type='infinisdk.infinibox.tenant:Tenant', feature_name='tenants',
+              is_filterable=True, is_sortable=True),
     ]
 
     BINDER_CLASS = Events
@@ -80,4 +84,4 @@ class Event(SystemObject):
     def get_event_data_dict(self):
         return dict((value['name'], value['value']) for value in self.get_field('data', from_cache=True))
 
-collections.Mapping.register(Event)  # pylint: disable=no-member
+abc_module.Mapping.register(Event)  # pylint: disable=no-member
