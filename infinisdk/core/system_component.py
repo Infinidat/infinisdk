@@ -13,7 +13,8 @@ class SystemComponentsBinder(TypeBinder):
         self._components_by_id = OrderedDict()
 
     def invalidate_cache(self):
-        self._components_by_id = OrderedDict()
+        for component in self._components_by_id.values():
+            component.invalidate_cache()
 
     def get_component_types(self):
         """
@@ -48,7 +49,7 @@ class SystemComponentsBinder(TypeBinder):
 
         if cls._COMPONENTS_BY_TYPE_NAME is None:
             cls._COMPONENTS_BY_TYPE_NAME = {}
-        cls._COMPONENTS_BY_TYPE_NAME[component_type.get_type_name()] = component_type
+        cls._COMPONENTS_BY_TYPE_NAME[component_type.get_type_name()] = component_type  # pylint: disable=unsupported-assignment-operation
         if cls.types is None:
             cls.types = TypeContainer()
         setattr(cls.types, component_type.__name__, component_type)

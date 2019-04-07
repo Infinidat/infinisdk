@@ -17,7 +17,7 @@ Creating volumes is done with the ``create`` method:
 			  >>> from capacity import GiB
 			  >>> vol = system.volumes.create(pool=pool, size=1*GiB)
 
-It is also possible to create multiple volumes with a single line, by calling :meth:`.create_many`:
+It is also possible to create multiple volumes with a single line, by calling :meth:`.create_many <.DatasetTypeBinder.create_many>`:
 
 .. code-block:: python
 

@@ -29,6 +29,9 @@ class TreeQBinder(TypeBinder):
         gossip.trigger_with_tags('infinidat.sdk.post_treeq_creation', hook_data, tags=hook_tags)
         return treeq
 
+    def get_filesystem(self):
+        return self._filesystem
+
     def get_url_path(self):
         return self._filesystem.get_this_url_path().add_path('treeqs')
 
@@ -84,7 +87,7 @@ class TreeQ(SystemObject):
                                  tags=hook_tags)
         data = get_data_for_object_creation(cls, system, fields)
         url = binder.get_url_path()
-        return cls._create(system, url, data)
+        return cls._create(system, url, data, parent=binder.get_filesystem())
 
     @classmethod
     def get_type_name(cls):

@@ -1,7 +1,6 @@
 import operator
 
 from sentinels import NOTHING
-from vintage import deprecated
 
 from .._compat import httplib
 from ..core.config import config
@@ -90,20 +89,20 @@ class Compatibility(object):
             return default_version
         return feature.version
 
-    def has_feature(self, feature_key):
+    def _has_feature(self, feature_key):
         return self._get_feature_version(feature_key, NOTHING) is not NOTHING
 
     def has_npiv(self):
-        return self.has_feature('fc_soft_targets') or self.has_feature('fc/soft_targets')
+        return self._has_feature('fc_soft_targets') or self._has_feature('fc/soft_targets')
 
     def has_replication(self):
         return int(self.get_version_major()) >= 2
 
     def has_iscsi(self):
-        return self.has_feature('iscsi')
+        return self._has_feature('iscsi')
 
     def has_compression(self):
-        return self.has_feature('compression')
+        return self._has_feature('compression')
 
     def has_nas(self):
         return self._get_feature_version('nas', 0) >= 2
@@ -124,17 +123,13 @@ class Compatibility(object):
         return self._get_feature_version("user_management", 0) >= 1
 
     def has_auth_sessions(self):
-        return self.has_feature('api_auth_sessions') or self.has_feature('api/auth_sessions')
+        return self._has_feature('api_auth_sessions') or self._has_feature('api/auth_sessions')
 
     def has_max_speed(self):
         return self.get_version_as_float() > 2.2
 
     def has_writable_snapshots(self):
-        return self.has_feature('snapshots')
-
-    @deprecated('Use has_writable_snapshots instead', since='65.0')
-    def has_snapclones(self):
-        self.has_writable_snapshots()
+        return self._has_feature('snapshots')
 
     def has_sync_job_states(self):
         return self.get_version_as_float() >= 3.0
@@ -143,16 +138,31 @@ class Compatibility(object):
         return self.get_version_as_float() >= 4.0
 
     def has_nas_replication(self):
-        return self.has_feature('filesystem_replicas')
+        return self._has_feature('filesystem_replicas')
 
     def has_qos(self):
-        return self.has_feature('qos')
+        return self._has_feature('qos')
 
     def has_treeq(self):
-        return self.has_feature('treeq')
+        return self._has_feature('treeq')
 
     def has_openvms(self):
-        return self.has_feature('open_vms')
+        return self._has_feature('open_vms')
+
+    def has_dot_snapshot(self):
+        return self._has_feature('dot_snapshots')
+
+    def has_tenants(self):
+        return self._has_feature('tenants')
+
+    def has_snapshot_lock(self):
+        return self.get_parsed_system_version() >= '4.0.30'
+
+    def has_active_active(self):
+        return False
+
+    def has_nlm(self):
+        return False
 
 
 _VERSION_TUPLE_LEN = 5

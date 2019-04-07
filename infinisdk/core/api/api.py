@@ -10,7 +10,7 @@ import gossip
 from logbook import Logger
 from sentinels import NOTHING
 from urlobject import URLObject as URL
-from vintage import deprecated, warn_deprecation
+from vintage import warn_deprecation
 
 import colorama
 
@@ -304,10 +304,6 @@ class API(object):
         self._session.cookies.clear()
 
 
-    @deprecated(message="Use get_auth_context instead", since='46.0')
-    def auth_context(self, *args, **kwargs):
-        return self.get_auth_context(*args, **kwargs)
-
     get = _get_request_delegate("get")
     put = _get_request_delegate("put")
     post = _get_request_delegate("post")
@@ -469,10 +465,6 @@ class API(object):
             yield
         finally:
             self._no_reponse_logs -= 1
-
-    @deprecated(message="Use get_no_response_logs_context instead", since='46.0')
-    def no_response_logs_context(self):
-        return self.get_no_response_logs_context()
 
     def add_auto_retry(self, retry_predicate, max_retries=1, sleep_seconds=None):
         if sleep_seconds is None: # backwards compatibility

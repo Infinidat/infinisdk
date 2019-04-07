@@ -2,7 +2,7 @@ from ..core import Field, CapacityType, MillisecondsDatetimeType
 from ..core.api.special_values import Autogenerate
 from ..core.translators_and_types import MunchListType
 from .system_object import InfiniBoxObject
-from ..core.bindings import RelatedObjectNamedBinding
+from ..core.bindings import RelatedObjectNamedBinding, RelatedObjectBinding
 
 
 class _Field(Field):
@@ -10,6 +10,7 @@ class _Field(Field):
         kwargs.setdefault('is_sortable', True)
         kwargs.setdefault('is_filterable', True)
         super(_Field, self).__init__(*args, **kwargs)
+
 
 class Export(InfiniBoxObject):
     FIELDS = [
@@ -30,10 +31,13 @@ class Export(InfiniBoxObject):
         _Field("pref_write", creation_parameter=True, optional=True, type=CapacityType, mutable=True),
         _Field("max_read", creation_parameter=True, optional=True, type=CapacityType, mutable=True),
         _Field("max_write", creation_parameter=True, optional=True, type=CapacityType, mutable=True),
-        _Field("permissions", type=MunchListType, creation_parameter=True, optional=True, mutable=True,
-               is_filterable=False, is_sortable=False),
+        Field("permissions", type=MunchListType, creation_parameter=True, optional=True, mutable=True),
         _Field("created_at", type=MillisecondsDatetimeType),
         _Field("updated_at", type=MillisecondsDatetimeType),
+        _Field("snapdir_visible", type=bool, creation_parameter=True, optional=True, mutable=True,
+               feature_name="dot_snapshot"),
+        _Field("tenant", api_name="tenant_id", binding=RelatedObjectBinding('tenants'),
+               type='infinisdk.infinibox.tenant:Tenant', feature_name='tenants'),
     ]
 
     @classmethod

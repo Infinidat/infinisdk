@@ -7,7 +7,11 @@ from ..core import Field, CapacityType, MillisecondsDatetimeType
 from ..core.utils import end_reraise_context
 from ..core.api.special_values import Autogenerate
 from .system_object import InfiniBoxObject
-from ..core.bindings import ListOfRelatedObjectBinding, ListOfRelatedObjectIDsBinding, InfiniSDKBindingWithSpecialFlags
+from ..core.bindings import (
+    ListOfRelatedObjectBinding,
+    ListOfRelatedObjectIDsBinding,
+    InfiniSDKBindingWithSpecialFlags,
+    RelatedObjectBinding)
 from ..core.object_query import ObjectQuery
 
 from urlobject import URLObject
@@ -58,7 +62,10 @@ class Pool(InfiniBoxObject):
         Field("filesystem_snapshots_count", type=int),
         Field("entities_count", type=int),
         Field("qos_policies", type=list, binding=ListOfRelatedObjectBinding('qos_policies'), feature_name='qos',
-              cached=False)
+              cached=False),
+        Field("tenant", api_name="tenant_id", binding=RelatedObjectBinding('tenants'),
+              type='infinisdk.infinibox.tenant:Tenant', feature_name='tenants',
+              is_filterable=True, is_sortable=True),
     ]
 
     @classmethod

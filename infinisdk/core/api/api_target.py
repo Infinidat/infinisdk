@@ -24,7 +24,7 @@ class APITarget(with_metaclass(abc.ABCMeta)):
         self.objects = TypeBinderContainer(self)
 
         if auth is None:
-            auth = self._get_api_auth()
+            auth = self._get_api_auth()  # pylint: disable=assignment-from-none
 
         self.api = API(self, auth, use_ssl=use_ssl, ssl_cert=ssl_cert)
         self.api.set_request_default_timeout(self._get_api_timeout())

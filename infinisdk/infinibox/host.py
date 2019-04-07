@@ -1,5 +1,4 @@
 from __future__ import absolute_import
-from vintage import deprecated
 
 from .._compat import requests
 
@@ -10,7 +9,7 @@ from ..core.exceptions import APICommandFailed
 from ..core.translators_and_types import host_port_to_api, HostPortListType
 from ..core.type_binder import TypeBinder
 from .system_object import InfiniBoxLURelatedObject
-from infi.dtypes.wwn import WWN
+
 
 class HostBinder(TypeBinder):
     """Implements *system.hosts*
@@ -72,6 +71,9 @@ class Host(InfiniBoxLURelatedObject):
         Field("security_chap_has_outbound_secret", type=bool, feature_name='iscsi'),
         Field("created_at", type=MillisecondsDatetimeType, is_sortable=True, is_filterable=True),
         Field("updated_at", type=MillisecondsDatetimeType, is_sortable=True, is_filterable=True),
+        Field("tenant", api_name="tenant_id", binding=RelatedObjectBinding('tenants'),
+              type='infinisdk.infinibox.tenant:Tenant', feature_name='tenants',
+              is_filterable=True, is_sortable=True),
     ]
 
     @InfiniBoxLURelatedObject.requires_cache_invalidation("ports")
@@ -97,15 +99,3 @@ class Host(InfiniBoxLURelatedObject):
               .add_path(data['type']) \
               .add_path(data['address'])
         self.system.api.delete(url)
-
-    @deprecated("Use get_ports() instead", since='58.0')
-    def get_fc_ports(self):
-        return [port for port in self.get_ports() if isinstance(port, WWN)]
-
-    @deprecated("Use add_port() instead", since='58.0')
-    def add_fc_port(self, *args, **kwargs):
-        return self.add_port(*args, **kwargs)
-
-    @deprecated("Use remove_port() instead", since='58.0')
-    def remove_fc_port(self, *args, **kwargs):
-        return self.remove_port(*args, **kwargs)

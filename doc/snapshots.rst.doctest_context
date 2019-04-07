@@ -16,7 +16,7 @@ def doctest_context():
     volume = system.volumes.create(pool=pool)
     try:
         yield {
-            "current_time": arrow.get(flux.current_timeline.time()).replace(days=+15),
+            "current_time": arrow.get(flux.current_timeline.time()).shift(days=+15),
             "system": system,
             "volume": volume,
             "pool": pool,

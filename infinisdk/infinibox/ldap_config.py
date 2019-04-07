@@ -1,5 +1,4 @@
 from urlobject import URLObject as URL
-from vintage import deprecated
 
 from .._compat import iteritems
 from ..core.type_binder import TypeBinder
@@ -10,7 +9,7 @@ from .user import User
 class LDAPConfigBinder(TypeBinder):
 
     def define(self, *args, **kwargs):
-        """Alias for :func:`.create`
+        """Alias for :func:`.create <infinisdk.core.type_binder.MonomorphicBinder.create>`
         """
         return self.create(*args, **kwargs)
 
@@ -39,8 +38,8 @@ class LDAPConfig(SystemObject):
     ]
 
     @classmethod
-    def get_plural_name(cls):
-        return 'ldap_configs'
+    def get_type_name(cls):
+        return 'ldap_config'
 
     def create_group(self, name, dn, role):
         """Maps a specified group in the LDAP directory to a specified role in the system
@@ -66,16 +65,3 @@ class LDAPConfig(SystemObject):
         """Tests the LDAP configuration
         """
         self.system.api.post('config/ldap/{}/test'.format(self.id), data={})
-
-    @deprecated("Use create_group instead", since='54.0')
-    def create_local_group(self, name, role, dn):
-        returned = self.system.api.post('users', data={
-            'type': 'Ldap',
-            'name': name,
-            'roles': [
-                role,
-                ],
-            'dn': dn,
-            'ldap_id': self.id,
-            })
-        return self.system.users.get_by_id_lazy(returned.get_json()['result']['id'])
