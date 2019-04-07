@@ -9,7 +9,7 @@ def doctest_context():
     simulator.activate()
     system = InfiniBox(simulator, auth=('infinidat', '123456'))
     system.login()
-    pool = system.pools.create()
+    pool = system.pools.create(name='my_pool')
     volume = system.volumes.create(pool=pool, name='my_volume')
     try:
         yield {

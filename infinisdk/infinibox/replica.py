@@ -1,7 +1,6 @@
 # pylint: disable=no-member
 import logbook
 import gossip
-import gadget
 import functools
 
 from ..core.utils import end_reraise_context
@@ -242,13 +241,6 @@ class Replica(SystemObject):
     def is_supported(cls, system):
         return system.compat.has_replication()
 
-    @classmethod
-    def _create(cls, system, url, data, tags=None):
-        if not system.compat.has_sync_replication() and data.get('replication_type', 'ASYNC').lower() == 'async':
-            # workaround to preserve older behavior for async creation
-            data.setdefault('sync_interval', 4000)
-        return super(Replica, cls)._create(system, url, data, tags)
-
     def _get_entity_collection(self):
         if self.is_filesystem():
             return self.system.filesystems
@@ -327,7 +319,6 @@ class Replica(SystemObject):
         returned = self._get_entity_collection().get_by_id_lazy(snapshot_id)
         gossip.trigger_with_tags('infinidat.sdk.replica_snapshot_created', {'snapshot': returned}, tags=['infinibox'])
         self._notify_post_exposure(self, returned)
-        gadget.log_operation(self, "expose last consistent snapshot")
         return returned
 
 
@@ -399,7 +390,6 @@ class Replica(SystemObject):
                                          {'replica': self, 'exception': e}, tags=['infinibox'])
         gossip.trigger_with_tags('infinidat.sdk.post_replica_suspend', {'replica': self}, tags=['infinibox'])
         self.invalidate_cache('state')
-        gadget.log_operation(self, "suspend")
 
     def sync(self):
         """Starts a sync job
@@ -407,7 +397,6 @@ class Replica(SystemObject):
         returned = self.system.api.post(self.get_this_url_path().add_path('sync'),
                                         headers={'X-INFINIDAT-RAW-RESPONSE': 'true'})
         result = returned.get_result()
-        gadget.log_operation(self, "sync", params=result)
         return result
 
     def resume(self):
@@ -422,7 +411,6 @@ class Replica(SystemObject):
                                          {'replica': self, 'exception': e}, tags=['infinibox'])
         gossip.trigger_with_tags('infinidat.sdk.post_replica_resume', {'replica': self}, tags=['infinibox'])
         self.invalidate_cache('state')
-        gadget.log_operation(self, "resume")
 
     @require_sync_replication
     def switch_role(self):
@@ -437,7 +425,6 @@ class Replica(SystemObject):
                                          {'replica': self, 'exception': e}, tags=['infinibox'])
         gossip.trigger_with_tags('infinidat.sdk.post_replica_switch_role', {'replica': self}, tags=['infinibox'])
         self.invalidate_cache()
-        gadget.log_operation(self, "switch role")
 
     def is_type_sync(self):
         if self.system.compat.has_sync_replication():
@@ -485,7 +472,6 @@ class Replica(SystemObject):
         :param params: Optional dictionary containing additional parameters for the type change
          """
         self._change_type(new_type='async', params=params)
-        gadget.log_operation(self, "change type to async")
 
     @require_sync_replication
     def change_type_to_sync(self, params=None):
@@ -494,7 +480,6 @@ class Replica(SystemObject):
         :param params: Optional dictionary containing additional parameters for the type change
          """
         self._change_type(new_type='sync', params=params)
-        gadget.log_operation(self, "change type to sync")
 
     def _change_type(self, new_type, params=None):
         if params is None:
@@ -657,23 +642,19 @@ class Replica(SystemObject):
             self._notify_pre_exposure(self)
             self._notify_pre_exposure(remote_replica)
 
-        gadget.log_entity_deletion(self)
-        with self._get_delete_context():
-            try:
-                resp = self.system.api.delete(path)
-                entity_pairs = None
-                result = resp.get_result()
-                if result:
-                    entity_pairs = result.get('entity_pairs')
-                gossip.trigger_with_tags(
-                    'infinidat.sdk.replica_deleted',
-                    {'replica': self, 'entity_pairs': entity_pairs},
-                    tags=['infinibox'])
-            except Exception as e:  # pylint: disable=broad-except
-                with end_reraise_context():
-                    if retain_staging_area:
-                        self._notify_exposure_failure(self, e)
-                        self._notify_exposure_failure(remote_replica, e)
+        try:
+            resp = self._send_delete_with_hooks_tirggering(path)
+        except Exception as e:  # pylint: disable=broad-except
+            with end_reraise_context():
+                if retain_staging_area:
+                    self._notify_exposure_failure(self, e)
+                    self._notify_exposure_failure(remote_replica, e)
+
+        result = resp.get_result()
+        entity_pairs = result.get('entity_pairs') if result else None
+        gossip.trigger_with_tags('infinidat.sdk.replica_deleted',
+                                 {'replica': self, 'entity_pairs': entity_pairs},
+                                 tags=['infinibox'])
 
         if retain_staging_area:
             local, remote = self._get_deletion_result(resp.get_result(), remote_replica)

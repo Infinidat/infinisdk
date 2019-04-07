@@ -6,7 +6,13 @@ from ..core.api.special_values import Autogenerate
 from ..core.object_query import PolymorphicQuery
 from ..core.translators_and_types import MillisecondsDatetimeType
 from ..core.utils import end_reraise_context
+from ..core.type_binder import TypeBinder
 from .system_object import InfiniBoxObject
+
+
+class QosPolicyBinder(TypeBinder):
+    def get_assigned_entities(self):
+        return QosPolicy._get_assigned_entities_query(self.system, URL("qos/assigned_entities")) # pylint: disable=protected-access
 
 
 class QosPolicy(InfiniBoxObject):
@@ -27,6 +33,20 @@ class QosPolicy(InfiniBoxObject):
               is_sortable=True),
     ]
 
+    BINDER_CLASS = QosPolicyBinder
+
+    @classmethod
+    def _get_assigned_entities_query(cls, system, url):
+        def object_factory(system, received_item):
+            type_name = received_item['entity_type'].lower()
+            entity_id = received_item['entity_id']
+            return system.objects.get_binder_by_type_name(type_name).get_by_id_lazy(entity_id)
+
+        object_types = (system.volumes.object_type, system.filesystems.object_type,
+                        system.pools.object_type)
+
+        return PolymorphicQuery(system, url, object_types, object_factory)
+
     @classmethod
     def get_type_name(cls):
         return "qos_policy"
@@ -40,15 +60,8 @@ class QosPolicy(InfiniBoxObject):
         return system.compat.has_qos()
 
     def get_assigned_entities(self):
-        def object_factory(system, received_item):
-            type_name = received_item['entity_type'].lower()
-            entity_id = received_item['entity_id']
-            return system.objects.get_binder_by_type_name(type_name).get_by_id_lazy(entity_id)
-
-        object_types = (self.system.volumes.object_type, self.system.filesystems.object_type,
-                        self.system.pools.object_type)
-        return PolymorphicQuery(self.system, self.get_this_url_path().add_path('assigned_entities'),
-                                object_types, object_factory)
+        """Returns the assigned entities of this QOS policy"""
+        return self._get_assigned_entities_query(self.system, self.get_this_url_path().add_path('assigned_entities'))
 
     def _assign_unassign_operation(self, entity, operation_name):
         hook_tags = self.get_tags_for_object_operations(self.system)

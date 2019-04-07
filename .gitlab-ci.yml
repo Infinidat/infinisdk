@@ -1,29 +1,12 @@
+variables:
+  BUNDLE_VERSION: dev-4.0.40
+  INSTALL_DIR: /root/src
+  RUN_ITZIK: https://git.infinidat.com/infradev/helpers/raw/master/run_itzik.py
+  RUN_ITZIK_PARAMETERS: --no-dev --src $INSTALL_DIR --bundle new-infra --bundle-version $BUNDLE_VERSION --until infinisdk -p $CI_PROJECT_DIR[testing] --curr-branch $CI_COMMIT_REF_NAME
 stages:
   - test
   - deploy
   - post
-
-py27:
-  image: python:2.7
-  tags:
-    - infradev
-  except:
-    - /^customer-.*$/
-  script:
-    - pip install -U --pre -i https://pypi.infinidat.com/simple -e .[testing]
-    - pylint --rcfile .pylintrc -j $(nproc) infinisdk tests
-    - pytest
-
-py35:
-  image: python:3.5
-  tags:
-    - infradev
-  except:
-    - /^customer-.*$/
-  script:
-    - pip install -U --pre -i https://pypi.infinidat.com/simple -e .[testing]
-    - pylint --rcfile .pylintrc -j $(nproc) infinisdk tests
-    - pytest
 
 py36:
   image: python:3.6
@@ -32,9 +15,22 @@ py36:
   except:
     - /^customer-.*$/
   script:
-    - pip install -U --pre -i https://pypi.infinidat.com/simple -e .[testing]
-    - pylint --rcfile .pylintrc -j $(nproc) infinisdk tests
-    - pytest
+    - curl -sL $RUN_ITZIK | python3.6 - $RUN_ITZIK_PARAMETERS
+    - source $INSTALL_DIR/env/bin/activate
+    - pylint --rcfile .pylintrc -j $(nproc) infinisdk scripts tests
+    - pytest -ra -W error::DeprecationWarning
+
+py37:
+  image: python:3.7
+  tags:
+    - infradev
+  except:
+    - /^customer-.*$/
+  script:
+    - curl -sL $RUN_ITZIK | python3.7 - $RUN_ITZIK_PARAMETERS
+    - source $INSTALL_DIR/env/bin/activate
+    - pylint --rcfile .pylintrc -j $(nproc) infinisdk scripts tests
+    - pytest -ra -W error::DeprecationWarning
 
 pypi:
   image: python

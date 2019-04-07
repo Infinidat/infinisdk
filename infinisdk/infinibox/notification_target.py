@@ -36,8 +36,8 @@ class NotificationTarget(SystemObject):
     ]
 
     @classmethod
-    def get_plural_name(cls):
-        return 'notification_targets'
+    def get_type_name(cls):
+        return 'notification_target'
 
     def test(self, recipients=None):
         """Tests the SMTP gateway, by sending a test email to one or several recipients

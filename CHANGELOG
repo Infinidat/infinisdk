@@ -1,3 +1,31 @@
+Version 127.2.1 (Released 2019-04-07)
+-------------------------------------
+
+* #11328 Add `ServiceCluster.is_degraded`
+* #11298 Replica creation on systems prior to version 4.0.x will no longer send a default replication sync interval - one must be specified explicitly
+* #11280 Use itzik instead of pip in gitlab-CI
+* #11211 Add `optimized` field to host objects
+* #11198 Change Compatibility.has_feature() to private API & use Compatibility.is_feature_supported() as public API
+* #11168 Deprecated API cleanup
+* #11167 Added hooks for adding/removing host from cluster
+* #11155 Renamed snapdir names 
+* #11149 Added `safe_get_field` to system objects
+* #11134 Remove deprecated APIs
+* #11098 Add "object" key to metadata dictionary
+* #11079 Add "url" parameter to deletion hooks
+* #11068 Add `component_binder.get_by_uid`
+* #11040 Add `system.get_dns_servers` & `system.update_dns_servers`
+* #11039 Add `system.update_name`
+* #11038 Add `fc_port.disable` & `fc_port.enable`
+* #10971 Fix NotificationTarget & LDAPConfig's get_type_name()
+* #10888 Remove deprecated API
+* #10825 Support metadata filetring
+* #10763 Delete deprecated `create_child` method
+* #10691 Add `data` parameter to "infinidat.sdk.object_update_failure" hook
+* #10669 Add `system.qos_policies.get_assigned_entities()` which returns all entities assigned to QoS policies
+* #10667 Add `parent` parameter to creation hooks
+* #10072 Add hooks documentation
+
 Version 116.1.1 (Released 2018-06-28)
 -------------------------------------
 

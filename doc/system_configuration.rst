@@ -23,7 +23,7 @@ Modifying SMTP notification targets:
        >>> smtp_target.update_username('username')
        >>> smtp_target.update_password('password')
        >>> smtp_target.update_from_address('username@domain.com')
-       >>> smtp_target.update_tls(True)
+       >>> smtp_target.enable_tls()
 
 Testing SMTP notification targets:
 

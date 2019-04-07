@@ -14,10 +14,10 @@ Creating filesystems is done with the ``create`` method:
 .. note:: When a size is not explicitly stated, a default of 1 GiB is used. You can also provide the size explicitly:
 
           .. code-block:: python
-             
+
 			  >>> fs = system.filesystems.create(pool=pool, size=1*GiB)
 
-It is also possible to create multiple filesystems with a single line, by calling :meth:`.create_many`:
+It is also possible to create multiple filesystems with a single line, by calling :meth:`.create_many <.DatasetTypeBinder.create_many>`:
 
 .. code-block:: python
 
@@ -147,10 +147,10 @@ Like other InfiniBox collections, InfiniSDK provides iteration and filtering abi
 Export Permissions
 --------------------
 
-| Export permissions can be modified with :meth:`.Export.update_permissions`.
+| Export permissions can be modified with ``.Export.update_permissions``.
 | This method overrides current permissions.
 |
-| To preserve current permission settings, first use :meth:`.Export.get_permissions`, then update accordingly.
+| To preserve current permission settings, first use ``.Export.get_permissions``, then update accordingly.
 
 .. code-block:: python
 
@@ -173,7 +173,7 @@ Export Permissions
 Deleting an Export
 --------------------
 
-Deleting an export is done with :meth:`.Export.delete`:
+Deleting an export is done with :func:`.Export.delete <infinisdk.core.system_object.SystemObject.delete>`:
 
 .. code-block:: python
 
@@ -195,7 +195,7 @@ Each filesystem has a ``treeqs`` member, which is a collection of its TreeQ's:
 TreeQ's can be queried, filtered and sorted:
 
 .. code-block:: python
-                
+
    >>> treeq2 = fs.treeqs.create(path='/path2', soft_capacity=GB, hard_inodes=300)
    >>> treeq3 = fs.treeqs.create(path='/path3', soft_capacity=GB, hard_inodes=400)
    >>> from infinisdk import Q
@@ -208,7 +208,7 @@ When creating a snapshot, all TreeQ's are copied to the child dataset. The new T
 
 .. code-block:: python
 
-   >>> fs2 = fs.create_child()
+   >>> fs2 = fs.create_snapshot()
    >>> for treeq in fs2.treeqs:
    ...     print(treeq.get_path())
    /path1

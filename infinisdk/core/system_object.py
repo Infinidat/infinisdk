@@ -1,10 +1,9 @@
 import copy
 import gossip
 import functools
-import gadget
-from contextlib import contextmanager
 
 from mitba import cached_method
+from sentinels import NOTHING
 from urlobject import URLObject as URL
 
 from .exceptions import APICommandFailed
@@ -22,7 +21,7 @@ from .utils import DONT_CARE, end_reraise_context
 class FieldsMeta(FieldsMetaBase):
 
     @classmethod
-    def FIELD_FACTORY(mcs, name):
+    def FIELD_FACTORY(mcs, name):  # pylint: disable=bad-mcs-classmethod-argument
         return Field(name, binding=PassthroughBinding())
 
 
@@ -132,6 +131,15 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
         if url_path is None:
             url_path = "/api/rest/{}".format(cls.get_plural_name())
         return url_path
+
+    def safe_get_field(self, field_name, default=NOTHING, **kwargs):
+        """
+        Like :meth:`.get_field`, only returns 'default' parameter if no result was found
+        """
+        try:
+            return self.get_field(field_name, **kwargs)
+        except CacheMiss:
+            return default
 
     def get_field(self, field_name, from_cache=DONT_CARE, fetch_if_not_cached=True, raw_value=False):
         """
@@ -283,7 +291,7 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
         except Exception as e:  # pylint: disable=broad-except
             with end_reraise_context():
                 gossip.trigger_with_tags('infinidat.sdk.object_update_failure',
-                                         {'obj': self, 'exception': e, 'system': self.system},
+                                         {'obj': self, 'exception': e, 'system': self.system, 'data': update_dict},
                                          tags=hook_tags)
         response_dict = res.get_result()
         if len(update_dict) == 1 and not isinstance(response_dict, dict):
@@ -352,9 +360,10 @@ class SystemObject(BaseSystemObject):
         return self.get_binder().is_caching_enabled() or super(SystemObject, self)._is_caching_enabled()
 
     @classmethod
-    def _create(cls, system, url, data, tags=None):
+    def _create(cls, system, url, data, tags=None, parent=None):
         hook_tags = tags or cls.get_tags_for_object_operations(system)
-        gossip.trigger_with_tags('infinidat.sdk.pre_object_creation', {'data': data, 'system': system, 'cls': cls},
+        gossip.trigger_with_tags('infinidat.sdk.pre_object_creation',
+                                 {'data': data, 'system': system, 'cls': cls, 'parent': parent},
                                  tags=hook_tags)
         try:
             returned = system.api.post(url, data=data).get_result()
@@ -362,11 +371,11 @@ class SystemObject(BaseSystemObject):
         except Exception as e:  # pylint: disable=broad-except
             with end_reraise_context():
                 gossip.trigger_with_tags('infinidat.sdk.object_creation_failure',
-                                         {'cls': cls, 'system': system, 'data': data, 'exception': e},
+                                         {'cls': cls, 'system': system, 'data': data, 'parent': parent, 'exception': e},
                                          tags=hook_tags)
         gossip.trigger_with_tags('infinidat.sdk.post_object_creation',
-                                 {'obj': obj, 'data': data, 'response_dict': returned}, tags=hook_tags)
-        gadget.log_entity_creation(entity=obj, params=data)
+                                 {'obj': obj, 'data': data, 'response_dict': returned, 'parent': parent},
+                                 tags=hook_tags)
         return obj
 
     @classmethod
@@ -411,22 +420,21 @@ class SystemObject(BaseSystemObject):
         """
         Deletes this object.
         """
-        gadget.log_entity_deletion(self)
-        with self._get_delete_context():
-            self.system.api.delete(self.get_this_url_path())
+        self._send_delete_with_hooks_tirggering(self.get_this_url_path())
 
-    @contextmanager
-    def _get_delete_context(self):
+    def _send_delete_with_hooks_tirggering(self, url):
+        url = URL(url)
         hook_tags = self.get_tags_for_object_operations(self.system)
-        gossip.trigger_with_tags('infinidat.sdk.pre_object_deletion', {'obj': self}, tags=hook_tags)
+        gossip.trigger_with_tags('infinidat.sdk.pre_object_deletion', {'obj': self, 'url': url}, tags=hook_tags)
         try:
-            yield
+            resp = self.system.api.delete(url)
         except Exception as e:       # pylint: disable=broad-except
             with end_reraise_context():
                 gossip.trigger_with_tags('infinidat.sdk.object_deletion_failure',
-                                         {'obj': self, 'exception': e, 'system': self.system},
+                                         {'obj': self, 'exception': e, 'system': self.system, 'url': url},
                                          tags=hook_tags)
-        gossip.trigger_with_tags('infinidat.sdk.post_object_deletion', {'obj': self}, tags=hook_tags)
+        gossip.trigger_with_tags('infinidat.sdk.post_object_deletion', {'obj': self, 'url': url}, tags=hook_tags)
+        return resp
 
 
 @gossip.register('infinidat.sdk.object_creation_failure')

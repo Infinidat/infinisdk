@@ -57,7 +57,7 @@ class BaseBinder(object):
 
     def safe_get(self, *predicates, **kw):
         """
-        Like :meth:`.TypeBinder.get`, only returns ``None`` if no objects were found
+        Like :meth:`.get`, only returns ``None`` if no objects were found
         """
         try:
             return self.get(*predicates, **kw)
