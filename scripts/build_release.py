@@ -33,7 +33,7 @@ def main(verbose, quiet, version, path):
         repo.finish_release()
         click.secho('Repository committed and tagged under {}'.format(repo.path), fg='green')
         click.echo('Examine changes, then push them using ', nl=False)
-        click.secho('git push master:master develop:develop && git push --tags', fg='yellow')
+        click.secho('git push origin master:master develop:develop && git push --tags', fg='yellow')
         input('[Press any key to continue]')
 
 
@@ -110,7 +110,7 @@ class Checkout(object):
                                             '"Release Notes Title" is not empty'):
 
                 if any(_normalize_version(self._version) > _normalize_version(fix_version) > _normalize_version(last_released) # pylint: disable=line-too-long
-                       for fix_version in issue.get_fix_versions()):
+                       for fix_version in issue.get_fix_versions() if 'dev-' not in fix_version):
 
                     print('*', '#{}'.format(issue.key.split('-')
                                             [1]), issue._data.fields.customfield_12507, file=changelog)  # pylint: disable=protected-access
