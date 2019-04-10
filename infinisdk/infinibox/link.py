@@ -35,7 +35,7 @@ class Link(InfiniBoxObject):
         Field('remote_link_id', type=int),
         Field('remote_host', type=str, mutable=True, creation_parameter=True),
         Field('remote_system_name', type=str),
-        Field('remote_system_serial_number', type=int),
+        Field('remote_system_serial_number', type=int, is_filterable=True, is_sortable=True),
         Field('link_state', type=str),
         Field('state_description', type=str, feature_name="sync_replication"),
         Field('is_local_link_ready_for_sync', type=bool, feature_name="sync_replication"),
