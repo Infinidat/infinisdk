@@ -39,19 +39,19 @@ class NlmLock(BaseSystemObject):
         return 'nlm_lock'
 
     FIELDS = [
-        Field("id", api_name='lock_id', type=str, is_identity=True, is_filterable=True, is_sortable=True),
-        Field("lock_id", type=str, is_identity=True, is_filterable=True, is_sortable=True),
+        Field("id", api_name='lock_id', type=str, is_identity=True, is_filterable=True),
+        Field("lock_id", type=str, is_identity=True, is_filterable=True),
         Field("filesystem", type='infinisdk.infinibox.filesystem:Filesystem', api_name="filesystem_id",
-              use_in_repr=True, is_filterable=True, is_sortable=True, binding=RelatedObjectNamedBinding()),
-        Field("file_path", type=str, is_filterable=True, is_sortable=True),
-        Field("file_path_status", type=str, is_filterable=True, is_sortable=True),
+              use_in_repr=True, is_filterable=True, binding=RelatedObjectNamedBinding()),
+        Field("file_path", type=str, is_filterable=True),
+        Field("file_path_status", type=str),
         Field("client", type=str, is_filterable=True, is_sortable=True),
         Field("state", type=str, is_filterable=True, is_sortable=True),
         Field("offset", type=int),
         Field("length", type=int),
-        Field("lock_type", type=str, is_filterable=True, is_sortable=True),
+        Field("lock_type", type=str),
         Field("granted_at", type=MillisecondsDatetimeType, is_filterable=True, is_sortable=True),
-        Field("owner", type=str, is_filterable=True, is_sortable=True),
+        Field("owner", type=str),
     ]
 
     @classmethod
