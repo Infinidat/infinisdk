@@ -148,3 +148,10 @@ def test_component_not_found(infinibox, id_field):
 def test_component_sample(infinibox):
     nodes = infinibox.components.nodes.sample(Q.index != 1, sample_count=2)
     assert {node.get_index() for node in nodes} == {2, 3}
+
+
+def test_component_without_api(infinibox):
+    node = infinibox.components.nodes.choose()
+    with infinibox.api.limited_interaction_context(disable_get=True):
+        infinibox.components.ib_ports.choose(Q.index != 2, Q.node != node)
+        infinibox.components.ib_ports.choose(index=2)
