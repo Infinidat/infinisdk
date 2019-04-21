@@ -216,6 +216,14 @@ infinibox.qos_policies
    :members:
    :inherited-members:
 
+
+infinibox.tenants
+~~~~~~~~~~~~~~~~~
+.. automodule:: infinisdk.infinibox.tenant
+
+.. autoclass:: Tenant
+   :members:
+
 Base Objects
 ~~~~~~~~~~~~
 
