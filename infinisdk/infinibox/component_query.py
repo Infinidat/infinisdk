@@ -86,6 +86,8 @@ class InfiniBoxComponentQuery(ComponentQueryBase):
     def passed_filtering(self, item):
         if self.object_type != self.system.components.object_type and self.object_type != type(item):
             return False
+        if not item.is_in_system():
+            return False
         for predicate in self.predicates:
             try:
                 op_func = getattr(operator, predicate.operator_name)

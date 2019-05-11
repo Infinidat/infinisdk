@@ -1,4 +1,5 @@
 import copy
+import uuid
 
 from .._compat import ExitStack, zip  # pylint: disable=redefined-builtin
 from ..core.field import Field
@@ -45,6 +46,7 @@ class InfiniBoxSystemComponents(SystemComponentsBinder):
         self._fetched_others = False
         self._fetched_service_clusters = False
         self._deps_by_compoents_tree = defaultdict(set)
+        self._initialization_uuid = uuid.uuid4()
 
     def invalidate_cache(self):
         super(InfiniBoxSystemComponents, self).invalidate_cache()
@@ -216,7 +218,7 @@ class InfiniBoxSystemComponent(BaseSystemObject):
         return self.get_uid()
 
     def is_in_system(self):
-        return True
+        return self._construct_uuid == self.system.components._initialization_uuid  # pylint: disable=protected-access
 
     def __deepcopy__(self, memo):
         return self.construct(self.system, copy.deepcopy(self._cache, memo), self.get_parent_id())
@@ -269,6 +271,7 @@ class InfiniBoxSystemComponent(BaseSystemObject):
         data = self.system.api.get(self.get_this_url_path()).get_result()
         self.construct(self.system, data, self.get_parent_id())
 
+
     @classmethod
     def construct(cls, system, data, parent_id, allow_partial_fields=False):    # pylint: disable=arguments-differ
         # pylint: disable=protected-access
@@ -289,6 +292,7 @@ class InfiniBoxSystemComponent(BaseSystemObject):
             except KeyError:
                 if not allow_partial_fields:
                     raise
+        returned._construct_uuid = system.components._initialization_uuid
         return returned
 
 
@@ -320,6 +324,9 @@ class Rack(InfiniBoxSystemComponent):
         self.system.components.mark_fetched_nodes()
         data['enclosures'] = []
         self.construct(self.system, data, self.get_parent_id())
+
+    def is_in_system(self):
+        return True
 
     def refresh_cache(self):
         self.system.components.mark_fetched_all()
@@ -691,6 +698,9 @@ class System(InfiniBoxSystemComponent):
     @cached_method
     def get_this_url_path(self):
         return URL('system')
+
+    def is_in_system(self):
+        return True
 
     def get_state(self, *args, **kwargs):
         return self.get_operational_state(*args, **kwargs)['state']
