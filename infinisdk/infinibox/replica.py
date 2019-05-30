@@ -371,12 +371,21 @@ class Replica(SystemObject):
             return self.get_local_entity().get_members().to_list()
         return [self.get_local_entity()]
 
-    def get_remote_data_entities(self):
+    def get_remote_data_entities(self, from_cache=False):
         """Returns all local volumes, whether as part of a consistency group, filesystem or a single volume
         """
         if self.is_consistency_group():
-            return self.get_remote_entity().get_members().to_list()
-        return [self.get_remote_entity()]
+            return self.get_remote_entity(from_cache=from_cache).get_members().to_list()
+        return [self.get_remote_entity(from_cache=from_cache)]
+
+    def get_remote_data_entity_from_local(self, dataset):
+        remote_system = self.get_remote_system(from_cache=True)
+        if remote_system is None:
+            return None
+        collection = remote_system.objects.get_binder_by_type_name(dataset.get_type_name())
+        for pair in self.get_entity_pairs(from_cache=True):
+            if pair['local_entity_id'] == dataset.id:
+                return collection.get_by_id_lazy(pair['remote_entity_id'])
 
     def is_consistency_group(self):
         """Returns whether this replica is configured with a consistency group as a local entity
