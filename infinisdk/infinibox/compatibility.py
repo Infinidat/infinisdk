@@ -179,6 +179,12 @@ class Compatibility(object):
     def has_fips(self):
         return self._has_feature('fips')
 
+    def has_replica_auto_create(self):
+        return self._has_feature('replica_auto_create')
+
+    def has_active_active_cg(self):
+        return self._get_feature_version("active_active", 0) > 1
+
 _VERSION_TUPLE_LEN = 5
 
 
