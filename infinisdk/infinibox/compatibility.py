@@ -255,6 +255,6 @@ class _InfiniboxVersion(object):
         extra_info = ""
         if self._is_dev:
             extra_info += " dev version"
-        if not self._is_odd_version:
+        if self._is_odd_version:
             extra_info += " (unknown structure)"
         return "<InfiniboxVersion: {}{}>".format(self.version, extra_info)
