@@ -341,8 +341,6 @@ class Dataset(InfiniBoxObject):
             tags=hook_tags)
 
     def get_replicas(self):
-        if isinstance(self, self.system.types.filesystem) and not self.system.compat.has_nas_replication():
-            return []
         return self.system.replicas.find(local_entity_id=self.id).to_list()
 
     def get_replica(self):
