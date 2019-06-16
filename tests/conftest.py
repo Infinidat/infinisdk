@@ -292,9 +292,9 @@ def secondary_infinibox(request):
 def type_binder(request, infinibox):
     object_type = request.param
     if not object_type.is_supported(infinibox):
-        pytest.skip('not supported')
+        pytest.skip('System does not support {}'.format(object_type.get_plural_name()))
     elif object_type.get_type_name() == 'fc_soft_target' and \
         infinibox.compat.get_version_major() < '3':
-        pytest.skip('not supported by infinisim')
+        pytest.skip('Soft targets are not supported by this infinisim version')
 
     return infinibox.objects[request.param]
