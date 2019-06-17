@@ -62,7 +62,7 @@ def main(src_dir, env_dir, python_exec, branch_name, sdk_dir, pytest_color):
     check_process("{}/bin/python -m pip install -i {} -e '.[testing]'".format(env_dir, LOCAL_PYPI_INDEX), cwd=sdk_dir)
 
     # Running unittests
-    extras = '' if branch_name == 'master' else '-k "not test_sphinx_doctest"'
+    extras = '' if branch_name == 'master' else '--disable-warnings -k "not test_sphinx_doctest"'
     rc, _, _ = run_process("{}/bin/pytest --color {} tests {}".format(env_dir, pytest_color, extras), cwd=sdk_dir)
     return rc
 
