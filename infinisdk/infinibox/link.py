@@ -50,10 +50,12 @@ class Link(InfiniBoxObject):
     ]
 
     def is_up(self, from_cache=DONT_CARE):
-        return self.get_link_state(from_cache=from_cache).lower() == 'up'
+        link_state = self.get_link_state(from_cache=from_cache)
+        return link_state is not None and link_state.lower() == 'up'
 
     def is_down(self, from_cache=DONT_CARE):
-        return self.get_link_state(from_cache=from_cache).lower() in ['down', 'unknown']
+        link_state = self.get_link_state(from_cache=from_cache)
+        return link_state is not None and link_state.lower() in ['down', 'unknown']
 
     @classmethod
     def is_supported(cls, system):
