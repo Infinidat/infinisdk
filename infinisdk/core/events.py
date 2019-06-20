@@ -54,7 +54,7 @@ class Event(SystemObject):
         Field("visibility", type=str, cached=True, is_filterable=True, is_sortable=True),
         Field("system_version", type=str, cached=True, is_filterable=True, is_sortable=True),
         Field("source_node_id", type=int, cached=True, is_filterable=True, is_sortable=True),
-        Field("description_template", type=str, cached=True, is_filterable=True, is_sortable=True),
+        Field("description_template", type=str, cached=True),
         Field("affected_entity_id", type=str, cached=True, is_filterable=True, is_sortable=True),
         Field("tenant", api_name="tenant_id", binding=RelatedObjectBinding('tenants'),
               type='infinisdk.infinibox.tenant:Tenant', feature_name='tenants',
