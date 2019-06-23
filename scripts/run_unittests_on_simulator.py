@@ -21,7 +21,7 @@ def parse_args():
     parser.add_argument("--src", dest="src_dir", default='src', help="directory for source files")
     parser.add_argument("--env", dest="env_dir", default='.env', help="directory for virtuale environment")
     parser.add_argument("--python-executeable", dest="python_exec", default=None)
-    parser.add_argument("--branch-name", dest="branch_name", required=True)
+    parser.add_argument("--bundle-version", dest="bundle_version", required=True)
     parser.add_argument("--infinisdk-dir", dest="sdk_dir", default=None)
     parser.add_argument("--pytest-color", dest="pytest_color", default='auto')
     parser.add_argument("-v", action="append_const", const=-10, dest="verbosity", default=[])
@@ -43,7 +43,7 @@ def check_process(cmd, cwd=None):
     return rc, out, err
 
 
-def main(src_dir, env_dir, python_exec, branch_name, sdk_dir, pytest_color, verbosity):
+def main(src_dir, env_dir, python_exec, bundle_version, sdk_dir, pytest_color, verbosity):
     log_level = sum(verbosity) + DEFAULT_LOG_LEVEL
     logging.basicConfig(stream=sys.stderr, level=log_level, format="%(message)s")
 
@@ -55,19 +55,19 @@ def main(src_dir, env_dir, python_exec, branch_name, sdk_dir, pytest_color, verb
         'src_dir': os.path.abspath(os.path.expanduser(src_dir)),
         'env_dir': os.path.abspath(os.path.expanduser(env_dir)),
         'python_exec': python_exec or sys.executable,
-        'branch_name': branch_name,
+        'bundle_version': bundle_version,
     }
 
     # Installing infinisdk's dependencies
     itzik_cmd = "itzik setup --src {src_dir} --env {env_dir} -i {python_exec} --bundle new-infra " + \
-        "--override-default-branch {branch_name} --stop-git-before infinisdk --clean"
+        "--bundle-version {bundle_version} --stop-git-before infinisdk --clean"
     check_process(itzik_cmd.format(**itzik_kwargs))
 
     # Installing infinisdk in the environment
     check_process("{}/bin/python -m pip install -i {} -e '.[testing]'".format(env_dir, LOCAL_PYPI_INDEX), cwd=sdk_dir)
 
     # Running unittests
-    extras = '' if branch_name == 'master' else '--disable-warnings -k "not test_sphinx_doctest"'
+    extras = '' if bundle_version == 'master' else '--disable-warnings -k "not test_sphinx_doctest"'
     check_process("{}/bin/pytest --color {} tests {}".format(env_dir, pytest_color, extras), cwd=sdk_dir)
 
 
