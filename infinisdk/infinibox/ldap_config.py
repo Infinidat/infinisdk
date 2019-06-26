@@ -8,7 +8,7 @@ from .user import User
 class LDAPConfigBinder(TypeBinder):
 
     def define(self, *args, **kwargs):
-        """Alias for :func:`.create <infinisdk.core.type_binder.MonomorphicBinder.create>`
+        """Alias for :func:`.create <infinisdk.core.type_binder.TypeBinder.create>`
         """
         return self.create(*args, **kwargs)
 

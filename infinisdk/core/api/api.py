@@ -627,6 +627,9 @@ class Response:
         """
         return self._get_result()
 
+    def get_extra(self):
+        return self.get_json().get("extra")
+
     def get_error(self):
         """
         :returns: The error portion of the response as returned from the system, or None if it doesn't exist

@@ -66,6 +66,7 @@ class Pool(InfiniBoxObject):
         Field("tenant", api_name="tenant_id", binding=RelatedObjectBinding('tenants'),
               type='infinisdk.infinibox.tenant:Tenant', feature_name='tenants',
               is_filterable=True, is_sortable=True),
+        Field("type", creation_parameter=True, default="pool", is_filterable=True, is_sortable=True),
     ]
 
     @classmethod

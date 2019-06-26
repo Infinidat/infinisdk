@@ -13,7 +13,7 @@ from .system_object_utils import get_data_for_object_creation
 from .exceptions import CacheMiss
 from api_object_schema import FieldsMeta as FieldsMetaBase
 from .field import Field
-from .type_binder import TypeBinder
+from .type_binder import TypeBinder, MonomorphicBinder
 from .bindings import PassthroughBinding
 from .api.special_values import translate_special_values
 from .utils import DONT_CARE, end_reraise_context, add_normalized_query_params
@@ -38,7 +38,7 @@ class BaseSystemObject(metaclass=FieldsMeta):
     URL_PATH = None
     UID_FIELD = "id"
     #: specifies which :class:`.TypeBinder` subclass is to be used for this type
-    BINDER_CLASS = TypeBinder
+    BINDER_CLASS = MonomorphicBinder
 
     def __init__(self, system, initial_data):
         super(BaseSystemObject, self).__init__()
@@ -354,7 +354,7 @@ class SystemObject(BaseSystemObject):
     """
     System object, that has query methods, creation and deletion
     """
-
+    BINDER_CLASS = TypeBinder
     @classmethod
     def find(cls, system, *predicates, **kw):
         binder = system.objects[cls.get_plural_name()]
