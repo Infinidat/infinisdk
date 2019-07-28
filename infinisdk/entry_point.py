@@ -29,8 +29,9 @@ def cli(ctx, verbose, quiet):
     console_handler.push_application()
 
 
-def _get_system_object(system_name, should_login=False):
-    system = InfiniBox(system_name)
+def _get_system_object(system_name, port=None, should_login=False):
+    address = system_name if port is None else (system_name, port)
+    system = InfiniBox(address)
     has_auth = bool(system.api.get_auth())
     if not has_auth:
         msg = "Auth (username & password) wasn't set at {!r} file".format(config.root.ini_file_path)
@@ -59,8 +60,10 @@ def _interact(**local_vars):
 
 @cli.command()
 @click.option("-s", "--system-name", required=True)
-def interact(system_name):
-    system = _get_system_object(system_name)
+@click.option("-p", "--port", type=int)
+@click.option("--login", "should_login", is_flag=True, default=False)
+def interact(system_name, port, should_login):
+    system = _get_system_object(system_name, port=port, should_login=should_login)
     _interact(system=system)
 
 
