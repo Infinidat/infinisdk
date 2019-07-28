@@ -447,6 +447,7 @@ class LocalDrive(InfiniBoxSystemComponent):
         Field("type"),
         Field("serial_number"),
         Field("node", api_name="node_index", type=int, cached=True, binding=RelatedComponentBinding()),
+        Field("encryption_state", type=bool, feature_name="fips"),
     ]
 
     @classmethod
@@ -603,6 +604,7 @@ class Drive(InfiniBoxSystemComponent):
         Field("serial_number"),
         Field("capacity", api_name="bytes_capacity", type=CapacityType),
         Field("state", cached=False),
+        Field("encryption_state", type=bool, feature_name="fips"),
     ]
 
     def get_paths(self, from_cache=False):
