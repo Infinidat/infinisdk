@@ -18,6 +18,7 @@ class User(SystemObject):
               optional=True),
         Field("password_digest_version", type=int, is_filterable=True, is_sortable=True,
               feature_name="local_users_auth"),
+        Field("is_digest_sufficient", type=bool, feature_name="fips"),
     ]
 
     @classmethod
