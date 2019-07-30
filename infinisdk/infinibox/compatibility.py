@@ -67,7 +67,8 @@ class Compatibility(object):
         return self.system.get_version().partition('.')[0]
 
     def get_version_as_float(self):
-        return float(".".join(self.get_parsed_system_version().version[:2]))
+        version_tuple = self.get_parsed_system_version().version[:2]
+        return float(".".join(str(num) for num in version_tuple))
 
     def _init_features(self):
         resp = self.system.api.get("_features", assert_success=False)
