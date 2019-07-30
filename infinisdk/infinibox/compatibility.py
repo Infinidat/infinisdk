@@ -67,8 +67,7 @@ class Compatibility(object):
         return self.system.get_version().partition('.')[0]
 
     def get_version_as_float(self):
-        float_digit_list = self.system.get_version().split('.')[:2]
-        return float(".".join(float_digit_list))
+        return float(".".join(self.get_parsed_system_version().version[:2]))
 
     def _init_features(self):
         resp = self.system.api.get("_features", assert_success=False)
@@ -114,10 +113,10 @@ class Compatibility(object):
         return self._get_feature_version('metadata', 1)
 
     def has_consistency_groups(self):
-        return self.get_version_as_float() >= 2.2
+        return self.get_parsed_system_version() >= '2.2'
 
     def has_initiators(self):
-        return self.get_version_as_float() >= 2.2
+        return self.get_parsed_system_version() >= '2.2'
 
     def has_user_disabling(self):
         return self._get_feature_version("user_management", 0) >= 1
@@ -126,16 +125,16 @@ class Compatibility(object):
         return self._has_feature('api_auth_sessions') or self._has_feature('api/auth_sessions')
 
     def has_max_speed(self):
-        return self.get_version_as_float() > 2.2
+        return self.get_parsed_system_version() > '2.2'
 
     def has_writable_snapshots(self):
         return self._has_feature('snapshots')
 
     def has_sync_job_states(self):
-        return self.get_version_as_float() >= 3.0
+        return self.get_parsed_system_version() >= '3.0'
 
     def has_sync_replication(self):
-        return self.get_version_as_float() >= 4.0
+        return self.get_parsed_system_version() >= '4.0'
 
     def has_nas_replication(self):
         return self._has_feature('filesystem_replicas')
