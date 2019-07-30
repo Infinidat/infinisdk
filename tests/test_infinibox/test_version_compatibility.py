@@ -89,3 +89,15 @@ def version_template(request):
 def version_string(version_template, major_minor):
     major, minor = major_minor
     return version_template.format(major=major, minor=minor)
+
+
+
+@pytest.mark.parametrize("version_string", ["5.5", "5.5.0", "5.5.0.2", "5.5.0.12", "5.5.0.12-a", "5"])
+def test_version_as_float(infinibox_simulator, version_string):
+    expected_float = 5.5 if len(version_string) > 1 else 5.0
+    infinibox_simulator.set_version(version_string)
+    user = infinibox_simulator.auth.get_current_user()
+    auth = (user.get_username(), user.get_password())
+    infiniBox = InfiniBox(infinibox_simulator.get_floating_addresses()[0], auth=auth)
+    infiniBox.login()
+    assert infiniBox.compat.get_version_as_float() == expected_float
