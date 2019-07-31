@@ -158,12 +158,23 @@ class Compatibility(object):
     def has_snapshot_lock(self):
         return self.get_parsed_system_version() >= '4.0.30'
 
+    def has_auto_respawn(self):
+        return self.get_parsed_system_version() >= '4.0.30'
+
     def has_active_active(self):
-        return False
+        return self._has_feature('active_active')
+
+    def has_active_active_preferred_on_link(self):
+        return self._get_feature_version("active_active", -1) == 0
+
+    def has_active_active_preferred_on_replica(self):
+        return self._get_feature_version("active_active", 0) > 0
 
     def has_nlm(self):
-        return False
+        return self._has_feature('nlm')
 
+    def has_local_users_auth(self):
+        return self._has_feature('local_users_auth')
 
 _VERSION_TUPLE_LEN = 5
 

@@ -71,6 +71,8 @@ class Host(InfiniBoxLURelatedObject):
         Field("security_chap_has_outbound_secret", type=bool, feature_name='iscsi'),
         Field("created_at", type=MillisecondsDatetimeType, is_sortable=True, is_filterable=True),
         Field("updated_at", type=MillisecondsDatetimeType, is_sortable=True, is_filterable=True),
+        Field("optimized", type=bool, mutable=True, is_sortable=True, is_filterable=True,
+              creation_parameter=True, optional=True, new_to="5.0"),
         Field("tenant", api_name="tenant_id", binding=RelatedObjectBinding('tenants'),
               type='infinisdk.infinibox.tenant:Tenant', feature_name='tenants',
               is_filterable=True, is_sortable=True),

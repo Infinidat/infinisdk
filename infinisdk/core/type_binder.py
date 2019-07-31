@@ -1,6 +1,7 @@
 import random
 from contextlib import contextmanager
 from sentinels import NOTHING
+from urlobject import URLObject
 
 from .object_query import PolymorphicQuery, ObjectQuery
 from .exceptions import ObjectNotFound, TooManyObjectsFound
@@ -111,7 +112,7 @@ class PolymorphicBinder(BaseBinder):
     def __init__(self, url, object_types, factory, system, feature_name=NOTHING):
         super(PolymorphicBinder, self).__init__(system)
         self._object_types = object_types
-        self._url = url
+        self._url = URLObject(url)
         self._query_factory = factory
         self._feature_name = feature_name
 
@@ -136,8 +137,11 @@ class MonomorphicBinder(BaseBinder): # pylint: disable=abstract-method
         super(MonomorphicBinder, self).__init__(system)
         self.object_type = object_type
 
+    def get_name(self):
+        return self.object_type.get_plural_name()
+
     def __repr__(self):
-        return "<{}.{}>".format(self.system, self.object_type.get_plural_name())
+        return "<{}.{}>".format(self.system, self.get_name())
 
     @property
     def fields(self):

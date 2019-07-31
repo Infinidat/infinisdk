@@ -6,7 +6,7 @@ from .._compat import xrange  # pylint: disable=redefined-builtin
 from .field import Field
 from .field_filter import FieldFilter
 from .q import QField
-from .exceptions import ObjectNotFound
+from .exceptions import ObjectNotFound, ChangedDuringIteration
 
 _DEFAULT_SYSTEM_PAGE_SIZE = 50
 _DEFAULT_PAGE_SIZE = 1000
@@ -90,7 +90,7 @@ class LazyQuery(QueryBase):
                 yield self[i]
             except IndexError:
                 if i != self._total_num_objects:
-                    raise
+                    raise ChangedDuringIteration("Queried path's size changed during iteration")
 
     def __len__(self):
         if self._total_num_objects is None:
@@ -193,7 +193,7 @@ class PolymorphicQuery(LazyQuery):
             field = obj_type.fields.get(field_name)
             if field is not None:
                 return field
-        self.object_types[0].fields.get_or_fabricate(field_name)
+        return self.object_types[0].fields.get_or_fabricate(field_name)
 
     def extend_url(self, *predicates, **kw):
         assert self._mutable, "Cannot modify query after fetching"

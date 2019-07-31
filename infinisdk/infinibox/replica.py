@@ -2,12 +2,11 @@
 import logbook
 import gossip
 import functools
-
 from ..core.utils import end_reraise_context
 from ..core import Field, MillisecondsDatetimeType
 from ..core.api.special_values import OMIT
 from ..core.bindings import RelatedObjectNamedBinding
-from ..core.exceptions import CannotGetReplicaState, InvalidUsageException, TooManyObjectsFound, UnknownSystem
+from ..core.exceptions import CannotGetReplicaState, InvalidUsageException, TooManyObjectsFound
 from ..core.translators_and_types import MillisecondsDeltaType, CapacityType
 from ..core.type_binder import TypeBinder
 from ..core.system_object import SystemObject
@@ -56,12 +55,14 @@ class ReplicaBinder(TypeBinder):
             return self.replicate_entity_create_target(entity, link, remote_pool=remote_pool, **kw)
         return self.replicate_entity_existing_target(entity, link, remote_entity=remote_entity, **kw)
 
-    def replicate_entity_create_target(self, entity, link, remote_pool=OMIT, **kw):
+    def replicate_entity_create_target(self, entity, link, remote_pool=OMIT, remote_entity_names=OMIT, **kw):
         """Replicates an entity, creating its remote replica on the specified pool
 
         :param remote_pool: Remote pool to use for entity creation on the remote side
         """
-        return self.system.replicas.create(link=link, entity_pairs=self._build_entity_pairs_create_target(entity),
+        return self.system.replicas.create(link=link,
+                                           entity_pairs=self._build_entity_pairs_create_target(remote_entity_names,
+                                                                                               entity),
                                            remote_pool_id=remote_pool.id if remote_pool is not OMIT else OMIT,
                                            **self._get_extra_replica_kwargs(kw, entity))
 
@@ -125,14 +126,19 @@ class ReplicaBinder(TypeBinder):
             return parent.id
         return entity.id
 
-    def _build_entity_pairs_create_target(self, entity):
+    def _build_entity_pairs_create_target(self, remote_entity_names, entity):
         returned = []
+        names_index = 0
         for sub_entity in self._get_sub_entities(entity):
-            returned.append({
+            new_pair = {
                 'remote_base_action': 'CREATE',
                 'local_entity_id': sub_entity.id,
                 'remote_entity_id': None,
-                })
+                }
+            if remote_entity_names is not OMIT and names_index < len(remote_entity_names):
+                new_pair['remote_entity_name'] = remote_entity_names[names_index]
+                names_index += 1
+            returned.append(new_pair)
         return returned
 
     def _build_entity_pairs_existing(self, local_entity, remote_entity, member_mappings, use_snapshots,
@@ -235,6 +241,8 @@ class Replica(SystemObject):
         Field('temporary_failure_retry_interval', type=MillisecondsDeltaType, mutable=True),
         Field('temporary_failure_retry_count', type=int, mutable=True),
         Field('started_at', type=MillisecondsDatetimeType),
+        Field('preferred', api_name='is_preferred', type=bool, optional=True, is_filterable=True, is_sortable=True,
+              creation_parameter=True, mutable=False, feature_name="active_active_preferred_on_replica"),
     ]
 
     @classmethod
@@ -248,20 +256,28 @@ class Replica(SystemObject):
             return self.system.volumes
         return self.system.cons_groups
 
-    def get_local_entity(self):
-        """Returns the local entity used for replication, be it a volume, filesystem or a consistency group
-        """
+    def _get_entity(self, is_local, from_cache=False, safe=False):
+        system = self.system if is_local else self.get_remote_system(from_cache=from_cache, safe=safe)
+        if system is None:
+            return None
+        side = 'local' if is_local else 'remote'
+
         if self.is_consistency_group():
-            return self.system.cons_groups.get_by_id_lazy(self.get_field('local_cg_id'))
+            return system.cons_groups.get_by_id_lazy(self.get_field('{}_cg_id'.format(side)))
 
         pairs = self.get_entity_pairs(from_cache=True)
         if len(pairs) > 1:
             raise TooManyObjectsFound('Entity pairs for {}'.format(self))
         [pair] = pairs
         if self.is_filesystem():
-            return self.system.filesystems.get_by_id_lazy(pair['local_entity_id'])
+            return system.filesystems.get_by_id_lazy(pair['{}_entity_id'.format(side)])
         else:
-            return self.system.volumes.get_by_id_lazy(pair['local_entity_id'])
+            return system.volumes.get_by_id_lazy(pair['{}_entity_id'.format(side)])
+
+    def get_local_entity(self):
+        """Returns the local entity used for replication, be it a volume, filesystem or a consistency group
+        """
+        return self._get_entity(is_local=True)
 
     def _get_entity_tags(self):
         if self.is_consistency_group():
@@ -317,7 +333,9 @@ class Replica(SystemObject):
         if snapshot_id is None:
             return None
         returned = self._get_entity_collection().get_by_id_lazy(snapshot_id)
-        gossip.trigger_with_tags('infinidat.sdk.replica_snapshot_created', {'snapshot': returned}, tags=['infinibox'])
+        gossip.trigger_with_tags('infinidat.sdk.replica_snapshot_created',
+                                 {'snapshot': returned, 'replica_deleted': False},
+                                 tags=['infinibox'])
         self._notify_post_exposure(self, returned)
         return returned
 
@@ -431,14 +449,27 @@ class Replica(SystemObject):
             return self.get_replication_type().lower() == 'sync'
         return False
 
+
+    def is_type_active_active(self):
+        if self.system.compat.has_sync_replication():
+            return self.get_replication_type(from_cache=True).lower() == 'active_active'
+        return False
+
     def is_type_async(self):
         if self.system.compat.has_sync_replication():
             return self.get_replication_type().lower() == 'async'
         return True
 
-    def _is_in_sync_state(self, sync_state):
+    def _is_in_sync_state(self, *sync_states):
         current_sync_state = self.get_sync_state()
-        return current_sync_state and current_sync_state.lower() == sync_state.lower()
+        return current_sync_state and current_sync_state.lower() in sync_states
+
+    def _is_in_state(self, *states):
+        current_state = self.get_state()
+        return current_state and current_state.lower() in states
+
+    def _get_state_lower(self, **kwargs):
+        return str(self.get_state(**kwargs)).lower()
 
     def is_synchronized(self):
         """Returns True if this replica sync state is 'SYNCHRONIZED'
@@ -507,48 +538,61 @@ class Replica(SystemObject):
         if self.is_target():
             raise CannotGetReplicaState('Replica state cannot be checked on target replica')
 
-    def is_suspended(self, *args, **kwargs):
+    def is_suspended(self, **kwargs):
         """Returns whether or not this replica is currently suspended
         """
+        if self.is_type_active_active():
+            return False
         self._validate_can_check_state()
-        return self.get_state(*args, **kwargs).lower() in ['suspended', 'auto_suspended']
+        return self._is_in_state('suspended', 'auto_suspended', **kwargs)
 
-    def is_user_suspended(self, *args, **kwargs):
+    def is_user_suspended(self, **kwargs):
         """Returns whether or not this replica is currently suspended due to a user request
         """
+        if self.is_type_active_active():
+            return False
         self._validate_can_check_state()
-        return self.get_state(*args, **kwargs).lower() == 'suspended'
+        return self._is_in_state('suspended', **kwargs)
 
-    def is_idle(self, *args, **kwargs):
+    def is_idle(self, **kwargs):
         """Returns whether or not this replica is in idle state
         """
         self._validate_can_check_state()
         if self.system.compat.has_sync_job_states():
             return not self.is_replicating() and not self.is_initial_replication()\
                 and not self.is_stalled() and self.is_active()
-        return self.get_state(*args, **kwargs).lower() == 'idle'
+        return self._is_in_state('idle', **kwargs)
 
-    def is_auto_suspended(self, *args, **kwargs):
+    def is_lagging(self, **kwargs):
+        if self.is_type_active_active():
+            return self._is_in_sync_state("lagging", **kwargs)
+        return False
+
+    def is_auto_suspended(self, **kwargs):
         """Returns whether or not this replica is in auto_suspended state
         """
+        if self.is_type_active_active():
+            return False
         self._validate_can_check_state()
-        return self.get_state(*args, **kwargs).lower() == 'auto_suspended'
+        return self._is_in_state('auto_suspended', **kwargs)
 
-    def is_initial_replication(self, *args, **kwargs):
+    def is_initial_replication(self, **kwargs):
         """Returns whether or not this replica is in initiating state
         """
+        if self.is_type_active_active():
+            return self._is_in_sync_state("initializing", "initializing_pending", **kwargs)
         self._validate_can_check_state()
         if self.system.compat.has_sync_job_states():
-            return self.is_initial() and self._any_sync_job_state_contains(['initializing', 'stalled'])
-        return 'initial' in self.get_state(*args, **kwargs).lower()
+            return self.is_initial(**kwargs) and self._any_sync_job_state_contains(['initializing', 'stalled'])
+        return 'initial' in self._get_state_lower(**kwargs)
 
-    def is_pending(self):
+    def is_pending(self, **kwargs):
         """Returns whether or not this replication is waiting to start initializing
         """
         self._validate_can_check_state()
         if not self.system.compat.has_sync_job_states():
             raise NotImplementedError("This system ({}) doesn't support replica \"pending\" state".format(self.system))
-        return self.is_active() and self._any_sync_job_state_contains('pending')
+        return self.is_active(**kwargs) and self._any_sync_job_state_contains('pending')
 
     def _get_jobs(self):
         returned = self.get_field('jobs')
@@ -563,27 +607,34 @@ class Replica(SystemObject):
                 j['state'] = global_job_state
         return returned
 
-    def is_replicating(self, *args, **kwargs):
+    def is_replicating(self, **kwargs):
         """Returns whether or not this replica is in replicating state
         """
         self._validate_can_check_state()
         if self.system.compat.has_sync_job_states():
             return self.is_active() and self._any_sync_job_state_contains('replicating')
-        return self.get_state(*args, **kwargs).lower() == 'replicating'
+        return self._is_in_state('replicating', **kwargs)
 
-    def is_stalled(self):
+    def is_stalled(self, **kwargs):
+        if self.is_type_active_active():
+            return self._is_in_sync_state("sync_stalled", **kwargs)
         self._validate_can_check_state()
         if not self.system.compat.has_sync_job_states():
             raise NotImplementedError("Checking for stalled is not supported on systems without sync job states")
         return self._any_sync_job_state_contains('stalled')
 
-    def is_active(self, *args, **kwargs):
+    def is_active(self, **kwargs):
         """Returns whether or not the replica is currently active
         """
+        if self.is_type_active_active():
+            return self._is_in_sync_state('synchronized', 'initializing',
+                                          'initializing_pending', 'sync_in_progress',
+                                          **kwargs)
         self._validate_can_check_state()
+        state = self._get_state_lower(**kwargs)
         if self.system.compat.has_sync_job_states():
-            return self.get_state().lower() == 'active'
-        return self.get_state(*args, **kwargs).lower() in ['idle', 'initiating', 'initial_replication', 'replicating']
+            return state == 'active'
+        return state in ['idle', 'initiating', 'initial_replication', 'replicating']
 
     def change_role(self, entity_pairs=OMIT):
         """Changes the role of this replica from source to target or vice-versa
@@ -602,11 +653,15 @@ class Replica(SystemObject):
     def is_source(self, *args, **kwargs):
         """A predicate returning whether or not the replica is currently in the "source" role
         """
+        if self.is_type_active_active():
+            return False
         return self.get_role(*args, **kwargs).lower() == 'source'
 
     def is_target(self, *args, **kwargs):
         """A predicate returning whether or not the replica is currently in the "target" role
         """
+        if self.is_type_active_active():
+            return False
         return not self.is_source(*args, **kwargs)
 
     def has_local_entity(self, entity):
@@ -618,7 +673,7 @@ class Replica(SystemObject):
 
     # pylint: disable=arguments-differ
     def delete(self, retain_staging_area=False, force_if_remote_error=False, force_on_target=False,
-               force_if_no_remote_credentials=False):
+               force_if_no_remote_credentials=False, force_on_local=OMIT, keep_serial_on_local=OMIT):
         """Deletes this replica
         """
         path = self.get_this_url_path()
@@ -630,13 +685,14 @@ class Replica(SystemObject):
             path = path.add_query_param('force_on_target', 'true')
         if force_if_no_remote_credentials:
             path = path.add_query_param('force_if_no_remote_credentials', 'true')
+        if force_on_local is not OMIT:
+            path = path.add_query_param('force_on_local', force_on_local)
+        if keep_serial_on_local is not OMIT:
+            path = path.add_query_param('keep_serial_on_local', keep_serial_on_local)
 
-        try:
-            remote_replica = self.get_remote_replica(safe=True)
-            if remote_replica is None:
-                _logger.debug('Failed to get remote replica during delete operation')
-        except UnknownSystem:
-            remote_replica = None
+        remote_replica = self.get_remote_replica(safe=True)
+        if remote_replica is None:
+            _logger.debug('Failed to get remote replica during delete operation')
 
         if retain_staging_area:
             self._notify_pre_exposure(self)
@@ -653,7 +709,7 @@ class Replica(SystemObject):
         result = resp.get_result()
         entity_pairs = result.get('entity_pairs') if result else None
         gossip.trigger_with_tags('infinidat.sdk.replica_deleted',
-                                 {'replica': self, 'entity_pairs': entity_pairs},
+                                 {'replica': self, 'entity_pairs': entity_pairs, 'deletion_params': path.query_dict},
                                  tags=['infinibox'])
 
         if retain_staging_area:
@@ -663,7 +719,8 @@ class Replica(SystemObject):
         for replica, snap in (self, local), (remote_replica, remote):
             if snap is not None:
                 gossip.trigger_with_tags(
-                    'infinidat.sdk.replica_snapshot_created', {'snapshot': snap}, tags=['infinibox'])
+                    'infinidat.sdk.replica_snapshot_created', {'snapshot': snap, 'replica_deleted': True},
+                    tags=['infinibox'])
 
                 self._notify_post_exposure(replica, snap)
         return local, remote
@@ -712,24 +769,21 @@ class Replica(SystemObject):
         return local, remote
 
     def get_remote_system(self, from_cache=True, safe=False):
-        return self.get_link(from_cache=from_cache).get_linked_system(safe=safe)
+        return self.get_link(from_cache=from_cache).get_linked_system(from_cache=from_cache, safe=safe)
 
     def get_remote_replica(self, from_cache=False, safe=False):
         """Get the corresponsing replica object in the remote machine. For this to work, the SDK user should
         call the register_related_system method of the Infinibox object when a link to a remote system is consructed
         for the first time"""
-        linked_system = self.get_link(from_cache=from_cache).get_linked_system(safe=safe)
+        linked_system = self.get_remote_system(from_cache=from_cache, safe=safe)
         if linked_system is None:
             return None
         return linked_system.replicas.get_by_id_lazy(self.get_remote_replica_id(from_cache=from_cache))
 
-    def get_remote_entity(self):
+    def get_remote_entity(self, from_cache=False, safe=False):
         """Fetches the remote replicated entity if available
         """
-        peer = self.get_remote_replica()
-        if peer is None:
-            return None
-        return peer.get_local_entity()
+        return self._get_entity(is_local=False, from_cache=from_cache, safe=safe)
 
     def get_remote_entity_pairs(self):
         """Returns the entity_pairs configuration as held by the remote replica
