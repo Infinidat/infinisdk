@@ -36,7 +36,9 @@ class TreeQBinder(TypeBinder):
         return self._filesystem.get_this_url_path().add_path('treeqs')
 
     def __repr__(self):
-        return "<{}.{}>".format(self._filesystem, self.object_type.get_plural_name())
+        return '<{}:Filesystem id={}.treeqs>'.format(
+            self._filesystem.system.get_name(), self._filesystem.id)
+
 
 
 class TreeQ(SystemObject):

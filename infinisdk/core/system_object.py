@@ -5,6 +5,7 @@ import functools
 from mitba import cached_method
 from sentinels import NOTHING
 from urlobject import URLObject as URL
+from contextlib import contextmanager
 
 from .exceptions import APICommandFailed
 from .system_object_utils import get_data_for_object_creation
@@ -16,6 +17,9 @@ from .type_binder import TypeBinder
 from .bindings import PassthroughBinding
 from .api.special_values import translate_special_values
 from .utils import DONT_CARE, end_reraise_context
+from logbook import Logger
+
+_logger = Logger(__name__)
 
 
 class FieldsMeta(FieldsMetaBase):
@@ -43,6 +47,7 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
         self._cache = initial_data
         uid_field = self.fields[self.UID_FIELD]
         self._uid = uid_field.binding.get_value_from_api_object(system, type(self), self, self._cache)
+        self._use_cache_by_default = False
 
     @property
     def id(self):
@@ -69,6 +74,19 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
     @classmethod
     def is_supported(cls, system): # pylint: disable=unused-argument
         return True
+
+    def is_in_system(self):
+        """
+        Returns whether or not the object actually exists
+        """
+        try:
+            self.get_field(self.UID_FIELD, from_cache=False)
+        except APICommandFailed as e:
+            if e.status_code != httplib.NOT_FOUND:
+                raise
+            return False
+        else:
+            return True
 
     @staticmethod
     def requires_cache_invalidation(*fields):
@@ -130,7 +148,7 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
         url_path = cls.URL_PATH
         if url_path is None:
             url_path = "/api/rest/{}".format(cls.get_plural_name())
-        return url_path
+        return URL(url_path)
 
     def safe_get_field(self, field_name, default=NOTHING, **kwargs):
         """
@@ -164,11 +182,14 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
         from_cache = self._deduce_from_cache(field_names, from_cache)
 
         if from_cache:
-            try:
+            if not fetch_if_not_cached:
                 return self._get_fields_from_cache(field_names, raw_value)
+            field_names_to_retrive = field_names or \
+                [field.name for field in self.fields if self.system.is_field_supported(field)]
+            try:
+                return self._get_fields_from_cache(field_names_to_retrive, raw_value)
             except CacheMiss:
-                if not fetch_if_not_cached:
-                    raise
+                pass
 
         query = self.get_this_url_path()
 
@@ -203,8 +224,10 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
         if not field_names:
             return False
 
-        cache_enabled = self._is_caching_enabled()
+        if self._use_cache_by_default:
+            return True
 
+        cache_enabled = self._is_caching_enabled()
         for field_name in field_names:
             field = self.fields.get_or_fabricate(field_name)
             should_get_from_cache = field.cached
@@ -339,19 +362,6 @@ class SystemObject(BaseSystemObject):
     def get_collection(self):
         return self.get_binder()
 
-    def is_in_system(self):
-        """
-        Returns whether or not the object actually exists
-        """
-        try:
-            self.get_field(self.UID_FIELD, from_cache=False)
-        except APICommandFailed as e:
-            if e.status_code != httplib.NOT_FOUND:
-                raise
-            return False
-        else:
-            return True
-
     @classmethod
     def get_tags_for_object_operations(cls, system):
         return [cls.get_type_name().lower(), system.get_type_name().lower()]
@@ -406,6 +416,18 @@ class SystemObject(BaseSystemObject):
             for field in cls.fields  # pylint: disable=no-member
             if field.creation_parameter and not field.optional))
 
+    @contextmanager
+    def using_cache_by_default(self):
+        prev_value = self._use_cache_by_default
+        self._use_cache_by_default = True
+        _logger.debug('Entered use cache by default context for object {}', self)
+        try:
+            yield
+        finally:
+            self._use_cache_by_default = prev_value
+            _logger.debug('Exited use cache by default for object {}, use_cache new value is {}', self, prev_value)
+
+
     def safe_delete(self, *args, **kwargs):
         """
         Tries to delete the object, doing nothing if the object cannot be found on the system
@@ -428,11 +450,15 @@ class SystemObject(BaseSystemObject):
         gossip.trigger_with_tags('infinidat.sdk.pre_object_deletion', {'obj': self, 'url': url}, tags=hook_tags)
         try:
             resp = self.system.api.delete(url)
+            self._use_cache_by_default = True
         except Exception as e:       # pylint: disable=broad-except
             with end_reraise_context():
                 gossip.trigger_with_tags('infinidat.sdk.object_deletion_failure',
                                          {'obj': self, 'exception': e, 'system': self.system, 'url': url},
                                          tags=hook_tags)
+        result = resp.get_result()
+        if isinstance(result, dict):
+            self.update_field_cache(result)
         gossip.trigger_with_tags('infinidat.sdk.post_object_deletion', {'obj': self, 'url': url}, tags=hook_tags)
         return resp
 
