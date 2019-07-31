@@ -24,6 +24,6 @@ def get_hostname():
 @cached_function
 def get_infinisdk_version():
     try:
-        return pkg_resources.get_distribution('infinisdk').version, # pylint: disable=no-member
+        return pkg_resources.get_distribution('infinisdk').version # pylint: disable=no-member
     except pkg_resources.DistributionNotFound:
         return 'N/A'

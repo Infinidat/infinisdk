@@ -29,27 +29,27 @@ def doctest_context():
 
     with ExitStack() as stack:
 
-        primary = stack.enter_context(_system())
-        secondary = stack.enter_context(_system())
+        primary_system = stack.enter_context(_system())
+        secondary_system = stack.enter_context(_system())
 
-        primary_ns = create_rmr_network_space(primary)
-        secondary_ns = create_rmr_network_space(secondary)
+        primary_ns = create_rmr_network_space(primary_system)
+        secondary_ns = create_rmr_network_space(secondary_system)
 
-        link = primary.links.create(
+        link = primary_system.links.create(
             name='link',
             local_replication_network_space_id=primary_ns.id,
             remote_host=secondary_ns.get_mgmt_ip().ip_address,
         )
 
-        vol = primary.volumes.create(pool=primary.pools.create())
-        async_replica = primary.replicas.replicate_entity(vol, link=link, remote_pool=secondary.pools.create())
+        vol = primary_system.volumes.create(pool=primary_system.pools.create())
+        async_replica = primary_system.replicas.replicate_entity(vol, link=link, remote_pool=secondary_system.pools.create())
         wait(async_replica.is_idle)
 
         yield {
             'link': link,
-            'primary': primary,
+            'primary_system': primary_system,
             'primary_ip': primary_ns.get_mgmt_ip(),
-            'secondary': secondary,
+            'secondary_system': secondary_system,
             'secondary_ip': secondary_ns.get_mgmt_ip(),
             'async_replica': async_replica,
         }

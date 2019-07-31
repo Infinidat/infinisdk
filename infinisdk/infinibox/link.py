@@ -35,11 +35,18 @@ class Link(InfiniBoxObject):
         Field('remote_link_id', type=int),
         Field('remote_host', type=str, mutable=True, creation_parameter=True),
         Field('remote_system_name', type=str),
-        Field('remote_system_serial_number', type=int),
+        Field('remote_system_serial_number', type=int, is_filterable=True, is_sortable=True),
         Field('link_state', type=str),
         Field('state_description', type=str, feature_name="sync_replication"),
         Field('is_local_link_ready_for_sync', type=bool, feature_name="sync_replication"),
         Field('async_only', type=bool, feature_name="sync_replication"),
+        Field('resiliency_mode', type=str, feature_name="active_active"),
+        Field('preferred', api_name='is_preferred', type=bool, optional=True, is_filterable=True, is_sortable=True,
+              creation_parameter=True, feature_name="active_active_preferred_on_link"),
+        Field('witness_address', type=str, optional=True, is_filterable=True, is_sortable=True,
+              creation_parameter=True, feature_name="active_active"),
+        Field('local_witness_state', type=str, feature_name="active_active"),
+        Field('link_mode', type=str, feature_name="active_active"),
     ]
 
     def is_up(self, from_cache=DONT_CARE):
@@ -79,19 +86,19 @@ class Link(InfiniBoxObject):
             url = url.add_query_param('force_if_no_remote_credentials', 'true')
         self._send_delete_with_hooks_tirggering(url)
 
-    def get_linked_system(self, safe=False):
+    def get_linked_system(self, safe=False, from_cache=DONT_CARE):
         """Get the corresponsing system object at the remote and of the link. For this to work, the SDK user should
         call the register_related_system method of the Infinibox object when a link to a remote system is consructed
         for the first time"""
         related_system = self.system.links.get_cached_related_system(self)
         if related_system is not None:
             return related_system
-        remote_host = self.get_remote_host()
+        remote_host = self.get_remote_host(from_cache=from_cache)
         for related_system in self.get_system().iter_related_systems():
             if safe and not related_system.is_active():
                 continue
             for network_space in related_system.network_spaces.get_all():
-                for ip in network_space.get_ips():
+                for ip in network_space.get_ips(from_cache=True):
                     if ip.ip_address == remote_host:
                         self.system.links.set_cached_related_system(self, related_system)
                         return related_system
@@ -106,3 +113,14 @@ class Link(InfiniBoxObject):
         if linked_system is None:
             return None
         return linked_system.links.get_by_id_lazy(self.get_remote_link_id())
+
+    def set_witness_address(self, witness_address):
+        url = self.get_this_url_path().add_path('set_witness_address')
+        self.system.api.post(url, data={'witness_address': witness_address})
+        self.invalidate_cache('witness_address')
+        self.invalidate_cache('is_preferred')
+
+    def set_preferred(self):
+        url = self.get_this_url_path().add_path('set_preferred')
+        self.system.api.post(url)
+        self.invalidate_cache('is_preferred')

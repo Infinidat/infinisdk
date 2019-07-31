@@ -167,6 +167,11 @@ class TooManyObjectsFound(InfiniSDKException):
 class MissingFields(InfiniSDKException):
     pass
 
+
+class ChangedDuringIteration(InfiniSDKException, IndexError):
+    pass
+
+
 class AttributeAlreadyExists(InfiniSDKException):
     def __init__(self, obj, attr):
         self._obj = obj

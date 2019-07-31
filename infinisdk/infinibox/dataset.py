@@ -102,6 +102,8 @@ class Dataset(InfiniBoxObject):
         Field("lock_expires_at", type=MillisecondsDatetimeType, mutable=True, creation_parameter=True,
               optional=True, feature_name='snapshot_lock'),
         Field("lock_state", type=str, feature_name='snapshot_lock'),
+        Field('rmr_active_active_peer', type=bool, is_sortable=True, is_filterable=True, feature_name='active_active'),
+        Field('replica_ids', type=list, new_to="5.0"),
         Field("tenant", api_name="tenant_id", binding=RelatedObjectBinding('tenants'),
               type='infinisdk.infinibox.tenant:Tenant', feature_name='tenants', is_filterable=True, is_sortable=True),
     ]
@@ -341,8 +343,7 @@ class Dataset(InfiniBoxObject):
     def get_replicas(self):
         if isinstance(self, self.system.types.filesystem) and not self.system.compat.has_nas_replication():
             return []
-        pairs = self.system.api.get(self.get_this_url_path().add_path('replication_pairs')).response.json()['result']
-        return [self.system.replicas.get_by_id_lazy(pair['replica_id']) for pair in pairs]
+        return self.system.replicas.find(local_entity_id=self.id).to_list()
 
     def get_replica(self):
         returned = self.get_replicas()
@@ -355,11 +356,11 @@ class Dataset(InfiniBoxObject):
     def get_remote_entities(self):
         returned = []
         for replica in self.get_replicas():
-            remote_system = replica.get_remote_system()
+            remote_system = replica.get_remote_system(from_cache=True)
             if remote_system is None:
                 continue
             collection = remote_system.objects.get_binder_by_type_name(self.get_type_name())
-            for pair in replica.get_entity_pairs():
+            for pair in replica.get_entity_pairs(from_cache=True):
                 if pair['local_entity_id'] == self.id:
                     returned.append(collection.get_by_id_lazy(pair['remote_entity_id']))
                     break
@@ -376,7 +377,10 @@ class Dataset(InfiniBoxObject):
     def is_replicated(self, from_cache=DONT_CARE):
         """Returns True if this volume is a part of a replica, whether as source or as target
         """
-        return any(self.get_fields(['rmr_source', 'rmr_target'], from_cache=from_cache).values())
+        fields = ['rmr_source', 'rmr_target']
+        if self.system.compat.has_active_active():
+            fields.append('rmr_active_active_peer')
+        return any(self.get_fields(fields, from_cache=from_cache).values())
 
     def assign_qos_policy(self, qos_policy):
         assert self.system.compat.has_qos(), 'QoS is not supported in this version'

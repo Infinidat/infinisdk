@@ -73,7 +73,7 @@ class APITarget(with_metaclass(abc.ABCMeta)):
         return [obj_type.get_plural_name() for obj_type in self.OBJECT_TYPES]
 
     def get_collections(self):
-        return list(self.objects)
+        return [obj_type for obj_type in self.objects]
 
     def _normalize_addresses(self, addresses, use_ssl):
         if not isinstance(addresses[0], (list, tuple)):

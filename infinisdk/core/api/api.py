@@ -152,7 +152,10 @@ class API(object):
 
     def __del__(self):
         if self._session is not None:
-            self._session.close()
+            try:
+                self._session.close()
+            except ReferenceError:
+                pass
 
     def reinitialize_session(self, auth=None):
         prev_auth = self._auth
@@ -394,9 +397,11 @@ class API(object):
             except _RETRY_REQUESTS_EXCEPTION_TYPES as e:  # pylint: disable=catching-non-exception
                 request_kwargs = dict(url=path, method=http_method, **kwargs)
                 _logger.debug('Exception while sending API command to {}: {}', self.system, e)
-                error_str = str(e)
-                if 'gaierror' in error_str or 'nodename nor servname' in error_str or \
-                    'Name or service not known' in error_str:
+                error_str = str(e).lower()
+                if any(substring in error_str for substring in ('gaierror',
+                                                                'nodename nor servname',
+                                                                'name or service not known',
+                                                                'temporary failure in name resolution')):
                     raise SystemNotFoundException(e, api_request, start_time)
                 raise APITransportFailure(self.system, request_kwargs, e, api_request, start_time)
 

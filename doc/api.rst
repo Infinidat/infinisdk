@@ -22,8 +22,8 @@ infinibox.api
 .. autoclass:: Response
    :members:
 
-infinibox.dataset
-~~~~~~~~~~~~~~~~~
+infinibox.datasets
+~~~~~~~~~~~~~~~~~~
 .. automodule:: infinisdk.infinibox.dataset
 
 .. autoclass:: DatasetTypeBinder
@@ -215,6 +215,14 @@ infinibox.qos_policies
 .. autoclass:: QosPolicy
    :members:
    :inherited-members:
+
+
+infinibox.tenants
+~~~~~~~~~~~~~~~~~
+.. automodule:: infinisdk.infinibox.tenant
+
+.. autoclass:: Tenant
+   :members:
 
 Base Objects
 ~~~~~~~~~~~~
