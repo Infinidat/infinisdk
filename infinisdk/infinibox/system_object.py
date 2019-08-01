@@ -1,9 +1,10 @@
 from urlobject import URLObject as URL
-
 from ..core.system_object import SystemObject, DONT_CARE
 from ..core.exceptions import InfiniSDKException, CacheMiss
 from .lun import LogicalUnit, LogicalUnitContainer
 from .metadata_holder import MetadataHolder
+from ..core.utils import end_reraise_context
+import gossip
 
 
 class InfiniBoxObject(SystemObject, MetadataHolder):
@@ -73,9 +74,19 @@ class InfiniBoxLURelatedObject(InfiniBoxObject):
         if lun is not None:
             post_data['lun'] = int(lun)
         url = self.get_this_url_path().add_path('luns')
-        res = self.system.api.post(url, data=post_data)
+        hook_tags = self.get_tags_for_object_operations(self.system)
+        gossip.trigger_with_tags('infinidat.sdk.pre_volume_mapping',
+                                 {'volume': volume, 'host_or_cluster': self}, tags=hook_tags)
+        try:
+            res = self.system.api.post(url, data=post_data)
+        except Exception as e: # pylint: disable=broad-except
+            with end_reraise_context():
+                gossip.trigger_with_tags('infinidat.sdk.volume_mapping_failure',
+                                         {'volume': volume, 'host_or_cluster': self, 'exception': e}, tags=[hook_tags])
         volume.invalidate_cache('mapped')
         self.invalidate_cache('luns')
+        gossip.trigger_with_tags('infinidat.sdk.post_volume_mapping', {'volume': volume, 'host_or_cluster': self},
+                                 tags=hook_tags)
         return LogicalUnit(system=self.system, **res.get_result())
 
     def unmap_volume(self, volume=None, lun=None):
@@ -91,7 +102,17 @@ class InfiniBoxLURelatedObject(InfiniBoxObject):
         else:
             raise InfiniSDKException('unmap_volume does must get or volume or lun')
         assert self == lun.get_mapping_object()
+        hook_tags = self.get_tags_for_object_operations(self.system)
+        gossip.trigger_with_tags('infinidat.sdk.pre_volume_unmapping', {'volume': volume, 'host_or_cluster': self},
+                                 tags=hook_tags)
         self.invalidate_cache('luns')
-        lun.unmap()
+        try:
+            lun.unmap()
+        except Exception as e: # pylint: disable=broad-except
+            with end_reraise_context():
+                gossip.trigger_with_tags('infinidat.sdk.volume_unmapping_failure',
+                                         {'volume': volume, 'host_or_cluster': self, 'exception': e}, tags=[hook_tags])
         if volume:
             volume.invalidate_cache('mapped')
+        gossip.trigger_with_tags('infinidat.sdk.post_volume_unmapping', {'volume': volume, 'host_or_cluster': self},
+                                 tags=hook_tags)
