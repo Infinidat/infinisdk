@@ -185,6 +185,9 @@ class Compatibility(object):
     def has_events_db(self):
         return self._has_feature('events_db')
 
+    def has_concurrent_replication(self):
+        return self._get_feature_version("active_active", 0) > 2
+
 
 _VERSION_TUPLE_LEN = 5
 

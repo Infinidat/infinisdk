@@ -256,6 +256,8 @@ class Replica(SystemObject):
               is_sortable=True, feature_name="replica_auto_create"),
         Field('base_action', type=str, creation_parameter=True, optional=True,
               feature_name="replica_auto_create"),
+        Field('concurrent_replica', type=bool, is_filterable=True, is_sortable=True,
+              mutable=False, feature_name="concurrent_replication"),
     ]
 
     @classmethod
