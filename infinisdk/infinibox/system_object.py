@@ -82,7 +82,7 @@ class InfiniBoxLURelatedObject(InfiniBoxObject):
         except Exception as e: # pylint: disable=broad-except
             with end_reraise_context():
                 gossip.trigger_with_tags('infinidat.sdk.volume_mapping_failure',
-                                         {'volume': volume, 'host_or_cluster': self, 'exception': e}, tags=[hook_tags])
+                                         {'volume': volume, 'host_or_cluster': self, 'exception': e}, tags=hook_tags)
         volume.invalidate_cache('mapped')
         self.invalidate_cache('luns')
         gossip.trigger_with_tags('infinidat.sdk.post_volume_mapping', {'volume': volume, 'host_or_cluster': self},
@@ -111,7 +111,7 @@ class InfiniBoxLURelatedObject(InfiniBoxObject):
         except Exception as e: # pylint: disable=broad-except
             with end_reraise_context():
                 gossip.trigger_with_tags('infinidat.sdk.volume_unmapping_failure',
-                                         {'volume': volume, 'host_or_cluster': self, 'exception': e}, tags=[hook_tags])
+                                         {'volume': volume, 'host_or_cluster': self, 'exception': e}, tags=hook_tags)
         if volume:
             volume.invalidate_cache('mapped')
         gossip.trigger_with_tags('infinidat.sdk.post_volume_unmapping', {'volume': volume, 'host_or_cluster': self},

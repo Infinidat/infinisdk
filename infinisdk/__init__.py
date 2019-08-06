@@ -182,13 +182,13 @@ def _install_hooks():
     gossip.define(_SDK_HOOK('post_volume_mapping'),
                   arg_names=('volume', 'host_or_cluster'), tags=['infinibox', 'host', 'host_cluster'])
     gossip.define(_SDK_HOOK('volume_mapping_failure'),
-                  arg_names=('volume', 'host_or_cluster'), tags=['infinibox', 'host', 'host_cluster'])
+                  arg_names=('volume', 'host_or_cluster', 'exception'), tags=['infinibox', 'host', 'host_cluster'])
     gossip.define(_SDK_HOOK('pre_volume_unmapping'),
                   arg_names=('volume', 'host_or_cluster'), tags=['infinibox', 'host', 'host_cluster'])
     gossip.define(_SDK_HOOK('post_volume_unmapping'),
                   arg_names=('volume', 'host_or_cluster'), tags=['infinibox', 'host', 'host_cluster'])
     gossip.define(_SDK_HOOK('volume_unmapping_failure'),
-                  arg_names=('volume', 'host_or_cluster'), tags=['infinibox', 'host', 'host_cluster'])
+                  arg_names=('volume', 'host_or_cluster', 'exception'), tags=['infinibox', 'host', 'host_cluster'])
 
     gossip.get_or_create_group('infinidat.sdk').set_strict()
 
