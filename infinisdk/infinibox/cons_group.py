@@ -171,6 +171,7 @@ class ConsGroup(InfiniBoxObject):
            .. code-block:: python
 
               member_list = cg.get_members().to_list()
+
         :param kwargs: Optional parameter containing filterable fields of cg member for filtering the members returned
         """
         def object_factory(system, received_item):
