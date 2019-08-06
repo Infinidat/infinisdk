@@ -163,7 +163,7 @@ class ConsGroup(InfiniBoxObject):
     def _get_members_url(self):
         return self.get_this_url_path().add_path('members')
 
-    def get_members(self):
+    def get_members(self, **kwargs):
         """
         Retrieves a lazy query for the consistency group's member datasets
 
@@ -171,13 +171,17 @@ class ConsGroup(InfiniBoxObject):
            .. code-block:: python
 
               member_list = cg.get_members().to_list()
+        :param kwargs: Optional parameter containing filterable fields of cg member for filtering the members returned
         """
         def object_factory(system, received_item):
             type_name = 'volume' if received_item['dataset_type'] == 'VOLUME' else 'filesystem'
             return system.objects.get_binder_by_type_name(type_name).object_type.construct(system, received_item)
 
         object_types = (self.system.volumes.object_type, self.system.filesystems.object_type)
-        return PolymorphicQuery(self.system, self._get_members_url(), object_types, object_factory)
+        ret = PolymorphicQuery(self.system, self._get_members_url(), object_types, object_factory)
+        if kwargs:
+            ret.extend_url(**kwargs)
+        return ret
 
     def add_member(self, member, **kwargs):
         """Adds a member data entity to this consistency group
