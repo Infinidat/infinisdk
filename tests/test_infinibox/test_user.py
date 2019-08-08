@@ -1,7 +1,5 @@
 import pytest
-import re
 from infinibox_sysdefs import latest as defs
-from ecosystem.mocks.mock_mailboxer import get_simulated_mail_server
 from infinisdk.core import object_query
 from ..conftest import relevant_from_version
 
@@ -105,27 +103,6 @@ def test_set_users(infinibox):
             pools = owner.get_owned_pools()
             assert len(pools) == 1
             assert pools[0] == pool
-
-
-def _get_token_from_mail(simulator, mail_address):
-    msg = _get_last_mailboxer_msg(simulator, mail_address)
-    return re.findall("token=(.*)\"", msg.content)[0]
-
-
-def _get_last_mailboxer_msg(simulator, mail_address):
-    msg = get_simulated_mail_server(simulator).get_emails(mail_address, unread=True)
-    return msg[0]
-
-
-@relevant_from_version('5.0')
-def test_reset_password(infinibox_simulator, user):
-    user_email = user.get_email()
-    user.update_name(user.get_name()[-30:])
-    user.request_reset_password()
-    token = _get_token_from_mail(infinibox_simulator, user_email)
-    user.reset_password(token)
-    msg = _get_last_mailboxer_msg(infinibox_simulator, user_email)
-    assert 'successfully' in msg.content
 
 
 @relevant_from_version('2.2.8')
