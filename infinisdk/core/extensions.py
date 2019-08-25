@@ -130,8 +130,9 @@ class Property(Attachment):
         self._cache = {}
 
     def __get__(self, obj, objclass):
-        cached = self._cache.get(obj, NOTHING)
+        cache_key = id(obj)
+        cached = self._cache.get(cache_key, NOTHING)
         if cached is NOTHING:
             cached = self._func(obj)
-            self._cache[obj] = cached
+            self._cache[cache_key] = cached
         return cached
