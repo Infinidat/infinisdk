@@ -164,9 +164,6 @@ class Compatibility(object):
     def has_active_active(self):
         return self._has_feature('active_active')
 
-    def has_active_active_preferred_on_link(self):
-        return self._get_feature_version("active_active", -1) == 0
-
     def has_active_active_preferred_on_replica(self):
         return self._get_feature_version("active_active", 0) > 0
 
