@@ -122,16 +122,13 @@ class _BoundMethod(functools.partial):  # pylint: disable=inherit-non-class
         return '<Bound method {0.im_class.__name__}.{0.__name__} of {0.args[0]!r}>'.format(self)
 
 
-_propery_caching = {}
 
-def drop_property_cache(obj):
-    return _propery_caching.pop(obj, None)
-
+_PROPERTY_CACHE = "__property_cache__"
 
 class Property(Attachment):
 
     def __get__(self, obj, objclass):
-        caching = _propery_caching.setdefault(obj, {})
+        caching = obj.__dict__.setdefault(_PROPERTY_CACHE, {})
         cached = caching.get(self, NOTHING)
         if cached is NOTHING:
             cached = self._func(obj)
