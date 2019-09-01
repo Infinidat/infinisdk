@@ -44,7 +44,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'InfiniSDK'
-copyright = u'2014-2018, Infinidat'  # pylint: disable=redefined-builtin
+copyright = u'2014-2019, Infinidat'  # pylint: disable=redefined-builtin
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -97,9 +97,17 @@ import alabaster
 html_theme_path = [alabaster.get_path()]
 html_theme = 'alabaster'
 html_theme_options = {
-    "logo": "infinidat-logo-small.png",
-    "github_button": False,
+    "logo": "infinisdk.png",
+    'github_user': 'Infinidat',
+    'github_repo': 'infinisdk',
+    'github_button': True,
+    'github_banner': False,
+    'travis_button': 'Infinidat/infinisdk',
     "font_family": "sans-serif",
+    'extra_nav_links': {
+        'InfiniSDK@Github': 'https://github.com/Infinidat/infinisdk',
+        'InfiniSDK@Pypi': 'https://pypi.python.org/pypi/infinisdk',
+    }
 }
 html_sidebars = {
     '**': [
