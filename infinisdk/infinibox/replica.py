@@ -5,7 +5,7 @@ import functools
 from ..core.utils import end_reraise_context
 from ..core import Field, MillisecondsDatetimeType
 from ..core.api.special_values import OMIT
-from ..core.bindings import RelatedObjectNamedBinding
+from ..core.bindings import RelatedObjectNamedBinding, ReplicaEntityBinding
 from ..core.exceptions import CannotGetReplicaState, InvalidUsageException, TooManyObjectsFound
 from ..core.translators_and_types import MillisecondsDeltaType, CapacityType
 from ..core.type_binder import TypeBinder
@@ -106,6 +106,8 @@ class ReplicaBinder(TypeBinder):
 
     def _get_extra_replica_kwargs(self, kw, entity, remote_entity=None):
         returned = kw
+        if 'base_action' in returned:
+            raise InvalidUsageException("replicate_entity() doesn't support creating replica with base_action format")
         assert 'entity_type' not in returned
         assert 'local_cg_id' not in returned
         assert 'remote_cg_id' not in returned
@@ -246,10 +248,12 @@ class Replica(SystemObject):
         Field('started_at', type=MillisecondsDatetimeType),
         Field('preferred', api_name='is_preferred', type=bool, optional=True, is_filterable=True, is_sortable=True,
               creation_parameter=True, mutable=False, feature_name="active_active_preferred_on_replica"),
-        Field('local_entity_id', type=int, creation_parameter=True, optional=True, is_filterable=True,
-              is_sortable=True, feature_name="replica_auto_create"),
-        Field('remote_entity_id', type=int, creation_parameter=True, optional=True, is_filterable=True,
-              is_sortable=True, feature_name="replica_auto_create"),
+        Field('local_entity', api_name='local_entity_id', binding=ReplicaEntityBinding(), creation_parameter=True,
+              optional=True, is_filterable=True, is_sortable=True, feature_name="replica_auto_create",
+              add_getter=False),
+        Field('remote_entity', api_name='remote_entity_id', binding=ReplicaEntityBinding(), creation_parameter=True,
+              optional=True, is_filterable=True, is_sortable=True, feature_name="replica_auto_create",
+              add_getter=False),
         Field('local_entity_name', type=str, creation_parameter=True, optional=True, is_filterable=True,
               is_sortable=True, feature_name="replica_auto_create"),
         Field('remote_entity_name', type=str, creation_parameter=True, optional=True, is_filterable=True,
