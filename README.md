@@ -5,7 +5,7 @@ InfiniSDK
 |                       |                                                                                    |
 |-----------------------|------------------------------------------------------------------------------------|
 | Build Status          | ![Build Status](https://secure.travis-ci.org/Infinidat/infinisdk.png?branch=master) |
-| Supported Versions    | ![Supported Versions](https://img.shields.io/badge/python-2.7%2C3.5%2C3.6%2C3.7-red.svg)    |
+| Supported Versions    | ![Supported Versions](https://img.shields.io/pypi/pyversions/infinisdk.svg)    |
 | Latest Version        | ![Latest Version](https://img.shields.io/pypi/v/infinisdk.svg)                  |
 
 Overview
