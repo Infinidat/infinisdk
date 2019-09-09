@@ -22,7 +22,6 @@ from vintage import deprecated, warn_deprecation
 # pylint: disable=attribute-defined-outside-init,no-member,super-on-old-class,no-init,abstract-method
 _logger = Logger(__name__)
 _UID_DEPRECATION_MSG = "Direct usage of the 'id' field is deprecated. Use 'uid' field instead"
-_NON_INVALIDATED_FIELDS = ('id', 'parent_id', 'rack')
 
 def _normalize_id_predicate(predicate, component_type):
     if predicate.field.name == 'id' and isinstance(predicate.value, str):
@@ -243,12 +242,14 @@ class InfiniBoxSystemComponent(BaseSystemObject):
         return self.construct(self.system, copy.deepcopy(self._cache, memo), self.get_parent_id())
 
     def invalidate_cache(self, *field_names):
-        field_names_to_invalidate = set(field_names or self._cache.keys()) - set(_NON_INVALIDATED_FIELDS)
+        non_invalidated_fields = set(name for field in self.fields for name in (field.name, field.api_name)
+                                     if field.is_identity)
+        field_names_to_invalidate = set(field_names or self._cache.keys()) - set(non_invalidated_fields)
         if field_names_to_invalidate:
             super(InfiniBoxSystemComponent, self).invalidate_cache(*field_names_to_invalidate)
         else:
             assert not field_names, \
-                "Cannot invalidate only these fields: {}".format(', '.join(_NON_INVALIDATED_FIELDS))
+                "Cannot invalidate only these fields: {}".format(', '.join(non_invalidated_fields))
 
     def _deduce_from_cache(self, field_names, from_cache):
         collection = self.system.components[self.get_plural_name()]
@@ -319,7 +320,7 @@ class InfiniBoxSystemComponent(BaseSystemObject):
 @InfiniBoxSystemComponents.install_component_type
 class Rack(InfiniBoxSystemComponent):
     FIELDS = [
-        Field("index", api_name="rack", type=int, cached=True),
+        Field("index", api_name="rack", type=int, cached=True, is_identity=True),
         Field("enclosures", type=list, binding=ListOfRelatedComponentBinding()),
         Field("nodes", type=list, binding=ListOfRelatedComponentBinding()),
         Field("bbus", api_name='ups', type=list, binding=ListOfRelatedComponentBinding()),
@@ -753,8 +754,8 @@ class BBU(InfiniBoxSystemComponent):
 @InfiniBoxSystemComponents.install_component_type
 class System(InfiniBoxSystemComponent):
     FIELDS = [
-        Field("api_id", api_name="id", type=int, cached=True),
-        Field("index", api_name="id", type=int, cached=True),
+        Field("api_id", api_name="id", type=int, cached=True, is_identity=True),
+        Field("index", api_name="id", type=int, cached=True, is_identity=True),
         Field("operational_state", type=dict, cached=False),
         Field("security", type=dict, feature_name='fips'),
     ]
