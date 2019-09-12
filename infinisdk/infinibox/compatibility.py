@@ -186,7 +186,8 @@ class Compatibility:
     def has_concurrent_replication(self):
         return self._get_feature_version("active_active", 0) > 2
 
-
+    def has_kms(self):
+        return  self._has_feature('kms')
 _VERSION_TUPLE_LEN = 5
 
 

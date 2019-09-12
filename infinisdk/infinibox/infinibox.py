@@ -42,6 +42,7 @@ from .search_utils import get_search_query_object, safe_get_object_by_id_and_typ
 from .user import User
 from .volume import Volume
 from .metadata import SystemMetadata
+from .kms import Kms
 
 try:
     from infinisim.core.context import lookup_simulator_by_address
@@ -70,6 +71,7 @@ class InfiniBox(APITarget):
         self._related_systems = []
         self.datasets = Datasets(self)
         self.san_clients = SanClients(self)
+        self.kms = Kms(self)
 
     def check_version(self):
         if not self.compat.can_run_on_system():

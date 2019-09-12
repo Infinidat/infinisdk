@@ -346,6 +346,7 @@ class API:
         data = kwargs.pop("data", NOTHING)
         sent_json_object = None
         headers = kwargs.pop('headers', None)
+        files = kwargs.pop('files', None)
         if headers is None:
             headers = {}
         else:
@@ -377,7 +378,7 @@ class API:
 
             hostname = full_url.hostname
             api_request = requests.Request(http_method, full_url, data=data if data is not NOTHING else None,
-                                           params=url_params, headers=headers, auth=auth)
+                                           params=url_params, headers=headers, auth=auth, files=files)
             for preprocessor in self._preprocessors:
                 preprocessor(api_request)
 
