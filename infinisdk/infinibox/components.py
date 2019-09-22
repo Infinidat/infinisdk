@@ -320,7 +320,7 @@ class InfiniBoxSystemComponent(BaseSystemObject):
 @InfiniBoxSystemComponents.install_component_type
 class Rack(InfiniBoxSystemComponent):
     FIELDS = [
-        Field("index", api_name="rack", type=int, cached=True, is_identity=True),
+        Field("index", api_name="rack", type=int, is_identity=True),
         Field("enclosures", type=list, binding=ListOfRelatedComponentBinding()),
         Field("nodes", type=list, binding=ListOfRelatedComponentBinding()),
         Field("bbus", api_name='ups', type=list, binding=ListOfRelatedComponentBinding()),
@@ -357,7 +357,7 @@ class Rack(InfiniBoxSystemComponent):
 class Enclosure(InfiniBoxSystemComponent):
     FIELDS = [
         Field("api_id", api_name="id", type=int, cached=True),
-        Field("index", api_name="id", type=int, cached=True),
+        Field("index", api_name="id", type=int, is_identity=True),
         Field("drives", type=list, binding=ListOfRelatedComponentBinding()),
         Field("state", cached=False),
     ]
@@ -393,7 +393,7 @@ class Node(InfiniBoxSystemComponent):
     BINDER_CLASS = Nodes
     FIELDS = [
         Field("api_id", api_name="id", type=int, cached=True),
-        Field("index", api_name="id", type=int, cached=True),
+        Field("index", api_name="id", type=int, is_identity=True),
         Field("name", cached=True),
         Field("model", cached=True),
         Field("ib_ports", type=list, binding=ListOfRelatedComponentBinding()),
@@ -440,7 +440,7 @@ class Node(InfiniBoxSystemComponent):
 @InfiniBoxSystemComponents.install_component_type
 class LocalDrive(InfiniBoxSystemComponent):
     FIELDS = [
-        Field("index", api_name="drive_index", type=int, cached=True),
+        Field("index", api_name="drive_index", type=int, is_identity=True),
         Field("model"),
         Field("vendor"),
         Field("firmware"),
@@ -477,7 +477,7 @@ class EthPort(InfiniBoxSystemComponent):
         Field("max_speed", type=int, feature_name="max_speed"),
         Field("device_name", api_name="name"),
         Field("port_number", type=int, cached=True),
-        Field("index", api_name="id", type=int, cached=True),
+        Field("index", api_name="id", type=int, is_identity=True),
         Field("node", api_name="node_index", type=int, cached=True, binding=RelatedComponentBinding()),
         Field("role", cached=True),
         Field("name", cached=True),
@@ -505,7 +505,7 @@ class EthPort(InfiniBoxSystemComponent):
 class IbPort(InfiniBoxSystemComponent):
     FIELDS = [
         Field("api_id", api_name="id", type=int, cached=True),
-        Field("index", api_name="id", type=int, cached=True),
+        Field("index", api_name="id", type=int, is_identity=True),
         Field("firmware"),
         Field("last_probe_timestamp", type=int),
         Field("link_state", cached=False, new_to="3.0"),
@@ -548,7 +548,7 @@ class FcPort(InfiniBoxSystemComponent):
     BINDER_CLASS = FcPorts
     FIELDS = [
         Field("api_id", api_name="id", type=int, cached=True),
-        Field("index", api_name="id", type=int, cached=True),
+        Field("index", api_name="id", type=int, is_identity=True),
         Field("wwpn", is_identity=True, cached=True, type=WWNType),
         Field("node", api_name="node_index", type=int, cached=True, binding=RelatedComponentBinding()),
         Field("state", cached=False),
@@ -599,7 +599,7 @@ class FcPort(InfiniBoxSystemComponent):
 @InfiniBoxSystemComponents.install_component_type
 class Drive(InfiniBoxSystemComponent):
     FIELDS = [
-        Field("index", api_name="drive_index", type=int, is_identity=True, cached=True),
+        Field("index", api_name="drive_index", type=int, is_identity=True),
         Field("enclosure_index", type=int, cached=True),
         Field("enclosure", api_name="enclosure_index", type=int, cached=True, binding=RelatedComponentBinding()),
         Field("serial_number"),
@@ -621,7 +621,7 @@ class Drive(InfiniBoxSystemComponent):
 @InfiniBoxSystemComponents.install_component_type
 class Service(InfiniBoxSystemComponent):
     FIELDS = [
-        Field("index", api_name="name", cached=True),
+        Field("index", api_name="name", is_identity=True),
         Field("name", is_identity=True, cached=True),
         Field("role", cached=False),
         Field("state", cached=False),
@@ -656,7 +656,7 @@ class Service(InfiniBoxSystemComponent):
 @InfiniBoxSystemComponents.install_component_type
 class ServiceCluster(InfiniBoxSystemComponent):
     FIELDS = [
-        Field("index", api_name="name", cached=True),
+        Field("index", api_name="name", is_identity=True),
         Field("name", is_identity=True, cached=True),
         Field("state", api_name="cluster_state", cached=False),
         ]
@@ -699,7 +699,7 @@ def _ensure_elastic(func):
 @InfiniBoxSystemComponents.install_component_type
 class ExternalServiceCluster(InfiniBoxSystemComponent):
     FIELDS = [
-        Field("index", api_name="name", cached=True),
+        Field("index", api_name="name", is_identity=True),
         Field("name", is_identity=True, cached=True),
         Field("state", api_name="cluster_state", cached=False),
         Field("node_states", type=list),
@@ -740,7 +740,7 @@ class ExternalServiceCluster(InfiniBoxSystemComponent):
 class BBU(InfiniBoxSystemComponent):
     FIELDS = [
         Field("api_id", api_name="id", type=int, cached=True),
-        Field("index", api_name="id", type=int, cached=True),
+        Field("index", api_name="id", type=int, is_identity=True),
         Field("state", cached=False),
         Field("on_battery", api_name="onBattery", type=bool, cached=False),
         Field("charging", type=bool, cached=False),
@@ -759,7 +759,7 @@ class BBU(InfiniBoxSystemComponent):
 class System(InfiniBoxSystemComponent):
     FIELDS = [
         Field("api_id", api_name="id", type=int, cached=True, is_identity=True),
-        Field("index", api_name="id", type=int, cached=True, is_identity=True),
+        Field("index", api_name="id", type=int, is_identity=True),
         Field("operational_state", type=dict, cached=False),
         Field("security", type=dict, feature_name='fips'),
     ]

@@ -10,6 +10,7 @@ _HERE = os.path.abspath(os.path.dirname(__file__))
 _DOCS_ROOT = os.path.abspath(os.path.join(_HERE, "..", "doc"))
 
 
+@pytest.mark.only_latest
 def test_sphinx_doctest(doctest_path):
     context_filename = doctest_path + ".doctest_context"
     context = {}

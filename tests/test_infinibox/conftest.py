@@ -1,6 +1,7 @@
 import flux
 import pytest
 from datetime import timedelta
+from infinisdk.infinibox.components import InfiniBoxSystemComponents
 
 
 @pytest.fixture
@@ -85,14 +86,11 @@ def volume_qos_policy(infinibox):
     return infinibox.qos_policies.create(type='VOLUME', max_ops=1000000)
 
 
-@pytest.fixture(params=['racks', 'systems', 'nodes', 'enclosures', 'ib_ports', 'drives'])
+@pytest.fixture(params=InfiniBoxSystemComponents.types.get_names())
 def component_collection(request, infinibox):
-    # The params list includes:
-    # 1. Collections with single (top level) component: systems/racks
-    # 2. Collections with multiple components in API's top level (ex. nodes, enclosures)
-    # 3. Sub-component, eg. ib_ports, drives
-    # One should not remove a type from this list, because the handling of each type has different implementation
-    return infinibox.components[request.param]
+    type_name = request.param
+    type_class = infinibox.components.types.get_type_by_name(type_name)
+    return infinibox.components[type_class]
 
 
 @pytest.fixture
