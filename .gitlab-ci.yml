@@ -14,6 +14,7 @@ py27:
   image: python:2.7
   tags:
     - infradev
+    - ubuntu
   except:
     - /^customer-.*$/
   script:
@@ -25,6 +26,7 @@ py27:
 .test:
   tags:
     - infradev
+    - ubuntu
   except:
     - /^customer-.*$/
   script:
@@ -56,6 +58,7 @@ pypi:
   image: python
   tags:
     - infradev
+    - ubuntu
   stage: deploy
   only:
     - master
@@ -68,6 +71,7 @@ trigger:
   image: python
   tags:
     - infradev
+    - ubuntu
   stage: post
   only:
     - master
