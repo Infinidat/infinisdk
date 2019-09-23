@@ -724,6 +724,10 @@ class ExternalServiceCluster(InfiniBoxSystemComponent):
         return system.compat.has_events_db()
 
     @_ensure_elastic
+    def is_steady(self, **kwargs):
+        return self.get_field("health", **kwargs)["initializing_shards"] == 0
+
+    @_ensure_elastic
     def is_active(self, **kwargs):
         return self.get_state(**kwargs) == 'GREEN'
 
