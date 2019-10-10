@@ -8,7 +8,7 @@ from ..core.system_component import SystemComponentsBinder
 from ..core.system_object import BaseSystemObject
 from ..core.exceptions import ObjectNotFound
 from ..core.type_binder import MonomorphicBinder
-from ..core.translators_and_types import WWNType, CapacityType, MunchType
+from ..core.translators_and_types import WWNType, CapacityType, MunchType, MunchListType
 from mitba import cached_method
 from .component_query import InfiniBoxComponentQuery, InfiniBoxGenericComponentQuery
 from ..core.bindings import InfiniSDKBinding, ListOfRelatedComponentBinding, RelatedComponentBinding
@@ -324,6 +324,7 @@ class Rack(InfiniBoxSystemComponent):
         Field("enclosures", type=list, binding=ListOfRelatedComponentBinding()),
         Field("nodes", type=list, binding=ListOfRelatedComponentBinding()),
         Field("bbus", api_name='ups', type=list, binding=ListOfRelatedComponentBinding()),
+        Field("pdus", type=list, binding=ListOfRelatedComponentBinding()),
     ]
 
     @classmethod
@@ -749,6 +750,31 @@ class BBU(InfiniBoxSystemComponent):
     @classmethod
     def get_url_path(cls, system):
         return cls.BASE_URL.add_path('ups')
+
+    @cached_method
+    def get_this_url_path(self):
+        return self.get_url_path(self.system).add_path(str(self.get_index()))
+
+
+@InfiniBoxSystemComponents.install_component_type
+class PDU(InfiniBoxSystemComponent):
+    FIELDS = [
+        Field("index", api_name="id", type=int, is_identity=True),
+        Field("api_id", api_name="id", type=int, is_identity=True),
+        Field("model"),
+        Field("vendor"),
+        Field("firmware"),
+        Field("state", cached=False),
+        Field("state_description"),
+        Field("power_ports", type=MunchListType),
+        Field("power_consumption", type=int),
+        Field("probe_ttl", type=int),
+        Field("last_probe_timestamp", type=int),
+    ]
+
+    @classmethod
+    def get_url_path(cls, system):
+        return cls.BASE_URL.add_path(cls.get_plural_name())
 
     @cached_method
     def get_this_url_path(self):
