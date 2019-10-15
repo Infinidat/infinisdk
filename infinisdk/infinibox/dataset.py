@@ -343,7 +343,8 @@ class Dataset(InfiniBoxObject):
     def get_replicas(self):
         if isinstance(self, self.system.types.filesystem) and not self.system.compat.has_nas_replication():
             return []
-        if isinstance(self, self.system.types.volume) and self.is_in_cons_group():
+        if self.system.compat.get_version_as_float() >= 5.5 and \
+            isinstance(self, self.system.types.volume) and self.is_in_cons_group():
             searched_id = self.get_cons_group().id
         else:
             searched_id = self.id
