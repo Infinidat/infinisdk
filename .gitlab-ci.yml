@@ -1,5 +1,5 @@
 variables:
-  BUNDLE_VERSION: replica-5.5
+  BUNDLE_VERSION: master
   INSTALL_DIR: /root/src
   RUN_ITZIK: https://git.infinidat.com/infradev/helpers/raw/master/run_itzik.py
   RUN_ITZIK_PARAMETERS: --no-dev --src $INSTALL_DIR --bundle new-infra --bundle-version $BUNDLE_VERSION --until $CI_PROJECT_NAME -p $CI_PROJECT_DIR[testing] --curr-branch $CI_COMMIT_REF_NAME
