@@ -92,7 +92,8 @@ class Link(InfiniBoxObject):
         for the first time"""
         related_system = self.system.links.get_cached_related_system(self)
         if related_system is not None:
-            return related_system
+            if not safe or related_system.is_active():
+                return related_system
         remote_host = self.get_remote_host(from_cache=from_cache)
         for related_system in self.get_system().iter_related_systems():
             if safe and not related_system.is_active():
