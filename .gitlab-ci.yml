@@ -20,7 +20,7 @@ py27:
   script:
     - curl -sL $RUN_ITZIK | python - $RUN_ITZIK_PARAMETERS_27
     - source $INSTALL_DIR/env/bin/activate
-    - pylint --rcfile .pylintrc -j $(nproc) infinisdk scripts tests
+    - pylint --rcfile .pylintrc -j $(nproc) infinisdk scripts tests doc/*.doctest_context
     - pytest -ra -W error::DeprecationWarning
 
 .test:
@@ -32,7 +32,7 @@ py27:
   script:
     - curl -sL $RUN_ITZIK | python - $RUN_ITZIK_PARAMETERS
     - source $INSTALL_DIR/env/bin/activate
-    - pylint --rcfile .pylintrc -j $(nproc) infinisdk scripts tests
+    - pylint --rcfile .pylintrc -j $(nproc) infinisdk scripts tests doc/*.doctest_context
     - pytest -ra -W error::DeprecationWarning
 
 py35:

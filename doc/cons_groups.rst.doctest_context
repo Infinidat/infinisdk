@@ -1,10 +1,10 @@
 # -*- mode: python -*-
 import flux
 import arrow
-import datetime
 from contextlib import contextmanager
 from infinisim.infinibox import Infinibox as Simulator
 from infinisdk import InfiniBox
+
 
 @contextmanager
 def doctest_context():
