@@ -1,7 +1,6 @@
 import itertools
 
 import pytest
-from infinisdk._compat import PY2
 from infinisdk.core import extensions
 from infinisdk.infinibox import InfiniBox
 from infinisdk.infinibox.system_object import SystemObject
@@ -44,18 +43,12 @@ def test_overriding(infinibox, different_name):
     if different_name:
         @extensions.wrap_method(InfiniBox, 'get_version')
         def some_other_name(self, _wrapped):
-            if PY2:
-                assert _wrapped == original
-            else:
-                assert _wrapped is original
+            assert _wrapped is original
             return 9999
     else:
         @extensions.wrap_method(InfiniBox)
         def get_version(self, _wrapped):
-            if PY2:
-                assert _wrapped == original
-            else:
-                assert _wrapped is original
+            assert _wrapped is original
             return 9999
 
     assert infinibox.get_version() == 9999

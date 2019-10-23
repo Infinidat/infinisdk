@@ -1,11 +1,10 @@
 import abc
 from munch import Munch
-from ..._compat import with_metaclass  # pylint: disable=no-name-in-module
 from .api import API
 from ..type_binder_container import TypeBinderContainer
 
 
-class APITarget(with_metaclass(abc.ABCMeta)):
+class APITarget(metaclass=abc.ABCMeta):
     """
     Abstract base class for anything that would like to become an API target
     """

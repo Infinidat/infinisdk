@@ -1,5 +1,4 @@
 import pytest
-from infinisdk._compat import xrange  # pylint: disable=redefined-builtin
 from capacity import Capacity, TB
 
 from infinisdk.core.exceptions import APICommandFailed
@@ -41,7 +40,7 @@ def test_write_protection(volume):
 def test_unmap_volume_which_mapped_to_multiple_hosts(infinibox, volume):
     assert not volume.is_mapped()
     host_count = 3
-    for _ in xrange(host_count):
+    for _ in range(host_count):
         host = infinibox.hosts.create()
         host.map_volume(volume)
     assert len(volume.get_logical_units()) == host_count

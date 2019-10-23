@@ -1,4 +1,4 @@
-from .._compat import abc_module
+import collections
 from ..core import Field, SystemObject, TypeBinder, MillisecondsDatetimeType
 from ..core.bindings import RelatedObjectBinding
 
@@ -84,4 +84,4 @@ class Event(SystemObject):
     def get_event_data_dict(self):
         return dict((value['name'], value['value']) for value in self.get_field('data', from_cache=True))
 
-abc_module.Mapping.register(Event)  # pylint: disable=no-member
+collections.abc.Mapping.register(Event)  # pylint: disable=no-member

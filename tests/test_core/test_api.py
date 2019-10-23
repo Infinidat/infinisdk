@@ -1,5 +1,6 @@
 # pylint: disable=redefined-builtin
 import functools
+import http.client as httplib
 import requests
 from uuid import uuid4
 import logbook
@@ -8,7 +9,6 @@ import warnings
 from infinisdk.core.api import Autogenerate, OMIT
 from infinisdk.core.config import config
 from infinisdk.core.exceptions import APICommandFailed, ObjectNotFound, SystemNotFoundException, MethodDisabled
-from infinisdk._compat import httplib
 from ..conftest import no_op_context
 
 from urlobject import URLObject as URL

@@ -1,30 +1,29 @@
-from functools import partial
+import colorama
 import copy
 import flux
-import json
-import sys
-import socket
-from contextlib import contextmanager
-
 import gossip
+import http.client as httplib
+import json
+import requests
+import socket
+import sys
+import urllib3.exceptions
+from ..config import config
+from ..exceptions import (APICommandFailed, APITransportFailure,
+                          CommandNotApproved, MethodDisabled,
+                          SystemNotFoundException)
+from .special_values import translate_special_values
+from contextlib import contextmanager
+from functools import partial
 from logbook import Logger
+from requests.exceptions import RequestException
 from sentinels import NOTHING
+from urllib.parse import unquote as unquote_url
 from urlobject import URLObject as URL
 from vintage import warn_deprecation
 
-import colorama
-
-from ... import _compat
-from ..._compat import httplib, iteritems, requests, RequestException, ProtocolError, unquote_url
-from ..config import config
-from ..exceptions import (APICommandFailed, APITransportFailure,
-                          CommandNotApproved, SystemNotFoundException, MethodDisabled)
-from .special_values import translate_special_values
-
-
-_RETRY_REQUESTS_EXCEPTION_TYPES = (RequestException, socket.error, ProtocolError,
-                                   requests.packages.urllib3.exceptions.TimeoutError)
-
+_RETRY_REQUESTS_EXCEPTION_TYPES = (RequestException, socket.error, urllib3.exceptions.ProtocolError,
+                                   urllib3.exceptions.TimeoutError)
 _REQUESTS_HTTP_EXCEPTION_TYPES = (requests.exceptions.HTTPError, requests.models.HTTPError)
 
 _logger = Logger(__name__)
@@ -51,7 +50,7 @@ def _approval_preprocessor(approve, request):
         request.url = request.url.set_query_param('approved', str(approve).lower())
 
 
-class API(object):
+class API:
 
     def __init__(self, target, auth, use_ssl, ssl_cert):
         super(API, self).__init__()
@@ -551,7 +550,7 @@ class API(object):
         if sys.stdout.isatty():
             msg = colorama.Fore.YELLOW + msg + colorama.Fore.RESET
         # note: call through module to allow stubbing
-        return _compat.raw_input(msg).strip().lower() in ['yes', 'y']
+        return input(msg).strip().lower() in ['yes', 'y']
 
     def _is_approval_required(self, exception):
         if exception.response.get_error():
@@ -584,7 +583,7 @@ class API(object):
         return URL("{}://{}:{}".format("https" if use_ssl else "http", hostname, port)).add_path("/api/rest")
 
 
-class Response(object):
+class Response:
     """
     System API request response
     """
@@ -663,7 +662,7 @@ class Response(object):
             raise APICommandFailed.raise_from_response(self)
 
 
-class _AutoRetryContext(object):
+class _AutoRetryContext:
     def __init__(self, global_retries_dict):
         self._retries_dict = None
         self._global_retries_dict = global_retries_dict
@@ -671,7 +670,7 @@ class _AutoRetryContext(object):
     def _should_retry_request(self, exc):
         if self._retries_dict is None:
             self._retries_dict = dict((k, v[0]) for k, v in self._global_retries_dict.items())
-        for retry_predicate, retries_left in iteritems(self._retries_dict):
+        for retry_predicate, retries_left in self._retries_dict.items():
             if retries_left < 1:
                 return None
             if retry_predicate not in self._global_retries_dict:

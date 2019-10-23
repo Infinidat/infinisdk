@@ -1,7 +1,6 @@
 import copy
 import uuid
 
-from .._compat import ExitStack, zip  # pylint: disable=redefined-builtin
 from ..core.field import Field
 from ..core.field_filter import FieldFilter
 from ..core.system_component import SystemComponentsBinder
@@ -14,7 +13,7 @@ from .component_query import InfiniBoxComponentQuery, InfiniBoxGenericComponentQ
 from ..core.bindings import InfiniSDKBinding, ListOfRelatedComponentBinding, RelatedComponentBinding
 
 from collections import defaultdict
-from contextlib import contextmanager
+from contextlib import contextmanager, ExitStack
 from logbook import Logger
 from urlobject import URLObject as URL
 from vintage import deprecated, warn_deprecation
@@ -23,11 +22,13 @@ from vintage import deprecated, warn_deprecation
 _logger = Logger(__name__)
 _UID_DEPRECATION_MSG = "Direct usage of the 'id' field is deprecated. Use 'uid' field instead"
 
+
 def _normalize_id_predicate(predicate, component_type):
     if predicate.field.name == 'id' and isinstance(predicate.value, str):
         warn_deprecation(_UID_DEPRECATION_MSG)
         return FieldFilter(component_type.fields.uid, predicate.operator_name, predicate.value)
     return predicate
+
 
 class InfiniBoxSystemComponents(SystemComponentsBinder):
 

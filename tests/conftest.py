@@ -7,7 +7,6 @@ from munch import Munch
 
 import pytest
 from ecosystem import SimulationContext
-from infinisdk._compat import xrange  # pylint: disable=redefined-builtin
 from infinisdk.core import extensions
 from infinisdk.core.config import config
 from infinisdk.infinibox import InfiniBox
@@ -224,7 +223,7 @@ def create_network_space(infinibox, **kwargs):
     if not kwargs.get('network_config'):
         kwargs['network_config'] = {'netmask': 19, 'network': '127.0.0.1', 'default_gateway': '127.0.0.1'}
     if not kwargs.get('interfaces'):
-        kwargs['interfaces'] = [create_network_interface(infinibox, node_id=index) for index in xrange(1, 4)]
+        kwargs['interfaces'] = [create_network_interface(infinibox, node_id=index) for index in range(1, 4)]
     return infinibox.network_spaces.create(**kwargs)
 
 
@@ -236,7 +235,7 @@ def network_interface(infinibox):
 @pytest.fixture
 def network_space(infinibox, network_interface):
     interfaces = [create_network_interface(infinibox, node_id=index)
-                  for index in xrange(1, 4) if index != network_interface.get_node().id]
+                  for index in range(1, 4) if index != network_interface.get_node().id]
     interfaces.append(network_interface)
     return create_network_space(infinibox, interfaces=interfaces)
 

@@ -1,7 +1,6 @@
 from __future__ import absolute_import
 import arrow
 import munch
-from .._compat import string_types
 from capacity import byte, Capacity
 from datetime import timedelta
 from infi.dtypes.iqn import make_iscsi_name, iSCSIName
@@ -98,7 +97,7 @@ WWNType = TypeInfo(type=WWN, api_type=str)
 def host_port_to_api(value):
     if isinstance(value, WWN):
         port_type = 'fc'
-    elif isinstance(value, string_types):
+    elif isinstance(value, (str, bytes)):
         port_type = 'fc'
         value = WWN(value)
     elif isinstance(value, iSCSIName):

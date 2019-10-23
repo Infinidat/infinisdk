@@ -1,6 +1,6 @@
+import http.client as httplib
 import pytest
 
-from infinisdk._compat import httplib
 from infinisdk.core.exceptions import APICommandFailed
 from infinisdk.infinibox.filesystem import Filesystem
 from infinisdk.infinibox.pool import Pool

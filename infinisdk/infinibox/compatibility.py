@@ -1,12 +1,10 @@
+import http.client as httplib
 import operator
-
+from ..core.config import config
 from sentinels import NOTHING
 
-from .._compat import httplib
-from ..core.config import config
 
-
-class Feature(object):
+class Feature:
     def __init__(self, name, version, enabled):
         self.name = name
         self.version = version
@@ -17,7 +15,7 @@ def _get_predicate(opreator_func, value):
         return opreator_func(version, value)
     return predicate
 
-class Compatibility(object):
+class Compatibility:
 
     def __init__(self, system):
         self.system = system
@@ -192,7 +190,7 @@ class Compatibility(object):
 _VERSION_TUPLE_LEN = 5
 
 
-class _InfiniboxVersion(object):
+class _InfiniboxVersion:
 
     def __init__(self, version_tuple, is_dev, is_odd=False):
         self.version = version_tuple

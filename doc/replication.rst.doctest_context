@@ -1,8 +1,6 @@
 # -*- mode: python -*-
 
-from contextlib import contextmanager
-
-from infinisdk._compat import ExitStack
+from contextlib import contextmanager, ExitStack
 
 from tests.conftest import create_rmr_network_space  # pylint: disable=import-error, no-name-in-module
 from infinisdk.infinibox import InfiniBox

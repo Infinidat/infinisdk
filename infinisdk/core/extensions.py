@@ -55,7 +55,7 @@ def clear_all():
     assert not active
 
 
-class Attachment(object):
+class Attachment:
 
     def __init__(self, objtype, name, func, wrap=False):
         super(Attachment, self).__init__()

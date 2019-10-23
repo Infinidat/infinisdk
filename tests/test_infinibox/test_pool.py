@@ -1,5 +1,4 @@
 import pytest
-from infinisdk._compat import iteritems
 from infinisdk.core import CapacityType
 from capacity import TB, GB, KiB, Capacity, TiB
 from ..conftest import create_volume, create_pool, create_filesystem, relevant_from_version
@@ -7,7 +6,7 @@ from ..conftest import create_volume, create_pool, create_filesystem, relevant_f
 
 def update_all_capacities_in_dict_to_api(d):
     capacity_translator = CapacityType.translator
-    for k, v in iteritems(d):
+    for k, v in d.items():
         if isinstance(v, Capacity):
             d[k] = capacity_translator.to_api(v.roundup(6 * 64 * KiB))
 

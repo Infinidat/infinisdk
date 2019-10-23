@@ -47,7 +47,7 @@ def _validate_prerequisites():
                         fg='red'))
 
 
-class Checkout(object):
+class Checkout:
 
     def __init__(self, version, path=None):
         super(Checkout, self).__init__()

@@ -51,7 +51,7 @@ class SampleObjectWithStringID(FakeSystemObject):
     ]
 
 
-class FakeSystem(object):
+class FakeSystem:
 
     def is_caching_enabled(self):
         return False

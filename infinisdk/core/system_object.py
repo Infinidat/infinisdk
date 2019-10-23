@@ -1,6 +1,7 @@
 import copy
 import gossip
 import functools
+import http.client as httplib
 
 from mitba import cached_method
 from sentinels import NOTHING
@@ -9,7 +10,6 @@ from contextlib import contextmanager
 
 from .exceptions import APICommandFailed
 from .system_object_utils import get_data_for_object_creation
-from .._compat import with_metaclass, iteritems, httplib, string_types  # pylint: disable=no-name-in-module
 from .exceptions import CacheMiss
 from api_object_schema import FieldsMeta as FieldsMetaBase
 from .field import Field
@@ -29,7 +29,7 @@ class FieldsMeta(FieldsMetaBase):
         return Field(name, binding=PassthroughBinding())
 
 
-class BaseSystemObject(with_metaclass(FieldsMeta)):
+class BaseSystemObject(metaclass=FieldsMeta):
     """
     Base class for system objects and components
     """
@@ -149,6 +149,10 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
         if url_path is None:
             url_path = "/api/rest/{}".format(cls.get_plural_name())
         return URL(url_path)
+
+    @classmethod
+    def get_tags_for_object_operations(cls, system):
+        return [cls.get_type_name().lower(), system.get_type_name().lower()]
 
     def safe_get_field(self, field_name, default=NOTHING, **kwargs):
         """
@@ -276,7 +280,7 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
         return self.system.is_field_supported(field)
 
     def update_field_cache(self, api_obj):
-        assert all(isinstance(key, string_types) for key in api_obj.keys())
+        assert all(isinstance(key, (str, bytes)) for key in api_obj.keys())
         self._cache.update(api_obj)
 
     def update_field(self, field_name, field_value):
@@ -296,7 +300,7 @@ class BaseSystemObject(with_metaclass(FieldsMeta)):
             'infinidat.sdk.pre_fields_update',
             {'source': self, 'fields': update_dict}, tags=hook_tags)
 
-        for field_name, field_value in list(iteritems(update_dict)):
+        for field_name, field_value in list(update_dict.items()):
             try:
                 field = self.fields[field_name]
             except LookupError:
@@ -361,10 +365,6 @@ class SystemObject(BaseSystemObject):
 
     def get_collection(self):
         return self.get_binder()
-
-    @classmethod
-    def get_tags_for_object_operations(cls, system):
-        return [cls.get_type_name().lower(), system.get_type_name().lower()]
 
     def _is_caching_enabled(self):
         return self.get_binder().is_caching_enabled() or super(SystemObject, self)._is_caching_enabled()

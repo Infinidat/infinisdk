@@ -1,6 +1,5 @@
 import pytest
 from sentinels import NOTHING
-from infinisdk._compat import string_types
 
 
 @pytest.mark.only_latest
@@ -20,7 +19,7 @@ def test_invalidate_cache(infinibox, component):
         assert not parent_id
         assert component.get_parent() is None
     else:
-        assert isinstance(parent_id, string_types)
+        assert isinstance(parent_id, (str, bytes))
         assert component.get_parent().id
     infinibox.components.get_rack_1().refresh_cache()
     assert infinibox.components.try_get_component_by_id(component_uid) is component

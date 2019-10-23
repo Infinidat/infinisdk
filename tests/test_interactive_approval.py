@@ -1,8 +1,7 @@
-from contextlib import contextmanager
-from infinisdk import _compat
-from infinisdk.core.exceptions import CommandNotApproved
-
+import builtins
 import pytest
+from contextlib import contextmanager
+from infinisdk.core.exceptions import CommandNotApproved
 
 # pylint: disable=attribute-defined-outside-init
 
@@ -14,8 +13,7 @@ def test_interactive_approval(infinibox, volume, interactive_approval):
 
 @pytest.fixture
 def interactive_approval(request, approved):
-
-    prev_raw_input = _compat.raw_input
+    prev_raw_input = builtins.input
 
     returned = InteractiveApproval()
     returned.approved = approved
@@ -27,16 +25,16 @@ def interactive_approval(request, approved):
             return "y\n"
         return "n\n"
 
-    _compat.raw_input = fake_raw_input
+    builtins.input = fake_raw_input
 
     @request.addfinalizer
     def cleanup():  # pylint: disable=unused-variable
-        _compat = prev_raw_input  # pylint: disable=unused-variable
+        builtins.input = prev_raw_input  # pylint: disable=unused-variable
 
     return returned
 
 
-class InteractiveApproval(object):
+class InteractiveApproval:
 
     asked = False
 

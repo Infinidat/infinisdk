@@ -7,10 +7,8 @@ import pytest
 
 from ..conftest import relevant_from_version
 from infinibox_sysdefs.defs import latest as defs
-from infinisdk._compat import iteritems, string_types
 from infinisdk.core.api import OMIT
-from infinisdk.core.exceptions import (APITransportFailure,
-                                       SystemNotFoundException)
+from infinisdk.core.exceptions import APITransportFailure, SystemNotFoundException
 from infinisdk.infinibox import InfiniBox
 from infinisdk.infinibox.system_object import InfiniBoxObject
 
@@ -64,7 +62,7 @@ def test_multiple_metadata_creation(volume):
     metadata_d = {'some_key':  'some_value',
                   'other_key': 'other_value',
                   'last_key':  'last_value'}
-    for k, v in iteritems(metadata_d):
+    for k, v in metadata_d.items():
         volume.set_metadata(k, v)
 
     all_metadata = volume.get_all_metadata()
@@ -122,11 +120,11 @@ def test_single_metadata_creation_on_all_infinibox_objects(infinibox, volume):
 
 
 def test_infinibox_attributes(infinibox):
-    assert isinstance(repr(infinibox), string_types)
+    assert isinstance(repr(infinibox), (str, bytes))
     assert isinstance(infinibox.get_serial(), int)
-    assert isinstance(infinibox.get_state(), string_types)
-    assert isinstance(infinibox.get_version(), string_types)
-    assert isinstance(infinibox.get_revision(), string_types)
+    assert isinstance(infinibox.get_state(), (str, bytes))
+    assert isinstance(infinibox.get_version(), (str, bytes))
+    assert isinstance(infinibox.get_revision(), (str, bytes))
 
 
 def test_infinibox_system_type(infinibox):

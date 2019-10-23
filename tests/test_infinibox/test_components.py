@@ -3,9 +3,8 @@ import copy
 import pytest
 
 from capacity import Capacity
-from contextlib import contextmanager
+from contextlib import contextmanager, ExitStack
 from infi.dtypes.wwn import WWN
-from infinisdk._compat import string_types, ExitStack
 from infinisdk.core.config import config
 from infinisdk.core.exceptions import MethodDisabled
 from infinisdk.infinibox.components import (Drive, Enclosure, FcPort, Node, EthPort, LocalDrive,
@@ -80,7 +79,7 @@ def test_system_component(infinibox):
     _basic_check_for_component(infinibox, System, None)
     system_component = infinibox.components.system_component
     assert system_component is infinibox.components.systems.get()
-    assert isinstance(system_component.get_state(), string_types)
+    assert isinstance(system_component.get_state(), (str, bytes))
 
 def test_system_component_state_getters(infinibox):
     system_component = infinibox.components.system_component
@@ -102,7 +101,7 @@ def test_rack_component(infinibox):
 def test_enclosure_component(infinibox):
     _basic_check_for_component(infinibox, Enclosure, Rack)
     enc = infinibox.components.enclosures.choose()
-    assert isinstance(enc.get_state(), string_types)
+    assert isinstance(enc.get_state(), (str, bytes))
 
 def test_drive_component(infinibox):
     _basic_check_for_component(infinibox, Drive, Enclosure)
@@ -179,7 +178,7 @@ def test_eth_port_component(infinibox):
 def test_node_component(infinibox):
     _basic_check_for_component(infinibox, Node, Rack)
     node = infinibox.components.nodes.choose()
-    assert isinstance(node.get_state(), string_types)
+    assert isinstance(node.get_state(), (str, bytes))
     assert all(isinstance(service, Service) for service in node.get_services())
     assert all(node is service.get_node() for service in node.get_services())
     assert [node.get_service('core')] == [service for service in node.get_services() if service.get_name() == 'core']
@@ -195,7 +194,7 @@ def test_service_component_with_service_cluster(infinibox):
 def test_service_cluster(infinibox):
     _basic_check_for_component(infinibox, ServiceCluster, None)
     service_cluster = infinibox.components.service_clusters.choose()
-    assert isinstance(service_cluster.get_state(from_cache=False), string_types)
+    assert isinstance(service_cluster.get_state(from_cache=False), (str, bytes))
     service = infinibox.components.services.choose(name=service_cluster.get_name())
     assert service.get_service_cluster() is service_cluster
     assert service in service_cluster.get_services()

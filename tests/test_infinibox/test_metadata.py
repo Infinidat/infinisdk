@@ -1,5 +1,6 @@
+import functools
 import pytest
-from infinisdk._compat import iteritems, cmp, sorted  # pylint: disable=redefined-builtin
+from infinisdk.core.utils.python import cmp
 from infinisdk.core import object_query
 from infinisdk.core.exceptions import APICommandFailed
 
@@ -38,7 +39,7 @@ def test_metadata_creation(volume):
     metadata_d = {'some_key':  'some_value',
                   'other_key': 'other_value',
                   'last_key':  'last_value'}
-    for k, v in iteritems(metadata_d):
+    for k, v in metadata_d.items():
         volume.set_metadata(k, v)
 
     all_metadata = volume.get_all_metadata()
@@ -71,6 +72,8 @@ def _remove_id_keys(info_list):
 def test_get_all_metadata(infinibox, volume, pool):
     def _metadata_cmp(d_1, d_2):
         return cmp(d_1['object_id'], d_2['object_id']) or cmp(d_1['key'], d_2['key'])
+    _metadata_key = functools.cmp_to_key(_metadata_cmp)
+
     pool.set_metadata_from_dict({'b': 'c', 'd': 'd'})
     volume.set_metadata_from_dict({'a': 'a', 'b': 'b'})
     expected = [
@@ -81,7 +84,7 @@ def test_get_all_metadata(infinibox, volume, pool):
         ]
     actual = list(infinibox.get_all_metadata())
     _remove_id_keys(actual)
-    assert sorted(expected, cmp=_metadata_cmp) == sorted(actual, cmp=_metadata_cmp)
+    assert sorted(expected, key=_metadata_key) == sorted(actual, key=_metadata_key)
 
     expected = [
         dict(object_id=pool.id, key='b', value='c', **_get_object_extras(infinibox, pool)),
@@ -89,7 +92,7 @@ def test_get_all_metadata(infinibox, volume, pool):
     ]
     actual = list(infinibox.get_all_metadata(key='b'))
     _remove_id_keys(actual)
-    assert sorted(expected, cmp=_metadata_cmp) == sorted(actual, cmp=_metadata_cmp)
+    assert sorted(expected, key=_metadata_key) == sorted(actual, key=_metadata_key)
 
 
 @relevant_from_version('3.0')

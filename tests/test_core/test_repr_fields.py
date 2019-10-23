@@ -31,7 +31,7 @@ def system_obj(system, object_id):
 
 @pytest.fixture
 def system(is_caching_enabled):  # pylint: disable=unused-argument
-    class _System(object):
+    class _System:
         def is_field_supported(self, field):  # pylint: disable=unused-argument
             return True
 

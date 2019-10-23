@@ -1,5 +1,4 @@
 import pytest
-from infinisdk._compat import iteritems
 from infinisdk.core.config import config
 from infinisdk.infinibox import InfiniBox
 
@@ -24,7 +23,7 @@ def test_creation(infinibox, host, request):
     host = infinibox.hosts.create(**kwargs)
     request.addfinalizer(host.delete)
 
-    for k, v in iteritems(kwargs):
+    for k, v in kwargs.items():
         assert host._cache[k] == v  # pylint: disable=protected-access
 
     assert host.get_cluster() is None

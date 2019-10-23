@@ -1,7 +1,7 @@
 import gc
 
 
-class MockedSystem(object):
+class MockedSystem:
     def __init__(self, name):
         self.get_name = lambda: name
 

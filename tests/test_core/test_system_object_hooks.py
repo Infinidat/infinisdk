@@ -11,7 +11,7 @@ from infinisdk.core.exceptions import APICommandFailed
 @pytest.fixture
 def hooks(forge, request):
 
-    class Hooks(object):
+    class Hooks:
         pass
 
     identifier = object()

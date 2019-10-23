@@ -325,7 +325,7 @@ class InfiniBox(APITarget):
         return not (self == other) # pylint: disable=superfluous-parens
 
 
-class _CurrentUserProxy(object):
+class _CurrentUserProxy:
     def __init__(self, system):
         self.system = system
 

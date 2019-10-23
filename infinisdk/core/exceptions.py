@@ -131,7 +131,7 @@ class RemoteAPICommandFailed(APICommandFailed):
     pass
 
 
-class ErrorReason(object):
+class ErrorReason:
 
     def __init__(self, message, affected_entities):
         super(ErrorReason, self).__init__()
