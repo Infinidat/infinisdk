@@ -4,6 +4,7 @@ import dateutil
 import pkg_resources
 import click
 import logbook
+import logbook.more
 from infinisdk import Q
 from infinisdk.infinibox import InfiniBox
 from infinisdk.core.config import config
@@ -22,7 +23,7 @@ CUSTOMIZE_ENTRY_POINT = 'infinisdk.cli.customize'
 @click.option("-q", "--quiet", count=True)
 @click.pass_context
 def cli(ctx, verbose, quiet):
-    console_handler = logbook.StderrHandler()
+    console_handler = logbook.more.ColorizedStderrHandler()
     console_handler.level = min(max(logbook.TRACE, _DEFAULT_CONSOLE_LEVEL-verbose+quiet), logbook.CRITICAL)
     ctx.obj['console_handler'] = console_handler
     console_handler.format_string = '{record.message}'
