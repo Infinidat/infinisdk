@@ -3,25 +3,11 @@ variables:
   INSTALL_DIR: /root/src
   RUN_ITZIK: https://git.infinidat.com/infradev/helpers/raw/master/run_itzik.py
   RUN_ITZIK_PARAMETERS: --no-dev --src $INSTALL_DIR --bundle new-infra --bundle-version $BUNDLE_VERSION --until $CI_PROJECT_NAME -p $CI_PROJECT_DIR[testing] --curr-branch $CI_COMMIT_REF_NAME
-  RUN_ITZIK_PARAMETERS_27: --no-dev --src $INSTALL_DIR --bundle new-infra-2.7 --bundle-version $BUNDLE_VERSION --until $CI_PROJECT_NAME -p $CI_PROJECT_DIR[testing] --curr-branch $CI_COMMIT_REF_NAME
 
 stages:
   - test
   - deploy
   - post
-
-py27:
-  image: python:2.7
-  tags:
-    - infradev
-    - ubuntu
-  except:
-    - /^customer-.*$/
-  script:
-    - curl -sL $RUN_ITZIK | python - $RUN_ITZIK_PARAMETERS_27
-    - source $INSTALL_DIR/env/bin/activate
-    - pylint --rcfile .pylintrc -j $(nproc) infinisdk scripts tests
-    - pytest -ra -W error::DeprecationWarning
 
 .test:
   tags:
@@ -34,6 +20,10 @@ py27:
     - source $INSTALL_DIR/env/bin/activate
     - pylint --rcfile .pylintrc -j $(nproc) infinisdk scripts tests
     - pytest -ra -W error::DeprecationWarning
+
+py27:
+  image: python:2.7
+  extends: .test
 
 py35:
   extends: .test
