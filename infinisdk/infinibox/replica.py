@@ -59,7 +59,11 @@ class ReplicaBinder(TypeBinder):
         """Replicates an entity, creating its remote replica on the specified pool
 
         :param remote_pool: Remote pool to use for entity creation on the remote side
+        :param remote_entity_names: A list or tuple containing the entity names created on remote side.
+                                    In case of cg - controls the entity names, not the cg name.
         """
+        if remote_entity_names is not OMIT:
+            assert isinstance(remote_entity_names, (list, tuple)), "object remote_entity_names must be tuple or list"
         return self.system.replicas.create(link=link,
                                            entity_pairs=self._build_entity_pairs_create_target(remote_entity_names,
                                                                                                entity),
