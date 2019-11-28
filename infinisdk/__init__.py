@@ -194,6 +194,11 @@ def _install_hooks():
                   arg_names=('volume', 'host_or_cluster', 'exception', 'lun'),
                   tags=['infinibox', 'host', 'host_cluster'])
 
+    gossip.define(_SDK_HOOK('pre_event_retention'), tags=['infinibox', 'event'], arg_names=('system', 'retention'))
+    gossip.define(_SDK_HOOK('post_event_retention'), tags=['infinibox', 'event'], arg_names=('system', 'retention'))
+    gossip.define(_SDK_HOOK('event_retention_failure'), tags=['infinibox', 'event'],
+                  arg_names=('system', 'retention', 'exception'))
+
     gossip.get_or_create_group('infinidat.sdk').set_strict()
 
 _install_hooks()

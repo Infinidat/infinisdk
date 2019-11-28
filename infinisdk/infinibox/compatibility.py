@@ -188,6 +188,11 @@ class Compatibility:
 
     def has_kms(self):
         return  self._has_feature('kms')
+
+    def has_event_retention(self):
+        return self._has_feature('event_retention')
+
+
 _VERSION_TUPLE_LEN = 5
 
 
