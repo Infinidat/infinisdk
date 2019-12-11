@@ -5,7 +5,12 @@ from capacity import Capacity, byte, GB
 from urlobject import URLObject as URL
 from collections import namedtuple
 from mitba import cached_method
-from ..core.utils import end_reraise_context, DONT_CARE, handle_possible_replication_snapshot
+from ..core.utils import (
+    DONT_CARE,
+    add_normalized_query_params,
+    end_reraise_context,
+    handle_possible_replication_snapshot,
+)
 from ..core.exceptions import ObjectNotFound, TooManyObjectsFound
 from ..core.type_binder import TypeBinder, PolymorphicBinder
 from ..core import Field, CapacityType, MillisecondsDatetimeType
@@ -150,11 +155,9 @@ class Dataset(InfiniBoxObject):
                                          tags=self.get_tags_for_object_operations(self.system))
         trigger_hook('infinidat.sdk.pre_refresh_snapshot')
         parent.trigger_begin_fork()
+        url = add_normalized_query_params(self.get_this_url_path().add_path("refresh"),
+                                          force_if_replicated_on_target=force_if_replicated_on_target)
         try:
-            url = self.get_this_url_path().add_path('refresh')
-            if force_if_replicated_on_target is not OMIT:
-                force = 'true' if force_if_replicated_on_target else 'false'
-                url = url.add_query_param('force_if_replicated_on_target', force)
             self.system.api.post(url, data={'source_id': parent.id})
         except Exception:  # pylint: disable=broad-except
             with end_reraise_context():
@@ -204,11 +207,8 @@ class Dataset(InfiniBoxObject):
         handle_possible_replication_snapshot(child)
         return child
 
-    def delete(self, force_if_snapshot_locked=OMIT): # pylint: disable=arguments-differ
-        path = self.get_this_url_path()
-        if force_if_snapshot_locked is not OMIT:
-            path = path.add_query_param('force_if_snapshot_locked', force_if_snapshot_locked)
-        self._send_delete_with_hooks_tirggering(path)
+    def delete(self, force_if_snapshot_locked=OMIT):  # pylint: disable=arguments-differ
+        super().delete(force_if_snapshot_locked=force_if_snapshot_locked)
 
     def _is_synced_remote_entity(self):
         if not self.system.compat.has_sync_replication() or not self.is_rmr_target():

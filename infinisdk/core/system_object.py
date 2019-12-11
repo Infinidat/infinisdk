@@ -16,7 +16,7 @@ from .field import Field
 from .type_binder import TypeBinder
 from .bindings import PassthroughBinding
 from .api.special_values import translate_special_values
-from .utils import DONT_CARE, end_reraise_context
+from .utils import DONT_CARE, end_reraise_context, add_normalized_query_params
 from logbook import Logger
 
 _logger = Logger(__name__)
@@ -438,14 +438,14 @@ class SystemObject(BaseSystemObject):
             if e.status_code != httplib.NOT_FOUND:
                 raise
 
-    def delete(self):
+    def delete(self, **kwargs):
         """
         Deletes this object.
         """
-        self._send_delete_with_hooks_tirggering(self.get_this_url_path())
+        self._send_delete_with_hooks_tirggering(self.get_this_url_path(), **kwargs)
 
-    def _send_delete_with_hooks_tirggering(self, url):
-        url = URL(url)
+    def _send_delete_with_hooks_tirggering(self, url, **kwargs):
+        url = add_normalized_query_params(url, **kwargs)
         hook_tags = self.get_tags_for_object_operations(self.system)
         gossip.trigger_with_tags('infinidat.sdk.pre_object_deletion', {'obj': self, 'url': url}, tags=hook_tags)
         try:

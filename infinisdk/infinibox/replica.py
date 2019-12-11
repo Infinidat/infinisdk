@@ -714,19 +714,7 @@ class Replica(SystemObject):
         """Deletes this replica
         """
         path = self.get_this_url_path()
-        if force_if_remote_error is not OMIT:
-            path = path.add_query_param('force_if_remote_error', 'true')
-        if force_on_target is not OMIT:
-            path = path.add_query_param('force_on_target', 'true')
-        if force_if_no_remote_credentials is not OMIT:
-            path = path.add_query_param('force_if_no_remote_credentials', 'true')
-        if force_on_local is not OMIT:
-            path = path.add_query_param('force_on_local', force_on_local)
-        if keep_serial_on_local is not OMIT:
-            path = path.add_query_param('keep_serial_on_local', keep_serial_on_local)
-        if retain_staging_area is not OMIT:
-            path = path.add_query_param('retain_staging_area', retain_staging_area)
-
+        requested_retain_staging_area = retain_staging_area
         remote_replica = self.get_remote_replica(safe=True)
         if remote_replica is None:
             _logger.debug('Failed to get remote replica during delete operation')
@@ -736,7 +724,14 @@ class Replica(SystemObject):
             self._notify_pre_exposure(remote_replica)
 
         try:
-            resp = self._send_delete_with_hooks_tirggering(path)
+            resp = self._send_delete_with_hooks_tirggering(
+                path,
+                force_if_remote_error=force_if_remote_error,
+                force_on_target=force_on_target,
+                force_if_no_remote_credentials=force_if_no_remote_credentials,
+                force_on_local=force_on_local,
+                keep_serial_on_local=keep_serial_on_local,
+                retain_staging_area=requested_retain_staging_area)
         except Exception as e:  # pylint: disable=broad-except
             with end_reraise_context():
                 if retain_staging_area:
