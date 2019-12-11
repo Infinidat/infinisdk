@@ -67,7 +67,7 @@ def main(src_dir, env_dir, python_exec, bundle_version, sdk_dir, pytest_color, v
     check_process("{}/bin/python -m pip install -i {} -e '.[testing]'".format(env_dir, LOCAL_PYPI_INDEX), cwd=sdk_dir)
 
     # Running unittests
-    extras = '' if bundle_version == 'master' else '--disable-warnings -k "not only_latest'
+    extras = '' if bundle_version == 'master' else '--disable-warnings -k "not only_latest"'
     check_process("{}/bin/pytest --color {} tests {}".format(env_dir, pytest_color, extras), cwd=sdk_dir)
 
 
