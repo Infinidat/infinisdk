@@ -10,6 +10,7 @@ def test_filter_by_seq_num(infinibox):
 
     assert len(infinibox.events.find(Q.seq_num >= event['seq_num']-events_no))
 
+
 def test_create_custom_event(infinibox):
     description = 'test events'
     event_from_post = infinibox.events.create_custom_event(
@@ -46,3 +47,11 @@ def test_set_anti_flooding_configuration(infinibox, set_anti_flooding_on):
     else:
         infinibox.events.disable_anti_flooding()
     assert infinibox.events.is_anti_flooding_enabled() == set_anti_flooding_on
+
+
+def test_create_external_event(infinibox):
+    event_data = [{'name':'some_number', 'type': 'int', 'value':3}]
+    event = infinibox.events.create(code='DDE_INFO_EVENT', data=event_data)
+    if infinibox.compat.get_version_as_float() >= 5.5:
+        # Due to simulator bug (INFRADEV-13215), it didn't support evnet data correctly pre 5.5
+        assert event.get_field('data') == event_data

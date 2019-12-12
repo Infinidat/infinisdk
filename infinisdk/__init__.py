@@ -13,6 +13,7 @@ def _install_hooks():
     # it is not in OBJECT_TYPES.
     obj_type_names = set(tag for sys in (InfiniBox, ) for obj_cls in sys.OBJECT_TYPES + [TreeQ]
                          for tag in obj_cls.get_tags_for_object_operations(sys))
+    obj_type_names.add('event')
 
     # pylint: disable=too-many-format-args
     gossip.define(_SDK_HOOK('pre_object_creation'), tags=obj_type_names, arg_names=('data', 'system', 'cls', 'parent'))
