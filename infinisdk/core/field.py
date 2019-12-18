@@ -48,6 +48,8 @@ class Field(FieldBase):
         self.cached = cached
         #:Specifies if this field needs to have get function (there is no need to add getter for hidden fields)
         self.add_getter = add_getter and not hidden
+        #:Specifies the field getter name if it has one
+        self.getter_name = None
         #:Specifies if this field needs to have update function
         self.add_updater = add_updater and self.mutable  # pylint: disable=no-member
         #:Specifies that the object's __repr__ method should use this field to describe the object
@@ -70,10 +72,10 @@ class Field(FieldBase):
     def notify_added_to_class(self, cls):
         if self.add_getter:
             getter_func = make_getter(self)
-            getter_name = getter_func.__name__
-            if getter_name in cls.__dict__:
-                raise AttributeAlreadyExists(cls, getter_name)
-            setattr(cls, getter_name, getter_func)
+            self.getter_name = getter_func.__name__
+            if self.getter_name in cls.__dict__:
+                raise AttributeAlreadyExists(cls, self.getter_name)
+            setattr(cls, self.getter_name, getter_func)
 
         if self.add_updater:
             for updater_func in make_field_updaters(self):

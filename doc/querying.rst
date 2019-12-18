@@ -34,7 +34,7 @@ Querying by fields is relatively easy if you want a specific field value:
 
 		>>> [v] = system.volumes.find(name='vol0')
 		>>> v # doctest: +ELLIPSIS
-		<...:Volume id=1007>
+		<...:Volume id=1008>
 
 Getting a Single Object
 -----------------------
@@ -43,7 +43,7 @@ Getting a single object has an even easier shortcut -- ``get``, which assumes on
 
 		>>> v = system.volumes.get(name='vol0')
 		>>> v # doctest: +ELLIPSIS
-		<...:Volume id=1007>
+		<...:Volume id=1008>
 
 It will fail if either 0 or several objects are returned:
 

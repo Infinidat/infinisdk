@@ -10,7 +10,7 @@ class Plugin(SystemObject):
         Field("type", type=str, is_filterable=True, creation_parameter=True, cached=True),
         Field("name", type=str, is_filterable=True, mutable=True, creation_parameter=True, is_sortable=True,
               default=Autogenerate("plugin_{uuid}")),
-        Field("version", type=str, is_filterable=True, creation_parameter=True),
+        Field("version", type=str, is_filterable=True, creation_parameter=True, mutable=True),
         Field("api_redirect_suffix", type=str, is_sortable=True, creation_parameter=True,
               mutable=True, is_filterable=True),
         Field("management_url", type=str, creation_parameter=True, mutable=True),

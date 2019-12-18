@@ -1,3 +1,17 @@
+Version 151.1.1 (Released 2019-12-18)
+-------------------------------------
+
+* #12938 Fix components get fields after invalidating cache
+* #12888 Add args to volume map and unmap
+* #12868 Add filterable and sortable fields for replica object
+* #12813 Support new API for re-enable QoS
+* #12795 Attached Property's cache is saved on the object itself (instead of the property)
+* #12743 Fix `User.reset_password()` method
+* #12689 Add for map_volume and unmap_volume before, after and on failure hooks
+* #12227 Add UUID for components constructor with validation
+* #12163 Support elasticsearch cluster
+* #12074 Support FIPS
+
 Version 141.1.0 (Released 2019-07-31)
 -------------------------------------
 

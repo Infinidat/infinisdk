@@ -1,4 +1,5 @@
 import copy
+import uuid
 
 from .._compat import ExitStack, zip  # pylint: disable=redefined-builtin
 from ..core.field import Field
@@ -7,7 +8,7 @@ from ..core.system_component import SystemComponentsBinder
 from ..core.system_object import BaseSystemObject
 from ..core.exceptions import ObjectNotFound
 from ..core.type_binder import MonomorphicBinder
-from ..core.translators_and_types import WWNType, CapacityType
+from ..core.translators_and_types import WWNType, CapacityType, MunchType
 from mitba import cached_method
 from .component_query import InfiniBoxComponentQuery, InfiniBoxGenericComponentQuery
 from ..core.bindings import InfiniSDKBinding, ListOfRelatedComponentBinding, RelatedComponentBinding
@@ -21,7 +22,6 @@ from vintage import deprecated, warn_deprecation
 # pylint: disable=attribute-defined-outside-init,no-member,super-on-old-class,no-init,abstract-method
 _logger = Logger(__name__)
 _UID_DEPRECATION_MSG = "Direct usage of the 'id' field is deprecated. Use 'uid' field instead"
-_NON_INVALIDATED_FIELDS = ('id', 'parent_id', 'rack')
 
 def _normalize_id_predicate(predicate, component_type):
     if predicate.field.name == 'id' and isinstance(predicate.value, str):
@@ -44,7 +44,9 @@ class InfiniBoxSystemComponents(SystemComponentsBinder):
         self._fetched_nodes = False
         self._fetched_others = False
         self._fetched_service_clusters = False
+        self._fetched_external_clusters = False
         self._deps_by_compoents_tree = defaultdict(set)
+        self._initialization_uuid = uuid.uuid4()
 
     def invalidate_cache(self):
         super(InfiniBoxSystemComponents, self).invalidate_cache()
@@ -65,6 +67,9 @@ class InfiniBoxSystemComponents(SystemComponentsBinder):
     def should_fetch_service_clusters(self):
         return not self._fetched_service_clusters
 
+    def should_fetch_external_clusters(self):
+        return not self._fetched_external_clusters
+
     def mark_fetched_nodes(self):
         self._fetched_nodes = True
 
@@ -74,6 +79,9 @@ class InfiniBoxSystemComponents(SystemComponentsBinder):
 
     def mark_fetched_service_clusters(self):
         self._fetched_service_clusters = True
+
+    def mark_fetched_external_clusters(self):
+        self._fetched_external_clusters = True
 
     def get_rack_1(self):
         return self._rack_1
@@ -187,6 +195,9 @@ class InfiniBoxComponentBinder(MonomorphicBinder):
         elif self.object_type is components.service_clusters.object_type:
             if force_fetch or components.should_fetch_service_clusters():
                 self._fetch_service_clusters()
+        elif self.object_type is components.external_clusters.object_type:
+            if force_fetch or components.should_fetch_external_clusters():
+                self._fetch_external_clusters()
         else:
             if force_fetch or components.should_fetch_all():
                 rack_1 = components.get_rack_1()
@@ -198,6 +209,15 @@ class InfiniBoxComponentBinder(MonomorphicBinder):
         url = service_cluster_type.get_url_path(self.system)
         clusters_data = self.system.api.get(url).get_result()
         components.mark_fetched_service_clusters()
+        for cluster_data in clusters_data:
+            service_cluster_type.construct(self.system, cluster_data, None)
+
+    def _fetch_external_clusters(self):
+        components = self.system.components
+        service_cluster_type = components.external_clusters.object_type
+        url = service_cluster_type.get_url_path(self.system)
+        clusters_data = self.system.api.get(url).get_result()
+        components.mark_fetched_external_clusters()
         for cluster_data in clusters_data:
             service_cluster_type.construct(self.system, cluster_data, None)
 
@@ -216,18 +236,20 @@ class InfiniBoxSystemComponent(BaseSystemObject):
         return self.get_uid()
 
     def is_in_system(self):
-        return True
+        return self._construct_uuid == self.system.components._initialization_uuid  # pylint: disable=protected-access
 
     def __deepcopy__(self, memo):
         return self.construct(self.system, copy.deepcopy(self._cache, memo), self.get_parent_id())
 
     def invalidate_cache(self, *field_names):
-        field_names_to_invalidate = set(field_names or self._cache.keys()) - set(_NON_INVALIDATED_FIELDS)
+        non_invalidated_fields = set(name for field in self.fields for name in (field.name, field.api_name)
+                                     if field.is_identity)
+        field_names_to_invalidate = set(field_names or self._cache.keys()) - set(non_invalidated_fields)
         if field_names_to_invalidate:
             super(InfiniBoxSystemComponent, self).invalidate_cache(*field_names_to_invalidate)
         else:
             assert not field_names, \
-                "Cannot invalidate only these fields: {}".format(', '.join(_NON_INVALIDATED_FIELDS))
+                "Cannot invalidate only these fields: {}".format(', '.join(non_invalidated_fields))
 
     def _deduce_from_cache(self, field_names, from_cache):
         collection = self.system.components[self.get_plural_name()]
@@ -269,6 +291,7 @@ class InfiniBoxSystemComponent(BaseSystemObject):
         data = self.system.api.get(self.get_this_url_path()).get_result()
         self.construct(self.system, data, self.get_parent_id())
 
+
     @classmethod
     def construct(cls, system, data, parent_id, allow_partial_fields=False):    # pylint: disable=arguments-differ
         # pylint: disable=protected-access
@@ -289,6 +312,7 @@ class InfiniBoxSystemComponent(BaseSystemObject):
             except KeyError:
                 if not allow_partial_fields:
                     raise
+        returned._construct_uuid = system.components._initialization_uuid
         return returned
 
 
@@ -296,7 +320,7 @@ class InfiniBoxSystemComponent(BaseSystemObject):
 @InfiniBoxSystemComponents.install_component_type
 class Rack(InfiniBoxSystemComponent):
     FIELDS = [
-        Field("index", api_name="rack", type=int, cached=True),
+        Field("index", api_name="rack", type=int, is_identity=True),
         Field("enclosures", type=list, binding=ListOfRelatedComponentBinding()),
         Field("nodes", type=list, binding=ListOfRelatedComponentBinding()),
         Field("bbus", api_name='ups', type=list, binding=ListOfRelatedComponentBinding()),
@@ -321,6 +345,9 @@ class Rack(InfiniBoxSystemComponent):
         data['enclosures'] = []
         self.construct(self.system, data, self.get_parent_id())
 
+    def is_in_system(self):
+        return True
+
     def refresh_cache(self):
         self.system.components.mark_fetched_all()
         super(Rack, self).refresh_cache()
@@ -330,7 +357,7 @@ class Rack(InfiniBoxSystemComponent):
 class Enclosure(InfiniBoxSystemComponent):
     FIELDS = [
         Field("api_id", api_name="id", type=int, cached=True),
-        Field("index", api_name="id", type=int, cached=True),
+        Field("index", api_name="id", type=int, is_identity=True),
         Field("drives", type=list, binding=ListOfRelatedComponentBinding()),
         Field("state", cached=False),
     ]
@@ -366,7 +393,7 @@ class Node(InfiniBoxSystemComponent):
     BINDER_CLASS = Nodes
     FIELDS = [
         Field("api_id", api_name="id", type=int, cached=True),
-        Field("index", api_name="id", type=int, cached=True),
+        Field("index", api_name="id", type=int, is_identity=True),
         Field("name", cached=True),
         Field("model", cached=True),
         Field("ib_ports", type=list, binding=ListOfRelatedComponentBinding()),
@@ -375,6 +402,8 @@ class Node(InfiniBoxSystemComponent):
         Field("drives", type=list, binding=ListOfRelatedComponentBinding("local_drives")),
         Field("services", type=list, binding=ListOfRelatedComponentBinding()),
         Field("state", cached=False),
+        Field("security", cached=False, type=MunchType, feature_name='fips'),
+        Field("tpm", cached=False, type=MunchType, feature_name='fips'),
     ]
 
     def is_active(self):
@@ -411,7 +440,7 @@ class Node(InfiniBoxSystemComponent):
 @InfiniBoxSystemComponents.install_component_type
 class LocalDrive(InfiniBoxSystemComponent):
     FIELDS = [
-        Field("index", api_name="drive_index", type=int, cached=True),
+        Field("index", api_name="drive_index", type=int, is_identity=True),
         Field("model"),
         Field("vendor"),
         Field("firmware"),
@@ -419,6 +448,7 @@ class LocalDrive(InfiniBoxSystemComponent):
         Field("type"),
         Field("serial_number"),
         Field("node", api_name="node_index", type=int, cached=True, binding=RelatedComponentBinding()),
+        Field("encryption_state", type=bool, feature_name="fips"),
     ]
 
     @classmethod
@@ -447,7 +477,7 @@ class EthPort(InfiniBoxSystemComponent):
         Field("max_speed", type=int, feature_name="max_speed"),
         Field("device_name", api_name="name"),
         Field("port_number", type=int, cached=True),
-        Field("index", api_name="id", type=int, cached=True),
+        Field("index", api_name="id", type=int, is_identity=True),
         Field("node", api_name="node_index", type=int, cached=True, binding=RelatedComponentBinding()),
         Field("role", cached=True),
         Field("name", cached=True),
@@ -475,7 +505,7 @@ class EthPort(InfiniBoxSystemComponent):
 class IbPort(InfiniBoxSystemComponent):
     FIELDS = [
         Field("api_id", api_name="id", type=int, cached=True),
-        Field("index", api_name="id", type=int, cached=True),
+        Field("index", api_name="id", type=int, is_identity=True),
         Field("firmware"),
         Field("last_probe_timestamp", type=int),
         Field("link_state", cached=False, new_to="3.0"),
@@ -518,7 +548,7 @@ class FcPort(InfiniBoxSystemComponent):
     BINDER_CLASS = FcPorts
     FIELDS = [
         Field("api_id", api_name="id", type=int, cached=True),
-        Field("index", api_name="id", type=int, cached=True),
+        Field("index", api_name="id", type=int, is_identity=True),
         Field("wwpn", is_identity=True, cached=True, type=WWNType),
         Field("node", api_name="node_index", type=int, cached=True, binding=RelatedComponentBinding()),
         Field("state", cached=False),
@@ -569,12 +599,13 @@ class FcPort(InfiniBoxSystemComponent):
 @InfiniBoxSystemComponents.install_component_type
 class Drive(InfiniBoxSystemComponent):
     FIELDS = [
-        Field("index", api_name="drive_index", type=int, is_identity=True, cached=True),
+        Field("index", api_name="drive_index", type=int, is_identity=True),
         Field("enclosure_index", type=int, cached=True),
         Field("enclosure", api_name="enclosure_index", type=int, cached=True, binding=RelatedComponentBinding()),
         Field("serial_number"),
         Field("capacity", api_name="bytes_capacity", type=CapacityType),
         Field("state", cached=False),
+        Field("encryption_state", type=bool, feature_name="fips"),
     ]
 
     def get_paths(self, from_cache=False):
@@ -590,7 +621,7 @@ class Drive(InfiniBoxSystemComponent):
 @InfiniBoxSystemComponents.install_component_type
 class Service(InfiniBoxSystemComponent):
     FIELDS = [
-        Field("index", api_name="name", cached=True),
+        Field("index", api_name="name", is_identity=True),
         Field("name", is_identity=True, cached=True),
         Field("role", cached=False),
         Field("state", cached=False),
@@ -625,7 +656,7 @@ class Service(InfiniBoxSystemComponent):
 @InfiniBoxSystemComponents.install_component_type
 class ServiceCluster(InfiniBoxSystemComponent):
     FIELDS = [
-        Field("index", api_name="name", cached=True),
+        Field("index", api_name="name", is_identity=True),
         Field("name", is_identity=True, cached=True),
         Field("state", api_name="cluster_state", cached=False),
         ]
@@ -658,11 +689,58 @@ class ServiceCluster(InfiniBoxSystemComponent):
         return self.get_state() == 'DEGRADED'
 
 
+def _ensure_elastic(func):
+    def inner(self, *args, **kwargs):
+        if not self.get_name() == 'elastic':
+            raise NotImplementedError("The getter for cluster {} is not support".format(self.get_name()))
+        return func(self, *args, **kwargs)
+    return inner
+
+@InfiniBoxSystemComponents.install_component_type
+class ExternalServiceCluster(InfiniBoxSystemComponent):
+    FIELDS = [
+        Field("index", api_name="name", is_identity=True),
+        Field("name", is_identity=True, cached=True),
+        Field("state", api_name="cluster_state", cached=False),
+        Field("node_states", type=list),
+        ]
+
+    @classmethod
+    def get_type_name(cls):
+        return "external_cluster"
+
+    @classmethod
+    def get_url_path(cls, system):
+        return URL('external_services')
+
+    @cached_method
+    def get_this_url_path(self):
+        services_url = self.get_url_path(self.system)
+        this_url = services_url.add_path(str(self.get_index()))
+        return this_url
+
+    @classmethod
+    def is_supported(cls, system): # pylint: disable=unused-argument
+        return system.compat.has_events_db()
+
+    @_ensure_elastic
+    def is_steady(self, **kwargs):
+        return self.get_field("health", **kwargs)["initializing_shards"] == 0
+
+    @_ensure_elastic
+    def is_active(self, **kwargs):
+        return self.get_state(**kwargs) == 'GREEN'
+
+    @_ensure_elastic
+    def is_degraded(self, **kwargs):
+        return self.get_state(**kwargs) == 'YELLOW'
+
+
 @InfiniBoxSystemComponents.install_component_type
 class BBU(InfiniBoxSystemComponent):
     FIELDS = [
         Field("api_id", api_name="id", type=int, cached=True),
-        Field("index", api_name="id", type=int, cached=True),
+        Field("index", api_name="id", type=int, is_identity=True),
         Field("state", cached=False),
         Field("on_battery", api_name="onBattery", type=bool, cached=False),
         Field("charging", type=bool, cached=False),
@@ -680,14 +758,18 @@ class BBU(InfiniBoxSystemComponent):
 @InfiniBoxSystemComponents.install_component_type
 class System(InfiniBoxSystemComponent):
     FIELDS = [
-        Field("api_id", api_name="id", type=int, cached=True),
-        Field("index", api_name="id", type=int, cached=True),
+        Field("api_id", api_name="id", type=int, cached=True, is_identity=True),
+        Field("index", api_name="id", type=int, is_identity=True),
         Field("operational_state", type=dict, cached=False),
+        Field("security", type=dict, feature_name='fips'),
     ]
 
     @cached_method
     def get_this_url_path(self):
         return URL('system')
+
+    def is_in_system(self):
+        return True
 
     def get_state(self, *args, **kwargs):
         return self.get_operational_state(*args, **kwargs)['state']

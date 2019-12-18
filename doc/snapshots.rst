@@ -10,10 +10,10 @@ Use the :meth:`.create_snapshot <.Dataset.create_snapshot>`
 
 		>>> snap = volume.create_snapshot()
 		>>> snap.id
-		1008
+		1009
 		>>> snap_of_snap = snap.create_snapshot()
 		>>> snap_of_snap.id
-		1009
+		1010
 
 Creating Group Snapshots
 ------------------------
@@ -61,7 +61,7 @@ Example: Deleting Snapshots by Creation Time
 		>>> for snapshot in system.volumes.find(system.volumes.fields.created_at < cutoff, parent_id=volume.id):
 		...     print("Deleting snapshot with id:", snapshot.id)
 		...     snapshot.delete()
-		Deleting snapshot with id: 1008
+		Deleting snapshot with id: 1009
 
 
 .. seealso:: :mod:`Volume API documentation <infinisdk.infinibox.volume>`
