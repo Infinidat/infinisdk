@@ -52,7 +52,7 @@ class SystemComponentsBinder(TypeBinder):
         cls._COMPONENTS_BY_TYPE_NAME[component_type.get_type_name()] = component_type  # pylint: disable=unsupported-assignment-operation
         if cls.types is None:
             cls.types = TypeContainer()
-        setattr(cls.types, component_type.__name__, component_type)
+        cls.types.install(component_type)
         return component_type
 
     def __getitem__(self, attr):
@@ -90,4 +90,26 @@ class SpecificComponentBinder(TypeBinder):
 
 
 class TypeContainer(object):
-    pass
+    def __init__(self):
+        super(TypeContainer, self).__init__()
+        self._type_name_to_class = {}
+
+    def install(self, component_type):
+        type_name = component_type.__name__
+        self._type_name_to_class[type_name] = component_type
+        setattr(self, type_name, component_type)
+
+    def get_names(self):
+        return list(self._type_name_to_class)
+
+    def get_type_by_name(self, name):
+        return self._type_name_to_class[name]
+
+    def to_list(self):
+        return list(self)
+
+    def __iter__(self):
+        return itervalues(self._type_name_to_class)
+
+    def __len__(self):
+        return len(self._type_name_to_class)

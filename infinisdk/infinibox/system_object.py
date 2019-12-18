@@ -1,9 +1,10 @@
 from urlobject import URLObject as URL
-
 from ..core.system_object import SystemObject, DONT_CARE
 from ..core.exceptions import InfiniSDKException, CacheMiss
 from .lun import LogicalUnit, LogicalUnitContainer
 from .metadata_holder import MetadataHolder
+from ..core.utils import end_reraise_context
+import gossip
 
 
 class InfiniBoxObject(SystemObject, MetadataHolder):
@@ -63,6 +64,9 @@ class InfiniBoxLURelatedObject(InfiniBoxObject):
 
         return False
 
+    def _get_hook_data(self, volume, lun=None):
+        return {'volume': volume, 'host_or_cluster': self, 'lun': int(lun) if lun else None}
+
     def map_volume(self, volume, lun=None):
         """
         Maps a volume to this object, possibly specifying the logical unit number (LUN) to use
@@ -73,10 +77,23 @@ class InfiniBoxLURelatedObject(InfiniBoxObject):
         if lun is not None:
             post_data['lun'] = int(lun)
         url = self.get_this_url_path().add_path('luns')
-        res = self.system.api.post(url, data=post_data)
+        hook_tags = self.get_tags_for_object_operations(self.system)
+        hook_data = self._get_hook_data(volume, lun)
+        gossip.trigger_with_tags('infinidat.sdk.pre_volume_mapping',
+                                 hook_data, tags=hook_tags)
+        try:
+            res = self.system.api.post(url, data=post_data)
+        except Exception as e: # pylint: disable=broad-except
+            with end_reraise_context():
+                hook_data['exception'] = e
+                gossip.trigger_with_tags('infinidat.sdk.volume_mapping_failure',
+                                         hook_data, tags=hook_tags)
         volume.invalidate_cache('mapped')
         self.invalidate_cache('luns')
-        return LogicalUnit(system=self.system, **res.get_result())
+        lun_obj = LogicalUnit(system=self.system, **res.get_result())
+        hook_data['lun_object'] = lun_obj
+        gossip.trigger_with_tags('infinidat.sdk.post_volume_mapping', hook_data, tags=hook_tags)
+        return lun_obj
 
     def unmap_volume(self, volume=None, lun=None):
         """
@@ -91,7 +108,16 @@ class InfiniBoxLURelatedObject(InfiniBoxObject):
         else:
             raise InfiniSDKException('unmap_volume does must get or volume or lun')
         assert self == lun.get_mapping_object()
+        hook_tags = self.get_tags_for_object_operations(self.system)
+        hook_data = self._get_hook_data(volume, lun)
+        gossip.trigger_with_tags('infinidat.sdk.pre_volume_unmapping', hook_data, tags=hook_tags)
         self.invalidate_cache('luns')
-        lun.unmap()
+        try:
+            lun.unmap()
+        except Exception as e: # pylint: disable=broad-except
+            with end_reraise_context():
+                hook_data['exception'] = e
+                gossip.trigger_with_tags('infinidat.sdk.volume_unmapping_failure', hook_data, tags=hook_tags)
         if volume:
             volume.invalidate_cache('mapped')
+        gossip.trigger_with_tags('infinidat.sdk.post_volume_unmapping', hook_data, tags=hook_tags)

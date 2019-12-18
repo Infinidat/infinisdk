@@ -1,5 +1,6 @@
 from urlobject import URLObject as URL
 from ..._compat import string_types, abc_module
+from ..api.special_values import OMIT, Autogenerate, RawValue
 
 
 def add_comma_separated_query_param(url, param_name, value):
@@ -20,3 +21,17 @@ def add_comma_separated_query_param(url, param_name, value):
         existing_sort = "{},".format(existing_sort)
 
     return url.set_query_param(param_name, "{}{}".format(existing_sort, value))
+
+
+def add_normalized_query_params(url, **kwargs):
+    url = URL(url)
+    for key, value in kwargs.items():
+        if value is OMIT:
+            continue
+        norm_value = value
+        if isinstance(norm_value, (RawValue, Autogenerate)):
+            norm_value = norm_value.generate()
+        elif isinstance(norm_value, bool):
+            norm_value = str(norm_value).lower()
+        url = url.add_query_param(key, norm_value)
+    return url

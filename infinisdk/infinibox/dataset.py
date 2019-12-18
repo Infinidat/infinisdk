@@ -341,8 +341,6 @@ class Dataset(InfiniBoxObject):
             tags=hook_tags)
 
     def get_replicas(self):
-        if isinstance(self, self.system.types.filesystem) and not self.system.compat.has_nas_replication():
-            return []
         return self.system.replicas.find(local_entity_id=self.id).to_list()
 
     def get_replica(self):
@@ -356,14 +354,9 @@ class Dataset(InfiniBoxObject):
     def get_remote_entities(self):
         returned = []
         for replica in self.get_replicas():
-            remote_system = replica.get_remote_system(from_cache=True)
-            if remote_system is None:
-                continue
-            collection = remote_system.objects.get_binder_by_type_name(self.get_type_name())
-            for pair in replica.get_entity_pairs(from_cache=True):
-                if pair['local_entity_id'] == self.id:
-                    returned.append(collection.get_by_id_lazy(pair['remote_entity_id']))
-                    break
+            remote_entity = replica.get_remote_data_entity_from_local(self)
+            if remote_entity is not None:
+                returned.append(remote_entity)
         return returned
 
     def get_remote_entity(self):

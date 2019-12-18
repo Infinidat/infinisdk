@@ -41,8 +41,6 @@ class Link(InfiniBoxObject):
         Field('is_local_link_ready_for_sync', type=bool, feature_name="sync_replication"),
         Field('async_only', type=bool, feature_name="sync_replication"),
         Field('resiliency_mode', type=str, feature_name="active_active"),
-        Field('preferred', api_name='is_preferred', type=bool, optional=True, is_filterable=True, is_sortable=True,
-              creation_parameter=True, feature_name="active_active_preferred_on_link"),
         Field('witness_address', type=str, optional=True, is_filterable=True, is_sortable=True,
               creation_parameter=True, feature_name="active_active"),
         Field('local_witness_state', type=str, feature_name="active_active"),
@@ -50,10 +48,12 @@ class Link(InfiniBoxObject):
     ]
 
     def is_up(self, from_cache=DONT_CARE):
-        return self.get_link_state(from_cache=from_cache).lower() == 'up'
+        link_state = self.get_link_state(from_cache=from_cache)
+        return link_state is not None and link_state.lower() == 'up'
 
     def is_down(self, from_cache=DONT_CARE):
-        return self.get_link_state(from_cache=from_cache).lower() in ['down', 'unknown']
+        link_state = self.get_link_state(from_cache=from_cache)
+        return link_state is not None and link_state.lower() in ['down', 'unknown']
 
     @classmethod
     def is_supported(cls, system):
@@ -118,9 +118,3 @@ class Link(InfiniBoxObject):
         url = self.get_this_url_path().add_path('set_witness_address')
         self.system.api.post(url, data={'witness_address': witness_address})
         self.invalidate_cache('witness_address')
-        self.invalidate_cache('is_preferred')
-
-    def set_preferred(self):
-        url = self.get_this_url_path().add_path('set_preferred')
-        self.system.api.post(url)
-        self.invalidate_cache('is_preferred')

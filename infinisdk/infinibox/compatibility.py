@@ -67,8 +67,8 @@ class Compatibility(object):
         return self.system.get_version().partition('.')[0]
 
     def get_version_as_float(self):
-        float_digit_list = self.system.get_version().split('.')[:2]
-        return float(".".join(float_digit_list))
+        version_tuple = self.get_parsed_system_version().version[:2]
+        return float(".".join(str(num) for num in version_tuple))
 
     def _init_features(self):
         resp = self.system.api.get("_features", assert_success=False)
@@ -114,10 +114,10 @@ class Compatibility(object):
         return self._get_feature_version('metadata', 1)
 
     def has_consistency_groups(self):
-        return self.get_version_as_float() >= 2.2
+        return self.get_parsed_system_version() >= '2.2'
 
     def has_initiators(self):
-        return self.get_version_as_float() >= 2.2
+        return self.get_parsed_system_version() >= '2.2'
 
     def has_user_disabling(self):
         return self._get_feature_version("user_management", 0) >= 1
@@ -126,16 +126,16 @@ class Compatibility(object):
         return self._has_feature('api_auth_sessions') or self._has_feature('api/auth_sessions')
 
     def has_max_speed(self):
-        return self.get_version_as_float() > 2.2
+        return self.get_parsed_system_version() > '2.2'
 
     def has_writable_snapshots(self):
         return self._has_feature('snapshots')
 
     def has_sync_job_states(self):
-        return self.get_version_as_float() >= 3.0
+        return self.get_parsed_system_version() >= '3.0'
 
     def has_sync_replication(self):
-        return self.get_version_as_float() >= 4.0
+        return self.get_parsed_system_version() >= '4.0'
 
     def has_nas_replication(self):
         return self._has_feature('filesystem_replicas')
@@ -164,9 +164,6 @@ class Compatibility(object):
     def has_active_active(self):
         return self._has_feature('active_active')
 
-    def has_active_active_preferred_on_link(self):
-        return self._get_feature_version("active_active", -1) == 0
-
     def has_active_active_preferred_on_replica(self):
         return self._get_feature_version("active_active", 0) > 0
 
@@ -175,6 +172,19 @@ class Compatibility(object):
 
     def has_local_users_auth(self):
         return self._has_feature('local_users_auth')
+
+    def has_fips(self):
+        return self._has_feature('fips')
+
+    def has_replica_auto_create(self):
+        return self._has_feature('replica_auto_create')
+
+    def has_active_active_cg(self):
+        return self._get_feature_version("active_active", 0) > 1
+
+    def has_events_db(self):
+        return self._has_feature('events_db')
+
 
 _VERSION_TUPLE_LEN = 5
 
@@ -246,6 +256,6 @@ class _InfiniboxVersion(object):
         extra_info = ""
         if self._is_dev:
             extra_info += " dev version"
-        if not self._is_odd_version:
+        if self._is_odd_version:
             extra_info += " (unknown structure)"
         return "<InfiniboxVersion: {}{}>".format(self.version, extra_info)

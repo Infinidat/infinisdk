@@ -61,3 +61,8 @@ class Filesystem(Dataset):
 
     def get_exports(self):
         return self.system.exports.find(Q.filesystem_id == self.id)
+
+    def get_replicas(self):
+        if not self.system.compat.has_nas_replication():
+            return []
+        return super(Filesystem, self).get_replicas()

@@ -174,11 +174,12 @@ class InfiniBox(APITarget):
         """
         return self.get_system_info('serial_number', **kwargs)
 
-    def get_model_name(self):
+    def get_model_name(self, long_name=True):
         """
         Retrieves the model name as reported by the system
         """
-        return self.api.get('config/mgmt/system.model_long_name').get_result()
+        url = 'config/mgmt/system.model_{}_name'.format('long' if long_name else 'short')
+        return self.api.get(url).get_result()
 
     def get_version(self):
         """

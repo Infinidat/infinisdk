@@ -191,55 +191,58 @@ class Replica(SystemObject):
     FIELDS = [
 
         Field('id', type=int, is_identity=True, is_filterable=True),
-        Field('description', is_filterable=True, mutable=True),
+        Field('description', is_filterable=True, is_sortable=True, mutable=True),
         Field('updated_at', type=MillisecondsDatetimeType, is_filterable=True, is_sortable=True),
-        Field('created_at', type=MillisecondsDatetimeType, is_sortable=True, is_filterable=True, cached=True),
+        Field('created_at', type=MillisecondsDatetimeType, is_filterable=True, is_sortable=True, cached=True),
         Field('link', api_name='link_id', binding=RelatedObjectNamedBinding('links'),
               type='infinisdk.infinibox.link:Link', creation_parameter=True),
         Field('entity_pairs', type=list, creation_parameter=True),
         Field('entity_type', type=str, cached=True, creation_parameter=True, default='VOLUME', is_filterable=True),
-        Field('remote_pool_id', type=int, creation_parameter=True, optional=True, is_filterable=True),
-        Field('remote_replica_id', type=int, is_filterable=True, cached=True),
+        Field('remote_pool_id', type=int, creation_parameter=True, optional=True, is_filterable=True, is_sortable=True),
+        Field('remote_replica_id', type=int, is_filterable=True, is_sortable=True, cached=True),
         Field('role', type=str, cached=False, is_filterable=True),
         Field('progress', type=int),
         Field('jobs', type=list, cached=False),
         Field('job_state'),
         Field('pending_job_count', type=int),
         Field('throughput', type=int),
-        Field('restore_point', type=MillisecondsDatetimeType, is_filterable=True),
+        Field('restore_point', type=MillisecondsDatetimeType, is_filterable=True, is_sortable=True),
         Field('last_synchronized', type=MillisecondsDatetimeType),
-        Field('last_replicated_guid', api_name='_consistent_guid', is_filterable=True),
-        Field('state', type=str, cached=False),
+        Field('last_replicated_guid', api_name='_consistent_guid', is_filterable=True, is_sortable=True),
+        Field('state', type=str, cached=False, is_filterable=True),
         Field('state_description'),
         Field('state_reason'),
         Field('initial', api_name='is_initial', type=bool, cached=False),
         Field('sync_interval', api_name='sync_interval', type=MillisecondsDeltaType,
-              mutable=True, creation_parameter=True, is_filterable=True, optional=True),
-        Field('rpo', api_name='rpo_value', type=MillisecondsDeltaType, mutable=True, is_filterable=True),
+              mutable=True, creation_parameter=True, is_filterable=True, is_sortable=True, optional=True),
+        Field('rpo', api_name='rpo_value', type=MillisecondsDeltaType, mutable=True,
+              is_filterable=True, is_sortable=True),
         Field('rpo_state'),
-        Field('rpo_type'),
-        Field('remote_cg_id', type=int, is_filterable=True, cached=True),
-        Field('remote_cg_name', is_filterable=True),
+        Field('rpo_type', is_filterable=True, is_sortable=True),
+        Field('remote_cg_id', type=int, is_filterable=True, is_sortable=True, cached=True),
+        Field('remote_cg_name', is_filterable=True, is_sortable=True),
         Field('local_cg_id', type=int, is_filterable=True, cached=True),
-        Field('local_cg_name', is_filterable=True),
-        Field('local_pool_id', type=int, is_filterable=True),
-        Field('local_pool_name', is_filterable=True),
-        Field('remote_pool_name', is_filterable=True),
+        Field('local_cg_name', is_filterable=True, is_sortable=True),
+        Field('local_pool_id', type=int, is_filterable=True, is_sortable=True),
+        Field('local_pool_name', is_filterable=True, is_sortable=True),
+        Field('remote_pool_name', is_filterable=True, is_sortable=True),
         Field('staging_area_allocated_size', type=CapacityType),
-        Field('replication_type', type=str, creation_parameter=True, optional=True, is_filterable=True,
-              feature_name="sync_replication"),
-        Field('sync_state', type=str, feature_name="sync_replication", cached=False),
+        Field('replication_type', type=str, creation_parameter=True, optional=True,
+              is_filterable=True, is_sortable=True, feature_name="sync_replication"),
+        Field('sync_state', type=str, feature_name="sync_replication", cached=False, is_filterable=True),
         Field('sync_duration', type=int),
         Field('async_mode', type=bool, feature_name="sync_replication", cached=False),
         Field('latency', type=int, feature_name="sync_replication"),
-        Field('domino', type=bool, is_filterable=True, feature_name="sync_replication"),
+        Field('domino', type=bool, is_filterable=True, is_sortable=True, feature_name="sync_replication"),
         Field('assigned_sync_remote_ips', type=list, api_name="_assigned_sync_remote_ips",
               feature_name="sync_replication"),
         Field('next_job_start_time', type=MillisecondsDatetimeType),
         Field('next_restore_point', type=MillisecondsDatetimeType),
-        Field('permanent_failure_wait_interval', type=MillisecondsDeltaType, mutable=True),
-        Field('temporary_failure_retry_interval', type=MillisecondsDeltaType, mutable=True),
-        Field('temporary_failure_retry_count', type=int, mutable=True),
+        Field('permanent_failure_wait_interval', type=MillisecondsDeltaType, mutable=True,
+              is_filterable=True, is_sortable=True),
+        Field('temporary_failure_retry_interval', type=MillisecondsDeltaType, mutable=True,
+              is_filterable=True, is_sortable=True),
+        Field('temporary_failure_retry_count', type=int, mutable=True, is_filterable=True, is_sortable=True),
         Field('started_at', type=MillisecondsDatetimeType),
         Field('preferred', api_name='is_preferred', type=bool, optional=True, is_filterable=True, is_sortable=True,
               creation_parameter=True, mutable=False, feature_name="active_active_preferred_on_replica"),
@@ -371,12 +374,21 @@ class Replica(SystemObject):
             return self.get_local_entity().get_members().to_list()
         return [self.get_local_entity()]
 
-    def get_remote_data_entities(self):
+    def get_remote_data_entities(self, from_cache=False):
         """Returns all local volumes, whether as part of a consistency group, filesystem or a single volume
         """
         if self.is_consistency_group():
-            return self.get_remote_entity().get_members().to_list()
-        return [self.get_remote_entity()]
+            return self.get_remote_entity(from_cache=from_cache).get_members().to_list()
+        return [self.get_remote_entity(from_cache=from_cache)]
+
+    def get_remote_data_entity_from_local(self, dataset):
+        remote_system = self.get_remote_system(from_cache=True)
+        if remote_system is None:
+            return None
+        collection = remote_system.objects.get_binder_by_type_name(dataset.get_type_name())
+        for pair in self.get_entity_pairs(from_cache=True):
+            if pair['local_entity_id'] == dataset.id:
+                return collection.get_by_id_lazy(pair['remote_entity_id'])
 
     def is_consistency_group(self):
         """Returns whether this replica is configured with a consistency group as a local entity
