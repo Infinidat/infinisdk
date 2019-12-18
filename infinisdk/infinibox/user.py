@@ -18,6 +18,7 @@ class User(SystemObject):
               optional=True),
         Field("password_digest_version", type=int, is_filterable=True, is_sortable=True,
               feature_name="local_users_auth"),
+        Field("is_digest_sufficient", type=bool, feature_name="fips"),
     ]
 
     @classmethod
@@ -38,7 +39,7 @@ class User(SystemObject):
         return URLObject(self.get_url_path(system=self.system)).add_path(self.get_name()).add_path('reset_password')
 
     def reset_password(self, token):
-        url = self._get_reset_password_path().add_query_param('token', token)
+        url = self._get_reset_password_path().add_path(token)
         self.system.api.get(url)
 
     def request_reset_password(self):

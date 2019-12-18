@@ -11,6 +11,13 @@ from .system_object import InfiniBoxObject
 
 
 class QosPolicyBinder(TypeBinder):
+    def is_enabled(self):
+        res = self.system.api.get("qos/state")
+        return res.get_result()["is_enabled"]
+
+    def enable(self):
+        return self.system.api.post("qos/enable", data={})
+
     def get_assigned_entities(self):
         return QosPolicy._get_assigned_entities_query(self.system, URL("qos/assigned_entities")) # pylint: disable=protected-access
 
