@@ -1,7 +1,7 @@
 Working with Hosts, Clusters and Mappings
 =========================================
 
-InfiniSDK provides an easy interface to query and manipulate volume mappings to hosts. 
+InfiniSDK provides an easy interface to query and manipulate volume mappings to hosts.
 
 Creating Hosts
 --------------
@@ -75,7 +75,7 @@ The :class:`returned lu object <.LogicalUnit>` represents the volume mapping to 
 Unmapping can be done in several ways. The easiest would be to call :meth:`.Host.unmap_volume`:
 
 .. code-block:: python
-		
+
 		>>> host.unmap_volume(volume)
 
 Which can also receive a specific LUN to unmap:
@@ -158,16 +158,16 @@ Manipulating clusters is done with the :class:`infinisdk.infinibox.host_cluster.
 		>>> cluster.add_host(host)
 
 		>>> lu = cluster.map_volume(volume)
-		
+
 		>>> host.invalidate_cache()
 		>>> [host_lu] = host.get_luns()
 
 		>>> host_lu # doctest: +ELLIPSIS
-		<LUN 11: <...:HostCluster id=1013>-><...:Volume id=1008>>
-		
+		<LUN 11: <...:Host id=1009>-><...:Volume id=1008>>
+
 		>>> host_lu.is_clustered()
 		True
 
-.. seealso:: 
+.. seealso::
     * :mod:`Host API documentation <infinisdk.infinibox.host>`
     * :mod:`Cluster API documentation <infinisdk.infinibox.host_cluster>`
