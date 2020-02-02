@@ -176,7 +176,7 @@ class InfiniBox(APITarget):
         """
         return self.get_system_info('serial_number', **kwargs)
 
-    def get_model_name(self, long_name=True):
+    def get_model_name(self, long_name=False):
         """
         Retrieves the model name as reported by the system
         """
