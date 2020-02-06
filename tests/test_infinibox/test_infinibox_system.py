@@ -22,6 +22,10 @@ def test_non_exist_system():
     assert caught.value.address == 'fake_system'
 
 
+def test_assert_is_simulator(infinibox):
+    assert infinibox.is_simulator()
+
+
 def test_api_transport_error(infinibox):
     infinibox.api.post('system/operational_state/shutdown')
     wait(infinibox.components.system_component.is_down)
