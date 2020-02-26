@@ -222,7 +222,7 @@ class Replica(SystemObject):
         Field('sync_interval', api_name='sync_interval', type=MillisecondsDeltaType,
               mutable=True, creation_parameter=True, is_filterable=True, is_sortable=True, optional=True),
         Field('rpo', api_name='rpo_value', type=MillisecondsDeltaType, mutable=True,
-              is_filterable=True, is_sortable=True),
+              creation_parameter=True, is_filterable=True, is_sortable=True, optional=True),
         Field('rpo_state'),
         Field('rpo_type', is_filterable=True, is_sortable=True),
         Field('remote_cg_id', type=int, is_filterable=True, is_sortable=True, cached=True),
