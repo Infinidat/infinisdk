@@ -43,6 +43,7 @@ from .user import User
 from .volume import Volume
 from .metadata import SystemMetadata
 from .kms import Kms
+from .certificates import Certificates
 
 try:
     from infinisim.core.context import lookup_simulator_by_address
@@ -72,6 +73,7 @@ class InfiniBox(APITarget):
         self.datasets = Datasets(self)
         self.san_clients = SanClients(self)
         self.kms = Kms(self)
+        self.certificates = Certificates(self)
 
     def check_version(self):
         if not self.compat.can_run_on_system():
