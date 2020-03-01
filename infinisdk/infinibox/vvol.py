@@ -2,6 +2,7 @@ from ..core.system_object import BaseSystemObject
 from ..core import Field, CapacityType
 from ..core.bindings import RelatedObjectBinding, RelatedObjectNamedBinding
 
+
 class Vvol(BaseSystemObject):
 
     FIELDS = [
@@ -21,3 +22,7 @@ class Vvol(BaseSystemObject):
         Field("name", cached=True, is_filterable=True, is_sortable=True),
         Field("guest_os", cached=True, is_filterable=True, is_sortable=True),
     ]
+
+    @classmethod
+    def is_supported(cls, system):
+        return system.compat.has_vvol()

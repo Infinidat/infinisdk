@@ -192,6 +192,9 @@ class Compatibility:
     def has_event_retention(self):
         return self._has_feature('event_retention')
 
+    def has_vvol(self):
+        return self.get_parsed_system_version() >= '5.5.10'
+
 
 _VERSION_TUPLE_LEN = 5
 
