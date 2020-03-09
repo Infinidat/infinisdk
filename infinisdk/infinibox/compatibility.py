@@ -53,7 +53,7 @@ class Compatibility:
         return getattr(self, 'has_{}'.format(feature_name))()
 
     def normalize_version_string(self, version):
-        return _InfiniboxVersion.parse(version)
+        return InfiniboxVersion.parse(version)
 
     def get_parsed_system_version(self):
         if self._system_version is None:
@@ -196,7 +196,7 @@ class Compatibility:
 _VERSION_TUPLE_LEN = 5
 
 
-class _InfiniboxVersion:
+class InfiniboxVersion:
 
     def __init__(self, version_tuple, is_dev, is_odd=False):
         self.version = version_tuple
@@ -205,7 +205,7 @@ class _InfiniboxVersion:
 
     @classmethod
     def parse(cls, version):
-        if isinstance(version, _InfiniboxVersion):
+        if isinstance(version, InfiniboxVersion):
             return version
         before_dash, _, after_dash = version.partition('-')
         is_dev = is_odd = False
