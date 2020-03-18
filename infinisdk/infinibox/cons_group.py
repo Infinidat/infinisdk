@@ -36,6 +36,7 @@ class ConsGroup(InfiniBoxObject):
         Field("lock_state", type=str, feature_name='snapshot_lock'),
         Field("tenant", api_name="tenant_id", binding=RelatedObjectBinding('tenants'),
               type='infinisdk.infinibox.tenant:Tenant', feature_name='tenants', is_filterable=True, is_sortable=True),
+        Field("replication_types", type=list, new_to="5.5.0", is_filterable=True),
     ]
 
     @classmethod
