@@ -140,10 +140,10 @@ class InfiniBox(APITarget):
         return self.components.system_component.get_state()
 
     def is_simulator(self):
-        model = self.components.system_component.get_fields().get("model")
-        if model is not None:
-            return model.lower() == "infinisim-model"
-        return "simulator" in self.get_system_info("name")
+        try:
+            return self.get_system_info("model").lower() == "infinisim-model"
+        except CacheMiss:
+            return "simulator" in self.get_system_info("name")
 
     def get_simulator(self):
         if lookup_simulator_by_address is None:
