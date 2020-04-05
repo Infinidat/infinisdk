@@ -1,8 +1,8 @@
-from ..core.system_object import BaseSystemObject
+from ..core.system_object import SystemObject
 from ..core import Field
 
 
-class Vm(BaseSystemObject):
+class Vm(SystemObject):
 
     FIELDS = [
         Field("id", type=int, cached=True, is_identity=True, is_sortable=True, is_filterable=True),
