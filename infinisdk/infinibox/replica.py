@@ -251,7 +251,7 @@ class Replica(SystemObject):
         Field('temporary_failure_retry_count', type=int, mutable=True, is_filterable=True, is_sortable=True),
         Field('started_at', type=MillisecondsDatetimeType),
         Field('preferred', api_name='is_preferred', type=bool, optional=True, is_filterable=True, is_sortable=True,
-              creation_parameter=True, mutable=False, feature_name="active_active_preferred_on_replica"),
+              creation_parameter=True, mutable=True, feature_name="active_active_preferred_on_replica"),
         Field('local_entity', api_name='local_entity_id', binding=ReplicaEntityBinding(), creation_parameter=True,
               optional=True, is_filterable=True, is_sortable=True, feature_name="replica_auto_create",
               add_getter=False),
