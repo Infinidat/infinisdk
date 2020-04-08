@@ -266,6 +266,8 @@ class Replica(SystemObject):
               feature_name="replica_auto_create"),
         Field('concurrent_replica', type=bool, is_filterable=True, is_sortable=True,
               mutable=False, feature_name="concurrent_replication"),
+        Field("suspended_from_local", type=bool, is_filterable=True, is_sortable=True,
+              mutable=False, feature_name="active_active_suspend"),
     ]
 
     @classmethod
@@ -481,7 +483,6 @@ class Replica(SystemObject):
             return self.get_replication_type().lower() == 'sync'
         return False
 
-
     def is_type_active_active(self):
         if self.system.compat.has_sync_replication():
             return self.get_replication_type(from_cache=True).lower() == 'active_active'
@@ -496,8 +497,8 @@ class Replica(SystemObject):
         current_sync_state = self.get_sync_state()
         return current_sync_state and current_sync_state.lower() in sync_states
 
-    def _is_in_state(self, *states):
-        current_state = self.get_state()
+    def _is_in_state(self, *states, **kwargs):
+        current_state = self.get_state(**kwargs)
         return current_state and current_state.lower() in states
 
     def _get_state_lower(self, **kwargs):
@@ -570,21 +571,26 @@ class Replica(SystemObject):
         if self.is_target():
             raise CannotGetReplicaState('Replica state cannot be checked on target replica')
 
+    def _is_in_suspended_state(self, *states, **kwargs):
+        if self.is_type_active_active():
+            return self.system.compat.has_active_active_suspend() and self.is_suspended_from_local() is not None
+        self._validate_can_check_state()
+        return self._is_in_state(*states, **kwargs)
+
     def is_suspended(self, **kwargs):
         """Returns whether or not this replica is currently suspended
         """
-        if self.is_type_active_active():
-            return False
-        self._validate_can_check_state()
-        return self._is_in_state('suspended', 'auto_suspended', **kwargs)
+        return self._is_in_suspended_state('suspended', 'auto_suspended', **kwargs)
 
     def is_user_suspended(self, **kwargs):
         """Returns whether or not this replica is currently suspended due to a user request
         """
-        if self.is_type_active_active():
-            return False
-        self._validate_can_check_state()
-        return self._is_in_state('suspended', **kwargs)
+        return self._is_in_suspended_state('suspended', **kwargs)
+
+    def is_auto_suspended(self, **kwargs):
+        """Returns whether or not this replica is in auto_suspended state
+        """
+        return self._is_in_suspended_state('auto_suspended', **kwargs)
 
     def is_idle(self, **kwargs):
         """Returns whether or not this replica is in idle state
@@ -599,14 +605,6 @@ class Replica(SystemObject):
         if self.is_type_active_active():
             return self._is_in_sync_state("lagging", **kwargs)
         return False
-
-    def is_auto_suspended(self, **kwargs):
-        """Returns whether or not this replica is in auto_suspended state
-        """
-        if self.is_type_active_active():
-            return False
-        self._validate_can_check_state()
-        return self._is_in_state('auto_suspended', **kwargs)
 
     def is_initial_replication(self, **kwargs):
         """Returns whether or not this replica is in initiating state

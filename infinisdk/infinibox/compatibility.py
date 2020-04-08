@@ -195,6 +195,9 @@ class Compatibility:
     def has_vvol(self):
         return self.get_parsed_system_version() >= '5.5.10'
 
+    def has_active_active_suspend(self):
+        return self._get_feature_version("active_active", 0) > 3
+
 
 _VERSION_TUPLE_LEN = 5
 
