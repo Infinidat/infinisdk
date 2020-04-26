@@ -207,6 +207,8 @@ def _install_hooks():
     gossip.define(_SDK_HOOK('event_retention_failure'), tags=['infinibox', 'event'],
                   arg_names=('system', 'retention', 'exception'))
 
+    gossip.define(_SDK_HOOK('witness_address_set'), tags=['infinibox'], arg_names=('witness_address',))
+
     gossip.get_or_create_group('infinidat.sdk').set_strict()
 
 _install_hooks()

@@ -1,3 +1,5 @@
+import gossip
+
 from ..core.api.special_values import Autogenerate
 from ..core import Field
 from ..core.bindings import RelatedObjectBinding
@@ -116,3 +118,5 @@ class Link(InfiniBoxObject):
         url = self.get_this_url_path().add_path('set_witness_address')
         self.system.api.post(url, data={'witness_address': witness_address})
         self.invalidate_cache('witness_address')
+        gossip.trigger_with_tags('infinidat.sdk.witness_address_set', {'witness_address': witness_address},
+                                 tags=['infinibox'])
