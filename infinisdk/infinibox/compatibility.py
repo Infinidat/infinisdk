@@ -193,7 +193,9 @@ class Compatibility:
         return self._has_feature('event_retention')
 
     def has_vvol(self):
-        return self._has_feature("vvol")
+        if self._features is None:
+            self._init_features()
+        return self._features.get("vvol") is not None
 
     def has_active_active_suspend(self):
         return self._get_feature_version("active_active", 0) > 3
