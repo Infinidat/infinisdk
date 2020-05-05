@@ -1,4 +1,5 @@
 import copy
+import functools
 import uuid
 
 from ..core.field import Field
@@ -693,10 +694,11 @@ class ServiceCluster(InfiniBoxSystemComponent):
         return self.get_state(**kwargs) == 'DEGRADED'
 
 
-def _ensure_elastic(func):
+def _ensure_supported_external_cluster(func):
+    @functools.wraps(func)
     def inner(self, *args, **kwargs):
-        if not self.get_name() == 'elastic':
-            raise NotImplementedError("The getter for cluster {} is not support".format(self.get_name()))
+        if self.get_name() not in ("elastic", "postgresql"):
+            raise NotImplementedError("The getter for cluster {} is not supported".format(self.get_name()))
         return func(self, *args, **kwargs)
     return inner
 
@@ -727,15 +729,15 @@ class ExternalServiceCluster(InfiniBoxSystemComponent):
     def is_supported(cls, system): # pylint: disable=unused-argument
         return system.compat.has_events_db()
 
-    @_ensure_elastic
+    @_ensure_supported_external_cluster
     def is_steady(self, **kwargs):
-        return self.get_field("health", **kwargs)["initializing_shards"] == 0
+        return self.get_field("health", **kwargs)["initializing_shards"] == 0 if self.get_name() == "elastic" else True
 
-    @_ensure_elastic
+    @_ensure_supported_external_cluster
     def is_active(self, **kwargs):
         return self.get_state(**kwargs) == 'GREEN'
 
-    @_ensure_elastic
+    @_ensure_supported_external_cluster
     def is_degraded(self, **kwargs):
         return self.get_state(**kwargs) == 'YELLOW'
 
