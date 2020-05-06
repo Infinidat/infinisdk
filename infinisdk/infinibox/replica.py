@@ -747,7 +747,7 @@ class Replica(SystemObject):
         else:
             local = remote = None
         for replica, snap in (self, local), (remote_replica, remote):
-            if snap is not None:
+            if snap is not None and snap.id != 0:
                 gossip.trigger_with_tags(
                     'infinidat.sdk.replica_snapshot_created', {'snapshot': snap, 'replica_deleted': True},
                     tags=['infinibox'])
