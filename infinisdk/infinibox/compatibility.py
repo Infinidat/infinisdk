@@ -90,6 +90,11 @@ class Compatibility:
     def _has_feature(self, feature_key):
         return self._get_feature_version(feature_key, NOTHING) is not NOTHING
 
+    def does_feature_exist(self, feature_key):
+        if self._features is None:
+            self._init_features()
+        return self._features.get(feature_key) is not None
+
     def has_npiv(self):
         return self._has_feature('fc_soft_targets') or self._has_feature('fc/soft_targets')
 
