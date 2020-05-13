@@ -191,7 +191,18 @@ class ConsGroup(InfiniBoxObject):
         data = kwargs
         data['dataset_id'] = member.id
         remote_entity = kwargs.pop('remote_entity', None)
-        if remote_entity is not None:
+        if self.is_replicated() and 'ACTIVE_ACTIVE' in self.get_replication_types():
+            if remote_entity:
+                data['active_active_info'] = {
+                    'base_action': 'EXISTING',
+                    'remote_entity_id': remote_entity.id,
+                }
+            else:
+                data['active_active_info'] = {
+                    'base_action': 'NEW',
+                    'remote_entity_name': kwargs.pop('remote_entity_name', None),
+                }
+        elif remote_entity is not None:
             data['replication_pair_info'] = {
                 'remote_base_action': 'NO_BASE_DATA',
                 'remote_entity_id': remote_entity.id
