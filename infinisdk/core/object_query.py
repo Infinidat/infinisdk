@@ -94,7 +94,7 @@ class LazyQuery(QueryBase):
             self._fetch()
         if self._requested_page is not None:
             start = (self._requested_page - 1) * self._requested_page_size
-            end = min(start + self._requested_page_size, len(self))
+            end = min(start + self._requested_page_size, self._total_num_objects)
         else:
             start = 0
             end = len(self)

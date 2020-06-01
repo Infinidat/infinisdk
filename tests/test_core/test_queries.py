@@ -164,8 +164,22 @@ def test_only_fields(infinibox):
     assert set(['id', 'used']) == set(lazy_query.query.query_dict['fields'].split(','))
 
 
-def test_pagination(infinibox):
+def test_pagination_query(infinibox):
     assert_query_equals(infinibox.volumes.find().page(5).page_size(100), None)  # pages are only added at query
+
+
+def test_pagination(infinibox, pool):
+    volume_name_prefix = "vol"
+    infinibox.volumes.create_many(count=30, pool=pool, name=volume_name_prefix)
+    volumes = infinibox.volumes.find().page(3).page_size(10)
+    assert len(volumes) == 10
+    for index, volume in zip(range(21, 31), volumes):
+        assert volume.get_name() == "{}_{}".format(volume_name_prefix, index)
+    assert infinibox.volumes.find().page(4).page_size(10).to_list() == []
+
+
+def test_pagination_empty_collection(infinibox):
+    assert infinibox.volumes.find().page(1).page_size(10).to_list() == []
 
 
 def assert_query_equals(q, expected):
