@@ -85,6 +85,10 @@ class Pool(InfiniBoxObject):
     def get_filesystems(self, **kwargs):
         return self.system.filesystems.find(pool_id=self.id, **kwargs)
 
+    def get_vvols(self, **kwargs):
+        assert self.system.compat.has_vvol(), "vVol is not supported in this version"
+        return self.system.vvols.find(pool_id=self.id, **kwargs)
+
     def _get_pool_owners_url(self, owner_id=None):
         url = self.get_this_url_path().add_path('owners')
         if owner_id:
