@@ -6,7 +6,7 @@ from ..core.bindings import RelatedObjectBinding, RelatedObjectNamedBinding
 class Vvol(SystemObject):
 
     FIELDS = [
-        Field("id", type=int, cached=True, is_identity=True, is_sortable=True, is_filterable=True),
+        Field("id", type=int, cached=True, is_identity=True, is_filterable=True, is_sortable=True),
         Field("uuid", cached=True, is_filterable=True, is_sortable=True),
         Field("vvol_type", cached=True, is_filterable=True, is_sortable=True),
         Field("type", cached=True, is_filterable=True, is_sortable=True),
@@ -21,8 +21,19 @@ class Vvol(SystemObject):
               binding=RelatedObjectBinding('vvols'), is_filterable=True),
         Field("name", cached=True, is_filterable=True, is_sortable=True),
         Field("guest_os", cached=True, is_filterable=True, is_sortable=True),
+        Field("tree_allocated", type=CapacityType),
+        Field("compression_suppressed", type=bool, feature_name="compression"),
+        Field("capacity_savings", type=CapacityType, feature_name="compression"),
+        Field("used_size", api_name="used", type=CapacityType),
+        Field("allocated", type=CapacityType, is_filterable=True, is_sortable=True),
     ]
 
     @classmethod
     def is_supported(cls, system):
         return system.compat.has_vvol()
+
+    def _get_fields_query(self):
+        return self.get_url_path(self.system).add_query_params(dict(id=self.id, include_space_stats=True))
+
+    def _get_fields_result(self, response):
+        return response.get_result()[0]

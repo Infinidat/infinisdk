@@ -195,7 +195,7 @@ class BaseSystemObject(metaclass=FieldsMeta):
             except CacheMiss:
                 pass
 
-        query = self.get_this_url_path()
+        query = self._get_fields_query()
 
         only_fields = []
         for field_name in field_names:
@@ -210,13 +210,19 @@ class BaseSystemObject(metaclass=FieldsMeta):
 
         response = self.system.api.get(query)
 
-        result = response.get_result()
+        result = self._get_fields_result(response)
         self.update_field_cache(result)
 
         if not field_names:
             field_names = self.fields.get_all_field_names_or_fabricate(result)
 
         return self._get_fields_from_cache(field_names, raw_value)
+
+    def _get_fields_query(self):
+        return self.get_this_url_path()
+
+    def _get_fields_result(self, response):
+        return response.get_result()
 
     def _is_caching_enabled(self):
         return self.system.is_caching_enabled()
