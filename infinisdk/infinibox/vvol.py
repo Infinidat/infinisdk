@@ -23,6 +23,10 @@ class Vvol(SystemObject):
         Field("guest_os", cached=True, is_filterable=True, is_sortable=True),
         Field("tree_allocated", type=CapacityType),
         Field("compression_suppressed", type=bool, feature_name="compression"),
+        Field("compression_enabled", type=bool, mutable=True, creation_parameter=True, optional=True,
+              is_filterable=True, is_sortable=True, feature_name="compression", toggle_name="compression"),
+        Field("ssd_enabled", type=bool, mutable=True, creation_parameter=True,
+              is_filterable=True, is_sortable=True, optional=True, toggle_name="ssd"),
         Field("capacity_savings", type=CapacityType, feature_name="compression"),
         Field("used_size", api_name="used", type=CapacityType),
         Field("allocated", type=CapacityType, is_filterable=True, is_sortable=True),
@@ -37,3 +41,6 @@ class Vvol(SystemObject):
 
     def _get_fields_result(self, response):
         return response.get_result()[0]
+
+    def get_pool_name(self):
+        return self.get_pool().get_name()
