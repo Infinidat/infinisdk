@@ -203,6 +203,12 @@ class Compatibility:
     def has_active_active_suspend(self):
         return self._get_feature_version("active_active", 0) > 3
 
+    def has_platform(self):
+        return self.get_parsed_system_version() >= '5.5.10'
+
+    def has_ism(self):
+        return self.has_fips()
+
 
 _VERSION_TUPLE_LEN = 5
 
