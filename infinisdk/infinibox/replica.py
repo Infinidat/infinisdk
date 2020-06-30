@@ -5,7 +5,7 @@ import functools
 from ..core.utils import end_reraise_context
 from ..core import Field, MillisecondsDatetimeType
 from ..core.api.special_values import OMIT
-from ..core.bindings import RelatedObjectNamedBinding
+from ..core.bindings import RelatedObjectNamedBinding, ReplicaEntityBinding
 from ..core.exceptions import CannotGetReplicaState, InvalidUsageException, TooManyObjectsFound
 from ..core.translators_and_types import MillisecondsDeltaType, CapacityType
 from ..core.type_binder import TypeBinder
@@ -59,7 +59,11 @@ class ReplicaBinder(TypeBinder):
         """Replicates an entity, creating its remote replica on the specified pool
 
         :param remote_pool: Remote pool to use for entity creation on the remote side
+        :param remote_entity_names: A list or tuple containing the entity names created on remote side.
+                                    In case of cg - controls the entity names, not the cg name.
         """
+        if remote_entity_names is not OMIT:
+            assert isinstance(remote_entity_names, (list, tuple)), "object remote_entity_names must be tuple or list"
         return self.system.replicas.create(link=link,
                                            entity_pairs=self._build_entity_pairs_create_target(remote_entity_names,
                                                                                                entity),
@@ -106,6 +110,8 @@ class ReplicaBinder(TypeBinder):
 
     def _get_extra_replica_kwargs(self, kw, entity, remote_entity=None):
         returned = kw
+        if 'base_action' in returned:
+            raise InvalidUsageException("replicate_entity() doesn't support creating replica with base_action format")
         assert 'entity_type' not in returned
         assert 'local_cg_id' not in returned
         assert 'remote_cg_id' not in returned
@@ -196,7 +202,7 @@ class Replica(SystemObject):
         Field('created_at', type=MillisecondsDatetimeType, is_filterable=True, is_sortable=True, cached=True),
         Field('link', api_name='link_id', binding=RelatedObjectNamedBinding('links'),
               type='infinisdk.infinibox.link:Link', creation_parameter=True),
-        Field('entity_pairs', type=list, creation_parameter=True),
+        Field('entity_pairs', type=list, creation_parameter=True, optional=True),
         Field('entity_type', type=str, cached=True, creation_parameter=True, default='VOLUME', is_filterable=True),
         Field('remote_pool_id', type=int, creation_parameter=True, optional=True, is_filterable=True, is_sortable=True),
         Field('remote_replica_id', type=int, is_filterable=True, is_sortable=True, cached=True),
@@ -216,7 +222,7 @@ class Replica(SystemObject):
         Field('sync_interval', api_name='sync_interval', type=MillisecondsDeltaType,
               mutable=True, creation_parameter=True, is_filterable=True, is_sortable=True, optional=True),
         Field('rpo', api_name='rpo_value', type=MillisecondsDeltaType, mutable=True,
-              is_filterable=True, is_sortable=True),
+              creation_parameter=True, is_filterable=True, is_sortable=True, optional=True),
         Field('rpo_state'),
         Field('rpo_type', is_filterable=True, is_sortable=True),
         Field('remote_cg_id', type=int, is_filterable=True, is_sortable=True, cached=True),
@@ -246,6 +252,20 @@ class Replica(SystemObject):
         Field('started_at', type=MillisecondsDatetimeType),
         Field('preferred', api_name='is_preferred', type=bool, optional=True, is_filterable=True, is_sortable=True,
               creation_parameter=True, mutable=False, feature_name="active_active_preferred_on_replica"),
+        Field('local_entity', api_name='local_entity_id', binding=ReplicaEntityBinding(), creation_parameter=True,
+              optional=True, is_filterable=True, is_sortable=True, feature_name="replica_auto_create",
+              add_getter=False),
+        Field('remote_entity', api_name='remote_entity_id', binding=ReplicaEntityBinding(), creation_parameter=True,
+              optional=True, is_filterable=True, is_sortable=True, feature_name="replica_auto_create",
+              add_getter=False),
+        Field('local_entity_name', type=str, creation_parameter=True, optional=True, is_filterable=True,
+              is_sortable=True, feature_name="replica_auto_create"),
+        Field('remote_entity_name', type=str, creation_parameter=True, optional=True, is_filterable=True,
+              is_sortable=True, feature_name="replica_auto_create"),
+        Field('base_action', type=str, creation_parameter=True, optional=True,
+              feature_name="replica_auto_create"),
+        Field('concurrent_replica', type=bool, is_filterable=True, is_sortable=True,
+              mutable=False, feature_name="concurrent_replication"),
     ]
 
     @classmethod
@@ -683,35 +703,35 @@ class Replica(SystemObject):
                 return True
         return False
 
+    def _should_retain_staging_area(self, retain_value=OMIT):
+        if retain_value is not OMIT:
+            return retain_value
+        return self.system.compat.has_replica_auto_create()
+
     # pylint: disable=arguments-differ
-    def delete(self, retain_staging_area=False, force_if_remote_error=False, force_on_target=False,
-               force_if_no_remote_credentials=False, force_on_local=OMIT, keep_serial_on_local=OMIT):
+    def delete(self, retain_staging_area=OMIT, force_if_remote_error=OMIT, force_on_target=OMIT,
+               force_if_no_remote_credentials=OMIT, force_on_local=OMIT, keep_serial_on_local=OMIT):
         """Deletes this replica
         """
         path = self.get_this_url_path()
-        if retain_staging_area:
-            path = path.add_query_param('retain_staging_area', 'true')
-        if force_if_remote_error:
-            path = path.add_query_param('force_if_remote_error', 'true')
-        if force_on_target:
-            path = path.add_query_param('force_on_target', 'true')
-        if force_if_no_remote_credentials:
-            path = path.add_query_param('force_if_no_remote_credentials', 'true')
-        if force_on_local is not OMIT:
-            path = path.add_query_param('force_on_local', force_on_local)
-        if keep_serial_on_local is not OMIT:
-            path = path.add_query_param('keep_serial_on_local', keep_serial_on_local)
-
+        requested_retain_staging_area = retain_staging_area
         remote_replica = self.get_remote_replica(safe=True)
         if remote_replica is None:
             _logger.debug('Failed to get remote replica during delete operation')
-
+        retain_staging_area = self._should_retain_staging_area(retain_value=retain_staging_area)
         if retain_staging_area:
             self._notify_pre_exposure(self)
             self._notify_pre_exposure(remote_replica)
 
         try:
-            resp = self._send_delete_with_hooks_tirggering(path)
+            resp = self._send_delete_with_hooks_tirggering(
+                path,
+                force_if_remote_error=force_if_remote_error,
+                force_on_target=force_on_target,
+                force_if_no_remote_credentials=force_if_no_remote_credentials,
+                force_on_local=force_on_local,
+                keep_serial_on_local=keep_serial_on_local,
+                retain_staging_area=requested_retain_staging_area)
         except Exception as e:  # pylint: disable=broad-except
             with end_reraise_context():
                 if retain_staging_area:

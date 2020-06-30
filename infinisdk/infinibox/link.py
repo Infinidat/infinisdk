@@ -79,12 +79,9 @@ class Link(InfiniBoxObject):
         :param force_if_remote_error: forces deletion even if remote side caused an API error
         :param force_if_no_remote_credentials: forces deletion even if no credentials to remote side
         """
-        url = self.get_this_url_path()
-        if force_if_remote_error:
-            url = url.add_query_param('force_if_remote_error', 'true')
-        if force_if_no_remote_credentials:
-            url = url.add_query_param('force_if_no_remote_credentials', 'true')
-        self._send_delete_with_hooks_tirggering(url)
+        super().delete(force_if_remote_error=force_if_remote_error,
+                       force_if_no_remote_credentials=force_if_no_remote_credentials)
+
 
     def get_linked_system(self, safe=False, from_cache=DONT_CARE):
         """Get the corresponsing system object at the remote and of the link. For this to work, the SDK user should
@@ -92,7 +89,8 @@ class Link(InfiniBoxObject):
         for the first time"""
         related_system = self.system.links.get_cached_related_system(self)
         if related_system is not None:
-            return related_system
+            if not safe or related_system.is_active():
+                return related_system
         remote_host = self.get_remote_host(from_cache=from_cache)
         for related_system in self.get_system().iter_related_systems():
             if safe and not related_system.is_active():

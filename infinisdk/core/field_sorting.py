@@ -1,6 +1,6 @@
 from .utils import add_comma_separated_query_param
 
-class FieldSorting(object):
+class FieldSorting:
 
     def __init__(self, field, prefix=""):
         super(FieldSorting, self).__init__()

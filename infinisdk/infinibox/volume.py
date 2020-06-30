@@ -128,9 +128,4 @@ class Volume(Dataset):
     def is_in_cons_group(self):
         return self.get_cons_group() is not None
 
-    def get_replicas(self):
-        if self.system.compat.has_replica_auto_create() and self.is_in_cons_group():
-            return self.system.replicas.find(local_entity_id=self.get_cons_group().id).to_list()
-        return super(Volume, self).get_replicas()
-
 ScsiVolume.register(Volume)  # pylint: disable=no-member

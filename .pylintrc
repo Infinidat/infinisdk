@@ -1,12 +1,12 @@
 [MESSAGES CONTROL]
-disable=R,locally-disabled,invalid-name,wrong-import-order,wrong-import-position,ungrouped-imports,missing-docstring,redefined-outer-name,unneeded-not,property-on-old-class,superfluous-parens,consider-iterating-dictionary,len-as-condition,bad-option-value,unnecessary-pass
+disable=R,locally-disabled,invalid-name,wrong-import-order,wrong-import-position,ungrouped-imports,missing-docstring,redefined-outer-name,unneeded-not,superfluous-parens,consider-iterating-dictionary,len-as-condition,bad-option-value,unnecessary-pass,no-member,import-outside-toplevel
 
 [REPORTS]
 reports=no
 
 [TYPECHECK]
 ignored-modules = flux.current_timeline,infi.dtypes.iqn,infi.dtypes.wwn,infi
-ignored-classes = httplib,http.client,LookupDict
+ignored-classes = httplib,http.client,LookupDict,Infinibox
 
 [FORMAT]
 max-line-length=120

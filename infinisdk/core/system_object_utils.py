@@ -2,7 +2,6 @@ from capacity import Capacity
 from sentinels import NOTHING
 from vintage import deprecated
 
-from .._compat import string_types
 from .exceptions import MissingFields
 
 
@@ -64,7 +63,7 @@ def _format_type_doc(_type):
     if isinstance(_type, type) and issubclass(_type, SystemObject):
         _type = '{}.{}'.format(_type.__module__, _type.__name__)
 
-    if isinstance(_type, string_types):
+    if isinstance(_type, (str, bytes)):
         return ':class:`{0} object <{0}>`'.format(_type.replace(':', '.'))
 
     return _type.__name__  # pylint: disable=no-member
