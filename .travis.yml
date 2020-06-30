@@ -17,5 +17,5 @@ jobs:
       install: pip install twine
       script:
         - python setup.py sdist bdist_wheel
-        - twine upload -u $PYPI_USERNAME -p PYPI_PASSWORD dist/*
+        - twine upload -u $PYPI_USERNAME -p $PYPI_PASSWORD dist/*
       if: tag IS present
