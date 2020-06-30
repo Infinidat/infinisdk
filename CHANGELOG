@@ -1,4 +1,4 @@
-Version 161.1.0 (Released 2020-06-30)
+Version 161.1.1 (Released 2020-06-30)
 -------------------------------------
 
 * #13534 RPO is now an optional creation parameter of replica
