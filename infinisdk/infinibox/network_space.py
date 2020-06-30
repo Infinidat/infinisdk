@@ -1,7 +1,8 @@
+import http.client as httplib
+
 from mitba import cached_method
 from sentinels import NOTHING
 
-from .._compat import httplib
 from ..core import Field
 from ..core.translators_and_types import MunchType, MunchListType
 from ..core.bindings import ListOfRelatedObjectIDsBinding, RelatedObjectBinding
@@ -79,7 +80,7 @@ class NetworkSpace(InfiniBoxObject):
         return Routes(self)
 
 
-class Route(object):
+class Route:
     def __init__(self, network_space, initial_data):
         self.network_space = network_space
         self.id = initial_data['id']
@@ -141,7 +142,7 @@ class Route(object):
             return True
 
 
-class Routes(object):
+class Routes:
     def __init__(self, network_space):
         self._network_space = network_space
         self.system = self._network_space.system

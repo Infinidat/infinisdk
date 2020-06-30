@@ -1,7 +1,6 @@
-from .._compat import string_types, itervalues
 
 
-class TypeBinderContainer(object):
+class TypeBinderContainer:
     """
     Contains several type binders with a common characteristic. Used to implement system.objects and similar facilities
     """
@@ -34,7 +33,7 @@ class TypeBinderContainer(object):
         """
         Gets a type binder given its name
         """
-        if isinstance(name, string_types):
+        if isinstance(name, (str, bytes)):
             return self._binders_by_name[name]
         return self._binders_by_class[name]
 
@@ -42,7 +41,7 @@ class TypeBinderContainer(object):
         return dir(type(self)) + list(self.__dict__) + list(self._binders_by_name)
 
     def __iter__(self):
-        return itervalues(self._binders_by_name)
+        return iter(self._binders_by_name.values())
 
     def __len__(self):
         return len(self._binders_by_name)

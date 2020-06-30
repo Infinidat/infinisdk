@@ -18,8 +18,8 @@ The :meth:`.InfiniBox.get_model_name` method retrieves the model information, as
 
 .. code-block:: python
 
-		>>> print(system.get_model_name())
-		01IB...AF
+		>>> isinstance(system.get_model_name(), str)
+		True
 
 .. seealso:: :class:`.InfiniBox`
 

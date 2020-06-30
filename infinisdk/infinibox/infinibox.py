@@ -42,6 +42,7 @@ from .search_utils import get_search_query_object, safe_get_object_by_id_and_typ
 from .user import User
 from .volume import Volume
 from .metadata import SystemMetadata
+from .kms import Kms
 
 try:
     from infinisim.core.context import lookup_simulator_by_address
@@ -70,6 +71,7 @@ class InfiniBox(APITarget):
         self._related_systems = []
         self.datasets = Datasets(self)
         self.san_clients = SanClients(self)
+        self.kms = Kms(self)
 
     def check_version(self):
         if not self.compat.can_run_on_system():
@@ -133,7 +135,7 @@ class InfiniBox(APITarget):
         return self.components.system_component.get_state()
 
     def is_simulator(self):
-        return "simulator" in self.get_system_info("name")
+        return self.get_system_info("model").lower() == "infinisim-model"
 
     def get_simulator(self):
         if lookup_simulator_by_address is None:
@@ -174,7 +176,7 @@ class InfiniBox(APITarget):
         """
         return self.get_system_info('serial_number', **kwargs)
 
-    def get_model_name(self, long_name=True):
+    def get_model_name(self, long_name=False):
         """
         Retrieves the model name as reported by the system
         """
@@ -325,7 +327,7 @@ class InfiniBox(APITarget):
         return not (self == other) # pylint: disable=superfluous-parens
 
 
-class _CurrentUserProxy(object):
+class _CurrentUserProxy:
     def __init__(self, system):
         self.system = system
 

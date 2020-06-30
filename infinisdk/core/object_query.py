@@ -2,7 +2,6 @@ import itertools
 import random
 from urlobject import URLObject as URL
 from numbers import Number
-from .._compat import xrange  # pylint: disable=redefined-builtin
 from .field import Field
 from .field_filter import FieldFilter
 from .q import QField
@@ -12,7 +11,7 @@ _DEFAULT_SYSTEM_PAGE_SIZE = 50
 _DEFAULT_PAGE_SIZE = 1000
 
 
-class QueryBase(object):
+class QueryBase:
 
     def count(self):
         return len(self)
@@ -47,7 +46,7 @@ class QueryBase(object):
         query_size = self.count()
         if query_size < sample_count:
             raise ValueError('Sample larger than returned items ({} > {})'.format(sample_count, query_size))
-        indexes = random.sample(xrange(query_size), sample_count)
+        indexes = random.sample(range(query_size), sample_count)
         return [self[index] for index in indexes]
 
 class LazyQuery(QueryBase):
@@ -85,7 +84,7 @@ class LazyQuery(QueryBase):
         else:
             start = 0
             end = len(self)
-        for i in xrange(start, end):
+        for i in range(start, end):
             try:
                 yield self[i]
             except IndexError:

@@ -7,7 +7,7 @@ from .object_query import PolymorphicQuery, ObjectQuery
 from .exceptions import ObjectNotFound, TooManyObjectsFound
 
 
-class BaseBinder(object):
+class BaseBinder:
     """
     Binds a specific type to a system.
     """

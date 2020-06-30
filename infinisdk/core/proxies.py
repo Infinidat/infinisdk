@@ -1,4 +1,4 @@
-class ValueProxy(object):
+class ValueProxy:
     """
     Represents a value that is fetched at a later stage from various sources
     """
@@ -6,7 +6,7 @@ class ValueProxy(object):
     def resolve(self):
         raise NotImplementedError() # pragma: no cover
 
-class FROM_CONFIG(object):
+class FROM_CONFIG:
     """
     Values fetched from configuration
     """
