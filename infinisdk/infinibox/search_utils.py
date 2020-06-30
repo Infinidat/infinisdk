@@ -15,7 +15,7 @@ _type_map = {'cg': 'cons_group',
              'users_repository': 'ldap_config'}
 
 
-class UnknownSearchObject(object):
+class UnknownSearchObject:
     def __init__(self, system, construct_data):
         self.system = system
         self.id = construct_data['id']

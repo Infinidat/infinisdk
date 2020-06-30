@@ -137,23 +137,20 @@ class ConsGroup(InfiniBoxObject):
 
     refresh_snapshot = refresh_snapgroup
 
-    def delete(self, delete_members=None, force_if_snapshot_locked=OMIT): # pylint: disable=arguments-differ
+    def delete(self, delete_members=OMIT, force_if_snapshot_locked=OMIT):  # pylint: disable=arguments-differ
         """Deletes the consistency group
 
         :param delete_members: if True, deletes the member datasets as well as the group itself
         """
-        path = self.get_this_url_path()
-        if delete_members is not None:
-            path = path.add_query_param('delete_members', str(delete_members).lower())
-        if force_if_snapshot_locked is not OMIT:
-            path = path.add_query_param('force_if_snapshot_locked', force_if_snapshot_locked)
         trigger_hook = functools.partial(gossip.trigger_with_tags,
                                          kwargs={'cons_group': self, 'delete_members': delete_members},
                                          tags=self.get_tags_for_object_operations(self.system))
         trigger_hook('infinidat.sdk.pre_cons_group_deletion')
 
         try:
-            self._send_delete_with_hooks_tirggering(path)
+            self._send_delete_with_hooks_tirggering(self.get_this_url_path(),
+                                                    delete_members=delete_members,
+                                                    force_if_snapshot_locked=force_if_snapshot_locked)
         except Exception:  # pylint: disable=broad-except
             with end_reraise_context():
                 trigger_hook('infinidat.sdk.cons_group_deletion_failure')

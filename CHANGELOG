@@ -1,3 +1,18 @@
+Version 161.1.0 (Released 2020-06-30)
+-------------------------------------
+
+* #13534 RPO is now an optional creation parameter of replica
+* #13411 Changed InfiniBox.get_model_name() default (long->short)
+* #13393 Add system security state to backslash metadata
+* #13226 Allow passing get-field parameters to component checkers
+* #13225 Use utility for adding normalized query parameters to URL
+* #13175 Support event-retention
+* #13126 Add assertion for remote_entity_names type
+* #13098 Use ColorizedStderrHandler instead of StderrHandler in cli
+* #13037 Drop support for python version < 3.5
+* #13001 Add 'long_name' parameter to InfiniBox.get_model_name()
+* #12246 Support PDU component
+
 Version 151.1.1 (Released 2019-12-18)
 -------------------------------------
 

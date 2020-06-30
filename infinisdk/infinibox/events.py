@@ -1,4 +1,9 @@
+import gossip
+from arrow import Arrow
 from ..core import Events as EventsBase
+from ..core.api.special_values import OMIT
+from ..core.translators_and_types import MillisecondsDatetimeTranslator
+from ..core.utils import normalized_query_value, end_reraise_context
 
 
 class Events(EventsBase):
@@ -29,3 +34,23 @@ class Events(EventsBase):
 
     def enable_anti_flooding(self):
         self.system.api.put(self._get_anti_flooding_path(), data=True)
+
+    def delete(self, *, retention):
+        hook_tags = self.object_type.get_tags_for_object_operations(self.system)
+        url = self.get_url_path()
+        if retention is not OMIT:
+            if isinstance(retention, Arrow):
+                retention = MillisecondsDatetimeTranslator().to_api(retention)
+            retention = normalized_query_value(retention)
+            url = url.add_query_param("timestamp", "le:{}".format(retention))
+        gossip.trigger_with_tags('infinidat.sdk.pre_event_retention', {'system': self.system, 'retention': retention},
+                                 tags=hook_tags)
+        try:
+            self.system.api.delete(url)
+        except Exception as e:       # pylint: disable=broad-except
+            with end_reraise_context():
+                gossip.trigger_with_tags('infinidat.sdk.event_retention_failure',
+                                         {'retention': retention, 'exception': e, 'system': self.system},
+                                         tags=hook_tags)
+        gossip.trigger_with_tags('infinidat.sdk.post_event_retention', {'system': self.system, 'retention': retention},
+                                 tags=hook_tags)

@@ -6,7 +6,7 @@ from infinisdk import InfiniBox
 @contextmanager
 def doctest_context():
     simulator = Simulator()
-    simulator.api._flask_config.update({
+    simulator.api._flask_config.update({  # pylint: disable=protected-access
         'DEBUG': True,
         'PROPAGATE_EXCEPTIONS': True,
         })

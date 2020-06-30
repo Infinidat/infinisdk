@@ -1,11 +1,11 @@
+import requests
 from sentinels import NOTHING
 
-from .._compat import requests
 from ..core.exceptions import APICommandFailed
 from ..core.object_query import LazyQuery
 
 
-class MetadataHolder(object):
+class MetadataHolder:
 
     system = None
 

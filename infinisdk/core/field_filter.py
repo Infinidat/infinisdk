@@ -1,4 +1,5 @@
-from .._compat import string_types, abc_module
+import collections
+
 
 _operator_name_to_sign_str = {
     "eq": '=',
@@ -9,7 +10,7 @@ _operator_name_to_sign_str = {
     "ne": '!='}
 
 
-class FieldFilter(object):
+class FieldFilter:
 
     def __init__(self, field, operator_name, value):
         super(FieldFilter, self).__init__()
@@ -18,7 +19,7 @@ class FieldFilter(object):
         self.value = value
 
     def _translate(self, value, system):
-        if isinstance(self.value, abc_module.Iterable) and not isinstance(self.value, string_types):
+        if isinstance(self.value, collections.abc.Iterable) and not isinstance(self.value, (str, bytes)):
             value = "({})".format(",".join(str(self._translate_single_value(val, system)) for val in self.value))
         else:
             value = self._translate_single_value(value, system)

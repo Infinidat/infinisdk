@@ -4,8 +4,6 @@ from uuid import uuid4
 
 from api_object_schema.special_value import SpecialValue
 
-from ..._compat import iteritems
-
 
 class _OmitType(SpecialValue):
 
@@ -70,7 +68,7 @@ class RawValue(SpecialValue):
         return "<RawValue {}>".format(self._value)
 
 
-class _LazyUUIDFactory(object):
+class _LazyUUIDFactory:
 
     def __init__(self, short=False):
         super(_LazyUUIDFactory, self).__init__()
@@ -87,14 +85,14 @@ _LAZY_UUID_FACTORY = _LazyUUIDFactory()
 _LAZY_SHORT_UUID_FACTORY = _LazyUUIDFactory(short=True)
 
 
-
 def translate_special_values_dict(data_dict):
-    for key, value in list(iteritems(data_dict)):
+    for key, value in list(data_dict.items()):
         if value is OMIT:
             data_dict.pop(key)
         else:
             data_dict[key] = translate_special_values(value)
     return data_dict
+
 
 def translate_special_values(data):
     if isinstance(data, dict):

@@ -3,7 +3,7 @@ from sentinels import NOTHING
 from munch import Munch
 from .api.special_values import SpecialValue, RawValue
 from .translators_and_types import address_type_factory, host_port_from_api
-from .._compat import string_types
+
 # pylint: disable=abstract-method
 
 class InfiniSDKBinding(ObjectAPIBinding):
@@ -31,6 +31,33 @@ class InfiniSDKBindingWithSpecialFlags(InfiniSDKBinding):
         if api_value in self._special_flags:
             return api_value
         return super(InfiniSDKBindingWithSpecialFlags, self).get_value_from_api_value(system, objtype, obj, api_value)
+
+class ReplicaEntityBinding(InfiniSDKBinding):
+    def __init__(self, value_for_none=0):
+        super(ReplicaEntityBinding, self).__init__()
+        self._value_for_none = value_for_none
+
+    def _get_collection(self, obj, system):
+        if obj.get_entity_type() == 'FILESYSTEM':
+            return system.filesystems
+        elif obj.get_entity_type() == 'VOLUME':
+            return system.volumes
+        else:
+            return system.cons_groups
+
+    def get_api_value_from_value(self, system, objtype, obj, value):
+        if value is None:
+            return self._value_for_none
+        if isinstance(value, SpecialValue):
+            if isinstance(value, RawValue):
+                return value.generate()
+            return value
+        return value.id
+
+    def get_value_from_api_value(self, system, objtype, obj, api_value):
+        if api_value == self._value_for_none or api_value is None:
+            return None
+        return self._get_collection(obj, system).get_by_id_lazy(api_value)
 
 
 class RelatedObjectBinding(InfiniSDKBinding):
@@ -67,7 +94,7 @@ class RelatedObjectBinding(InfiniSDKBinding):
 class RelatedObjectNamedBinding(RelatedObjectBinding):
 
     def get_api_value_from_value(self, system, objtype, obj, value):
-        if isinstance(value, string_types):
+        if isinstance(value, (str, bytes)):
             value = system.objects[self._collection_name].get(name=value)
         return super(RelatedObjectNamedBinding, self).get_api_value_from_value(system, objtype, obj, value)
 
