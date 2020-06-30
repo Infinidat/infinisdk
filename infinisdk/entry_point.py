@@ -4,6 +4,7 @@ import dateutil
 import pkg_resources
 import click
 import logbook
+import logbook.more
 from infinisdk import Q
 from infinisdk.infinibox import InfiniBox
 from infinisdk.core.config import config
@@ -20,13 +21,15 @@ CUSTOMIZE_ENTRY_POINT = 'infinisdk.cli.customize'
 @click.group()
 @click.option("-v", "--verbose", count=True)
 @click.option("-q", "--quiet", count=True)
-@click.pass_context
-def cli(ctx, verbose, quiet):
-    console_handler = logbook.StderrHandler()
+@click.option("-l", "--log-file", type=click.Path())
+def cli(verbose, quiet, log_file):
+    console_handler = logbook.more.ColorizedStderrHandler()
     console_handler.level = min(max(logbook.TRACE, _DEFAULT_CONSOLE_LEVEL-verbose+quiet), logbook.CRITICAL)
-    ctx.obj['console_handler'] = console_handler
     console_handler.format_string = '{record.message}'
     console_handler.push_application()
+    if log_file:
+        file_handler = logbook.FileHandler(log_file, mode="w", bubble=True)
+        file_handler.push_application()
 
 
 def _get_system_object(system_name, port=None, should_login=False):

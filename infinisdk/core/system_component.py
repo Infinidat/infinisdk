@@ -1,5 +1,4 @@
 from collections import OrderedDict
-from .._compat import itervalues, iterkeys
 from .type_binder import TypeBinder
 
 
@@ -20,10 +19,10 @@ class SystemComponentsBinder(TypeBinder):
         """
         Returns all classes installed for specific component types
         """
-        return list(itervalues(self._COMPONENTS_BY_TYPE_NAME))
+        return list(self._COMPONENTS_BY_TYPE_NAME.values())
 
     def get_component_type_names(self):
-        return list(iterkeys(self._COMPONENTS_BY_TYPE_NAME))
+        return list(self._COMPONENTS_BY_TYPE_NAME.keys())
 
     def try_get_component_by_id(self, component_id):
         """
@@ -64,7 +63,7 @@ class SystemComponentsBinder(TypeBinder):
             raise KeyError(attr)
 
 
-class SpecificComponentBinderGetter(object):
+class SpecificComponentBinderGetter:
 
     def __init__(self, object_type):
         super(SpecificComponentBinderGetter, self).__init__()
@@ -89,7 +88,7 @@ class SpecificComponentBinder(TypeBinder):
         return returned
 
 
-class TypeContainer(object):
+class TypeContainer:
     def __init__(self):
         super(TypeContainer, self).__init__()
         self._type_name_to_class = {}
@@ -109,7 +108,7 @@ class TypeContainer(object):
         return list(self)
 
     def __iter__(self):
-        return itervalues(self._type_name_to_class)
+        return iter(self._type_name_to_class.values())
 
     def __len__(self):
         return len(self._type_name_to_class)

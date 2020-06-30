@@ -1,6 +1,5 @@
 from urlobject import URLObject as URL
 
-from .._compat import iteritems
 from ..core.type_binder import TypeBinder
 from ..core import Field, SystemObject
 from .user import User
@@ -53,7 +52,7 @@ class LDAPConfig(SystemObject):
         """Modifies the LDAP configuration
         """
         post_dict = {}
-        for key, value in iteritems(kwargs):
+        for key, value in kwargs.items():
             if key.startswith('schema_'):
                 post_dict.setdefault('schema_definition', {})[key.split('_', 1)[1]] = value
             else:

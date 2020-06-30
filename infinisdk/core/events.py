@@ -1,4 +1,5 @@
-from .._compat import abc_module
+import collections
+from ..core.q import Q
 from ..core import Field, SystemObject, TypeBinder, MillisecondsDatetimeType
 from ..core.bindings import RelatedObjectBinding
 
@@ -9,12 +10,16 @@ class Events(TypeBinder):
         self._types = None
 
     def get_events(self, min_event_id=0):
-        return list(self.find(Event.fields.id >= min_event_id).sort(Event.fields.id))  # pylint: disable=no-member
+        return self.find(Event.fields.id >= min_event_id).sort(Q.id).to_list()
 
     def get_last_events(self, num, reversed=False):  # pylint: disable=redefined-builtin
-        returned = list(self.find().sort(-Event.fields.id).page_size(num).page(1))  # pylint: disable=no-member
+        returned = self.find().sort(-Q.id).page_size(num).page(1).to_list()
         if not reversed:
             returned.reverse()
+        return returned
+
+    def get_first_events(self, num):
+        returned = self.find().sort(+Q.id).page_size(num).page(1).to_list()
         return returned
 
     def get_last_event(self):
@@ -84,4 +89,4 @@ class Event(SystemObject):
     def get_event_data_dict(self):
         return dict((value['name'], value['value']) for value in self.get_field('data', from_cache=True))
 
-abc_module.Mapping.register(Event)  # pylint: disable=no-member
+collections.abc.Mapping.register(Event)  # pylint: disable=no-member

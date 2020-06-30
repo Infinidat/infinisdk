@@ -1,20 +1,19 @@
 import copy
 import uuid
 
-from .._compat import ExitStack, zip  # pylint: disable=redefined-builtin
 from ..core.field import Field
 from ..core.field_filter import FieldFilter
 from ..core.system_component import SystemComponentsBinder
 from ..core.system_object import BaseSystemObject
 from ..core.exceptions import ObjectNotFound
 from ..core.type_binder import MonomorphicBinder
-from ..core.translators_and_types import WWNType, CapacityType, MunchType
+from ..core.translators_and_types import WWNType, CapacityType, MunchType, MunchListType
 from mitba import cached_method
 from .component_query import InfiniBoxComponentQuery, InfiniBoxGenericComponentQuery
 from ..core.bindings import InfiniSDKBinding, ListOfRelatedComponentBinding, RelatedComponentBinding
 
 from collections import defaultdict
-from contextlib import contextmanager
+from contextlib import contextmanager, ExitStack
 from logbook import Logger
 from urlobject import URLObject as URL
 from vintage import deprecated, warn_deprecation
@@ -23,11 +22,13 @@ from vintage import deprecated, warn_deprecation
 _logger = Logger(__name__)
 _UID_DEPRECATION_MSG = "Direct usage of the 'id' field is deprecated. Use 'uid' field instead"
 
+
 def _normalize_id_predicate(predicate, component_type):
     if predicate.field.name == 'id' and isinstance(predicate.value, str):
         warn_deprecation(_UID_DEPRECATION_MSG)
         return FieldFilter(component_type.fields.uid, predicate.operator_name, predicate.value)
     return predicate
+
 
 class InfiniBoxSystemComponents(SystemComponentsBinder):
 
@@ -324,6 +325,7 @@ class Rack(InfiniBoxSystemComponent):
         Field("enclosures", type=list, binding=ListOfRelatedComponentBinding()),
         Field("nodes", type=list, binding=ListOfRelatedComponentBinding()),
         Field("bbus", api_name='ups', type=list, binding=ListOfRelatedComponentBinding()),
+        Field("pdus", type=list, binding=ListOfRelatedComponentBinding()),
     ]
 
     @classmethod
@@ -338,7 +340,8 @@ class Rack(InfiniBoxSystemComponent):
         return self.get_specific_rack_url(self.get_index())
 
     def refresh_without_enclosures(self):
-        fields = ",".join(field.api_name for field in self.fields if field.name != 'enclosures')
+        fields = ",".join(field.api_name for field in self.fields
+                          if field.name not in ('enclosures', 'uid', 'parent_id'))
         url = self.get_this_url_path().add_query_param('fields', fields)
         data = self.system.api.get(url).get_result()
         self.system.components.mark_fetched_nodes()
@@ -406,14 +409,14 @@ class Node(InfiniBoxSystemComponent):
         Field("tpm", cached=False, type=MunchType, feature_name='fips'),
     ]
 
-    def is_active(self):
-        return self.get_state() == 'ACTIVE'
+    def is_active(self, **kwargs):
+        return self.get_state(**kwargs) == 'ACTIVE'
 
-    def is_degraded(self):
-        return self.get_state() == 'DEGRADED'
+    def is_degraded(self, **kwargs):
+        return self.get_state(**kwargs) == 'DEGRADED'
 
-    def is_failed(self):
-        return self.get_state() == 'FAILED'
+    def is_failed(self, **kwargs):
+        return self.get_state(**kwargs) == 'FAILED'
 
     @classmethod
     def get_url_path(cls, system):
@@ -461,11 +464,11 @@ class LocalDrive(InfiniBoxSystemComponent):
         this_url = parent_url.add_path("drives").add_path(str(self.get_index()))
         return this_url
 
-    def is_active(self):
-        return self.get_state() == 'OK'
+    def is_active(self, **kwargs):
+        return self.get_state(**kwargs) == 'OK'
 
-    def is_ssd(self):
-        return self.get_type() == 'SSD'
+    def is_ssd(self, **kwargs):
+        return self.get_type(**kwargs) == 'SSD'
 
 
 @InfiniBoxSystemComponents.install_component_type
@@ -495,10 +498,10 @@ class EthPort(InfiniBoxSystemComponent):
     def get_type_name(cls):
         return "eth_port"
 
-    def is_link_up(self):
-        if self.get_state() != 'OK':
+    def is_link_up(self, **kwargs):
+        if self.get_state(**kwargs) != 'OK':
             return False
-        return self.get_link_state().lower() in ("link up", "up")
+        return self.get_link_state(**kwargs).lower() in ("link up", "up")
 
 
 @InfiniBoxSystemComponents.install_component_type
@@ -522,8 +525,9 @@ class IbPort(InfiniBoxSystemComponent):
     def get_type_name(cls):
         return "ib_port"
 
-    def is_link_up(self):
-        self.refresh_cache()
+    def is_link_up(self, *, from_cache=False):
+        if not from_cache:
+            self.refresh_cache()
         if self.get_state(from_cache=True) != 'OK':
             return False
         if not self.is_field_supported('link_state'):
@@ -559,31 +563,31 @@ class FcPort(InfiniBoxSystemComponent):
         Field("enabled", type=bool),
     ]
 
-    def is_link_up(self):
-        if not self.is_enabled():
+    def is_link_up(self, **kwargs):
+        if not self.is_enabled(**kwargs):
             return False
-        if self.get_state() != 'OK':
+        if self.get_state(**kwargs) != 'OK':
             return False
-        return self.get_link_state().lower() in ("link up", "up")
+        return self.get_link_state(**kwargs).lower() in ("link up", "up")
 
     @classmethod
     def get_type_name(cls):
         return "fc_port"
 
-    def is_hard_port(self):
+    def is_hard_port(self, **kwargs):
         if self.system.compat.has_npiv():
-            return self.get_role() == 'HARD_PORT'
+            return self.get_role(**kwargs) == 'HARD_PORT'
         return True
 
-    def is_soft_port(self):
+    def is_soft_port(self, **kwargs):
         if self.system.compat.has_npiv():
-            return self.get_role() == 'SOFT_PORT'
+            return self.get_role(**kwargs) == 'SOFT_PORT'
         return False
 
-    def get_target_addresses(self):
-        if self.is_soft_port():
-            return self.get_soft_target_addresses()
-        return set([self.get_wwpn()])
+    def get_target_addresses(self, **kwargs):
+        if self.is_soft_port(**kwargs):
+            return self.get_soft_target_addresses(**kwargs)
+        return set([self.get_wwpn(**kwargs)])
 
     def enable(self, role):
         """Enables the FC port with the specified role (SOFT_PORT/HARD_PORT)"""
@@ -614,8 +618,8 @@ class Drive(InfiniBoxSystemComponent):
                 for node, can_access_node in zip(self.system.components.nodes, node_access_flags)
                 if can_access_node]
 
-    def is_active(self):
-        return self.get_state() == 'ACTIVE'
+    def is_active(self, **kwargs):
+        return self.get_state(**kwargs) == 'ACTIVE'
 
 
 @InfiniBoxSystemComponents.install_component_type
@@ -633,21 +637,21 @@ class Service(InfiniBoxSystemComponent):
         except ObjectNotFound:
             raise NotImplementedError("This service ({}) doesn't support CLM".format(self.get_name()))
 
-    def is_active(self):
-        return self.get_state() == 'ACTIVE'
+    def is_active(self, **kwargs):
+        return self.get_state(**kwargs) == 'ACTIVE'
 
-    def is_inactive(self):
+    def is_inactive(self, **kwargs):
         # Workaround for INFINIBOX-18309 & INFINIBOX-18308 & INFINIBOX-18647 & INFINIBOX-17256
-        return self.get_state() in ('INACTIVE', 'PROCESS_FINISHED', 'SHUTDOWN', 'INVALID')
+        return self.get_state(**kwargs) in ('INACTIVE', 'PROCESS_FINISHED', 'SHUTDOWN', 'INVALID')
 
-    def is_master(self):
-        return self.get_role() == 'MASTER'
+    def is_master(self, **kwargs):
+        return self.get_role(**kwargs) == 'MASTER'
 
-    def is_secondary(self):
-        return self.get_role() == 'SECONDARY'
+    def is_secondary(self, **kwargs):
+        return self.get_role(**kwargs) == 'SECONDARY'
 
-    def is_member(self):
-        return self.get_role() == 'MEMBER'
+    def is_member(self, **kwargs):
+        return self.get_role(**kwargs) == 'MEMBER'
 
     def get_node(self):
         return self.get_parent()
@@ -679,14 +683,14 @@ class ServiceCluster(InfiniBoxSystemComponent):
         return [self.system.components.nodes.get(index=service_info['node_id']).get_service(self.get_name())
                 for service_info in self.get_field('node_states')]
 
-    def is_active(self):
-        return self.get_state() == 'ACTIVE'
+    def is_active(self, **kwargs):
+        return self.get_state(**kwargs) == 'ACTIVE'
 
-    def is_inactive(self):
-        return self.get_state() in ('INACTIVE', 'SHUTDOWN')
+    def is_inactive(self, **kwargs):
+        return self.get_state(**kwargs) in ('INACTIVE', 'SHUTDOWN')
 
-    def is_degraded(self):
-        return self.get_state() == 'DEGRADED'
+    def is_degraded(self, **kwargs):
+        return self.get_state(**kwargs) == 'DEGRADED'
 
 
 def _ensure_elastic(func):
@@ -756,6 +760,31 @@ class BBU(InfiniBoxSystemComponent):
 
 
 @InfiniBoxSystemComponents.install_component_type
+class PDU(InfiniBoxSystemComponent):
+    FIELDS = [
+        Field("index", api_name="id", type=int, is_identity=True),
+        Field("api_id", api_name="id", type=int, is_identity=True),
+        Field("model"),
+        Field("vendor"),
+        Field("firmware"),
+        Field("state", cached=False),
+        Field("state_description"),
+        Field("power_ports", type=MunchListType),
+        Field("power_consumption", type=int),
+        Field("probe_ttl", type=int),
+        Field("last_probe_timestamp", type=int),
+    ]
+
+    @classmethod
+    def get_url_path(cls, system):
+        return cls.BASE_URL.add_path(cls.get_plural_name())
+
+    @cached_method
+    def get_this_url_path(self):
+        return self.get_url_path(self.system).add_path(str(self.get_index()))
+
+
+@InfiniBoxSystemComponents.install_component_type
 class System(InfiniBoxSystemComponent):
     FIELDS = [
         Field("api_id", api_name="id", type=int, cached=True, is_identity=True),
@@ -774,20 +803,20 @@ class System(InfiniBoxSystemComponent):
     def get_state(self, *args, **kwargs):
         return self.get_operational_state(*args, **kwargs)['state']
 
-    def safe_get_state(self):
+    def safe_get_state(self, **kwargs):
         try:
-            return self.get_state()
+            return self.get_state(**kwargs)
         except Exception:  # pylint: disable=broad-except
             return None
 
-    def is_active(self):
-        return self.safe_get_state() == 'ACTIVE'
+    def is_active(self, **kwargs):
+        return self.safe_get_state(**kwargs) == 'ACTIVE'
 
-    def is_stand_by(self):
-        return self.safe_get_state() == 'STANDBY'
+    def is_stand_by(self, **kwargs):
+        return self.safe_get_state(**kwargs) == 'STANDBY'
 
-    def is_down(self):
-        return self.safe_get_state() is None
+    def is_down(self, **kwargs):
+        return self.safe_get_state(**kwargs) is None
 
     def refresh_cache(self):
         data = self.system.api.get(self.get_this_url_path()).get_result()
