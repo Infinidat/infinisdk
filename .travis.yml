@@ -1,14 +1,21 @@
 language: python
+dist: xenial
 python:
-- '3.6'
+  - "3.6"
+  - "3.7"
+  - "3.8"
+install:
+  - pip install -e .
+  - pip install astroid>=2.0
+  - pip install pylint>=2.0
 script:
-- echo "Doing nothing"
-deploy:
-  provider: pypi
-  user: infradev
-  password:
-    secure: gfYjp9bTACDYS0Jfuk7bKrv/AUmtsgOX4Q0ceepIJQkoOyDEBlyt1zXDnhKG753dn7XGM/C3VmCbDufOmw+LyHGRjlZ6zR+koqgRAratXHk8OQzJ8bEdPcLRtzdNboxq+WwU1Pc2GrXrOI+XKzxDBRxzXmztNT6cx74g7lKsnOMTqeNmQl9xyJJNmnaD8KkroMUdYOvsKt/TEKvPCtcgHIUNhUogS9TzL59eUuBvhEAtiJ+JanzB6ixGLDE1BIpCxbXAS09WXrLqXfG0PJGpwRjPnseFSKFBohSmmJtER6w1Z7O/mKxum8OPAFGa73yOhE59MBxoc9nInZCJb7vnzxdkRMtFLnaDEXG0uopWP3h57jev6BlBn5gw31T1+JfQdy/sSWEmgbuYuKyCQCFg2+P1hL1hLu6H1dgyQ+sSWIXUrulIPJSf0iBANoXHUrjB5DUK6717awkvZgpucvdfKiF1qfB/wD9KEsk28R81XV3E085wpB78j/P4siteTVGs1CMZBzDwNzgdAdIVfjM4FJuStrNeviviceApopb2KBT8URMoqzehFkW9rxkJPhigGnMyb3hjuAiMeavUD8Hl6PWrZA0PVbXCTY9wrGizXqG7mOUPie0kw66Q76SUBLyqVy15YVS5HmeFq/kiDh37J4wZxT4unTlX6Safx0Re0sU=
-  on:
-    tags: true
-    distributions: sdist bdist_wheel
-    repo: Infinidat/infinisdk
+  - pylint --rcfile=.pylintrc infinisdk setup.py
+jobs:
+  include:
+    - stage: deploy
+      python: 3.7
+      install: pip install twine
+      script:
+        - python setup.py sdist bdist_wheel
+        - twine upload -u $PYPI_USERNAME -p $PYPI_PASSWORD dist/*
+      if: tag IS present
