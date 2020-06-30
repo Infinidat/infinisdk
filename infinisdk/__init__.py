@@ -13,6 +13,7 @@ def _install_hooks():
     # it is not in OBJECT_TYPES.
     obj_type_names = set(tag for sys in (InfiniBox, ) for obj_cls in sys.OBJECT_TYPES + [TreeQ]
                          for tag in obj_cls.get_tags_for_object_operations(sys))
+    obj_type_names.add('event')
 
     # pylint: disable=too-many-format-args
     gossip.define(_SDK_HOOK('pre_object_creation'), tags=obj_type_names, arg_names=('data', 'system', 'cls', 'parent'))
@@ -192,6 +193,11 @@ def _install_hooks():
     gossip.define(_SDK_HOOK('volume_unmapping_failure'),
                   arg_names=('volume', 'host_or_cluster', 'exception', 'lun'),
                   tags=['infinibox', 'host', 'host_cluster'])
+
+    gossip.define(_SDK_HOOK('pre_event_retention'), tags=['infinibox', 'event'], arg_names=('system', 'retention'))
+    gossip.define(_SDK_HOOK('post_event_retention'), tags=['infinibox', 'event'], arg_names=('system', 'retention'))
+    gossip.define(_SDK_HOOK('event_retention_failure'), tags=['infinibox', 'event'],
+                  arg_names=('system', 'retention', 'exception'))
 
     gossip.get_or_create_group('infinidat.sdk').set_strict()
 

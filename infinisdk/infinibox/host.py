@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 
-from .._compat import requests
+import requests
 
 from ..core import Field, MillisecondsDatetimeType
 from ..core.api.special_values import Autogenerate

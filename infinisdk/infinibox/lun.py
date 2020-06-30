@@ -1,13 +1,13 @@
-from .._compat import string_types, requests
+import requests
 from ..core.exceptions import APICommandFailed
 
 
-class LogicalUnit(object):
+class LogicalUnit:
     def __init__(self, system, id, lun, clustered, host_cluster_id, volume_id,  # pylint: disable=redefined-builtin
                  host_id, **kwargs):
         self.system = system
         self.id = id
-        self.lun = int(lun) if isinstance(lun, string_types) else lun
+        self.lun = int(lun) if isinstance(lun, (str, bytes)) else lun
         self.clustered = clustered
         self.host_cluster_id = host_cluster_id
         self.volume_id = volume_id
@@ -89,7 +89,7 @@ class LogicalUnit(object):
         return hash(self.get_unique_key())
 
 
-class LogicalUnitContainer(object):
+class LogicalUnitContainer:
     def __init__(self, system):
         self.luns = set()
         self._system = system

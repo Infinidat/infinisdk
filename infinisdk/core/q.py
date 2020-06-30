@@ -1,7 +1,7 @@
 from . import field
 
 
-class _Q(object):
+class _Q:
 
     def __getattribute__(self, name):
         if name.startswith("_"):

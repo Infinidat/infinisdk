@@ -27,6 +27,9 @@ class APICommandException(InfiniSDKException):
 class CannotGetReplicaState(InfiniSDKException):
     pass
 
+class BadFilepathException(InfiniSDKException):
+    pass
+
 class SystemNotFoundException(APICommandException):
     def __init__(self, err, api_request, start_timestamp):
         self.start_timestamp = start_timestamp
@@ -131,7 +134,7 @@ class RemoteAPICommandFailed(APICommandFailed):
     pass
 
 
-class ErrorReason(object):
+class ErrorReason:
 
     def __init__(self, message, affected_entities):
         super(ErrorReason, self).__init__()

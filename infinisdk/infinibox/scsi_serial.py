@@ -2,7 +2,7 @@ import binascii
 import struct
 
 
-class SCSISerial(object):
+class SCSISerial:
 
     def __init__(self, serial):
         super(SCSISerial, self).__init__()

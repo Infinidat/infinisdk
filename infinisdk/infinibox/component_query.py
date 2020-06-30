@@ -1,7 +1,8 @@
+import functools
 import operator
 from numbers import Number
 
-from .._compat import cmp, iteritems, itervalues, sorted  # pylint: disable=redefined-builtin
+from ..core.utils.python import cmp
 from ..core.object_query import QueryBase
 
 
@@ -70,11 +71,11 @@ class InfiniBoxComponentQuery(ComponentQueryBase):
                 return 0
 
             with self._get_binder().fetch_tree_once_context(force_fetch=self._force_fetch, with_logging=False):
-                all_components = itervalues(self.system.components._components_by_id)  # pylint: disable=protected-access
+                all_components = self.system.components._components_by_id.values()  # pylint: disable=protected-access
                 returned = [item for item in all_components if self.passed_filtering(item)]
 
             if self.sort_criteria:
-                returned = sorted(returned, cmp=_sort_cmp_items)
+                returned = sorted(returned, key=functools.cmp_to_key(_sort_cmp_items))
             self._fetched_items = returned
         return returned
 
@@ -96,7 +97,7 @@ class InfiniBoxComponentQuery(ComponentQueryBase):
             item_value = item.get_field(predicate.field.name)
             if not op_func(item_value, predicate.value):
                 return False
-        for k, v in iteritems(self.kw):
+        for k, v in self.kw.items():
             if item.get_field(k) != v:
                 return False
         return True

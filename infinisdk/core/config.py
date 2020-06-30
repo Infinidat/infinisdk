@@ -1,8 +1,7 @@
-import os
-
-from .._compat import ConfigParser
-
 import confetti
+import os
+from configparser import ConfigParser
+
 
 config = confetti.Config(dict(
 
