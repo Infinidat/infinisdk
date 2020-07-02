@@ -5,9 +5,11 @@ python:
   - "3.7"
   - "3.8"
 install:
-  - pip install -e .[testing]
+  - pip install -e .
+  - pip install astroid>=2.0
+  - pip install pylint>=2.0
 script:
-  - pylint --rcfile=.pylintrc infinisdk setup.py doc/*.doctest_context
+  - pylint --rcfile=.pylintrc infinisdk setup.py
 jobs:
   include:
     - stage: deploy
@@ -15,5 +17,5 @@ jobs:
       install: pip install twine
       script:
         - python setup.py sdist bdist_wheel
-        - twine upload -u $PYPI_USERNAME -p "'${PYPI_PASSWORD}'" dist/*
+        - twine upload -u $PYPI_USERNAME -p $PYPI_PASSWORD dist/*
       if: tag IS present
