@@ -572,8 +572,6 @@ class Replica(SystemObject):
             raise CannotGetReplicaState('Replica state cannot be checked on target replica')
 
     def _is_in_suspended_state(self, *states, **kwargs):
-        if self.is_type_active_active():
-            return self.system.compat.has_active_active_suspend() and self.is_suspended_from_local() is not None
         self._validate_can_check_state()
         return self._is_in_state(*states, **kwargs)
 
