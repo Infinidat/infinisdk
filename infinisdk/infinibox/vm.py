@@ -7,7 +7,7 @@ class Vm(SystemObject):
     FIELDS = [
         Field("id", type=int, cached=True, is_identity=True, is_sortable=True, is_filterable=True),
         Field("uuid", type=str, cached=True, is_filterable=True, is_sortable=True),
-        Field("name", type=str, cached=True, is_filterable=True, is_sortable=True),
+        Field("name", type=str, cached=True, is_filterable=True, is_sortable=True, mutable=True, add_getter=True),
     ]
 
     @classmethod
