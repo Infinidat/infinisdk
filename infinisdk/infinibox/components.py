@@ -383,6 +383,12 @@ class Nodes(InfiniBoxComponentBinder):
                     if ip.ip_address == ip_address:
                         return self.system.network_interfaces.get_by_id_lazy(ip.interface_id).get_node()
 
+    def get_by_mgmt_ip(self, ip_address):
+        with self.system.components.eth_ports.fetch_once_context():
+            for port in self.system.components.eth_ports:
+                if port.get_role() == 'MANAGEMENT' and port.get_ip_v4_addr() == ip_address:
+                    return port.get_node()
+
     def refresh_fields(self, field_names):
         assert isinstance(field_names, (list, tuple)), "field_names must be either a list or a tuple"
         field_names_str = ",".join(set(field_names).union(['id']))

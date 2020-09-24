@@ -230,6 +230,11 @@ def test_refresh_nodes_fields(infinibox):
     nodes = infinibox.components.nodes.refresh_fields(['services', 'state'])
     assert [node.get_uid() for node in nodes] == [node.get_uid() for node in infinibox.components.nodes]
 
+def test_get_node_by_mgmt_ip(infinibox):
+    ports = [port for port in infinibox.components.eth_ports if port.get_role() == 'MANAGEMENT']
+    for port in ports:
+        assert port.get_node() == infinibox.components.nodes.get_by_mgmt_ip(port.get_ip_v4_addr())
+
 @pytest.mark.parametrize('component_binder_name', ['nodes', 'enclosures', 'drives', 'local_drives'])
 def test_get_components_sorted_by_index_and_parent_index(infinibox, component_binder_name):
     comp_binder = infinibox.components[component_binder_name]
