@@ -18,7 +18,7 @@ def require_sync_replication(func):
     def new_func(self, *args, **kwargs):
         if self.system.compat.has_sync_replication():
             return func(self, *args, **kwargs)
-        raise NotImplementedError("not availble in this version")
+        raise NotImplementedError("not available in this version")
     return new_func
 
 
@@ -82,7 +82,7 @@ class ReplicaBinder(TypeBinder):
                                            **self._get_extra_replica_kwargs(kw, entity, remote_entity))
 
     def replicate_entity_use_base(self, entity, link, local_snapshot, remote_snapshot, member_mappings=None, **kw):
-        """Replicates an entity, using an existing remote entity and a base snapthot on both sides
+        """Replicates an entity, using an existing remote entity and a base snapshot on both sides
 
         :param local_snapshot: Local base snapshot to use
         :param remote_snapshot: Remote base snapshot to use
@@ -800,8 +800,8 @@ class Replica(SystemObject):
         return self.get_link(from_cache=from_cache).get_linked_system(from_cache=from_cache, safe=safe)
 
     def get_remote_replica(self, from_cache=False, safe=False):
-        """Get the corresponsing replica object in the remote machine. For this to work, the SDK user should
-        call the register_related_system method of the Infinibox object when a link to a remote system is consructed
+        """Get the corresponding replica object in the remote machine. For this to work, the SDK user should
+        call the register_related_system method of the Infinibox object when a link to a remote system is constructed
         for the first time"""
         linked_system = self.get_remote_system(from_cache=from_cache, safe=safe)
         if linked_system is None:
