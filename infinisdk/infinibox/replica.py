@@ -720,7 +720,7 @@ class Replica(SystemObject):
             self._notify_pre_exposure(remote_replica)
 
         try:
-            resp = self._send_delete_with_hooks_tirggering(
+            resp = self._send_delete_with_hooks_triggering(
                 path,
                 force_if_remote_error=force_if_remote_error,
                 force_on_target=force_on_target,

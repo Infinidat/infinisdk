@@ -47,7 +47,7 @@ class InfiniBoxSystemComponents(SystemComponentsBinder):
         self._fetched_others = False
         self._fetched_service_clusters = False
         self._fetched_external_clusters = False
-        self._deps_by_compoents_tree = defaultdict(set)
+        self._deps_by_components_tree = defaultdict(set)
         self._initialization_uuid = uuid.uuid4()
 
     def invalidate_cache(self):
@@ -55,7 +55,7 @@ class InfiniBoxSystemComponents(SystemComponentsBinder):
         self._initialize()
 
     def get_depended_components_type(self, component_type):
-        deps = self._deps_by_compoents_tree[component_type].copy()
+        deps = self._deps_by_components_tree[component_type].copy()
         for dep_type in deps.copy():
             deps.update(self.get_depended_components_type(dep_type))
         return deps
@@ -304,7 +304,7 @@ class InfiniBoxSystemComponent(BaseSystemObject):
             component_type = cls.get_type_name()
             object_type = system.components._COMPONENTS_BY_TYPE_NAME.get(component_type, InfiniBoxSystemComponent)
             returned = object_type(system, data)
-            system.components._deps_by_compoents_tree[type(returned.get_parent())].add(object_type)
+            system.components._deps_by_components_tree[type(returned.get_parent())].add(object_type)
             system.components.cache_component(returned)
         else:
             returned.update_field_cache(data)

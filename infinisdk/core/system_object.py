@@ -188,10 +188,10 @@ class BaseSystemObject(metaclass=FieldsMeta):
         if from_cache:
             if not fetch_if_not_cached:
                 return self._get_fields_from_cache(field_names, raw_value)
-            field_names_to_retrive = field_names or \
+            field_names_to_retrieve = field_names or \
                 [field.name for field in self.fields if self.system.is_field_supported(field)]
             try:
-                return self._get_fields_from_cache(field_names_to_retrive, raw_value)
+                return self._get_fields_from_cache(field_names_to_retrieve, raw_value)
             except CacheMiss:
                 pass
 
@@ -448,9 +448,9 @@ class SystemObject(BaseSystemObject):
         """
         Deletes this object.
         """
-        self._send_delete_with_hooks_tirggering(self.get_this_url_path(), **kwargs)
+        self._send_delete_with_hooks_triggering(self.get_this_url_path(), **kwargs)
 
-    def _send_delete_with_hooks_tirggering(self, url, **kwargs):
+    def _send_delete_with_hooks_triggering(self, url, **kwargs):
         url = add_normalized_query_params(url, **kwargs)
         hook_tags = self.get_tags_for_object_operations(self.system)
         gossip.trigger_with_tags('infinidat.sdk.pre_object_deletion', {'obj': self, 'url': url}, tags=hook_tags)

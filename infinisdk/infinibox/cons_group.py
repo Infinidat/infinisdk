@@ -149,7 +149,7 @@ class ConsGroup(InfiniBoxObject):
         trigger_hook('infinidat.sdk.pre_cons_group_deletion')
 
         try:
-            self._send_delete_with_hooks_tirggering(self.get_this_url_path(),
+            self._send_delete_with_hooks_triggering(self.get_this_url_path(),
                                                     delete_members=delete_members,
                                                     force_if_snapshot_locked=force_if_snapshot_locked)
         except Exception:  # pylint: disable=broad-except
