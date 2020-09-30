@@ -34,7 +34,7 @@ class QueryBase:
         try:
             return self.sample(1)[0]
         except ValueError:
-            raise ObjectNotFound('No items where returned')
+            raise ObjectNotFound('No items were found')
 
     def sample(self, sample_count):
         """
