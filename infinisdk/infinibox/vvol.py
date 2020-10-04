@@ -1,3 +1,6 @@
+from infinisdk.core.exceptions import APICommandFailed
+import http.client as httplib
+
 from ..core.system_object import SystemObject
 from ..core import Field, CapacityType
 from ..core.bindings import RelatedObjectBinding, RelatedObjectNamedBinding
@@ -40,7 +43,22 @@ class Vvol(SystemObject):
         return self.get_url_path(self.system).add_query_params(dict(id=self.id, include_space_stats=True))
 
     def _get_fields_result(self, response):
-        return response.get_result()[0]
+        result = response.get_result()
+        return {} if result == [] else result[0]
 
     def get_pool_name(self):
         return self.get_pool().get_name()
+
+    def is_in_system(self):
+        """
+        Returns whether or not the vvol object actually exists in system
+        """
+        try:
+            query = self.get_this_url_path().add_query_param("fields", ",".join('id'))
+            self.system.api.get(query)
+        except APICommandFailed as e:
+            if e.status_code != httplib.NOT_FOUND:
+                raise
+            return False
+        else:
+            return True
