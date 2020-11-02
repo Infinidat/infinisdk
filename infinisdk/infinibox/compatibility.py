@@ -200,6 +200,9 @@ class Compatibility:
     def has_vvol(self):
         return self._has_feature('vvol')
 
+    def has_sg_delete_limit(self):
+        return self.get_parsed_system_version() >= '6.0.0'
+
     def has_active_active_suspend(self):
         return self._get_feature_version("active_active", 0) > 3
 
