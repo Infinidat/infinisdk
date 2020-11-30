@@ -3,6 +3,7 @@ variables:
   INSTALL_DIR: /root/src
   RUN_ITZIK: https://git.infinidat.com/infradev/helpers/raw/master/run_itzik.py
   RUN_ITZIK_PARAMETERS: --no-dev --src $INSTALL_DIR --bundle new-infra --bundle-version $BUNDLE_VERSION --until $CI_PROJECT_NAME -p $CI_PROJECT_DIR[testing] --curr-branch $CI_COMMIT_REF_NAME
+  PYTHON_IMAGE: git.infinidat.com:4567/infradev/python-docker-mirror
 
 stages:
   - test
@@ -23,29 +24,29 @@ stages:
 
 py35:
   extends: .test
-  image: python:3.5
+  image: $PYTHON_IMAGE:3.5
 
 py36:
   extends: .test
-  image: python:3.6
+  image: $PYTHON_IMAGE:3.6
 
 py37:
   extends: .test
-  image: python:3.7
+  image: $PYTHON_IMAGE:3.7
 
 py38:
   extends: .test
-  image: python:3.8
+  image: $PYTHON_IMAGE:3.8
 
 docs:
   extends: .test
-  image: python:3.7
+  image: $PYTHON_IMAGE:3.7
   script:
     - pip install -e ".[doc]"
     - sphinx-build -a -W -E doc build/sphinx/html
 
 pypi:
-  image: python
+  image: $PYTHON_IMAGE:3.8
   tags:
     - infradev
     - ubuntu
@@ -58,7 +59,7 @@ pypi:
     - curl -sL http://goto/pypi_register | python - -v ./
 
 trigger:
-  image: python
+  image: $PYTHON_IMAGE:3.8
   tags:
     - infradev
     - ubuntu
