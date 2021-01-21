@@ -22,10 +22,6 @@ stages:
     - pylint --rcfile .pylintrc -j $(nproc) infinisdk scripts tests doc/*.doctest_context
     - pytest -ra -W error::DeprecationWarning
 
-py35:
-  extends: .test
-  image: $PYTHON_IMAGE:3.5
-
 py36:
   extends: .test
   image: $PYTHON_IMAGE:3.6
