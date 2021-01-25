@@ -34,6 +34,10 @@ py38:
   extends: .test
   image: $PYTHON_IMAGE:3.8
 
+py39:
+  extends: .test
+  image: $PYTHON_IMAGE:3.9
+
 docs:
   extends: .test
   image: $PYTHON_IMAGE:3.7
