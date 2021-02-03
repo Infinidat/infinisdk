@@ -636,7 +636,7 @@ class Response:
         """
         json = self.get_json()
         if json is not None:
-            return json["error"]
+            return json.get("error")
 
     def __repr__(self):
         return repr(self.response)

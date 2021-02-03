@@ -1,19 +1,21 @@
 # pylint: disable=redefined-builtin
 import functools
 import http.client as httplib
-import requests
+import warnings
+from unittest.mock import MagicMock
 from uuid import uuid4
+
 import logbook
 import pytest
-import warnings
-from infinisdk.core.api import Autogenerate, OMIT
-from infinisdk.core.config import config
-from infinisdk.core.exceptions import APICommandFailed, ObjectNotFound, SystemNotFoundException, MethodDisabled
-from ..conftest import no_op_context
-
+import requests
 from urlobject import URLObject as URL
-from ..conftest import relevant_from_version
 
+from infinisdk.core.api import OMIT, Autogenerate
+from infinisdk.core.api.api import Response
+from infinisdk.core.config import config
+from infinisdk.core.exceptions import APICommandFailed, MethodDisabled, ObjectNotFound, SystemNotFoundException
+
+from ..conftest import no_op_context, relevant_from_version
 
 # pylint: disable=redefined-outer-name
 
@@ -73,6 +75,16 @@ def test_error_response(infinibox):
     exception_response = caught.value.response
     error_keys = set(exception_response.get_error())
     assert error_keys.issuperset({'code', 'message'})
+
+
+def test_response_get_error_is_safe():
+    response = Response(
+        MagicMock(json=lambda: {"detail": "failed"}),
+        data={"mock": "mock"},
+        start_timestamp=1,
+        end_timestamp=2,
+    )
+    assert response.get_error() is None
 
 
 def test_error_response_truncates_data(infinibox):
