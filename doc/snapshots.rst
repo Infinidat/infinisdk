@@ -48,7 +48,7 @@ You can inspect the snapshot's creation time:
 		>>> delta.days
 		15
 
-.. note:: Time is represented in InfiniSDK with `Arrow objects <http://crsmithdev.com/arrow/>`_. See the `relevant documentation <http://crsmithdev.com/arrow/#user-s-guide>`_ for more details on how to use and manipulate these values.
+.. note:: Time is represented in InfiniSDK with `Arrow objects <https://arrow.readthedocs.io/en/latest>`_. See the `relevant documentation <https://arrow.readthedocs.io/en/latest/#user-s-guide>`_ for more details on how to use and manipulate these values.
 
 
 
