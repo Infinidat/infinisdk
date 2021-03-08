@@ -31,7 +31,7 @@ jobs:
     - name: Lint with pylint
       run: |
         pylint --rcfile=.pylintrc infinisdk setup.py
-    - name: Build and publish
+    - name: Test build and publish
       env:
         TWINE_USERNAME: ${{ secrets.TEST_PYPI_USERNAME }}
         TWINE_PASSWORD: ${{ secrets.TEST_PYPI_PASSWORD }}
