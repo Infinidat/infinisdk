@@ -38,6 +38,6 @@ jobs:
       run: |
         pip install setuptools wheel twine
         python setup.py sdist bdist_wheel
-        twine upload --non-interactive --repository-url https://test.pypi.org/legacy/ dist/*
+        twine upload -u "$TWINE_USERNAME" -p "$TWINE_PASSWORD" --non-interactive --repository-url https://test.pypi.org/legacy/ dist/*
         python -m pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple infinisdk
         python -c "import infinisdk"
