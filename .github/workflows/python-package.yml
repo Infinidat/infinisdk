@@ -39,3 +39,4 @@ jobs:
         python setup.py sdist bdist_wheel
         twine upload --repository testpypi dist/*
         python -m pip install --index-url https://test.pypi.org/simple/ infinisdk
+        python -c "import infinisdk"
