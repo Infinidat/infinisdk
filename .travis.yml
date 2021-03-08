@@ -1,15 +1,5 @@
 language: python
 dist: xenial
-python:
-  - "3.6"
-  - "3.7"
-  - "3.8"
-install:
-  - pip install -e .
-  - pip install astroid>=2.0
-  - pip install pylint>=2.0
-script:
-  - pylint --rcfile=.pylintrc infinisdk setup.py
 jobs:
   include:
     - stage: deploy
