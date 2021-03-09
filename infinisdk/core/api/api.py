@@ -70,7 +70,7 @@ class API:
         self._urls = [self._url_from_address(address, use_ssl) for address in target.get_api_addresses()]
         self._active_url = None
         self._checked_version = False
-        self._no_reponse_logs = 0 # Use counter instead of bool, improves support for coroutines
+        self._no_response_logs = 0 # Use counter instead of bool, improves support for coroutines
         self._use_pretty_json = config.root.api.log.pretty_json
         self._login_refresh_enabled = True
         self._disabled_http_methods = set()
@@ -412,7 +412,7 @@ class API:
             _logger.trace("{} --> {} {} (took {:.04f}s)", hostname, response.status_code, response.reason, elapsed)
             returned = Response(response, data, start_time, end_time)
             resp_data = returned.get_json()
-            if self._no_reponse_logs:
+            if self._no_response_logs:
                 logged_response_data = "..."
             elif self._use_pretty_json and resp_data is not None:
                 logged_response_data = json.dumps(resp_data, indent=4, separators=(',', ': '))
@@ -465,11 +465,11 @@ class API:
 
     @contextmanager
     def get_no_response_logs_context(self):
-        self._no_reponse_logs += 1
+        self._no_response_logs += 1
         try:
             yield
         finally:
-            self._no_reponse_logs -= 1
+            self._no_response_logs -= 1
 
     def add_auto_retry(self, retry_predicate, max_retries=1, sleep_seconds=None):
         if sleep_seconds is None: # backwards compatibility
@@ -627,13 +627,16 @@ class Response:
         """
         return self._get_result()
 
+    def get_extra(self):
+        return self.get_json().get("extra")
+
     def get_error(self):
         """
         :returns: The error portion of the response as returned from the system, or None if it doesn't exist
         """
         json = self.get_json()
         if json is not None:
-            return json["error"]
+            return json.get("error")
 
     def __repr__(self):
         return repr(self.response)

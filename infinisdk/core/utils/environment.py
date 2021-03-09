@@ -12,7 +12,7 @@ def get_logged_in_username():
         os_info = pwd.getpwuid(user_id)
         return os_info.pw_name
     except (ImportError, KeyError):
-        # ImprortError: For windows users
+        # ImportError: For windows users
         # KeyError: In case getpwuid fails to retrieve the user information
         return os.environ.get('USERNAME') or os.environ.get('USER', 'unknown')
 

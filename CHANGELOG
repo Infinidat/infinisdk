@@ -1,3 +1,17 @@
+Version 185.1.1 (Released 2021-03-09)
+-------------------------------------
+
+* #14784 Make the get_error method safe
+* #14649 Add support for python 3.9, remove support for python 3.5
+* #14135 Fix data handling when AA replica is suspended
+* #13931 Support purging a volume belonging to active-active replicated CG
+* #13828 Support Active-Active add-member and remove-member
+* #13822 Allow external cluster validation of postgresql
+* #13753 Clean _is_in_suspended_state
+* #13713 Support Active-Active suspend, resume, volume resize and change-preferred
+* #13525 Add sdk support for certificate management
+* #13369 Add infra support for replica-type and its filtering operators
+
 Version 161.1.1 (Released 2020-06-30)
 -------------------------------------
 

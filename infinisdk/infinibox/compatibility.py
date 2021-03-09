@@ -53,7 +53,7 @@ class Compatibility:
         return getattr(self, 'has_{}'.format(feature_name))()
 
     def normalize_version_string(self, version):
-        return _InfiniboxVersion.parse(version)
+        return InfiniboxVersion.parse(version)
 
     def get_parsed_system_version(self):
         if self._system_version is None:
@@ -89,6 +89,11 @@ class Compatibility:
 
     def _has_feature(self, feature_key):
         return self._get_feature_version(feature_key, NOTHING) is not NOTHING
+
+    def does_feature_exist(self, feature_key):
+        if self._features is None:
+            self._init_features()
+        return self._features.get(feature_key) is not None
 
     def has_npiv(self):
         return self._has_feature('fc_soft_targets') or self._has_feature('fc/soft_targets')
@@ -192,11 +197,26 @@ class Compatibility:
     def has_event_retention(self):
         return self._has_feature('event_retention')
 
+    def has_vvol(self):
+        return self._has_feature('vvol')
+
+    def has_sg_delete_limit(self):
+        return self.get_parsed_system_version() >= '6.0.0'
+
+    def has_active_active_suspend(self):
+        return self._get_feature_version("active_active", 0) > 3
+
+    def has_platform(self):
+        return self.get_parsed_system_version() >= '5.5.10'
+
+    def has_ism(self):
+        return self.has_fips()
+
 
 _VERSION_TUPLE_LEN = 5
 
 
-class _InfiniboxVersion:
+class InfiniboxVersion:
 
     def __init__(self, version_tuple, is_dev, is_odd=False):
         self.version = version_tuple
@@ -205,7 +225,7 @@ class _InfiniboxVersion:
 
     @classmethod
     def parse(cls, version):
-        if isinstance(version, _InfiniboxVersion):
+        if isinstance(version, InfiniboxVersion):
             return version
         before_dash, _, after_dash = version.partition('-')
         is_dev = is_odd = False

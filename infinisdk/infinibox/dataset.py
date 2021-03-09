@@ -111,6 +111,7 @@ class Dataset(InfiniBoxObject):
         Field('replica_ids', type=list, new_to="5.0"),
         Field("tenant", api_name="tenant_id", binding=RelatedObjectBinding('tenants'),
               type='infinisdk.infinibox.tenant:Tenant', feature_name='tenants', is_filterable=True, is_sortable=True),
+        Field("replication_types", type=list, new_to="5.5.0", is_filterable=True),
     ]
 
     PROVISIONING = namedtuple('Provisioning', ['Thick', 'Thin'])('THICK', 'THIN')

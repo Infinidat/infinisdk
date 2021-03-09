@@ -18,7 +18,7 @@ def require_sync_replication(func):
     def new_func(self, *args, **kwargs):
         if self.system.compat.has_sync_replication():
             return func(self, *args, **kwargs)
-        raise NotImplementedError("not availble in this version")
+        raise NotImplementedError("not available in this version")
     return new_func
 
 
@@ -82,7 +82,7 @@ class ReplicaBinder(TypeBinder):
                                            **self._get_extra_replica_kwargs(kw, entity, remote_entity))
 
     def replicate_entity_use_base(self, entity, link, local_snapshot, remote_snapshot, member_mappings=None, **kw):
-        """Replicates an entity, using an existing remote entity and a base snapthot on both sides
+        """Replicates an entity, using an existing remote entity and a base snapshot on both sides
 
         :param local_snapshot: Local base snapshot to use
         :param remote_snapshot: Remote base snapshot to use
@@ -251,7 +251,7 @@ class Replica(SystemObject):
         Field('temporary_failure_retry_count', type=int, mutable=True, is_filterable=True, is_sortable=True),
         Field('started_at', type=MillisecondsDatetimeType),
         Field('preferred', api_name='is_preferred', type=bool, optional=True, is_filterable=True, is_sortable=True,
-              creation_parameter=True, mutable=False, feature_name="active_active_preferred_on_replica"),
+              creation_parameter=True, mutable=True, feature_name="active_active_preferred_on_replica"),
         Field('local_entity', api_name='local_entity_id', binding=ReplicaEntityBinding(), creation_parameter=True,
               optional=True, is_filterable=True, is_sortable=True, feature_name="replica_auto_create",
               add_getter=False),
@@ -266,6 +266,8 @@ class Replica(SystemObject):
               feature_name="replica_auto_create"),
         Field('concurrent_replica', type=bool, is_filterable=True, is_sortable=True,
               mutable=False, feature_name="concurrent_replication"),
+        Field("suspended_from_local", type=bool, is_filterable=True, is_sortable=True,
+              mutable=False, feature_name="active_active_suspend"),
     ]
 
     @classmethod
@@ -481,7 +483,6 @@ class Replica(SystemObject):
             return self.get_replication_type().lower() == 'sync'
         return False
 
-
     def is_type_active_active(self):
         if self.system.compat.has_sync_replication():
             return self.get_replication_type(from_cache=True).lower() == 'active_active'
@@ -496,8 +497,8 @@ class Replica(SystemObject):
         current_sync_state = self.get_sync_state()
         return current_sync_state and current_sync_state.lower() in sync_states
 
-    def _is_in_state(self, *states):
-        current_state = self.get_state()
+    def _is_in_state(self, *states, **kwargs):
+        current_state = self.get_state(**kwargs)
         return current_state and current_state.lower() in states
 
     def _get_state_lower(self, **kwargs):
@@ -570,21 +571,24 @@ class Replica(SystemObject):
         if self.is_target():
             raise CannotGetReplicaState('Replica state cannot be checked on target replica')
 
+    def _is_in_suspended_state(self, *states, **kwargs):
+        self._validate_can_check_state()
+        return self._is_in_state(*states, **kwargs)
+
     def is_suspended(self, **kwargs):
         """Returns whether or not this replica is currently suspended
         """
-        if self.is_type_active_active():
-            return False
-        self._validate_can_check_state()
-        return self._is_in_state('suspended', 'auto_suspended', **kwargs)
+        return self._is_in_suspended_state('suspended', 'auto_suspended', **kwargs)
 
     def is_user_suspended(self, **kwargs):
         """Returns whether or not this replica is currently suspended due to a user request
         """
-        if self.is_type_active_active():
-            return False
-        self._validate_can_check_state()
-        return self._is_in_state('suspended', **kwargs)
+        return self._is_in_suspended_state('suspended', **kwargs)
+
+    def is_auto_suspended(self, **kwargs):
+        """Returns whether or not this replica is in auto_suspended state
+        """
+        return self._is_in_suspended_state('auto_suspended', **kwargs)
 
     def is_idle(self, **kwargs):
         """Returns whether or not this replica is in idle state
@@ -599,14 +603,6 @@ class Replica(SystemObject):
         if self.is_type_active_active():
             return self._is_in_sync_state("lagging", **kwargs)
         return False
-
-    def is_auto_suspended(self, **kwargs):
-        """Returns whether or not this replica is in auto_suspended state
-        """
-        if self.is_type_active_active():
-            return False
-        self._validate_can_check_state()
-        return self._is_in_state('auto_suspended', **kwargs)
 
     def is_initial_replication(self, **kwargs):
         """Returns whether or not this replica is in initiating state
@@ -724,7 +720,7 @@ class Replica(SystemObject):
             self._notify_pre_exposure(remote_replica)
 
         try:
-            resp = self._send_delete_with_hooks_tirggering(
+            resp = self._send_delete_with_hooks_triggering(
                 path,
                 force_if_remote_error=force_if_remote_error,
                 force_on_target=force_on_target,
@@ -749,7 +745,7 @@ class Replica(SystemObject):
         else:
             local = remote = None
         for replica, snap in (self, local), (remote_replica, remote):
-            if snap is not None:
+            if snap is not None and snap.id != 0:
                 gossip.trigger_with_tags(
                     'infinidat.sdk.replica_snapshot_created', {'snapshot': snap, 'replica_deleted': True},
                     tags=['infinibox'])
@@ -804,8 +800,8 @@ class Replica(SystemObject):
         return self.get_link(from_cache=from_cache).get_linked_system(from_cache=from_cache, safe=safe)
 
     def get_remote_replica(self, from_cache=False, safe=False):
-        """Get the corresponsing replica object in the remote machine. For this to work, the SDK user should
-        call the register_related_system method of the Infinibox object when a link to a remote system is consructed
+        """Get the corresponding replica object in the remote machine. For this to work, the SDK user should
+        call the register_related_system method of the Infinibox object when a link to a remote system is constructed
         for the first time"""
         linked_system = self.get_remote_system(from_cache=from_cache, safe=safe)
         if linked_system is None:
