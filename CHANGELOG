@@ -38,16 +38,17 @@ Version 141.1.0 (Released 2019-07-31)
 * #11946 Backwards (and forward) compatibility with preferred field
 * #11914 Support `NetworkSpace.Routes`
 * #11901 Add missing fields to `Tenant` object
-* #11900 Object fields updated in cache with data returned from delete 
-* #11892  Re-use component instances after cache invalidation
+* #11900 Object fields updated in cache with data returned from delete
+* #11892 Re-use component instances after cache invalidation
 * #11886 Add using_cache_by_default context and use it automatically after object deletion
 * #11837 Add Compatibility.has_auto_respawn()
 * #11751 Add `tenant_id` field to cons_group
-* #11737 Raise ChangedDuringIteration when When paged objects size changes during iteration
+* #11737 Raise ChangedDuringIteration when paged objects size changes during iteration
 * #11695 Fix confusing behavior of SystemObject.get_fields(from_cache=True)
 * #11679 Drastically reduced the amount of API calls we make for replicas, especially when starting jobs
 * #11626 Add "get_name()" method to binders
 * #11259 Support Tenants and Plugins
+* #10690 Support Active-Active Replication
 
 Version 127.2.1 (Released 2019-04-07)
 -------------------------------------
