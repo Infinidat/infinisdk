@@ -7,10 +7,10 @@ Version 185.1.1 (Released 2021-03-09)
 * #13931 Support purging a volume belonging to active-active replicated CG
 * #13828 Support Active-Active add-member and remove-member
 * #13822 Allow external cluster validation of postgresql
-* #13753 Clean _is_in_suspended_state
+* #13753 Fix _is_in_suspended_state when AA replica states are supported
 * #13713 Support Active-Active suspend, resume, volume resize and change-preferred
-* #13525 Add sdk support for certificate management
-* #13369 Add infra support for replica-type and its filtering operators
+* #13525 Support certificate management
+* #13369 Support replica-type and its filtering operators
 
 Version 161.1.1 (Released 2020-06-30)
 -------------------------------------
