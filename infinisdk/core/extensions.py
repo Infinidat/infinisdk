@@ -9,6 +9,7 @@
 # are strictly forbidden unless prior written permission is obtained from Infinidat Ltd.
 # !
 import functools
+import types
 
 from sentinels import NOTHING
 
@@ -21,7 +22,12 @@ def _extend_method(objtype, name, wrap):
         if method_name is None:
             method_name = func.__name__
 
-        extension = Method(objtype, method_name, func, wrap)
+        if isinstance(objtype, types.ModuleType):
+            classname = Function
+        else:
+            classname = Method
+
+        extension = classname(objtype, method_name, func, wrap)
         extension.activate()
         func.__extension_deactivate__ = extension.deactivate
         return func
@@ -59,7 +65,6 @@ class Attachment:
 
     def __init__(self, objtype, name, func, wrap=False):
         super(Attachment, self).__init__()
-        assert isinstance(objtype, type)
         if wrap and not hasattr(objtype, name):
             raise RuntimeError(
                 'You asked to wrap {1!r} in {0.__name__}, but it doesn\'t have such a method'.format(objtype, name))
@@ -92,6 +97,19 @@ class Attachment:
 
     def __repr__(self):
         return "<{}:{}>".format(self._objtype.__name__, self._name)
+
+
+class Function(Attachment):
+    def __call__(self, *args, **kwargs):
+        if self._wrap:
+            assert self._original
+            kwargs['_wrapped'] = self._original
+
+        # pylint: disable=attribute-defined-outside-init
+        method = _BoundMethod(self._func, *args, **kwargs)
+        method.__name__ = self._name
+        method.im_func = self._func
+        return method()
 
 
 class Method(Attachment):

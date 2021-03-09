@@ -1,19 +1,27 @@
 from .core.q import Q  # pylint: disable=unused-import
 
 from .infinibox import InfiniBox
+from .infinibox.components import InfiniBoxSystemComponents
 from .infinibox.treeq import TreeQ
 
 _SDK_HOOK = 'infinidat.sdk.{}'.format
 
+
+def _get_system_tag_names(system_cls, sdk_classes):
+    return set(tag for obj_cls in sdk_classes for tag in obj_cls.get_tags_for_object_operations(system_cls))
 
 def _install_hooks():
     import gossip
 
     # Define systems objects operation hooks. TreeQ is explicitly added separately, as, being a special type of object,
     # it is not in OBJECT_TYPES.
-    obj_type_names = set(tag for sys in (InfiniBox, ) for obj_cls in sys.OBJECT_TYPES + [TreeQ]
-                         for tag in obj_cls.get_tags_for_object_operations(sys))
+    obj_type_names = _get_system_tag_names(InfiniBox, InfiniBox.OBJECT_TYPES + [TreeQ])
     obj_type_names.add('event')
+
+    component_type_names = _get_system_tag_names(InfiniBox, InfiniBoxSystemComponents.types.to_list())
+    # Update is the only action which components can perform (it cannot be created or deleted)
+    update_tag_names = obj_type_names | component_type_names
+
 
     # pylint: disable=too-many-format-args
     gossip.define(_SDK_HOOK('pre_object_creation'), tags=obj_type_names, arg_names=('data', 'system', 'cls', 'parent'))
@@ -27,12 +35,12 @@ def _install_hooks():
     gossip.define(_SDK_HOOK('object_deletion_failure'), tags=obj_type_names,
                   arg_names=('obj', 'exception', 'system', 'url'))
 
-    gossip.define(_SDK_HOOK('pre_object_update'), tags=obj_type_names, arg_names=('obj', 'data'))
-    gossip.define(_SDK_HOOK('post_object_update'), tags=obj_type_names, arg_names=('obj', 'data', 'response_dict'))
-    gossip.define(_SDK_HOOK('object_update_failure'), tags=obj_type_names,
+    gossip.define(_SDK_HOOK('pre_object_update'), tags=update_tag_names, arg_names=('obj', 'data'))
+    gossip.define(_SDK_HOOK('post_object_update'), tags=update_tag_names, arg_names=('obj', 'data', 'response_dict'))
+    gossip.define(_SDK_HOOK('object_update_failure'), tags=update_tag_names,
                   arg_names=('obj', 'exception', 'system', 'data'))
 
-    gossip.define(_SDK_HOOK('object_operation_failure'), tags=obj_type_names, arg_names=('exception',))
+    gossip.define(_SDK_HOOK('object_operation_failure'), tags=update_tag_names, arg_names=('exception',))
 
     gossip.define(_SDK_HOOK('pre_treeq_creation'), tags=['infinibox', 'treeq'],
                   arg_names=('fields', 'system', 'filesystem'))
@@ -83,7 +91,7 @@ def _install_hooks():
 
     gossip.define(_SDK_HOOK('pre_creation_data_validation'), tags=obj_type_names, arg_names=('fields', 'system', 'cls'))
 
-    gossip.define(_SDK_HOOK('pre_fields_update'), tags=obj_type_names, arg_names=('fields', 'source'))
+    gossip.define(_SDK_HOOK('pre_fields_update'), tags=update_tag_names, arg_names=('fields', 'source'))
 
     gossip.define(_SDK_HOOK('pre_cons_group_add_member'), tags=['infinibox'],
                   arg_names=('cons_group', 'member', 'request'))
@@ -198,6 +206,8 @@ def _install_hooks():
     gossip.define(_SDK_HOOK('post_event_retention'), tags=['infinibox', 'event'], arg_names=('system', 'retention'))
     gossip.define(_SDK_HOOK('event_retention_failure'), tags=['infinibox', 'event'],
                   arg_names=('system', 'retention', 'exception'))
+
+    gossip.define(_SDK_HOOK('witness_address_set'), tags=['infinibox'], arg_names=('witness_address',))
 
     gossip.get_or_create_group('infinidat.sdk').set_strict()
 

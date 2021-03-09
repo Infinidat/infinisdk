@@ -51,7 +51,7 @@ class InfiniBoxComponentQuery(ComponentQueryBase):
         self.object_type = object_type
         self.sort_criteria = tuple()
         # predicates' field attribute is QField (non the object field), therefore, we should get the object's one
-        # for checking its cahced attribute
+        # for checking its cached attribute
         field_names = [pred.field.name for pred in predicates] + list(kw)
         relevant_fields = [self.object_type.fields.get_or_fabricate(field_name) for field_name in field_names]
         self._force_fetch = any(field.cached is not True for field in relevant_fields)

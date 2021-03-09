@@ -13,7 +13,7 @@ from .system_object_utils import get_data_for_object_creation
 from .exceptions import CacheMiss
 from api_object_schema import FieldsMeta as FieldsMetaBase
 from .field import Field
-from .type_binder import TypeBinder
+from .type_binder import TypeBinder, MonomorphicBinder
 from .bindings import PassthroughBinding
 from .api.special_values import translate_special_values
 from .utils import DONT_CARE, end_reraise_context, add_normalized_query_params
@@ -38,7 +38,7 @@ class BaseSystemObject(metaclass=FieldsMeta):
     URL_PATH = None
     UID_FIELD = "id"
     #: specifies which :class:`.TypeBinder` subclass is to be used for this type
-    BINDER_CLASS = TypeBinder
+    BINDER_CLASS = MonomorphicBinder
 
     def __init__(self, system, initial_data):
         super(BaseSystemObject, self).__init__()
@@ -188,14 +188,14 @@ class BaseSystemObject(metaclass=FieldsMeta):
         if from_cache:
             if not fetch_if_not_cached:
                 return self._get_fields_from_cache(field_names, raw_value)
-            field_names_to_retrive = field_names or \
+            field_names_to_retrieve = field_names or \
                 [field.name for field in self.fields if self.system.is_field_supported(field)]
             try:
-                return self._get_fields_from_cache(field_names_to_retrive, raw_value)
+                return self._get_fields_from_cache(field_names_to_retrieve, raw_value)
             except CacheMiss:
                 pass
 
-        query = self.get_this_url_path()
+        query = self._get_fields_query()
 
         only_fields = []
         for field_name in field_names:
@@ -210,13 +210,19 @@ class BaseSystemObject(metaclass=FieldsMeta):
 
         response = self.system.api.get(query)
 
-        result = response.get_result()
+        result = self._get_fields_result(response)
         self.update_field_cache(result)
 
         if not field_names:
             field_names = self.fields.get_all_field_names_or_fabricate(result)
 
         return self._get_fields_from_cache(field_names, raw_value)
+
+    def _get_fields_query(self):
+        return self.get_this_url_path()
+
+    def _get_fields_result(self, response):
+        return response.get_result()
 
     def _is_caching_enabled(self):
         return self.system.is_caching_enabled()
@@ -354,7 +360,7 @@ class SystemObject(BaseSystemObject):
     """
     System object, that has query methods, creation and deletion
     """
-
+    BINDER_CLASS = TypeBinder
     @classmethod
     def find(cls, system, *predicates, **kw):
         binder = system.objects[cls.get_plural_name()]
@@ -442,9 +448,9 @@ class SystemObject(BaseSystemObject):
         """
         Deletes this object.
         """
-        self._send_delete_with_hooks_tirggering(self.get_this_url_path(), **kwargs)
+        self._send_delete_with_hooks_triggering(self.get_this_url_path(), **kwargs)
 
-    def _send_delete_with_hooks_tirggering(self, url, **kwargs):
+    def _send_delete_with_hooks_triggering(self, url, **kwargs):
         url = add_normalized_query_params(url, **kwargs)
         hook_tags = self.get_tags_for_object_operations(self.system)
         gossip.trigger_with_tags('infinidat.sdk.pre_object_deletion', {'obj': self, 'url': url}, tags=hook_tags)

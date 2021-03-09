@@ -136,6 +136,7 @@ class MonomorphicBinder(BaseBinder): # pylint: disable=abstract-method
     def __init__(self, object_type, system):
         super(MonomorphicBinder, self).__init__(system)
         self.object_type = object_type
+        self._cache = None
 
     def get_name(self):
         return self.object_type.get_plural_name()
@@ -153,26 +154,11 @@ class MonomorphicBinder(BaseBinder): # pylint: disable=abstract-method
     def get_url_path(self):
         return self.object_type.get_url_path(self.system)
 
-    def create(self, *args, **kwargs):
-        """
-        Creates an object on the system
-        """
-        return self.object_type.create(self.system, *args, **kwargs)
 
     def get_mutable_fields(self):
         """Returns a list of all mutable fields for this object type
         """
         return [f for f in self.fields if f.mutable]
-
-
-class TypeBinder(MonomorphicBinder):
-
-    def __init__(self, object_type, system):
-        super(TypeBinder, self).__init__(object_type, system)
-        self._cache = None
-
-    def is_caching_enabled(self):
-        return self._cache is not None
 
     def find(self, *predicates, **kw):
         """Queries objects according to predicates. Can receive arguments in two possible forms:
@@ -196,18 +182,6 @@ class TypeBinder(MonomorphicBinder):
         query = ObjectQuery(self.system, self.get_url_path(), self.object_type)
         return query.extend_url(*predicates, **kw)
 
-    def get_by_id_lazy(self, id):  # pylint: disable=redefined-builtin
-        """
-        Obtains an object with a specified id *without* checking if it exists or querying it on the way.
-
-        This is useful assuming the next operation is a further query/update on this object.
-        """
-        if self._cache is not None:
-            obj = self._cache.safe_get_by_id_from_cache(id)
-            if obj is not None:
-                return obj
-        return self.object_type.construct(self.system, {self.fields.id.api_name:id})
-
     @contextmanager
     def fetch_once_context(self):
         original_cache = self._cache
@@ -219,3 +193,24 @@ class TypeBinder(MonomorphicBinder):
             yield
         finally:
             self._cache = original_cache
+class TypeBinder(MonomorphicBinder):
+    def create(self, *args, **kwargs):
+        """
+        Creates an object on the system
+        """
+        return self.object_type.create(self.system, *args, **kwargs)
+
+    def is_caching_enabled(self):
+        return self._cache is not None
+
+    def get_by_id_lazy(self, id):  # pylint: disable=redefined-builtin
+        """
+        Obtains an object with a specified id *without* checking if it exists or querying it on the way.
+
+        This is useful assuming the next operation is a further query/update on this object.
+        """
+        if self._cache is not None:
+            obj = self._cache.safe_get_by_id_from_cache(id)
+            if obj is not None:
+                return obj
+        return self.object_type.construct(self.system, {self.fields.id.api_name:id})

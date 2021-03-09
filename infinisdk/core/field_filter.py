@@ -19,11 +19,14 @@ class FieldFilter:
         self.value = value
 
     def _translate(self, value, system):
+        if self.operator_name in ("allof", "anyof", "noneof"):
+            if (not isinstance(value, collections.abc.Iterable) or isinstance(value, (str, bytes)) or
+                    not all(isinstance(element, str) for element in value)):
+                raise ValueError("Expected an iterable of strings, but got {}".format(repr(value)))
+            return ",".join(value)
         if isinstance(self.value, collections.abc.Iterable) and not isinstance(self.value, (str, bytes)):
-            value = "({})".format(",".join(str(self._translate_single_value(val, system)) for val in self.value))
-        else:
-            value = self._translate_single_value(value, system)
-        return value
+            return "({})".format(",".join(str(self._translate_single_value(val, system)) for val in self.value))
+        return self._translate_single_value(value, system)
 
     def add_to_url(self, urlobj, system):
         value = self._translate(self.value, system)

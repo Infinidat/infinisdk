@@ -39,10 +39,10 @@ class MunchTranslator(ValueTranslator):
     def _from_api(self, value):
         return munch.munchify(value)
 
-class MunchListTraslator(ValueTranslator):
+class MunchListTranslator(ValueTranslator):
 
     def __init__(self, *args, **kwargs):
-        super(MunchListTraslator, self).__init__(*args, **kwargs)
+        super(MunchListTranslator, self).__init__(*args, **kwargs)
         self._translator = MunchTranslator()
 
     def _to_api(self, value):
@@ -52,7 +52,7 @@ class MunchListTraslator(ValueTranslator):
         return [self._translator._from_api(single_value) for single_value in value]  # pylint: disable=protected-access
 
 MunchType = TypeInfo(type=munch.Munch, api_type=dict, translator=MunchTranslator())
-MunchListType = TypeInfo(type=list, api_type=list, translator=MunchListTraslator())
+MunchListType = TypeInfo(type=list, api_type=list, translator=MunchListTranslator())
 
 
 class MillisecondsDatetimeTranslator(ValueTranslator):

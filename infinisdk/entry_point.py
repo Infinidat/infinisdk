@@ -74,7 +74,7 @@ def interact(system_name, port, should_login):
 def events():
     pass
 
-TIME_TEPMPLATE = 'YYYY-MM-DD HH:mm:ss'
+TIME_TEMPLATE = 'YYYY-MM-DD HH:mm:ss'
 
 def _convert_time_string_to_arrow(time_string, tzinfo):
     datetime_obj = dateutil.parser.parse(time_string)
@@ -122,7 +122,7 @@ def events_query(system_name, show_reporter, show_visibility, show_source_node_i
         event_time = event_info['timestamp']
         if display_in_local_time:
             event_time = event_time.to('local')
-        formatted = '{} {:5}'.format(event_time.format(TIME_TEPMPLATE), event_info['id'])
+        formatted = '{} {:5}'.format(event_time.format(TIME_TEMPLATE), event_info['id'])
         if show_reporter:
             formatted += ' {:10}'.format(event_info['reporter'])
         if show_visibility:
