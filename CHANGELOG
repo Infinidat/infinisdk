@@ -1,116 +1,166 @@
-CHANGES
-=======
+Version 161.1.1 (Released 2020-06-30)
+-------------------------------------
 
-* Add install wheel and twine
-* Rename step
-* Add import
-* Add deployment to testpypi
-* Delete travis.yml
-* Create python-publish.yml
-* Add python-package.yml (#11)
-* Update travis.yml password var and allign setup.cfg
+* #13534 RPO is now an optional creation parameter of replica
+* #13411 Changed InfiniBox.get_model_name() default (long->short)
+* #13393 Add system security state to backslash metadata
+* #13226 Allow passing get-field parameters to component checkers
+* #13225 Use utility for adding normalized query parameters to URL
+* #13175 Support event-retention
+* #13126 Add assertion for remote_entity_names type
+* #13098 Use ColorizedStderrHandler instead of StderrHandler in cli
+* #13037 Drop support for python version < 3.5
+* #13001 Add 'long_name' parameter to InfiniBox.get_model_name()
+* #12246 Support PDU component
 
-161.1.3
--------
+Version 151.1.1 (Released 2019-12-18)
+-------------------------------------
 
-* Update travis.yml password var
+* #12938 Fix components get fields after invalidating cache
+* #12888 Add args to volume map and unmap
+* #12868 Add filterable and sortable fields for replica object
+* #12813 Support new API for re-enable QoS
+* #12795 Attached Property's cache is saved on the object itself (instead of the property)
+* #12743 Fix `User.reset_password()` method
+* #12689 Add for map_volume and unmap_volume before, after and on failure hooks
+* #12227 Add UUID for components constructor with validation
+* #12163 Support elasticsearch cluster
+* #12074 Support FIPS
 
-161.1.2
--------
+Version 141.1.0 (Released 2019-07-31)
+-------------------------------------
 
-* Update travis.yml
-* Update travis.yml
+* #12116 Support VLAN type for network_interface
+* #12101 NLMLock fields should not be marked as cached
+* #12094 Raise SystemNotFoundException for failed DNS resolution
+* #12077 Remove `*args` from Replica's state getters
+* #11990 Support remote_entity_names for replicate_entity_create_target
+* #11946 Backwards (and forward) compatibility with preferred field
+* #11914 Support `NetworkSpace.Routes`
+* #11901 Add missing fields to `Tenant` object
+* #11900 Object fields updated in cache with data returned from delete 
+* #11892  Re-use component instances after cache invalidation
+* #11886 Add using_cache_by_default context and use it automatically after object deletion
+* #11837 Add Compatibility.has_auto_respawn()
+* #11751 Add `tenant_id` field to cons_group
+* #11737 Raise ChangedDuringIteration when When paged objects size changes during iteration
+* #11695 Fix confusing behavior of SystemObject.get_fields(from_cache=True)
+* #11679 Drastically reduced the amount of API calls we make for replicas, especially when starting jobs
+* #11626 Add "get_name()" method to binders
+* #11259 Support Tenants and Plugins
 
-161.1.1
--------
+Version 127.2.1 (Released 2019-04-07)
+-------------------------------------
 
-* v161.1.1
+* #11328 Add `ServiceCluster.is_degraded`
+* #11298 Replica creation on systems prior to version 4.0.x will no longer send a default replication sync interval - one must be specified explicitly
+* #11280 Use itzik instead of pip in gitlab-CI
+* #11211 Add `optimized` field to host objects
+* #11198 Change Compatibility.has_feature() to private API & use Compatibility.is_feature_supported() as public API
+* #11168 Deprecated API cleanup
+* #11167 Added hooks for adding/removing host from cluster
+* #11155 Renamed snapdir names 
+* #11149 Added `safe_get_field` to system objects
+* #11134 Remove deprecated APIs
+* #11098 Add "object" key to metadata dictionary
+* #11079 Add "url" parameter to deletion hooks
+* #11068 Add `component_binder.get_by_uid`
+* #11040 Add `system.get_dns_servers` & `system.update_dns_servers`
+* #11039 Add `system.update_name`
+* #11038 Add `fc_port.disable` & `fc_port.enable`
+* #10971 Fix NotificationTarget & LDAPConfig's get_type_name()
+* #10888 Remove deprecated API
+* #10825 Support metadata filetring
+* #10763 Delete deprecated `create_child` method
+* #10691 Add `data` parameter to "infinidat.sdk.object_update_failure" hook
+* #10669 Add `system.qos_policies.get_assigned_entities()` which returns all entities assigned to QoS policies
+* #10667 Add `parent` parameter to creation hooks
+* #10072 Add hooks documentation
 
-161.1.0
--------
+Version 116.1.1 (Released 2018-06-28)
+-------------------------------------
 
-* v161.1.0
+* #10538 Delete deprecated refresh method of objects
+* #10527 Support Zero value for MillisecondsDeltaTranslator
+* #10503 `Volume._get_luns_data_from_url` now returns luns from all pages
+* #10268 Added support for the new "udid" field for volumes (part of OpenVMS support)
+* #10235 Support passing TreeQ limits to creation command
+* #10208 dataset and cons_group return pool_name field
+* #10084 Volume now has `is_in_cons_group()` method
+* #9037 Add TreeQ support to InfisiSDK and Infinisim
 
-151.1.1
--------
+Version 103.0.0 (Released 2017-11-16)
+-------------------------------------
 
-* v151.1.1
-* Update documentation
+* Support InfiniBox v4.0.0
+* #9668 Added `username` and `affected_entity_id` fields to Event objects
+* #9619 Improve `repr` of node objets
+* #9584 `FcPorts.get_online_target_addresses` now supports `from_cache` parameter
+* #9439 Removed deprecated Dataset methods: `is_clone` & `create_clone`
+* #8734 InfiniSDK now correctly detects the remote network space management IP when establishing replicas
+* #8564 Remove Backward compatibility for deprecation utils
+* #8365 Support creation of Sync replication
+* #7057 Support NAS replication
+* #8274 Added hidden flag to Field & used it for fields that don't return from API
+* #8213 Support caching for object collections
+* #8032 Added `is_read_only()` method to system object
 
-141.1.0
--------
+Version 83.0.0.post5 (Released 2017-08-07)
+------------------------------------------
 
-* v141.1.0
-* Update Pypi credentials
+* #9427 Fix get_logged_in_username in cases where fetching the current user fails
 
-127.2.1
--------
+Version 83.0 (Released 2017-01-12)
+----------------------------------
 
-* v127.2.1
+* #8213 Support caching for object collections
+* #8180 Add `sample()` method for both LazyQuery & BaseBinder
+* #7595 Added `infinisdk-cli` entry point
+* #7363 Added system.api.save_credentials and system.api.load_credentials to enable preserving login across sessions
+* #7356 Add safe deepcopy for system objects
+* #7277 Support `FcPort.op.activate()` & `FcPort.op.deactivate()`
+* #7235 When object deletion fails, object_operation_failure hook no longer triggers (only object_deletion_failure)
+* #7211 Added `get_rmr_snapshot_guid` to consistency groups
+* #7205 Added write_protected parameter for snapshot creation
+* #7199 Added system.api.added_headers_context() to add headers to the API session
+* #7155 Add IB Port component to infinisdk
+* #7133 Added replica.is_user_suspended() to denote user-initiated suspended state
+* #7057 Support NAS Replication
+* #7019 Added infinidat.sdk.object_deletion_failure hook to handle failures on object deletion
+* #6987 Removed `mounts`, `get_all_mounts()` and `is_mounted()` from `MountGroup`
+* #6951 NetworkSpace's service field was changed to immutable (and mandatory creation field)
+* #6942 Calling `system.initiators.targets` now returns `munch` instead of `WWN` object
+* #6764 Add object_restore (pre, post, failure) hooks
+* #6735 Add hooks for refresh snapshot
+* #6707 Support soft targets API (NPIV)
+* #6649 Support SG refresh
+* #6620 IZBox object & unittests were deleted
+* #6613 Component.refresh() is deprecated in favor of Component.refresh_cache()
+* #6610 __repr__ of Field objects now shows if the field is a creation parameter and/or mutable.
+* #6602 Support Infinibox.datasets (PolymorphicBinder) queries
+* #6600 obj.refresh() is now deprecated and has been renamed invalidate_cache()
+* #6599 Support field versioning (added new_to & until attributes to Field)
+* #6573 Adjusted replica API to match the new sync jobs changes in 3.0
+* #6555 Add Dataset.get_family_master()
+* #6498 Added system.api.use_basic_auth_context() for forcing usage of basic auth for systems supporting auth sessions
+* #6475 Added system.is_logged_in() indicating whather login() was called on the given system
+* #6474 system.api.reinitialize_session now properly copies cookies from previous session
+* #6444 Added `snapshot.refresh()` (snapshot refresh API)
+* #6417 Support "capacity" as creation parameter for pools
+* #6414 Removed methods which become deprecated before stable-2.0
+* #6243 Added `is_stalled` to replica objects (new v3.0 async state)
+* #6162 Added support for emptying the auth cache by calling `system.api.set_auth(None)`
+* #6158 Hot upgrade suite between versions is now supported (with limitations)
+* #6135 Added support for datasets compression
+* #6117 Added system.api.disable_login_refresh_context() to disable re-establishing auth sessions automatically
+* #6116 InfiniSDK will now perform login automatically to refresh expired auth session cookies
+* #6111 get_auth_context() method now performs automatic login with the new credentials, unless login=False is provided
+* #6089 Added system.compat.has_auth_sessions()
+* #6058 Support Link attach/detach & refresh_connectivity
+* #6050 Support (local) user disabling
+* #6005 Will no longer send HTTP authorization header if system supports the new Auth Sessions feature
+* #6003 Added system.logout() for logging out the current user
+* #5989 Added system.api.url shortcut for fetching the system's API URL
+* #5981 API logs now use the TRACE low level, below DEBUG
+* #5845 Support new session-based authentication
 
-116.1.3
--------
-
-* Fix .travis.yml
-* Fix Travis
-
-116.1.2
--------
-
-* Add .travis.yml
-
-116.1.1
--------
-
-* v116.1.1
-
-103.0.1
--------
-
-* Remove setuptools requirement from setup\_requires
-
-103.0.0
--------
-
-* v103.0.0
-
-83.0.0.post5
-------------
-
-* Changelog
-* v83.0.0.post5
-
-83.0.0.post4
-------------
-
-* v83.0
-
-83.0.0.post3
-------------
-
-* v83.0
-
-83.0.0.post2
-------------
-
-* Remove erroneous COPYRIGHT file
-
-83.0.post1
-----------
-
-* v83.0
-* Bump version for re-uploading to pypi
-* Fix documentation and license
-* Documentation fixes
-* Update setup.py
-* Update license
-
-57.0.rc1
---------
-
-* v57.0
-* README
-* Doc links
-* Update license info
-* README
-* First published version
