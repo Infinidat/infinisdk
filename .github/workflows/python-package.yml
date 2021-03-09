@@ -17,6 +17,8 @@ jobs:
       matrix:
         python-version: [3.6, 3.7, 3.8, 3.9]
 
+    environment: pypi
+
     steps:
     - uses: actions/checkout@v2
       with:
