@@ -34,7 +34,7 @@ class QueryBase:
         try:
             return self.sample(1)[0]
         except ValueError:
-            raise ObjectNotFound('No items where returned')
+            raise ObjectNotFound('No items were found')
 
     def sample(self, sample_count):
         """
@@ -61,6 +61,12 @@ class LazyQuery(QueryBase):
         self._objects_by_id = {}
         self._total_num_objects = None
         self._mutable = True
+        self._included_fields = None
+        self._extra = None
+
+    def get_extra(self):
+        self._fetch()
+        return self._extra
 
     def safe_get_by_id_from_cache(self, id): # pylint: disable=redefined-builtin
         return self._objects_by_id.get(id)
@@ -75,12 +81,20 @@ class LazyQuery(QueryBase):
         self.query = url
         return self
 
+    def include(self, fields):
+        if self._included_fields is None:
+            self._included_fields = fields
+        else:
+            self._included_fields.extend(fields)
+        fields_str = ','.join(fields)
+        return self.extend_url(include=fields_str)
+
     def __iter__(self):
         if self._total_num_objects is None:
             self._fetch()
         if self._requested_page is not None:
             start = (self._requested_page - 1) * self._requested_page_size
-            end = min(start + self._requested_page_size, len(self))
+            end = min(start + self._requested_page_size, self._total_num_objects)
         else:
             start = 0
             end = len(self)
@@ -112,6 +126,7 @@ class LazyQuery(QueryBase):
             obj = self._fetched[item_index] = self.factory(self.system, received_item)
             self._objects_by_id[obj.id] = obj
 
+
     def __getitem__(self, index):
         if isinstance(index, Number) and index < 0:
             raise NotImplementedError("Negative indices not supported yet")
@@ -133,7 +148,8 @@ class LazyQuery(QueryBase):
 
             if self._total_num_objects is None:
                 self._total_num_objects = response.get_total_num_objects()
-
+            if self._included_fields is not None:
+                self._extra = response.get_extra()
             for index, obj in enumerate(response.get_result(), start=response.get_page_start_index()):
                 if self._fetched.get(index) is None:
                     self._fetched[index] = obj

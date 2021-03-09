@@ -1,4 +1,5 @@
 import copy
+import functools
 import uuid
 
 from ..core.field import Field
@@ -46,7 +47,7 @@ class InfiniBoxSystemComponents(SystemComponentsBinder):
         self._fetched_others = False
         self._fetched_service_clusters = False
         self._fetched_external_clusters = False
-        self._deps_by_compoents_tree = defaultdict(set)
+        self._deps_by_components_tree = defaultdict(set)
         self._initialization_uuid = uuid.uuid4()
 
     def invalidate_cache(self):
@@ -54,7 +55,7 @@ class InfiniBoxSystemComponents(SystemComponentsBinder):
         self._initialize()
 
     def get_depended_components_type(self, component_type):
-        deps = self._deps_by_compoents_tree[component_type].copy()
+        deps = self._deps_by_components_tree[component_type].copy()
         for dep_type in deps.copy():
             deps.update(self.get_depended_components_type(dep_type))
         return deps
@@ -303,7 +304,7 @@ class InfiniBoxSystemComponent(BaseSystemObject):
             component_type = cls.get_type_name()
             object_type = system.components._COMPONENTS_BY_TYPE_NAME.get(component_type, InfiniBoxSystemComponent)
             returned = object_type(system, data)
-            system.components._deps_by_compoents_tree[type(returned.get_parent())].add(object_type)
+            system.components._deps_by_components_tree[type(returned.get_parent())].add(object_type)
             system.components.cache_component(returned)
         else:
             returned.update_field_cache(data)
@@ -381,6 +382,12 @@ class Nodes(InfiniBoxComponentBinder):
                         continue
                     if ip.ip_address == ip_address:
                         return self.system.network_interfaces.get_by_id_lazy(ip.interface_id).get_node()
+
+    def get_by_mgmt_ip(self, ip_address):
+        with self.system.components.eth_ports.fetch_once_context():
+            for port in self.system.components.eth_ports:
+                if port.get_role() == 'MANAGEMENT' and port.get_ip_v4_addr() == ip_address:
+                    return port.get_node()
 
     def refresh_fields(self, field_names):
         assert isinstance(field_names, (list, tuple)), "field_names must be either a list or a tuple"
@@ -693,10 +700,11 @@ class ServiceCluster(InfiniBoxSystemComponent):
         return self.get_state(**kwargs) == 'DEGRADED'
 
 
-def _ensure_elastic(func):
+def _ensure_supported_external_cluster(func):
+    @functools.wraps(func)
     def inner(self, *args, **kwargs):
-        if not self.get_name() == 'elastic':
-            raise NotImplementedError("The getter for cluster {} is not support".format(self.get_name()))
+        if self.get_name() not in ("elastic", "postgresql"):
+            raise NotImplementedError("The getter for cluster {} is not supported".format(self.get_name()))
         return func(self, *args, **kwargs)
     return inner
 
@@ -727,15 +735,15 @@ class ExternalServiceCluster(InfiniBoxSystemComponent):
     def is_supported(cls, system): # pylint: disable=unused-argument
         return system.compat.has_events_db()
 
-    @_ensure_elastic
+    @_ensure_supported_external_cluster
     def is_steady(self, **kwargs):
-        return self.get_field("health", **kwargs)["initializing_shards"] == 0
+        return self.get_field("health", **kwargs)["initializing_shards"] == 0 if self.get_name() == "elastic" else True
 
-    @_ensure_elastic
+    @_ensure_supported_external_cluster
     def is_active(self, **kwargs):
         return self.get_state(**kwargs) == 'GREEN'
 
-    @_ensure_elastic
+    @_ensure_supported_external_cluster
     def is_degraded(self, **kwargs):
         return self.get_state(**kwargs) == 'YELLOW'
 

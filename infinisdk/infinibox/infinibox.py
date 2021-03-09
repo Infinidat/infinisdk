@@ -43,6 +43,10 @@ from .user import User
 from .volume import Volume
 from .metadata import SystemMetadata
 from .kms import Kms
+from .certificates import Certificates
+from .vvol import Vvol
+from .vm import Vm
+
 
 try:
     from infinisim.core.context import lookup_simulator_by_address
@@ -57,7 +61,7 @@ class InfiniBox(APITarget):
     OBJECT_TYPES = [Volume, Pool, Host, HostCluster, User, Filesystem, Export,
                     NetworkSpace, NetworkInterface, Link, Replica, LDAPConfig,
                     NotificationTarget, NotificationRule, ConsGroup, Initiator,
-                    FcSwitch, FcSoftTarget, QosPolicy, NlmLock, Plugin, Tenant]
+                    FcSwitch, FcSoftTarget, QosPolicy, NlmLock, Plugin, Tenant, Vvol, Vm]
 
     SYSTEM_EVENTS_TYPE = Events
     SYSTEM_COMPONENTS_TYPE = InfiniBoxSystemComponents
@@ -72,6 +76,7 @@ class InfiniBox(APITarget):
         self.datasets = Datasets(self)
         self.san_clients = SanClients(self)
         self.kms = Kms(self)
+        self.certificates = Certificates(self)
 
     def check_version(self):
         if not self.compat.can_run_on_system():
@@ -135,7 +140,10 @@ class InfiniBox(APITarget):
         return self.components.system_component.get_state()
 
     def is_simulator(self):
-        return self.get_system_info("model").lower() == "infinisim-model"
+        try:
+            return self.get_system_info("model").lower() == "infinisim-model"
+        except CacheMiss:
+            return "simulator" in self.get_system_info("name")
 
     def get_simulator(self):
         if lookup_simulator_by_address is None:

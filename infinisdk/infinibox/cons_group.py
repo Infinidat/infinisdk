@@ -36,6 +36,7 @@ class ConsGroup(InfiniBoxObject):
         Field("lock_state", type=str, feature_name='snapshot_lock'),
         Field("tenant", api_name="tenant_id", binding=RelatedObjectBinding('tenants'),
               type='infinisdk.infinibox.tenant:Tenant', feature_name='tenants', is_filterable=True, is_sortable=True),
+        Field("replication_types", type=list, new_to="5.5.0", is_filterable=True),
     ]
 
     @classmethod
@@ -148,7 +149,7 @@ class ConsGroup(InfiniBoxObject):
         trigger_hook('infinidat.sdk.pre_cons_group_deletion')
 
         try:
-            self._send_delete_with_hooks_tirggering(self.get_this_url_path(),
+            self._send_delete_with_hooks_triggering(self.get_this_url_path(),
                                                     delete_members=delete_members,
                                                     force_if_snapshot_locked=force_if_snapshot_locked)
         except Exception:  # pylint: disable=broad-except
@@ -190,7 +191,18 @@ class ConsGroup(InfiniBoxObject):
         data = kwargs
         data['dataset_id'] = member.id
         remote_entity = kwargs.pop('remote_entity', None)
-        if remote_entity is not None:
+        if self.is_replicated() and 'ACTIVE_ACTIVE' in self.get_replication_types():
+            if remote_entity:
+                data['active_active_info'] = {
+                    'base_action': 'EXISTING',
+                    'remote_entity_id': remote_entity.id,
+                }
+            else:
+                data['active_active_info'] = {
+                    'base_action': 'NEW',
+                    'remote_entity_name': kwargs.pop('remote_entity_name', None),
+                }
+        elif remote_entity is not None:
             data['replication_pair_info'] = {
                 'remote_base_action': 'NO_BASE_DATA',
                 'remote_entity_id': remote_entity.id

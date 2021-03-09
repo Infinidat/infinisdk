@@ -1,3 +1,5 @@
+import gossip
+
 from ..core.api.special_values import Autogenerate
 from ..core import Field
 from ..core.bindings import RelatedObjectBinding
@@ -84,8 +86,8 @@ class Link(InfiniBoxObject):
 
 
     def get_linked_system(self, safe=False, from_cache=DONT_CARE):
-        """Get the corresponsing system object at the remote and of the link. For this to work, the SDK user should
-        call the register_related_system method of the Infinibox object when a link to a remote system is consructed
+        """Get the corresponding system object at the remote and of the link. For this to work, the SDK user should
+        call the register_related_system method of the Infinibox object when a link to a remote system is constructed
         for the first time"""
         related_system = self.system.links.get_cached_related_system(self)
         if related_system is not None:
@@ -106,7 +108,7 @@ class Link(InfiniBoxObject):
         raise UnknownSystem("Could not find a related machine with IP address {}".format(remote_host))
 
     def get_remote_link(self, safe=False):
-        """Get the corresponsing link object in the remote machine"""
+        """Get the corresponding link object in the remote machine"""
         linked_system = self.get_linked_system(safe=safe)
         if linked_system is None:
             return None
@@ -116,3 +118,5 @@ class Link(InfiniBoxObject):
         url = self.get_this_url_path().add_path('set_witness_address')
         self.system.api.post(url, data={'witness_address': witness_address})
         self.invalidate_cache('witness_address')
+        gossip.trigger_with_tags('infinidat.sdk.witness_address_set', {'witness_address': witness_address},
+                                 tags=['infinibox'])

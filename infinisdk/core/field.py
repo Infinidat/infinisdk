@@ -97,12 +97,13 @@ class Field(FieldBase):
         # pylint: disable=no-member
         return json[self.api_name]
 
+
 def _install_filter_factory(operator_name, operator_function_name):
     def meth(self, other):
         return FieldFilter(self, operator_name, other)
     meth.__name__ = operator_function_name
     setattr(Field, operator_function_name, meth)
-    return meth
+
 
 def _install_filter_factories():
     # Installing operators that python has overloading functions for them
@@ -117,7 +118,10 @@ def _install_filter_factories():
                                                   ("between", "between"),
                                                   ("like", "like"),
                                                   ("is", "is_"),
-                                                  ("isnot", "is_not")]:
+                                                  ("isnot", "is_not"),
+                                                  ("allof", "all_of"),
+                                                  ("anyof", "any_of"),
+                                                  ("noneof", "none_of")]:
         _install_filter_factory(operator_name, operator_function_name)
 
 _install_filter_factories()
