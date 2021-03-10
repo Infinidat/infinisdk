@@ -212,6 +212,9 @@ class Compatibility:
     def has_ism(self):
         return self.has_fips()
 
+    def has_native_smb(self):
+        return self._has_feature("native_smb")
+
 
 _VERSION_TUPLE_LEN = 5
 
