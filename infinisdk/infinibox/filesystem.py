@@ -63,3 +63,9 @@ class Filesystem(Dataset):
 
     def get_exports(self):
         return self.system.exports.find(Q.filesystem_id == self.id)
+
+    def add_share(self, **kwargs):
+        return self.system.shares.create(filesystem=self, **kwargs)
+
+    def get_shares(self):
+        return self.system.shares.find(Q.filesystem_id == self.id)

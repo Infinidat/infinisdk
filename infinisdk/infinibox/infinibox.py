@@ -46,7 +46,7 @@ from .kms import Kms
 from .certificates import Certificates
 from .vvol import Vvol
 from .vm import Vm
-
+from .share import Share
 
 try:
     from infinisim.core.context import lookup_simulator_by_address
@@ -61,7 +61,8 @@ class InfiniBox(APITarget):
     OBJECT_TYPES = [Volume, Pool, Host, HostCluster, User, Filesystem, Export,
                     NetworkSpace, NetworkInterface, Link, Replica, LDAPConfig,
                     NotificationTarget, NotificationRule, ConsGroup, Initiator,
-                    FcSwitch, FcSoftTarget, QosPolicy, NlmLock, Plugin, Tenant, Vvol, Vm]
+                    FcSwitch, FcSoftTarget, QosPolicy, NlmLock, Plugin, Tenant, Vvol, Vm,
+                    Share]
 
     SYSTEM_EVENTS_TYPE = Events
     SYSTEM_COMPONENTS_TYPE = InfiniBoxSystemComponents

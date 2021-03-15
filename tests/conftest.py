@@ -149,6 +149,12 @@ def create_export(infinibox, **kwargs):
     export = infinibox.exports.create(**kwargs)
     return export
 
+def create_share(infinibox, **kwargs):
+    if not kwargs.get('filesystem_id') and not kwargs.get('filesystem'):
+        kwargs['filesystem_id'] = create_filesystem(infinibox).id
+    share = infinibox.shares.create(**kwargs)
+    return share
+
 def create_filesystem(infinibox, **kwargs):
     if not kwargs.get('pool_id') and not kwargs.get('pool'):
         kwargs['pool_id'] = create_pool(infinibox).id
@@ -202,6 +208,10 @@ def filesystem(infinibox, pool):
 @pytest.fixture
 def export(infinibox, filesystem):
     return create_export(infinibox, filesystem=filesystem)
+
+@pytest.fixture
+def share(infinibox, filesystem):
+    return create_share(infinibox, filesystem=filesystem)
 
 @pytest.fixture(params=['volume', 'filesystem'])
 def data_entity_type(request):
