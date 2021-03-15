@@ -41,7 +41,6 @@ class Share(InfiniBoxObject):
         ),
         Field(
             "access_based_enumeration",
-            api_name="access_based_enumeration_enabled",
             type=bool,
             mutable=True,
             optional=True,
