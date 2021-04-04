@@ -7,6 +7,10 @@ include:
     ref: master
     file: /templates/codecov.yml
 
+  - project: infradev/gitlab-ci
+    ref: master
+    file: /jobs/pypi.yml
+
 stages:
   - test
   - deploy
@@ -54,19 +58,6 @@ docs:
   script:
     - pip install -e ".[doc]"
     - sphinx-build -a -W -E doc build/sphinx/html
-
-pypi:
-  image: $PYTHON_IMAGE:3.8
-  tags:
-    - infradev
-    - ubuntu
-  stage: deploy
-  only:
-    - master
-    - tags
-    - /^(dev|stable)-\d+(\.\d+)*$/
-  script:
-    - curl -sL http://goto/pypi_register | python - -v ./
 
 trigger:
   image: $PYTHON_IMAGE:3.8
