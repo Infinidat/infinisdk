@@ -47,6 +47,7 @@ from .certificates import Certificates
 from .vvol import Vvol
 from .vm import Vm
 from .share import Share
+from .active_directory import ActiveDirectoryDomains
 from .smb_user import SMBUser
 from .smb_group import SMBGroup
 
@@ -88,6 +89,7 @@ class InfiniBox(APITarget):
         Share,
         SMBUser,
         SMBGroup,
+        ActiveDirectoryDomains,
     ]
 
     SYSTEM_EVENTS_TYPE = Events
