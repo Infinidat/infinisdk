@@ -214,3 +214,14 @@ class TypeBinder(MonomorphicBinder):
             if obj is not None:
                 return obj
         return self.object_type.construct(self.system, {self.fields.id.api_name:id})
+
+
+class SMBUserBinder(TypeBinder):
+    def create(self, *args, **kwargs):
+        primary_group = kwargs.pop("primary_group", NOTHING)
+        if primary_group is not NOTHING:
+            kwargs["primary_group_id"] = primary_group.id
+        groups = kwargs.pop("groups", NOTHING)
+        if groups is not NOTHING:
+            kwargs["group_ids"] = [group.id for group in groups]
+        return self.object_type.create(self.system, *args, **kwargs)
