@@ -11,6 +11,10 @@ include:
     ref: master
     file: /jobs/pypi.yml
 
+  - project: infradev/gitlab-ci
+    ref: master
+    file: /templates/itzik_setup.yml
+
 stages:
   - test
   - deploy
@@ -23,8 +27,7 @@ stages:
   except:
     - /^customer-.*$/
   before_script:
-    - curl -sL $RUN_ITZIK | python - $RUN_ITZIK_PARAMETERS
-    - source $INSTALL_DIR/env/bin/activate
+    - !reference [.itzik, before_script]
     - pylint --rcfile .pylintrc -j $(nproc) infinisdk scripts tests doc/*.doctest_context
 
 py36:
