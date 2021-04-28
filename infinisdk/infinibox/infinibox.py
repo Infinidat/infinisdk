@@ -50,6 +50,8 @@ from .share import Share
 from .active_directory import ActiveDirectoryDomains
 from .smb_user import SMBUser
 from .smb_group import SMBGroup
+from .replication_group import ReplicationGroup
+from .rg_replica import RgReplica
 
 try:
     from infinisim.core.context import lookup_simulator_by_address
@@ -90,6 +92,8 @@ class InfiniBox(APITarget):
         SMBUser,
         SMBGroup,
         ActiveDirectoryDomains,
+        ReplicationGroup,
+        RgReplica,
     ]
 
     SYSTEM_EVENTS_TYPE = Events

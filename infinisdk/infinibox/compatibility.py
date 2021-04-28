@@ -215,6 +215,8 @@ class Compatibility:
     def has_native_smb(self):
         return self._has_feature("native_smb")
 
+    def has_vvol_replication(self):
+        return self._has_feature("vvol_replication")
 
 _VERSION_TUPLE_LEN = 5
 
