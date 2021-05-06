@@ -91,7 +91,6 @@ class InfiniBox(APITarget):
         Share,
         SMBUser,
         SMBGroup,
-        ActiveDirectoryDomains,
         ReplicationGroup,
         RgReplica,
     ]
@@ -110,6 +109,7 @@ class InfiniBox(APITarget):
         self.san_clients = SanClients(self)
         self.kms = Kms(self)
         self.certificates = Certificates(self)
+        self.active_directory_domains = ActiveDirectoryDomains(self)
 
     def check_version(self):
         if not self.compat.can_run_on_system():

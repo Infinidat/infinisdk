@@ -1,42 +1,25 @@
-from ..core import Field
-from ..core.bindings import RelatedObjectBinding
-from .system_object import InfiniBoxObject
+from ..core.api.special_values import OMIT
 
 
-class ActiveDirectoryDomains(InfiniBoxObject):
-    URL_PATH = "activedirectory/domains"
-    UID_FIELD = "domain"
-    FIELDS = [
-        Field(
-            "domain",
-            creation_parameter=True,
-        ),
-        Field(
-            "org_unit",
-            creation_parameter=True,
-            optional=True,
-        ),
-        Field(
-            "preferred_ips",
-            type=list,
-            creation_parameter=True,
-        ),
-        Field(
-            "username",
-            creation_parameter=True,
-        ),
-        Field(
-            "password",
-            creation_parameter=True,
-            hidden=True,
-        ),
-        Field(
-            "tenant",
-            type="infinisdk.infinibox.tenant:Tenant",
-            api_name="tenant_id",
-            binding=RelatedObjectBinding("tenants"),
-        ),
-    ]
+class ActiveDirectoryDomains:
+    def __init__(self, system):
+        self.system = system
+        self._url_path = "activedirectory/domains"
+
+    def create(
+        self, *, domain, org_unit=OMIT, preferred_ips, username, password, tenant=None
+    ):
+        return self.system.api.post(
+            self._url_path,
+            data={
+                "domain": domain,
+                "org_unit": org_unit,
+                "preferred_ips": preferred_ips,
+                "username": username,
+                "password": password,
+                "tenant_id": tenant.id if tenant is not None else OMIT,
+            },
+        ).get_result()
 
     @classmethod
     def get_type_name(cls):
