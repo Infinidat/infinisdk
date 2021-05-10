@@ -37,9 +37,8 @@ class SMBGroup(InfiniBoxObject):
             mutable=True,
         ),
         Field(
-            "members",
+            "domain_members",
             type=list,
-            api_name="domain_members",
             creation_parameter=True,
             optional=True,
             mutable=True,
