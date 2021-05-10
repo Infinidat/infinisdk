@@ -8,7 +8,7 @@ InfiniSDK provides a convenient extensibility mechanism to allow us to extend it
 Extending Objects with Methods
 ------------------------------
 
-A very common case is adding methods to InfiniSDK objects. Let's assume we want to add a method to an :class:`.InfiniBox` object, to get the location of the system from a global dictionary:
+A very common case is adding methods to InfiniSDK objects. Let's assume we want to add a method to an :class:`infinisdk.infinibox.InfiniBox` object, to get the location of the system from a global dictionary:
 
 .. code-block:: python
 

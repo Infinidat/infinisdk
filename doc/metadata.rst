@@ -72,4 +72,4 @@ You can also clear all metadata related to a single object:
 		>>> volume.clear_metadata()
 
 
-.. seealso:: :class:`.InfiniBoxObject`
+.. seealso:: :class:`infinisdk.infinibox.system_object.InfiniBoxObject`
