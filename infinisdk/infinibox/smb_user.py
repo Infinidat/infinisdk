@@ -40,7 +40,6 @@ class SMBUser(InfiniBoxObject):
             mutable=True,
             creation_parameter=True,
             optional=True,
-            default=True,
             is_filterable=True,
             is_sortable=True,
         ),
