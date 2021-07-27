@@ -67,6 +67,7 @@ class SMBUser(InfiniBoxObject):
             api_name="group_ids",
             type=list,
             binding=ListOfRelatedObjectIDsBinding("smb_groups"),
+            is_filterable=True,
             mutable=True,
         ),
     ]
