@@ -6,6 +6,21 @@ class ActiveDirectoryDomains:
         self.system = system
         self._url_path = "activedirectory/domains"
 
+    def get(self):
+        return self.system.api.get(
+            self._url_path,
+        ).get_result()
+
+    def leave(
+        self,
+        *,
+        username,
+        password,
+    ):
+        return self.system.api.post(
+            self._url_path + "/leave", data={"username": username, "password": password}
+        ).get_result()
+
     def create(
         self, *, domain, org_unit=OMIT, preferred_ips, username, password, tenant=None
     ):
