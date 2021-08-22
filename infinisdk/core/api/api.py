@@ -663,7 +663,7 @@ class Response:
                 password = b'password' if isinstance(self.sent_data, bytes) else 'password'
                 if password in self.sent_data:
                     self.sent_data = '<HIDDEN>'
-            raise APICommandFailed.raise_from_response(self)
+            APICommandFailed.raise_from_response(self)
 
 
 class _AutoRetryContext:
