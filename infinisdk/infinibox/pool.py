@@ -72,6 +72,9 @@ class Pool(InfiniBoxObject):
 
     @classmethod
     def create(cls, system, **fields):
+        """
+        Create a new pool
+        """
         capacity = fields.pop('capacity', NOTHING)
         if capacity is not NOTHING:
             for field_name in ['virtual_capacity', 'physical_capacity']:
