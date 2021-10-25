@@ -1,8 +1,11 @@
+import mitba
+
 from ..core import Field, MillisecondsDatetimeType
 from ..core.api.special_values import Autogenerate
 from ..core.bindings import RelatedObjectBinding, RelatedObjectNamedBinding
-from ..core.translators_and_types import MunchListType
+from ..core.type_binder import SubObjectTypeBinder
 from .system_object import InfiniBoxObject
+from .share_permission import SharePermission
 
 
 class Share(InfiniBoxObject):
@@ -73,10 +76,6 @@ class Share(InfiniBoxObject):
             creation_parameter=True,
         ),
         Field(
-            "permissions",
-            type=MunchListType,
-        ),
-        Field(
             "created_at",
             type=MillisecondsDatetimeType,
             is_filterable=True,
@@ -110,3 +109,7 @@ class Share(InfiniBoxObject):
     @classmethod
     def is_supported(cls, system):
         return system.compat.has_native_smb()
+
+    @mitba.cached_property
+    def permissions(self):
+        return SubObjectTypeBinder(self.system, SharePermission, self)

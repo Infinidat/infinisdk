@@ -23,6 +23,7 @@ from .san_client import SanClients
 from .events import Events
 from .export import Export
 from .filesystem import Filesystem
+from .treeq import TreeQ
 from .qos_policy import QosPolicy
 from .nlm_lock import NlmLock
 from .host import Host
@@ -47,6 +48,7 @@ from .certificates import Certificates
 from .vvol import Vvol
 from .vm import Vm
 from .share import Share
+from .share_permission import SharePermission
 from .active_directory import ActiveDirectoryDomains
 from .smb_user import SMBUser
 from .smb_group import SMBGroup
@@ -94,7 +96,10 @@ class InfiniBox(APITarget):
         ReplicationGroup,
         RgReplica,
     ]
-
+    SUB_OBJECT_TYPES = [
+        TreeQ,
+        SharePermission,
+    ]
     SYSTEM_EVENTS_TYPE = Events
     SYSTEM_COMPONENTS_TYPE = InfiniBoxSystemComponents
 
