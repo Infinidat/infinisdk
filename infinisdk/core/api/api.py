@@ -402,8 +402,8 @@ class API:
                                                                 'nodename nor servname',
                                                                 'name or service not known',
                                                                 'temporary failure in name resolution')):
-                    raise SystemNotFoundException(e, api_request, start_time)
-                raise APITransportFailure(self.system, request_kwargs, e, api_request, start_time)
+                    raise SystemNotFoundException(e, api_request, start_time) from e
+                raise APITransportFailure(self.system, request_kwargs, e, api_request, start_time) from e
 
             end_time = flux.current_timeline.time()
             gossip.trigger('infinidat.sdk.after_api_request', request=prepared, response=response)
@@ -533,7 +533,7 @@ class API:
                                 if self._ask_approval_interactively(http_method, path, reason):
                                     path = self._with_approved(path)
                                     continue
-                                raise CommandNotApproved(e.response, reason)
+                                raise CommandNotApproved(e.response, reason) from e
                         raise
                 deprecation_header = returned.response.headers.get('x-infinidat-deprecated-api')
                 if deprecation_header:

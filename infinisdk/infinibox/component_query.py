@@ -92,8 +92,8 @@ class InfiniBoxComponentQuery(ComponentQueryBase):
         for predicate in self.predicates:
             try:
                 op_func = getattr(operator, predicate.operator_name)
-            except AttributeError:
-                raise NotImplementedError("Filtering by {} operator is not supported".format(predicate.operator_name))
+            except AttributeError as e:
+                raise NotImplementedError(f"Filtering by {predicate.operator_name} operator is not supported") from e
             item_value = item.get_field(predicate.field.name)
             if not op_func(item_value, predicate.value):
                 return False

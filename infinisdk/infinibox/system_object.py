@@ -21,9 +21,9 @@ class InfiniBoxLURelatedObject(InfiniBoxObject):
         if fetch_from_cache:
             try:
                 return self.get_luns(from_cache=from_cache, fetch_if_not_cached=False)[lun]
-            except (KeyError, CacheMiss):
+            except (KeyError, CacheMiss) as e:
                 if not fetch_if_not_cached:
-                    raise CacheMiss('LUN {} is not cached'.format(int(lun)))
+                    raise CacheMiss('LUN {} is not cached'.format(int(lun))) from e
 
         url = self.get_this_url_path().add_path('luns/{}'.format(lun))
         lun_info = self.system.api.get(url).get_result()

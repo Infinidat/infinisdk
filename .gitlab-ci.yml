@@ -28,7 +28,7 @@ stages:
     - /^customer-.*$/
   before_script:
     - !reference [.itzik, before_script]
-    - pylint --rcfile .pylintrc -j $(nproc) infinisdk scripts tests doc/*.doctest_context
+    - make lint
 
 py36:
   extends: .install-and-lint

@@ -59,8 +59,8 @@ class SystemComponentsBinder(TypeBinder):
             return self[attr.get_plural_name()]
         try:
             return getattr(self, attr)
-        except AttributeError:
-            raise KeyError(attr)
+        except AttributeError as e:
+            raise KeyError(attr) from e
 
 
 class SpecificComponentBinderGetter:

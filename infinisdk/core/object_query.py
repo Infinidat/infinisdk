@@ -33,8 +33,8 @@ class QueryBase:
     def choose(self):
         try:
             return self.sample(1)[0]
-        except ValueError:
-            raise ObjectNotFound('No items were found')
+        except ValueError as e:
+            raise ObjectNotFound('No items were found') from e
 
     def sample(self, sample_count):
         """
@@ -101,9 +101,9 @@ class LazyQuery(QueryBase):
         for i in range(start, end):
             try:
                 yield self[i]
-            except IndexError:
+            except IndexError as e:
                 if i != self._total_num_objects:
-                    raise ChangedDuringIteration("Queried path's size changed during iteration")
+                    raise ChangedDuringIteration("Queried path's size changed during iteration") from e
 
     def __len__(self):
         if self._total_num_objects is None:
@@ -135,8 +135,8 @@ class LazyQuery(QueryBase):
         self._translate_item_if_needed(index)
         try:
             return self._fetched[index]
-        except LookupError:
-            raise IndexError()
+        except LookupError as e:
+            raise IndexError() from e
 
     def _fetch(self, element_index=None):
         self._mutable = False
