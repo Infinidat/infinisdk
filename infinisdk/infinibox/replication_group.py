@@ -1,6 +1,10 @@
+import gossip
+import functools
+
 from ..core import Field, MillisecondsDatetimeType
 from ..core.bindings import RelatedObjectBinding
 from ..core.api.special_values import Autogenerate
+from ..core.utils import end_reraise_context
 from .system_object import InfiniBoxObject
 
 
@@ -44,3 +48,20 @@ class ReplicationGroup(InfiniBoxObject):
     @classmethod
     def get_type_name(cls):
         return "replication_group"
+
+    def remove_member(self, member):
+        path = self._get_members_url().add_path(str(member.id))
+
+        trigger_hook = functools.partial(gossip.trigger_with_tags,
+                                         kwargs={"replication_group": self, "member": member},
+                                         tags=["infinibox"])
+        trigger_hook("infinidat.sdk.pre_replication_group_remove_member")
+        try:
+            self.system.api.delete(path)
+        except Exception:  # pylint: disable=broad-except
+            with end_reraise_context():
+                trigger_hook("infinidat.sdk.replication_group_remove_member_failure")
+        trigger_hook("infinidat.sdk.post_replication_group_remove_member")
+
+    def _get_members_url(self):
+        return self.get_this_url_path().add_path("members")
