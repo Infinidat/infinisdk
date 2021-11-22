@@ -191,7 +191,8 @@ class ConsGroup(InfiniBoxObject):
         data = kwargs
         data['dataset_id'] = member.id
         remote_entity = kwargs.pop('remote_entity', None)
-        if self.is_replicated() and 'ACTIVE_ACTIVE' in self.get_replication_types():
+        if (self.system.compat.has_active_active_suspend() and
+                self.is_replicated() and 'ACTIVE_ACTIVE' in self.get_replication_types()):
             if remote_entity:
                 data['active_active_info'] = {
                     'base_action': 'EXISTING',
