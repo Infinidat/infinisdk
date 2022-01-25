@@ -76,7 +76,7 @@ class Host(InfiniBoxLURelatedObject):
         Field("tenant", api_name="tenant_id", binding=RelatedObjectBinding('tenants'),
               type='infinisdk.infinibox.tenant:Tenant', feature_name='tenants',
               is_filterable=True, is_sortable=True),
-        Field("subsystem_nqn"),
+        Field("subsystem_nqn", feature_name="nvme"),
     ]
 
     @InfiniBoxLURelatedObject.requires_cache_invalidation("ports")
