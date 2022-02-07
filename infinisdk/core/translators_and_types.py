@@ -5,6 +5,7 @@ from capacity import byte, Capacity
 from datetime import timedelta
 from infi.dtypes.iqn import make_iscsi_name, iSCSIName
 from infi.dtypes.wwn import WWN
+from infi.dtypes.nqn import NQN
 
 from api_object_schema import TypeInfo, ValueTranslator
 
@@ -102,13 +103,15 @@ def host_port_to_api(value):
         value = WWN(value)
     elif isinstance(value, iSCSIName):
         port_type = 'iscsi'
+    elif isinstance(value, NQN):
+        port_type = 'nqn'
     else:
         assert False, "Unknown type of {}".format(value)
     return {'type': port_type, 'address': str(value)}
 
 
 def address_type_factory(type_):
-    _TYPES = {'fc': WWN, 'iscsi': make_iscsi_name}
+    _TYPES = {'fc': WWN, 'iscsi': make_iscsi_name, 'nqn': NQN}
     return _TYPES[type_.lower()]
 
 
