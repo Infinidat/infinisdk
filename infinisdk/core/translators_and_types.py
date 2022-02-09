@@ -104,14 +104,14 @@ def host_port_to_api(value):
     elif isinstance(value, iSCSIName):
         port_type = 'iscsi'
     elif isinstance(value, NQN):
-        port_type = 'nqn'
+        port_type = 'NVME'
     else:
         assert False, "Unknown type of {}".format(value)
     return {'type': port_type, 'address': str(value)}
 
 
 def address_type_factory(type_):
-    _TYPES = {'fc': WWN, 'iscsi': make_iscsi_name, 'nqn': NQN}
+    _TYPES = {'fc': WWN, 'iscsi': make_iscsi_name, 'nvme': NQN}
     return _TYPES[type_.lower()]
 
 
