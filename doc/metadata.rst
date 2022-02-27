@@ -52,8 +52,8 @@ You can also get all metadata keys for all the object in the system:
 .. code-block:: python
 
 		>>> for object_metadata_item in volume.system.get_all_metadata():
-		...     print("Found key: {key} with value: {value} for object id {object_id}".format(**object_metadata_item))
-		Found key: metadata_key with value: value! for object id 1008
+		...     print("Found key: {key} with value: {value} for object id {object_id}".format(**object_metadata_item))  # doctest: +ELLIPSIS
+		Found key: metadata_key with value: value! for object id ...
 
 
 Deleting (Unsetting) Metadata
