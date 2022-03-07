@@ -268,6 +268,12 @@ class Replica(SystemObject):
               mutable=False, feature_name="concurrent_replication"),
         Field("suspended_from_local", type=bool, is_filterable=True, is_sortable=True,
               mutable=False, feature_name="active_active_suspend"),
+        Field("including_snapshots", type=bool, creation_parameter=True,
+                is_filterable=True, is_sortable=True, optional=True,
+                feature_name="replicate_snapshots"),
+        Field("snapshots_retention", type=int, creation_parameter=True,
+                is_filterable=True, is_sortable=True, mutable=True,
+                add_updater=True, optional=True, feature_name="replicate_snapshots")
     ]
 
     @classmethod
