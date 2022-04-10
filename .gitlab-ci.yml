@@ -55,6 +55,12 @@ py39-codecov:
     - .codecov
   image: $PYTHON_IMAGE:3.9
 
+py310:
+  extends: .install-and-lint
+  image: $PYTHON_IMAGE:3.10
+  script:
+    - pytest
+
 docs:
   extends: .install-and-lint
   image: $PYTHON_IMAGE:3.7
