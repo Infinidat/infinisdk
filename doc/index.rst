@@ -39,6 +39,8 @@ Contents:
    events
    components
    qos
+   smb_users_and_groups
+   smb_shares
    extending
    cookbook
    faq
