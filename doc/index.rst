@@ -41,6 +41,7 @@ Contents:
    qos
    smb_users_and_groups
    smb_shares
+   active_directory_domains
    extending
    cookbook
    faq
