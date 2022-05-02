@@ -56,6 +56,26 @@ infinibox.filesystems
    :members:
    :inherited-members:
 
+infinibox.exports
+~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: infinisdk.infinibox.export
+.. autoclass:: Export
+   :members:
+
+infinibox.shares
+~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: infinisdk.infinibox.share
+.. autoclass:: Share
+   :members:
+
+infinibox.shares.permissions
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: infinisdk.infinibox.share_permission
+.. autoclass:: SharePermission
+   :members:
 
 infinibox.pools
 ~~~~~~~~~~~~~~~
@@ -245,19 +265,6 @@ infinibox.active_directory_domains
 .. autoclass:: ActiveDirectoryDomains
    :members:
 
-infinibox.shares
-~~~~~~~~~~~~~~~~~~~
-
-.. automodule:: infinisdk.infinibox.share
-.. autoclass:: Share
-   :members:
-
-infinibox.shares.permissions
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. automodule:: infinisdk.infinibox.share_permission
-.. autoclass:: SharePermission
-   :members:
 
 Base Objects
 ~~~~~~~~~~~~

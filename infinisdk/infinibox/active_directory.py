@@ -65,6 +65,8 @@ class ActiveDirectoryDomains:
             },
         ).get_result()
 
+    join = create
+
     @classmethod
     def get_type_name(cls):
         return "active_directory_domain"
