@@ -105,7 +105,8 @@ def _install_hooks():
     gossip.define(_SDK_HOOK('cons_group_remove_member_failure'), tags=['infinibox'],
                   arg_names=('cons_group', 'member'))
 
-    gossip.define(_SDK_HOOK('replica_snapshot_created'), tags=['infinibox'], arg_names=('snapshot', 'replica_deleted',))
+    gossip.define(_SDK_HOOK('replica_snapshot_created'), tags=['infinibox'],
+                  arg_names=('snapshot', 'replica_deleted', 'replica_exposed'))
     gossip.define(_SDK_HOOK('replica_deleted'), tags=['infinibox'], arg_names=('replica', 'entity_pairs',\
                                                                                'deletion_params'))
 
