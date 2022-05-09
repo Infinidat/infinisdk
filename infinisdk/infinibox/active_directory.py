@@ -7,6 +7,11 @@ class ActiveDirectoryDomains:
         self._url_path = "activedirectory/domains"
 
     def get(self):
+        """Obtains the active directory domain
+
+        :returns: Dictionary with fields: "tenant_id", "domain", "org_unit", "preferred_ips"
+        :rtype: dict
+        """
         return self.system.api.get(
             self._url_path,
         ).get_result()
@@ -17,6 +22,13 @@ class ActiveDirectoryDomains:
         username,
         password,
     ):
+        """Leave the active directory domain
+
+        :param username: the username for the domain
+        :type username: str
+        :param password: the password for the domain
+        :type password: str
+        """
         return self.system.api.post(
             self._url_path + "/leave", data={"username": username, "password": password}
         ).get_result()
@@ -24,6 +36,23 @@ class ActiveDirectoryDomains:
     def create(
         self, *, domain, org_unit=OMIT, preferred_ips, username, password, tenant=None
     ):
+        """Join an active directory domain
+
+        :param domain: the domain to join
+        :type domain: str
+        :param org_unit: the organization unit
+        :type org_unit: str
+        :param preferred_ips: a list of ips
+        :type preferred_ips: list[str]
+        :param username: the username for the domain
+        :type username: str
+        :param password: the password for the domain
+        :type password: str
+        :param tenant: the tenant object
+        :type tenant: :class:`infinisdk.infinibox.tenant.Tenant`
+        :returns: Dictionary with fields: "tenant_id", "domain", "org_unit", "preferred_ips"
+        :rtype: dict
+        """
         return self.system.api.post(
             self._url_path,
             data={
@@ -35,6 +64,8 @@ class ActiveDirectoryDomains:
                 "tenant_id": tenant.id if tenant is not None else OMIT,
             },
         ).get_result()
+
+    join = create
 
     @classmethod
     def get_type_name(cls):
