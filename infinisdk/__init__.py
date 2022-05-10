@@ -207,13 +207,6 @@ def _install_hooks():
 
     gossip.define(_SDK_HOOK('witness_address_set'), tags=['infinibox'], arg_names=('witness_address',))
 
-    gossip.define(_SDK_HOOK('pre_replication_group_remove_member'), tags=['infinibox'],
-                  arg_names=('replication_group', 'member'))
-    gossip.define(_SDK_HOOK('post_replication_group_remove_member'), tags=['infinibox'],
-                  arg_names=('replication_group', 'member'))
-    gossip.define(_SDK_HOOK('replication_group_remove_member_failure'), tags=['infinibox'],
-                  arg_names=('replication_group', 'member'))
-
     gossip.get_or_create_group('infinidat.sdk').set_strict()
 
 _install_hooks()

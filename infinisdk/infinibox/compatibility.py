@@ -215,12 +215,6 @@ class Compatibility:
     def has_native_smb(self):
         return self._has_feature("native_smb")
 
-    def has_vvol_replication(self):
-        return self._has_feature("vvol_replication")
-
-    def has_nvme(self):
-        return self.get_parsed_system_version() >= '7.1'
-
 _VERSION_TUPLE_LEN = 5
 
 

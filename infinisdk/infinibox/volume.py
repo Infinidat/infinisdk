@@ -72,7 +72,6 @@ class Volume(Dataset):
               binding=RelatedObjectBinding('volumes'), is_filterable=True),
         Field('data_snapshot_guid', is_filterable=True, is_sortable=True, feature_name="nas_replication"),
         Field('paths_available', type=bool, new_to="5.0"),
-        Field("nguid", feature_name="nvme"),
     ]
 
     @classmethod

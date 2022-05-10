@@ -33,11 +33,6 @@ class Vvol(SystemObject):
         Field("capacity_savings", type=CapacityType, feature_name="compression"),
         Field("used_size", api_name="used", type=CapacityType),
         Field("allocated", type=CapacityType, is_filterable=True, is_sortable=True),
-        Field("replicated", api_name="is_replicated", type=bool, is_filterable=True, is_sortable=False),
-        Field("replication_group", api_name="replication_group_id",
-            binding=RelatedObjectBinding("replication_groups"),
-            type="infinisdk.infinibox.replication_group:ReplicationGroup",
-            is_filterable=True, is_sortable=True),
     ]
 
     @classmethod
