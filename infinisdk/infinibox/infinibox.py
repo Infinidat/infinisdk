@@ -23,6 +23,7 @@ from .san_client import SanClients
 from .events import Events
 from .export import Export
 from .filesystem import Filesystem
+from .treeq import TreeQ
 from .qos_policy import QosPolicy
 from .nlm_lock import NlmLock
 from .host import Host
@@ -46,7 +47,11 @@ from .kms import Kms
 from .certificates import Certificates
 from .vvol import Vvol
 from .vm import Vm
-
+from .share import Share
+from .share_permission import SharePermission
+from .active_directory import ActiveDirectoryDomains
+from .smb_user import SMBUser
+from .smb_group import SMBGroup
 
 try:
     from infinisim.core.context import lookup_simulator_by_address
@@ -58,11 +63,39 @@ _DNS_SERVERS_CONFIG_PATH = 'config/mgmt/environment.dns_servers'
 
 
 class InfiniBox(APITarget):
-    OBJECT_TYPES = [Volume, Pool, Host, HostCluster, User, Filesystem, Export,
-                    NetworkSpace, NetworkInterface, Link, Replica, LDAPConfig,
-                    NotificationTarget, NotificationRule, ConsGroup, Initiator,
-                    FcSwitch, FcSoftTarget, QosPolicy, NlmLock, Plugin, Tenant, Vvol, Vm]
-
+    OBJECT_TYPES = [
+        Volume,
+        Pool,
+        Host,
+        HostCluster,
+        User,
+        Filesystem,
+        Export,
+        NetworkSpace,
+        NetworkInterface,
+        Link,
+        Replica,
+        LDAPConfig,
+        NotificationTarget,
+        NotificationRule,
+        ConsGroup,
+        Initiator,
+        FcSwitch,
+        FcSoftTarget,
+        QosPolicy,
+        NlmLock,
+        Plugin,
+        Tenant,
+        Vvol,
+        Vm,
+        Share,
+        SMBUser,
+        SMBGroup,
+    ]
+    SUB_OBJECT_TYPES = [
+        TreeQ,
+        SharePermission,
+    ]
     SYSTEM_EVENTS_TYPE = Events
     SYSTEM_COMPONENTS_TYPE = InfiniBoxSystemComponents
 
@@ -77,6 +110,7 @@ class InfiniBox(APITarget):
         self.san_clients = SanClients(self)
         self.kms = Kms(self)
         self.certificates = Certificates(self)
+        self.active_directory_domains = ActiveDirectoryDomains(self)
 
     def check_version(self):
         if not self.compat.can_run_on_system():

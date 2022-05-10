@@ -1,9 +1,11 @@
 from urlobject import URLObject as URL
 from ..core.system_object import SystemObject, DONT_CARE
 from ..core.exceptions import InfiniSDKException, CacheMiss
+from ..core.type_binder import SubObjectTypeBinder
 from .lun import LogicalUnit, LogicalUnitContainer
 from .metadata_holder import MetadataHolder
 from ..core.utils import end_reraise_context
+from ..core.system_object_utils import get_data_for_object_creation
 import gossip
 
 
@@ -19,9 +21,9 @@ class InfiniBoxLURelatedObject(InfiniBoxObject):
         if fetch_from_cache:
             try:
                 return self.get_luns(from_cache=from_cache, fetch_if_not_cached=False)[lun]
-            except (KeyError, CacheMiss):
+            except (KeyError, CacheMiss) as e:
                 if not fetch_if_not_cached:
-                    raise CacheMiss('LUN {} is not cached'.format(int(lun)))
+                    raise CacheMiss('LUN {} is not cached'.format(int(lun))) from e
 
         url = self.get_this_url_path().add_path('luns/{}'.format(lun))
         lun_info = self.system.api.get(url).get_result()
@@ -121,3 +123,35 @@ class InfiniBoxLURelatedObject(InfiniBoxObject):
         if volume:
             volume.invalidate_cache('mapped')
         gossip.trigger_with_tags('infinidat.sdk.post_volume_unmapping', hook_data, tags=hook_tags)
+
+
+class InfiniBoxSubObject(InfiniBoxObject):
+    def _is_caching_enabled(self):
+        return self.system.is_caching_enabled()
+
+    @classmethod
+    def create(cls, system, binder, **fields):  # pylint: disable=arguments-differ
+        cls._trigger_pre_create(system, fields)
+        parent = binder.get_parent()
+        return cls._create(
+            system,
+            cls._get_url_path(parent),
+            get_data_for_object_creation(cls, system, fields),
+            parent=binder.get_parent(),
+        )
+
+    @classmethod
+    def _get_url_path(cls, parent):
+        return parent.get_this_url_path().add_path(cls.URL_PATH)
+
+    def get_parent(self):
+        return getattr(self, f"get_{self.PARENT_FIELD}")(from_cache=True)
+
+    def get_this_url_path(self):
+        return (
+            self._get_url_path(self.get_parent())
+            .add_path(str(self.id))
+        )
+
+    def get_binder(self):
+        return SubObjectTypeBinder(self.system, self.__class__, self.get_parent())

@@ -2,7 +2,6 @@ from .core.q import Q  # pylint: disable=unused-import
 
 from .infinibox import InfiniBox
 from .infinibox.components import InfiniBoxSystemComponents
-from .infinibox.treeq import TreeQ
 
 _SDK_HOOK = 'infinidat.sdk.{}'.format
 
@@ -13,9 +12,8 @@ def _get_system_tag_names(system_cls, sdk_classes):
 def _install_hooks():
     import gossip
 
-    # Define systems objects operation hooks. TreeQ is explicitly added separately, as, being a special type of object,
-    # it is not in OBJECT_TYPES.
-    obj_type_names = _get_system_tag_names(InfiniBox, InfiniBox.OBJECT_TYPES + [TreeQ])
+    # Define systems objects operation hooks.
+    obj_type_names = _get_system_tag_names(InfiniBox, InfiniBox.OBJECT_TYPES + InfiniBox.SUB_OBJECT_TYPES)
     obj_type_names.add('event')
 
     component_type_names = _get_system_tag_names(InfiniBox, InfiniBoxSystemComponents.types.to_list())

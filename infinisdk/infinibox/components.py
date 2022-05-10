@@ -641,8 +641,8 @@ class Service(InfiniBoxSystemComponent):
     def get_service_cluster(self):
         try:
             return self.system.components.service_clusters.get(name=self.get_name())
-        except ObjectNotFound:
-            raise NotImplementedError("This service ({}) doesn't support CLM".format(self.get_name()))
+        except ObjectNotFound as e:
+            raise NotImplementedError("This service ({}) doesn't support CLM".format(self.get_name())) from e
 
     def is_active(self, **kwargs):
         return self.get_state(**kwargs) == 'ACTIVE'

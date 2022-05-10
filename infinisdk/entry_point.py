@@ -47,9 +47,9 @@ def _get_system_object(system_name, port=None, should_login=False):
             system.api.set_auth(username, password=password, login=False)
         try:
             system.login()
-        except Exception:
+        except Exception as e:
             _logger.debug('Caught exception while trying to login', exc_info=True)
-            raise click.ClickException('Failed to login to system {}'.format(system_name))
+            raise click.ClickException('Failed to login to system {}'.format(system_name)) from e
     return system
 
 def _interact(**local_vars):
@@ -107,8 +107,8 @@ def events_query(system_name, show_reporter, show_visibility, show_source_node_i
         supported_levels = system.events.get_levels()
         try:
             min_index = supported_levels.index(min_level)
-        except ValueError:
-            raise click.ClickException('Unsupported level {!r}'.format(min_level))
+        except ValueError as e:
+            raise click.ClickException('Unsupported level {!r}'.format(min_level)) from e
         filters.append(Q.level.in_(supported_levels[min_index:]))
     if since is not None:
         filters.append(Q.timestamp > _convert_time_string_to_arrow(since, tzinfo))

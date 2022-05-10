@@ -214,3 +214,29 @@ class TypeBinder(MonomorphicBinder):
             if obj is not None:
                 return obj
         return self.object_type.construct(self.system, {self.fields.id.api_name:id})
+
+
+class SubObjectTypeBinder(TypeBinder):
+    def __init__(self, system, object_type, parent):
+        super().__init__(object_type, system)
+        self._parent = parent
+
+    def create(self, *args, **kwargs):
+        kwargs[self._parent.get_type_name()] = self._parent
+        return self.object_type.create(self.system, self, **kwargs)
+
+    def get_parent(self):
+        return self._parent
+
+    def __repr__(self):
+        system_name = self.system.get_name()
+        parent_name = self._parent.get_type_name().capitalize()
+        child_name = self.object_type.get_plural_name()
+        return f"<{system_name}:{parent_name} id={self._parent.id}.{child_name}>"
+
+    def get_url_path(self):
+        return (
+            self.get_parent()
+            .get_this_url_path()
+            .add_path(self.object_type.URL_PATH)
+        )

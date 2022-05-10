@@ -4,7 +4,7 @@ Network Configuration
 Network Spaces
 --------------
 
-NAS, iSCSI, external replication and other network-related features require a configured *network space* to operate. A network space defines a set of configured IP addresses, as well as additional network-related configuration, with which the system can operate.
+NAS, iSCSI, replication and other network-related features require a configured *network space* to operate. A network space defines a set of configured IP addresses, as well as additional network-related configuration, with which the system can operate.
 
 Creating Network Interfaces
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~

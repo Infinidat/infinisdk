@@ -17,6 +17,13 @@ Creating filesystems is done with the ``create`` method:
 
 			  >>> fs = system.filesystems.create(pool=pool, size=1*GiB)
 
+You can optionally specify the ``security_style`` in the ``create`` method:
+
+          .. code-block:: python
+
+			  >>> fs = system.filesystems.create(pool=pool, security_style="WINDOWS")
+
+
 It is also possible to create multiple filesystems with a single line, by calling :meth:`.create_many <.DatasetTypeBinder.create_many>`:
 
 .. code-block:: python
@@ -88,8 +95,8 @@ Example: Deleting All Filesystems with Specific Name Prefix
 .. seealso:: :mod:`Filesystem API documentation <infinisdk.infinibox.filesystem>`
 
 
-Exports
-=======
+NFS Exports
+============
 
 Creating a Filesystem Export
 ----------------------------
@@ -244,3 +251,44 @@ Refreshing a snapshot or restoring a filesystem from a snapshot modifies its Tre
    >>> fs2.refresh_snapshot()
    >>> print(fs2.treeqs.count())
    2
+
+
+SMB Shares
+====================
+
+
+Creating a Share
+----------------
+
+Create a share using the ``add_share`` method on the :class:`infinisdk.infinibox.filesystem.Filesystem` object:
+
+.. code-block:: python
+
+        >>> fs = system.filesystems.create(
+        ...    pool=pool,
+        ...    security_style="WINDOWS"
+        ... )
+        >>> share = fs.add_share()
+        >>> share in fs.get_shares()
+        True
+
+
+Share Permissions
+-------------------------
+
+Permissions can be accessed with the ``permissions`` field:
+
+.. code-block:: python
+
+        >>> perm = share.permissions.create(sid="S-1-1-1", access="NONE") # doctest: +SKIP
+        >>> perm.update_access("FULLCONTROL") # doctest: +SKIP
+        >>> perm.get_access() # doctest: +SKIP
+        FULLCONTROL
+        >>> share.permissions.get(sid="S-1-1-1") == perm # doctest: +SKIP
+        True
+        >>> perm in share.permissions.to_list() # doctest: +SKIP
+        True
+        >>> perm.delete() # doctest: +SKIP
+        >>> perm in share.permissions.to_list() # doctest: +SKIP
+        False
+

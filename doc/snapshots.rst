@@ -9,11 +9,7 @@ Use the :meth:`.create_snapshot <.Dataset.create_snapshot>`
 .. code-block:: python
 
 		>>> snap = volume.create_snapshot()
-		>>> snap.id
-		1009
 		>>> snap_of_snap = snap.create_snapshot()
-		>>> snap_of_snap.id
-		1010
 
 Creating Group Snapshots
 ------------------------
@@ -48,7 +44,7 @@ You can inspect the snapshot's creation time:
 		>>> delta.days
 		15
 
-.. note:: Time is represented in InfiniSDK with `Arrow objects <http://crsmithdev.com/arrow/>`_. See the `relevant documentation <http://crsmithdev.com/arrow/#user-s-guide>`_ for more details on how to use and manipulate these values.
+.. note:: Time is represented in InfiniSDK with `Arrow objects <https://arrow.readthedocs.io/en/latest>`_. See the `relevant documentation <https://arrow.readthedocs.io/en/latest/#user-s-guide>`_ for more details on how to use and manipulate these values.
 
 
 
@@ -60,8 +56,8 @@ Example: Deleting Snapshots by Creation Time
 		>>> cutoff = current_time.shift(days=-10)
 		>>> for snapshot in system.volumes.find(system.volumes.fields.created_at < cutoff, parent_id=volume.id):
 		...     print("Deleting snapshot with id:", snapshot.id)
-		...     snapshot.delete()
-		Deleting snapshot with id: 1009
+		...     snapshot.delete()  # doctest: +ELLIPSIS
+		Deleting snapshot with id: ...
 
 
 .. seealso:: :mod:`Volume API documentation <infinisdk.infinibox.volume>`
