@@ -243,3 +243,10 @@ class InitiatorTargetsBinding(InfiniSDKBinding):
             target.address = target_type(target_address)
             result.append(target)
         return result
+
+
+class RelatedObjectViewBinding(RelatedObjectBinding):
+    def get_value_from_api_value(self, system, objtype, obj, api_value):
+        if api_value == self._value_for_none or api_value is None:
+            return None
+        return getattr(system, self._collection_name).get_by_id_lazy(api_value["id"])

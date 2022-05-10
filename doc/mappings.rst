@@ -12,7 +12,7 @@ Creating hosts is the same like creating any other management object through Inf
 
 		>>> host = system.hosts.create(name='production01')
 		>>> host # doctest: +ELLIPSIS
-		<...:Host id=1009>
+		<...:Host id=...>
 		>>> print(host.get_name())
 		production01
 
@@ -104,11 +104,11 @@ Iterating over available mappings of a host is fairly simple:
 		>>> lu = host.map_volume(volume, lun=5)
 
 		>>> host.get_luns() # doctest: +ELLIPSIS
-		<LogicalUnitsContainer: [<LUN 5: <...:Host id=1009>-><...:Volume id=1008>>]>
+		<LogicalUnitsContainer: [<LUN 5: <...:Host id=...>-><...:Volume id=...>>]>
 
 		>>> for lun in host.get_luns():
 		...     print("{} is mapped to {}".format(lun, lun.volume)) # doctest: +ELLIPSIS
-		<LUN 5: <...:Host id=1009>-><...:Volume id=1008>> is mapped to <...:Volume id=1008>
+		<LUN 5: <...:Host id=...>-><...:Volume id=...>> is mapped to <...:Volume id=...>
 
 There is also a shortcut to iterate over all mappings in the entire system:
 
@@ -116,7 +116,7 @@ There is also a shortcut to iterate over all mappings in the entire system:
 
 		>>> for lun in system.luns:
 		...     print("{} belongs to {} and is mapped to {}".format(lun, lun.mapping_object, lun.volume)) # doctest: +ELLIPSIS
-		<LUN 5: <...:Host id=1009>-><...:Volume id=1008>> belongs to <...:Host id=1009> and is mapped to <...:Volume id=1008>
+		<LUN 5: <...:Host id=...>-><...:Volume id=...>> belongs to <...:Host id=...> and is mapped to <...:Volume id=...>
 
 
 Here is a code snippet to unmap all volumes in the system that contain 'to remove' in their names:
@@ -132,7 +132,7 @@ Here is a code snippet to unmap all volumes in the system that contain 'to remov
 		...         if 'to remove' in lun.volume.get_name():
 		...             print("Unmapping", lun.volume)
 		...             lun.unmap() # doctest: +ELLIPSIS
-		Unmapping <...:Volume id=1008>
+		Unmapping <...:Volume id=...>
 
 
 Of course there is a much more convenient shortcut for unmapping a volume from all hosts, using the :meth:`.Volume.unmap` shortcut:
@@ -163,7 +163,7 @@ Manipulating clusters is done with the :class:`infinisdk.infinibox.host_cluster.
 		>>> [host_lu] = host.get_luns()
 
 		>>> host_lu # doctest: +ELLIPSIS
-		<LUN 11: <...:Host id=1009>-><...:Volume id=1008>>
+		<LUN 11: <...:Host id=...>-><...:Volume id=...>>
 
 		>>> host_lu.is_clustered()
 		True

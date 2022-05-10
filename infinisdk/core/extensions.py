@@ -136,7 +136,7 @@ class _BoundMethod(functools.partial):  # pylint: disable=inherit-non-class
         return self.func.__doc__
 
     def __repr__(self):
-        # pylint: disable=missing-format-attribute
+        # pylint: disable=missing-format-attribute, invalid-format-index
         return '<Bound method {0.im_class.__name__}.{0.__name__} of {0.args[0]!r}>'.format(self)
 
 

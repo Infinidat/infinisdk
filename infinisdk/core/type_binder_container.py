@@ -26,8 +26,8 @@ class TypeBinderContainer:
         """
         try:
             return self._binders_by_name[attr]
-        except LookupError:
-            raise AttributeError(attr)
+        except LookupError as e:
+            raise AttributeError(attr) from e
 
     def __getitem__(self, name):
         """
