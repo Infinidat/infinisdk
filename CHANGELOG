@@ -1,3 +1,16 @@
+Version 206.1.2 (Released 2022-05-10)
+-------------------------------------
+
+* #15058 Add active_directory_domains leave/query
+* #15057 Add is_filterable to smb_user's groups
+* #15005 Fix create smb user
+* #14977 Update sphinx docs to work with sphinx>=4
+* #14976 Change smb_group.get_members to smb_group.get_domain_members
+* #14932 Add support for joining an active directory domain
+* #14909 Add support for atime_granularity in filesystems
+* #14907 Add support for smb users and groups
+* #14861 Fix arrow documentation link
+
 Version 185.1.1 (Released 2021-03-09)
 -------------------------------------
 
