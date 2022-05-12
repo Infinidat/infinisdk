@@ -89,6 +89,9 @@ class RgReplica(SystemObject):
             is_filterable=True,
             is_sortable=True,
         ),
+        Field('state', type=str, cached=False, is_filterable=True),
+        Field('state_description', cached=False),
+        Field('state_reason', cached=False),
     ]
 
     @classmethod
