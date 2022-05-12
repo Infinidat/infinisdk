@@ -216,8 +216,8 @@ class Replica(SystemObject):
         Field('last_synchronized', type=MillisecondsDatetimeType),
         Field('last_replicated_guid', api_name='_consistent_guid', is_filterable=True, is_sortable=True),
         Field('state', type=str, cached=False, is_filterable=True),
-        Field('state_description'),
-        Field('state_reason'),
+        Field('state_description', cached=False),
+        Field('state_reason', cached=False),
         Field('initial', api_name='is_initial', type=bool, cached=False),
         Field('sync_interval', api_name='sync_interval', type=MillisecondsDeltaType,
               mutable=True, creation_parameter=True, is_filterable=True, is_sortable=True, optional=True),
@@ -447,7 +447,7 @@ class Replica(SystemObject):
                 gossip.trigger_with_tags('infinidat.sdk.replica_suspend_failure',
                                          {'replica': self, 'exception': e}, tags=['infinibox'])
         gossip.trigger_with_tags('infinidat.sdk.post_replica_suspend', {'replica': self}, tags=['infinibox'])
-        self.invalidate_cache('state')
+        self.invalidate_cache('state', 'state_reason', 'state_description')
 
     def sync(self):
         """Starts a sync job
@@ -468,7 +468,7 @@ class Replica(SystemObject):
                 gossip.trigger_with_tags('infinidat.sdk.replica_resume_failure',
                                          {'replica': self, 'exception': e}, tags=['infinibox'])
         gossip.trigger_with_tags('infinidat.sdk.post_replica_resume', {'replica': self}, tags=['infinibox'])
-        self.invalidate_cache('state')
+        self.invalidate_cache('state', 'state_reason', 'state_description')
 
     @require_sync_replication
     def switch_role(self):
