@@ -1,4 +1,6 @@
 # pylint: disable=no-member
+import gossip
+from ..core.utils import end_reraise_context
 from ..core import Field, MillisecondsDatetimeType
 from ..core.bindings import RelatedObjectBinding
 from ..core.system_object import SystemObject
@@ -110,3 +112,31 @@ class RgReplica(SystemObject):
                                         headers={'X-INFINIDAT-RAW-RESPONSE': 'true'})
         result = returned.get_result()
         return result
+
+    def suspend(self):
+        """
+        Suspends this rg_replica
+        """
+        gossip.trigger_with_tags('infinidat.sdk.pre_rg_replica_suspend', {'rg_replica': self}, tags=['infinibox'])
+        try:
+            self.system.api.post(self.get_this_url_path().add_path('suspend'))
+        except Exception as e: # pylint: disable=broad-except
+            with end_reraise_context():
+                gossip.trigger_with_tags('infinidat.sdk.rg_replica_suspend_failure',
+                                         {'rg_replica': self, 'exception': e}, tags=['infinibox'])
+        gossip.trigger_with_tags('infinidat.sdk.post_rg_replica_suspend', {'rg_replica': self}, tags=['infinibox'])
+        self.invalidate_cache('state', 'state_reason', 'state_description')
+
+    def resume(self):
+        """
+        Resumes this rg_replica
+        """
+        gossip.trigger_with_tags('infinidat.sdk.pre_rg_replica_resume', {'rg_replica': self}, tags=['infinibox'])
+        try:
+            self.system.api.post(self.get_this_url_path().add_path('resume'))
+        except Exception as e: # pylint: disable=broad-except
+            with end_reraise_context():
+                gossip.trigger_with_tags('infinidat.sdk.rg_replica_resume_failure',
+                                         {'rg_replica': self, 'exception': e}, tags=['infinibox'])
+        gossip.trigger_with_tags('infinidat.sdk.post_rg_replica_resume', {'rg_replica': self}, tags=['infinibox'])
+        self.invalidate_cache('state', 'state_reason', 'state_description')

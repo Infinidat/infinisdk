@@ -214,6 +214,14 @@ def _install_hooks():
     gossip.define(_SDK_HOOK('replication_group_remove_member_failure'), tags=['infinibox'],
                   arg_names=('replication_group', 'member'))
 
+    gossip.define(_SDK_HOOK('pre_rg_replica_suspend'), tags=['infinibox'], arg_names=('rg_replica',))
+    gossip.define(_SDK_HOOK('post_rg_replica_suspend'), tags=['infinibox'], arg_names=('rg_replica',))
+    gossip.define(_SDK_HOOK('rg_replica_suspend_failure'), tags=['infinibox'], arg_names=('rg_replica', 'exception'))
+
+    gossip.define(_SDK_HOOK('pre_rg_replica_resume'), tags=['infinibox'], arg_names=('rg_replica',))
+    gossip.define(_SDK_HOOK('post_rg_replica_resume'), tags=['infinibox'], arg_names=('rg_replica',))
+    gossip.define(_SDK_HOOK('rg_replica_resume_failure'), tags=['infinibox'], arg_names=('rg_replica', 'exception'))
+
     gossip.get_or_create_group('infinidat.sdk').set_strict()
 
 _install_hooks()
