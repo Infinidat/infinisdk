@@ -49,6 +49,8 @@ class BaseBinder:
         :class:`.TooManyObjectsFound` if more than one is found
         """
         returned = self.find(*predicates, **kw)
+        if hasattr(returned, "page_size"):
+            returned.page_size(1)
         if not returned:
             raise ObjectNotFound(str(returned))
         if len(returned) > 1:

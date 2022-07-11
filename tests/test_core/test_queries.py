@@ -2,6 +2,7 @@ import operator
 import pytest
 
 from infinisdk.core.exceptions import ObjectNotFound, TooManyObjectsFound
+from infinisdk.infinibox.volume import Volume
 from ..conftest import create_volume, create_pool
 
 # pylint: disable=redefined-outer-name
@@ -31,6 +32,12 @@ def test_get_too_many_items(infinibox):
         create_volume(infinibox, name="vol{}".format(i))
     with pytest.raises(TooManyObjectsFound):
         infinibox.objects.volumes.get()
+
+
+def test_get_one_item(infinibox) -> None:
+    create_volume(infinibox, name="vol1")
+    result = infinibox.objects.volumes.get(name="vol1")
+    assert isinstance(result, Volume)
 
 
 def test_get_not_found(infinibox):
