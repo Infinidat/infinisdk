@@ -219,6 +219,11 @@ class TypeBinder(MonomorphicBinder):
 
 
 class SubObjectTypeBinder(TypeBinder):
+    """
+    This class provides a TypeBinder for an InfiniBoxSubObject
+    binding it with general methods of handling objects like "create",
+    "find", and others.
+    """
     def __init__(self, system, object_type, parent):
         super().__init__(object_type, system)
         self._parent = parent

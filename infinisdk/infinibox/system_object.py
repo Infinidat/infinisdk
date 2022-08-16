@@ -126,6 +126,19 @@ class InfiniBoxLURelatedObject(InfiniBoxObject):
 
 
 class InfiniBoxSubObject(InfiniBoxObject):
+    """
+    Adds support for subobjects when the subobject appears in the URL api path
+    at most 1 level deep. E.g. "api/rest/father/23/son/1".
+    This means that every InfiniBoxSubObject must have a PARENT_FIELD defined.
+    The PARENT_FIELD should be the parent object, in the example above it will
+    be the "father" object.
+    So in order to create a "Son" object you'll create it inheriting from
+    this InfiniBoxSubObject, and defining the PARENT_FIELD to be equal to
+    the "father" field which you'll have in the child object. The "father" field
+    will be of type "Father".
+    The URL_PATH of this object is defined relative to the parent object,
+    so in the example above it will be "son".
+    """
     def _is_caching_enabled(self):
         return self.system.is_caching_enabled()
 
