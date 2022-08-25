@@ -4,7 +4,8 @@ from contextlib import contextmanager
 from sentinels import NOTHING
 from urlobject import URLObject
 
-from .exceptions import ObjectNotFound, TooManyObjectsFound
+from .exceptions import (InfiniSDKRuntimeException, ObjectNotFound,
+                         TooManyObjectsFound)
 from .object_query import ObjectQuery, PolymorphicQuery
 
 
@@ -118,6 +119,15 @@ class PolymorphicBinder(BaseBinder):
         self._query_factory = factory
         self._feature_name = feature_name
 
+    def get_by_id(self, id):  # pylint: disable=redefined-builtin
+        names_of_uid_field = {obj.UID_FIELD for obj in self._object_types}
+        if len(names_of_uid_field) == 1:
+            return self.get(**{list(names_of_uid_field)[0]: id})
+        else:
+            raise InfiniSDKRuntimeException(
+                f"Number of distinct identifying fields' names is: {len(names_of_uid_field)}"
+            )
+
     def __repr__(self):
         return "<{}.{} ({})>".format(
             self.system,
@@ -143,6 +153,12 @@ class MonomorphicBinder(BaseBinder):  # pylint: disable=abstract-method
         super(MonomorphicBinder, self).__init__(system)
         self.object_type = object_type
         self._cache = None
+
+    def get_by_id(self, id):  # pylint: disable=redefined-builtin
+        return self.get(**{self.object_type.UID_FIELD: id})
+
+    def safe_get_by_id(self, id):  # pylint: disable=redefined-builtin
+        return self.safe_get(**{self.object_type.UID_FIELD: id})
 
     def get_name(self):
         return self.object_type.get_plural_name()
