@@ -224,6 +224,9 @@ class Compatibility:
     def has_replicate_snapshots(self):
         return self.get_parsed_system_version() >= '7.1'
 
+    def has_standard_and_vvol_counts(self):
+        return self.get_parsed_system_version() >= '7.0'
+
 _VERSION_TUPLE_LEN = 5
 
 
