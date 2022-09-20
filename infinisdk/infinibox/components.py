@@ -129,6 +129,18 @@ class InfiniBoxComponentBinder(MonomorphicBinder):
     def should_force_fetching_from_cache(self):
         return self._force_fetching_from_cache
 
+    def get_by_id(self, id):  # pylint: disable=redefined-builtin
+        """
+        Obtains an object with a specific id
+        """
+        return self.get(id=id)
+
+    def safe_get_by_id(self, id):  # pylint: disable=redefined-builtin
+        """
+        Like get_by_id, only returning None if the object could not be found
+        """
+        return self.safe_get(id=id)
+
     def get_by_uid(self, uid):
         return self.get(uid=uid)
 

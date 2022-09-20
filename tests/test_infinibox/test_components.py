@@ -6,7 +6,7 @@ from capacity import Capacity
 from contextlib import contextmanager, ExitStack
 from infi.dtypes.wwn import WWN
 from infinisdk.core.config import config
-from infinisdk.core.exceptions import MethodDisabled
+from infinisdk.core.exceptions import MethodDisabled, TooManyObjectsFound, CacheMiss
 from infinisdk.infinibox.components import (Drive, Enclosure, FcPort, Node, EthPort, LocalDrive,
                                             Rack, Service, System, ServiceCluster)
 
@@ -26,6 +26,21 @@ def test_component_id_field(component_collection, component):
     assert isinstance(component.id, str)
     assert component.get_field('uid') == component.id
     assert component_collection.get_by_uid(component.id) is component
+
+
+def test_component_get_by_id(component_collection, component):
+    try:
+        id_ = component.get_field("id")
+    except CacheMiss:
+        # not all components have an id, ignore those that don't
+        return
+    try:
+        assert component_collection.get_by_id(id=id_) is component
+    except TooManyObjectsFound:
+        # for some components id is not a unique identifier (uid should be used instead)
+        return
+    assert component_collection.safe_get_by_id(id=id_) is component
+    assert component_collection.safe_get_by_id(id=-1) is None
 
 
 def _basic_check_for_component(infinibox, component_type, parent_type, blacklist=None):
