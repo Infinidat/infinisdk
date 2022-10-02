@@ -68,14 +68,14 @@ class Pool(InfiniBoxObject):
               is_filterable=True, is_sortable=True),
         Field("type", creation_parameter=True, optional=True, is_filterable=True, is_sortable=True,
               feature_name="vvol"),
-        Field("standard_volumes_count", type=int, feature_name="standard_and_vvol_counts"),
-        Field("standard_entities_count", type=int, feature_name="standard_and_vvol_counts"),
-        Field("standard_filesystems_count", type=int, feature_name="standard_and_vvol_counts"),
-        Field("standard_snapshots_count", type=int, feature_name="standard_and_vvol_counts"),
-        Field("standard_filesystem_snapshots_count", type=int, feature_name="standard_and_vvol_counts"),
-        Field("vvol_volumes_count", type=int, feature_name="standard_and_vvol_counts"),
-        Field("vvol_entities_count", type=int, feature_name="standard_and_vvol_counts"),
-        Field("vvol_snapshots_count", type=int, feature_name="standard_and_vvol_counts"),
+        Field("standard_volumes_count", type=int, feature_name="standard_counts"),
+        Field("standard_entities_count", type=int, feature_name="standard_counts"),
+        Field("standard_filesystems_count", type=int, feature_name="standard_counts"),
+        Field("standard_snapshots_count", type=int, feature_name="standard_counts"),
+        Field("standard_filesystem_snapshots_count", type=int, feature_name="standard_counts"),
+        Field("vvol_volumes_count", type=int, feature_name="vvol_counts"),
+        Field("vvol_entities_count", type=int, feature_name="vvol_counts"),
+        Field("vvol_snapshots_count", type=int, feature_name="vvol_counts"),
     ]
 
     @classmethod
