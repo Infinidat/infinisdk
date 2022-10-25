@@ -4,8 +4,8 @@ from ..core import Field, MillisecondsDatetimeType
 from ..core.api.special_values import Autogenerate
 from ..core.bindings import RelatedObjectBinding, RelatedObjectNamedBinding
 from ..core.type_binder import SubObjectTypeBinder
-from .system_object import InfiniBoxObject
 from .share_permission import SharePermission
+from .system_object import InfiniBoxObject
 
 
 class Share(InfiniBoxObject):
@@ -103,6 +103,20 @@ class Share(InfiniBoxObject):
             binding=RelatedObjectBinding("tenants"),
             is_filterable=True,
             is_sortable=True,
+        ),
+        Field(
+            "default_file_unix_permissions",
+            mutable=True,
+            is_filterable=True,
+            is_sortable=True,
+            feature_name="native_smb_dual_protocol",
+        ),
+        Field(
+            "default_folder_unix_permissions",
+            mutable=True,
+            is_filterable=True,
+            is_sortable=True,
+            feature_name="native_smb_dual_protocol",
         ),
     ]
 

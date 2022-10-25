@@ -1,7 +1,7 @@
 from urlobject import URLObject as URL
-from ..core.system_object import SystemObject, DONT_CARE
+from ..core.system_object import BaseSystemObject, SystemObject, DONT_CARE
 from ..core.exceptions import InfiniSDKException, CacheMiss
-from ..core.type_binder import SubObjectTypeBinder
+from ..core.type_binder import SubObjectTypeBinder, SubObjectMonomorphicBinder
 from .lun import LogicalUnit, LogicalUnitContainer
 from .metadata_holder import MetadataHolder
 from ..core.utils import end_reraise_context
@@ -168,3 +168,24 @@ class InfiniBoxSubObject(InfiniBoxObject):
 
     def get_binder(self):
         return SubObjectTypeBinder(self.system, self.__class__, self.get_parent())
+
+
+class BaseSystemSubObject(BaseSystemObject):
+    def _is_caching_enabled(self):
+        return self.system.is_caching_enabled()
+
+    @classmethod
+    def _get_url_path(cls, parent):
+        return parent.get_this_url_path().add_path(cls.URL_PATH)
+
+    def get_parent(self):
+        return getattr(self, f"get_{self.PARENT_FIELD}")(from_cache=True)
+
+    def get_this_url_path(self):
+        return (
+            self._get_url_path(self.get_parent())
+            .add_path(str(self.id))
+        )
+
+    def get_binder(self):
+        return SubObjectMonomorphicBinder(self.system, self.__class__, self.get_parent())

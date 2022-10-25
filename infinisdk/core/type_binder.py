@@ -157,6 +157,18 @@ class MonomorphicBinder(BaseBinder):  # pylint: disable=abstract-method
     def get_by_id(self, id):  # pylint: disable=redefined-builtin
         return self.get(**{self.object_type.UID_FIELD: id})
 
+    def get_by_id_lazy(self, id):  # pylint: disable=redefined-builtin
+        """
+        Obtains an object with a specified id *without* checking if it exists or querying it on the way.
+
+        This is useful assuming the next operation is a further query/update on this object.
+        """
+        if self._cache is not None:
+            obj = self._cache.safe_get_by_id_from_cache(id)
+            if obj is not None:
+                return obj
+        return self.object_type.construct(self.system, {self.object_type.UID_FIELD: id})
+
     def safe_get_by_id(self, id):  # pylint: disable=redefined-builtin
         return self.safe_get(**{self.object_type.UID_FIELD: id})
 
@@ -227,18 +239,6 @@ class TypeBinder(MonomorphicBinder):
     def is_caching_enabled(self):
         return self._cache is not None
 
-    def get_by_id_lazy(self, id):  # pylint: disable=redefined-builtin
-        """
-        Obtains an object with a specified id *without* checking if it exists or querying it on the way.
-
-        This is useful assuming the next operation is a further query/update on this object.
-        """
-        if self._cache is not None:
-            obj = self._cache.safe_get_by_id_from_cache(id)
-            if obj is not None:
-                return obj
-        return self.object_type.construct(self.system, {self.fields.id.api_name: id})
-
 
 class SubObjectTypeBinder(TypeBinder):
     """
@@ -266,3 +266,25 @@ class SubObjectTypeBinder(TypeBinder):
 
     def get_url_path(self):
         return self.get_parent().get_this_url_path().add_path(self.object_type.URL_PATH)
+
+
+class SubObjectMonomorphicBinder(MonomorphicBinder):
+    def __init__(self, system, object_type, parent):
+        super().__init__(object_type, system)
+        self._parent = parent
+
+    def get_parent(self):
+        return self._parent
+
+    def __repr__(self):
+        system_name = self.system.get_name()
+        parent_name = self._parent.get_type_name().capitalize()
+        child_name = self.object_type.get_plural_name()
+        return f"<{system_name}:{parent_name} id={self._parent.id}.{child_name}>"
+
+    def get_url_path(self):
+        return (
+            self.get_parent()
+            .get_this_url_path()
+            .add_path(self.object_type.URL_PATH)
+        )

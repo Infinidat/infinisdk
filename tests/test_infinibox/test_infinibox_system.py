@@ -109,6 +109,8 @@ def test_single_metadata_creation_on_all_infinibox_objects(infinibox, volume):
     def should_ignore_type(obj_type):
         if not issubclass(obj_type, InfiniBoxObject):
             return True
+        if not obj_type.is_supported(infinibox):
+            return True
         for field in obj_type.fields:
             if field.creation_parameter and field.generate_default() is NOTHING:
                 return True
