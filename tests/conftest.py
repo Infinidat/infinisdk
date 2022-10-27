@@ -82,6 +82,7 @@ _DEFAULT_REQUIRED_VERSION = Munch(kwargs={})
 
 def create_infinibox_simulator(request):
     returned = InfiniboxSimulator()
+    returned.features.native_smb.set_enabled(False)
     returned.api.set_propagate_exceptions(True)
     returned.activate()
     request.addfinalizer(returned.deactivate)

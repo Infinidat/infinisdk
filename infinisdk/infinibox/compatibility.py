@@ -216,7 +216,7 @@ class Compatibility:
         return self._has_feature("native_smb")
 
     def has_native_smb_dual_protocol(self):
-        return self.get_parsed_system_version() >= '7.2'
+        return self.has_native_smb() and self.get_parsed_system_version() >= '7.2'
 
     def has_vvol_replication(self):
         return self._has_feature("vvol_replication")
