@@ -11,11 +11,12 @@ import urllib3.exceptions
 from ..config import config
 from ..exceptions import (APICommandFailed, APITransportFailure,
                           CommandNotApproved, MethodDisabled,
-                          SystemNotFoundException)
+                          SystemNotFoundException, RelatedSystemNotFound)
 from .special_values import translate_special_values
 from contextlib import contextmanager
 from functools import partial
 from logbook import Logger
+from base64 import b64encode
 from requests.exceptions import RequestException
 from sentinels import NOTHING
 from urllib.parse import unquote as unquote_url
@@ -534,12 +535,26 @@ class API:
                                     path = self._with_approved(path)
                                     continue
                                 raise CommandNotApproved(e.response, reason) from e
+                        if (e.status_code == 403) and (e.error_code == "REMOTE_PERMISSION_REQUIRED"):
+                            try:
+                                related_user, related_password = self._get_related_system_auth()
+                                self._session.headers["X-Remote-Authorization"] = b"Basic " + \
+                                b64encode(f"{related_user}:{related_password}".encode())
+                                continue
+                            except TypeError as e:
+                                raise RelatedSystemNotFound("There are no "
+                                        "related systems registered to get the auth from") from e
                         raise
                 deprecation_header = returned.response.headers.get('x-infinidat-deprecated-api')
                 if deprecation_header:
                     warn_deprecation('Deprecation warning: {}'.format(deprecation_header), frame_correction=2)
                 return returned
         assert False, "Should never get here!"  # pragma: no cover
+
+    def _get_related_system_auth(self):
+        for related_system in self.system.iter_related_systems():
+            if related_system is not None:
+                return related_system.api.get_auth()
 
     def _with_approved(self, path):
         return path.set_query_param('approved', 'true')

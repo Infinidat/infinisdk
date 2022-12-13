@@ -30,6 +30,9 @@ class CannotGetReplicaState(InfiniSDKException):
 class BadFilepathException(InfiniSDKException):
     pass
 
+class RelatedSystemNotFound(InfiniSDKException):
+    pass
+
 class SystemNotFoundException(APICommandException):
     def __init__(self, err, api_request, start_timestamp):
         self.start_timestamp = start_timestamp

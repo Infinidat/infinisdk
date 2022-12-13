@@ -112,6 +112,9 @@ class Dataset(InfiniBoxObject):
         Field("tenant", api_name="tenant_id", binding=RelatedObjectBinding('tenants'),
               type='infinisdk.infinibox.tenant:Tenant', feature_name='tenants', is_filterable=True, is_sortable=True),
         Field("replication_types", type=list, new_to="5.5.0", is_filterable=True),
+        Field("snapshot_expires_at", type=int, feature_name="replicate_snapshots"),
+        Field("snapshot_retention", type=int, is_filterable=True, is_sortable=True,
+            feature_name="replicate_snapshots")
     ]
 
     PROVISIONING = namedtuple('Provisioning', ['Thick', 'Thin'])('THICK', 'THIN')
