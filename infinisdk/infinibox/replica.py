@@ -216,8 +216,8 @@ class Replica(SystemObject):
         Field('last_synchronized', type=MillisecondsDatetimeType),
         Field('last_replicated_guid', api_name='_consistent_guid', is_filterable=True, is_sortable=True),
         Field('state', type=str, cached=False, is_filterable=True),
-        Field('state_description'),
-        Field('state_reason'),
+        Field('state_description', cached=False),
+        Field('state_reason', cached=False),
         Field('initial', api_name='is_initial', type=bool, cached=False),
         Field('sync_interval', api_name='sync_interval', type=MillisecondsDeltaType,
               mutable=True, creation_parameter=True, is_filterable=True, is_sortable=True, optional=True),
@@ -268,6 +268,12 @@ class Replica(SystemObject):
               mutable=False, feature_name="concurrent_replication"),
         Field("suspended_from_local", type=bool, is_filterable=True, is_sortable=True,
               mutable=False, feature_name="active_active_suspend"),
+        Field("including_snapshots", type=bool, creation_parameter=True,
+                is_filterable=True, is_sortable=True, optional=True,
+                feature_name="replicate_snapshots"),
+        Field("snapshots_retention", type=int, creation_parameter=True,
+                is_filterable=True, is_sortable=True, mutable=True,
+                add_updater=True, optional=True, feature_name="replicate_snapshots")
     ]
 
     @classmethod
@@ -359,7 +365,7 @@ class Replica(SystemObject):
             return None
         returned = self._get_entity_collection().get_by_id_lazy(snapshot_id)
         gossip.trigger_with_tags('infinidat.sdk.replica_snapshot_created',
-                                 {'snapshot': returned, 'replica_deleted': False},
+                                 {'snapshot': returned, 'replica_deleted': False, 'replica_exposed': True},
                                  tags=['infinibox'])
         self._notify_post_exposure(self, returned)
         return returned
@@ -441,7 +447,7 @@ class Replica(SystemObject):
                 gossip.trigger_with_tags('infinidat.sdk.replica_suspend_failure',
                                          {'replica': self, 'exception': e}, tags=['infinibox'])
         gossip.trigger_with_tags('infinidat.sdk.post_replica_suspend', {'replica': self}, tags=['infinibox'])
-        self.invalidate_cache('state')
+        self.invalidate_cache('state', 'state_reason', 'state_description')
 
     def sync(self):
         """Starts a sync job
@@ -462,7 +468,7 @@ class Replica(SystemObject):
                 gossip.trigger_with_tags('infinidat.sdk.replica_resume_failure',
                                          {'replica': self, 'exception': e}, tags=['infinibox'])
         gossip.trigger_with_tags('infinidat.sdk.post_replica_resume', {'replica': self}, tags=['infinibox'])
-        self.invalidate_cache('state')
+        self.invalidate_cache('state', 'state_reason', 'state_description')
 
     @require_sync_replication
     def switch_role(self):
@@ -747,7 +753,8 @@ class Replica(SystemObject):
         for replica, snap in (self, local), (remote_replica, remote):
             if snap is not None and snap.id != 0:
                 gossip.trigger_with_tags(
-                    'infinidat.sdk.replica_snapshot_created', {'snapshot': snap, 'replica_deleted': True},
+                    'infinidat.sdk.replica_snapshot_created',
+                    {'snapshot': snap, 'replica_deleted': True, 'replica_exposed': False},
                     tags=['infinibox'])
 
                 self._notify_post_exposure(replica, snap)
