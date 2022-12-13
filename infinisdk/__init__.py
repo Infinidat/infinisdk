@@ -105,7 +105,8 @@ def _install_hooks():
     gossip.define(_SDK_HOOK('cons_group_remove_member_failure'), tags=['infinibox'],
                   arg_names=('cons_group', 'member'))
 
-    gossip.define(_SDK_HOOK('replica_snapshot_created'), tags=['infinibox'], arg_names=('snapshot', 'replica_deleted',))
+    gossip.define(_SDK_HOOK('replica_snapshot_created'), tags=['infinibox'],
+                  arg_names=('snapshot', 'replica_deleted', 'replica_exposed'))
     gossip.define(_SDK_HOOK('replica_deleted'), tags=['infinibox'], arg_names=('replica', 'entity_pairs',\
                                                                                'deletion_params'))
 
@@ -206,6 +207,21 @@ def _install_hooks():
                   arg_names=('system', 'retention', 'exception'))
 
     gossip.define(_SDK_HOOK('witness_address_set'), tags=['infinibox'], arg_names=('witness_address',))
+
+    gossip.define(_SDK_HOOK('pre_replication_group_remove_member'), tags=['infinibox'],
+                  arg_names=('replication_group', 'member'))
+    gossip.define(_SDK_HOOK('post_replication_group_remove_member'), tags=['infinibox'],
+                  arg_names=('replication_group', 'member'))
+    gossip.define(_SDK_HOOK('replication_group_remove_member_failure'), tags=['infinibox'],
+                  arg_names=('replication_group', 'member'))
+
+    gossip.define(_SDK_HOOK('pre_rg_replica_suspend'), tags=['infinibox'], arg_names=('rg_replica',))
+    gossip.define(_SDK_HOOK('post_rg_replica_suspend'), tags=['infinibox'], arg_names=('rg_replica',))
+    gossip.define(_SDK_HOOK('rg_replica_suspend_failure'), tags=['infinibox'], arg_names=('rg_replica', 'exception'))
+
+    gossip.define(_SDK_HOOK('pre_rg_replica_resume'), tags=['infinibox'], arg_names=('rg_replica',))
+    gossip.define(_SDK_HOOK('post_rg_replica_resume'), tags=['infinibox'], arg_names=('rg_replica',))
+    gossip.define(_SDK_HOOK('rg_replica_resume_failure'), tags=['infinibox'], arg_names=('rg_replica', 'exception'))
 
     gossip.get_or_create_group('infinidat.sdk').set_strict()
 

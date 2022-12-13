@@ -1,3 +1,37 @@
+Version 215.1.0 (Released 2022-12-13)
+-------------------------------------
+Tue Aug 2 15:03:13 2022 +0300 - Freeze 215.1.0
+Mon Aug 1 07:52:20 2022 +0300 - Constrain dependencies to v215.0.0
+Mon Jul 11 13:17:14 2022 +0300 - Release 214.0.0
+Mon Jul 11 13:17:14 2022 +0300 - Constrain dependencies to v214.0.0
+Mon Jul 11 10:11:24 2022 +0000 - INFRADEV-15624: InfiniSDK: Improve the <binder>.get() efficiency
+Thu Jul 7 14:48:34 2022 +0000 - INFRADEV-15623: InfiniSDK: please add page about efficient querying to the documentation
+Sun Jun 26 09:49:27 2022 +0300 - Release 213.0.0
+Sun Jun 26 09:49:27 2022 +0300 - Constrain dependencies to v213.0.0
+Sun Jun 12 11:35:45 2022 +0300 - Release 212.0.0
+Sun Jun 12 11:35:45 2022 +0300 - Constrain dependencies to v212.0.0
+Sun May 29 11:11:40 2022 +0300 - Release 211.0.0
+Sun May 29 11:11:40 2022 +0300 - Constrain dependencies to v211.0.0
+Sun May 15 11:56:47 2022 +0300 - Release 210.0.0
+Sun May 15 11:56:47 2022 +0300 - Constrain dependencies to v210.0.0
+Tue May 3 10:58:50 2022 +0300 - AUTOINFRA-630: Added replica_exposed parameter to replica_snapshot_created trigger
+Thu May 12 13:28:46 2022 +0000 - INFRADEV-15534: Add support for rg_replica suspend/resume operation
+Thu May 12 13:09:33 2022 +0000 - INFRADEV-15545: Add state fields to rg replica
+Thu May 12 14:17:43 2022 +0300 - INFRADEV-15551: Add sync method to rg replica
+Thu May 12 12:37:02 2022 +0000 - INFRADEV-15550: Add cached=False to state fields and invalidate cache to resume and suspend methods in replica
+Tue May 10 10:41:49 2022 +0000 - INFRADEV-15538: Remove old way of doing an infinisdk customer release
+Mon May 9 09:56:30 2022 +0300 - INFRADEV-15539: Add 7.0.0 documentation
+Sun May 8 16:15:48 2022 +0300 - Release 209.0.0
+Sun May 8 16:15:48 2022 +0300 - Constrain dependencies to v209.0.0
+Sun Apr 10 06:59:21 2022 +0000 - INFRADEV-15500: Add python3.10 support
+Tue Apr 5 09:56:51 2022 +0300 - Release 208.0.0
+Tue Apr 5 09:56:51 2022 +0300 - Constrain dependencies to v208.0.0
+Wed Mar 30 11:02:00 2022 +0000 - INFRADEV-15454: Add remote authorization when deleting rg replica from related system
+Mon Mar 21 14:08:59 2022 +0200 - Release 207.0.0
+Mon Mar 21 14:08:59 2022 +0200 - Constrain dependencies to v207.0.0
+Mon Mar 7 07:52:07 2022 +0000 - INFRADEV-15441: Add include_snapshots and retention_time fields to replica
+Sun Mar 6 08:43:43 2022 +0200 - Release 206.0.0
+
 Version 206.1.2 (Released 2022-05-10)
 -------------------------------------
 

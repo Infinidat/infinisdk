@@ -23,6 +23,7 @@ Contents:
 
    getting_started
    querying
+   efficient_querying
    system_object
    capacities
    pools
