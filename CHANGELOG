@@ -1,3 +1,8 @@
+Version 215.1.1 (Released 2022-12-26)
+-------------------------------------
+* #15931: Create documentation for 7.1
+* #15669: Add new fields to infinisdk/infinibox/pool.py
+
 Version 215.1.0 (Released 2022-12-13)
 -------------------------------------
 * #15624: Improve the <binder>.get() efficiency
@@ -13,6 +18,7 @@ Version 215.1.0 (Released 2022-12-13)
 * #15500: Add python3.10 support
 * #15454: Add remote authorization when deleting rg replica from related system
 * #15441: Add include_snapshots and retention_time fields to replica
+* #14926: Add vvol replication
 
 Version 206.1.2 (Released 2022-05-10)
 -------------------------------------
