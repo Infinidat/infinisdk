@@ -77,6 +77,18 @@ infinibox.shares.permissions
 .. autoclass:: SharePermission
    :members:
 
+infinibox.replication_groups
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. automodule:: infinisdk.infinibox.replication_group
+.. autoclass:: ReplicationGroup
+   :members:
+
+infinibox.rg_replicas
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. automodule:: infinisdk.infinibox.rg_replica
+.. autoclass:: RgReplica
+   :members:
+
 infinibox.pools
 ~~~~~~~~~~~~~~~
 
