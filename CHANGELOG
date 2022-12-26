@@ -1,6 +1,6 @@
 Version 215.1.2 (Released 2022-12-26)
 -------------------------------------
-
+* #15960: Remove python3.6 support from github actions
 
 Version 215.1.1 (Released 2022-12-26)
 -------------------------------------
