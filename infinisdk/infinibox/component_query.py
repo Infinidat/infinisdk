@@ -2,8 +2,8 @@ import functools
 import operator
 from numbers import Number
 
-from ..core.utils.python import cmp
 from ..core.object_query import QueryBase
+from ..core.utils.python import cmp
 
 
 class ComponentQueryBase(QueryBase):
@@ -13,11 +13,13 @@ class ComponentQueryBase(QueryBase):
         self.kw = kw
         self._fetched_items = None
         self._force_fetch = False
-        self._str = query_objects_str.replace('_', ' ').title()
+        self._str = query_objects_str.replace("_", " ").title()
         if predicates or kw:
-            self._str += ' with '
-            self._str += ' AND '.join(["({})".format(pred) for pred in predicates] +\
-                                      ["({}={})".format(k, v) for k, v in kw.items()])
+            self._str += " with "
+            self._str += " AND ".join(
+                ["({})".format(pred) for pred in predicates]
+                + ["({}={})".format(k, v) for k, v in kw.items()]
+            )
 
     def force_fetching_objects(self):
         self._force_fetch = True
@@ -47,21 +49,27 @@ class ComponentQueryBase(QueryBase):
 
 class InfiniBoxComponentQuery(ComponentQueryBase):
     def __init__(self, system, object_type, *predicates, **kw):
-        super(InfiniBoxComponentQuery, self).__init__(system, object_type.get_plural_name(), *predicates, **kw)
+        super(InfiniBoxComponentQuery, self).__init__(
+            system, object_type.get_plural_name(), *predicates, **kw
+        )
         self.object_type = object_type
         self.sort_criteria = tuple()
         # predicates' field attribute is QField (non the object field), therefore, we should get the object's one
         # for checking its cached attribute
         field_names = [pred.field.name for pred in predicates] + list(kw)
-        relevant_fields = [self.object_type.fields.get_or_fabricate(field_name) for field_name in field_names]
+        relevant_fields = [
+            self.object_type.fields.get_or_fabricate(field_name)
+            for field_name in field_names
+        ]
         self._force_fetch = any(field.cached is not True for field in relevant_fields)
 
     def _get_items(self):
         returned = self._fetched_items
         if returned is None:
+
             def _sort_cmp_items(x, y):
                 for criteria in self.sort_criteria:
-                    sign_func = operator.neg if criteria.prefix == '-' else operator.pos
+                    sign_func = operator.neg if criteria.prefix == "-" else operator.pos
                     sort_field_name = criteria.field.name
                     x_val = x.get_field(sort_field_name)
                     y_val = y.get_field(sort_field_name)
@@ -70,9 +78,14 @@ class InfiniBoxComponentQuery(ComponentQueryBase):
                         return sign_func(res)
                 return 0
 
-            with self._get_binder().fetch_tree_once_context(force_fetch=self._force_fetch, with_logging=False):
-                all_components = self.system.components._components_by_id.values()  # pylint: disable=protected-access
-                returned = [item for item in all_components if self.passed_filtering(item)]
+            with self._get_binder().fetch_tree_once_context(
+                force_fetch=self._force_fetch, with_logging=False
+            ):
+                # pylint: disable=protected-access
+                all_components = self.system.components._components_by_id.values()
+                returned = [
+                    item for item in all_components if self.passed_filtering(item)
+                ]
 
             if self.sort_criteria:
                 returned = sorted(returned, key=functools.cmp_to_key(_sort_cmp_items))
@@ -80,12 +93,15 @@ class InfiniBoxComponentQuery(ComponentQueryBase):
         return returned
 
     def _get_binder(self):
-        if self.object_type.get_type_name() == 'infiniboxsystemcomponent':
+        if self.object_type.get_type_name() == "infiniboxsystemcomponent":
             return self.system.components.enclosures
         return self.system.components[self.object_type]
 
     def passed_filtering(self, item):
-        if self.object_type != self.system.components.object_type and self.object_type != type(item):
+        if (
+            self.object_type != self.system.components.object_type
+            and self.object_type != type(item)
+        ):
             return False
         if not item.is_in_system():
             return False
@@ -93,7 +109,9 @@ class InfiniBoxComponentQuery(ComponentQueryBase):
             try:
                 op_func = getattr(operator, predicate.operator_name)
             except AttributeError as e:
-                raise NotImplementedError(f"Filtering by {predicate.operator_name} operator is not supported") from e
+                raise NotImplementedError(
+                    f"Filtering by {predicate.operator_name} operator is not supported"
+                ) from e
             item_value = item.get_field(predicate.field.name)
             if not op_func(item_value, predicate.value):
                 return False
@@ -103,11 +121,11 @@ class InfiniBoxComponentQuery(ComponentQueryBase):
         return True
 
     def page(self, page_index):
-        assert page_index == 1 # pragma: no cover
+        assert page_index == 1  # pragma: no cover
         return self
 
     def page_size(self, page_size):  # pylint: disable=unused-argument
-        return self # pragma: no cover
+        return self  # pragma: no cover
 
     def sort(self, *criteria):
         self.sort_criteria += criteria
@@ -119,18 +137,26 @@ class InfiniBoxComponentQuery(ComponentQueryBase):
 
 class InfiniBoxGenericComponentQuery(ComponentQueryBase):
     def __init__(self, system, *predicates, **kw):
-        super(InfiniBoxGenericComponentQuery, self).__init__(system, 'All components', *predicates, **kw)
+        super(InfiniBoxGenericComponentQuery, self).__init__(
+            system, "All components", *predicates, **kw
+        )
 
     def _get_items(self):
         if self._fetched_items is not None:
             return self._fetched_items
         items = []
-        with self.system.components.fetch_tree_once_context(force_fetch=self._force_fetch, with_logging=False):
-            fields = set(predicate.field.name for predicate in self.predicates) | set(self.kw)
+        with self.system.components.fetch_tree_once_context(
+            force_fetch=self._force_fetch, with_logging=False
+        ):
+            fields = set(predicate.field.name for predicate in self.predicates) | set(
+                self.kw
+            )
             for component_type in self.system.components.get_component_types():
                 if not component_type.is_supported(self.system):
                     continue
-                if not fields.issubset(set(field.name for field in component_type.fields)):
+                if not fields.issubset(
+                    set(field.name for field in component_type.fields)
+                ):
                     continue
                 assert component_type
                 collection = self.system.components[component_type]

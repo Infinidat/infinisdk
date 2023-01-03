@@ -28,6 +28,7 @@ stages:
     - /^customer-.*$/
   before_script:
     - !reference [.itzik, before_script]
+    - make check_format
     - make lint
 
 py36:
@@ -48,9 +49,8 @@ py38:
   script:
     - pytest
 
-
 py39-codecov:
-  extends: 
+  extends:
     - .install-and-lint
     - .codecov
   image: $PYTHON_IMAGE:3.9
@@ -79,4 +79,3 @@ trigger:
     - /^(dev|stable)-\d+(\.\d+)*$/
   script:
     - curl --request POST --form "token=$CI_JOB_TOKEN" --form "ref=$CI_COMMIT_REF_NAME" https://git.infinidat.com/api/v4/projects/222/trigger/pipeline
-

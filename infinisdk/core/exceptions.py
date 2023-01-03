@@ -1,37 +1,47 @@
 import arrow
+from munch import munchify
 from urlobject import URLObject as URL
 
-from munch import munchify
 
 class InfiniSDKException(Exception):
     pass
 
+
 class InfiniSDKRuntimeException(InfiniSDKException):
     pass
+
 
 class InvalidUsageException(InfiniSDKException):
     pass
 
+
 class UnknownSystem(InfiniSDKException):
     pass
+
 
 class InvalidOperationException(InfiniSDKException):
     pass
 
+
 class CacheMiss(InfiniSDKException):
     pass
+
 
 class APICommandException(InfiniSDKException):
     pass
 
+
 class CannotGetReplicaState(InfiniSDKException):
     pass
+
 
 class BadFilepathException(InfiniSDKException):
     pass
 
+
 class RelatedSystemNotFound(InfiniSDKException):
     pass
+
 
 class SystemNotFoundException(APICommandException):
     def __init__(self, err, api_request, start_timestamp):
@@ -39,11 +49,14 @@ class SystemNotFoundException(APICommandException):
         self.err = err
         self.api_request = api_request
         self.address = URL(api_request.url).hostname
-        super(SystemNotFoundException, self).__init__("Cannot connect {}".format(self.address))
+        super(SystemNotFoundException, self).__init__(
+            "Cannot connect {}".format(self.address)
+        )
+
 
 class APITransportFailure(APICommandException):
     def __init__(self, system, request_kwargs, err, api_request, start_timestamp):
-        super(APITransportFailure, self).__init__('APITransportFailure: {}'.format(err))
+        super(APITransportFailure, self).__init__("APITransportFailure: {}".format(err))
         self.start_timestamp = start_timestamp
         self.err = err
         self.api_request = api_request
@@ -57,10 +70,14 @@ class APITransportFailure(APICommandException):
         return arrow.Arrow.fromtimestamp(self.start_timestamp)
 
     def __repr__(self):
-        return ("API Transport Failure on {system_name}\n\t"
-                "Request: {e.attrs.method} {e.api_request.url}\n\t"
-                "Request Timestamp: {e.request_timestamp}\n\t"
-                "Error Description: {e.error_desc}".format(e=self, system_name=self.system.get_name()))
+        return (
+            "API Transport Failure on {system_name}\n\t"
+            "Request: {e.attrs.method} {e.api_request.url}\n\t"
+            "Request Timestamp: {e.request_timestamp}\n\t"
+            "Error Description: {e.error_desc}".format(
+                e=self, system_name=self.system.get_name()
+            )
+        )
 
     __str__ = __repr__
 
@@ -72,7 +89,7 @@ class APICommandFailed(APICommandException):
         self.status_code = self.response.response.status_code
         json = response.get_json()
         error = response.get_error()
-        self.error_code = error.get('code') if error else None
+        self.error_code = error.get("code") if error else None
         if json is None:
             message = "[{}]".format(response.response.content)
         else:
@@ -84,27 +101,29 @@ class APICommandFailed(APICommandException):
     @classmethod
     def raise_from_response(cls, response):
         error = response.get_error() or {}
-        if error.get('is_remote', False):
+        if error.get("is_remote", False):
             cls = RemoteAPICommandFailed  # pylint: disable=self-cls-assignment
         raise cls(response)
 
     def _parse_reasons(self, error):
         returned = []
-        for reason in (error.get('reasons') or []):
+        for reason in error.get("reasons") or []:
             returned.append(ErrorReason.from_dict(reason))
         return returned
 
     def __repr__(self):
-        returned = ("API Command Failed\n\t"
-                    "Request: {e.response.method} {e.response.url}\n\t"
-                    "Request Timestamp: {e.request_timestamp}\n\t"
-                    "Response Timestamp: {e.response_timestamp}\n\t"
-                    "Data: {e.sent_data_truncated}\n\t"
-                    "Status: {e.status_code}\n\t"
-                    "Code: {e.error_code}\n\t"
-                    "Message: {e.message}".format(e=self))
+        returned = (
+            "API Command Failed\n\t"
+            "Request: {e.response.method} {e.response.url}\n\t"
+            "Request Timestamp: {e.request_timestamp}\n\t"
+            "Response Timestamp: {e.response_timestamp}\n\t"
+            "Data: {e.sent_data_truncated}\n\t"
+            "Status: {e.status_code}\n\t"
+            "Code: {e.error_code}\n\t"
+            "Message: {e.message}".format(e=self)
+        )
 
-        cookies = self.response.response.request.headers.get('cookie')
+        cookies = self.response.response.request.headers.get("cookie")
         if cookies:
             returned += "\n\tCookies: {}".format(cookies)
         if self.reasons:
@@ -118,7 +137,7 @@ class APICommandFailed(APICommandException):
         max_length = 500
         returned = repr(self.response.sent_data)
         if len(returned) > max_length:
-            returned = returned[:max_length - 3 - 1] + '...' + returned[-1:]
+            returned = returned[: max_length - 3 - 1] + "..." + returned[-1:]
         return returned
 
     @property
@@ -138,7 +157,6 @@ class RemoteAPICommandFailed(APICommandFailed):
 
 
 class ErrorReason:
-
     def __init__(self, message, affected_entities):
         super(ErrorReason, self).__init__()
         self.message = message
@@ -149,7 +167,8 @@ class ErrorReason:
 
     @classmethod
     def from_dict(cls, d):
-        return cls(message=d['message'], affected_entities=d['affected_entities'])
+        return cls(message=d["message"], affected_entities=d["affected_entities"])
+
 
 class CommandNotApproved(APICommandFailed):
     def __init__(self, response, reason):
@@ -159,16 +178,18 @@ class CommandNotApproved(APICommandFailed):
     def __repr__(self):
         return "Command forbidden without explicit approval ({})".format(self.reason)
 
+
 class CapacityUnavailable(APICommandException):
     pass
 
+
 class ObjectNotFound(InfiniSDKException):
-    """Thrown when using .get(), when no results are found but the code expects a single object
-    """
+    """Thrown when using .get(), when no results are found but the code expects a single object"""
+
 
 class TooManyObjectsFound(InfiniSDKException):
-    """Thrown when using .get(), when more than one result is found but the code expects a single object
-    """
+    """Thrown when using .get(), when more than one result is found but the code expects a single object"""
+
 
 class MissingFields(InfiniSDKException):
     pass
@@ -185,11 +206,18 @@ class AttributeAlreadyExists(InfiniSDKException):
         msg = "{} already exists for {}".format(attr, obj)
         super(AttributeAlreadyExists, self).__init__(msg)
 
+
 class VersionNotSupported(InfiniSDKException):
     def __init__(self, version):
-        msg = "System version '{}' is not supported by this version of InfiniSDK".format(version)
+        msg = (
+            "System version '{}' is not supported by this version of InfiniSDK".format(
+                version
+            )
+        )
         super(VersionNotSupported, self).__init__(msg)
+
 
 class MethodDisabled(InfiniSDKException):
     """Thrown when attempting to use an HTTP method, which has been explicitly disabled"""
+
     pass

@@ -5,7 +5,7 @@ from .bindings import InfiniSDKBinding
 from .exceptions import AttributeAlreadyExists
 from .field_filter import FieldFilter
 from .field_sorting import FieldSorting
-from .system_object_utils import make_getter, make_field_updaters
+from .system_object_utils import make_field_updaters, make_getter
 from .utils import DONT_CARE
 
 
@@ -13,16 +13,16 @@ class Field(FieldBase):
     """
     This class represents a single field exposed by a schema
     """
+
     def __repr__(self):
         # pylint: disable=no-member
         extra = []
         if self.creation_parameter:
-            extra.append('Creation param')
+            extra.append("Creation param")
         if self.mutable:
-            extra.append('Mutable')
+            extra.append("Mutable")
         return "<FIELD {}{}>".format(
-            self.name,
-            ' ({})'.format(', '.join(extra)) if extra else ''
+            self.name, " ({})".format(", ".join(extra)) if extra else ""
         )
 
     def __init__(self, *args, **kwargs):
@@ -104,6 +104,7 @@ class Field(FieldBase):
 def _install_filter_factory(operator_name, operator_function_name):
     def meth(self, other):
         return FieldFilter(self, operator_name, other)
+
     meth.__name__ = operator_function_name
     setattr(Field, operator_function_name, meth)
 
@@ -116,15 +117,18 @@ def _install_filter_factories():
         _install_filter_factory(operator_name, operator_function_name)
 
     # Installing operators that python doesn't have overloading functions for them
-    for operator_name, operator_function_name in [("in", "in_"),
-                                                  ("notin", "not_in"),
-                                                  ("between", "between"),
-                                                  ("like", "like"),
-                                                  ("is", "is_"),
-                                                  ("isnot", "is_not"),
-                                                  ("allof", "all_of"),
-                                                  ("anyof", "any_of"),
-                                                  ("noneof", "none_of")]:
+    for operator_name, operator_function_name in [
+        ("in", "in_"),
+        ("notin", "not_in"),
+        ("between", "between"),
+        ("like", "like"),
+        ("is", "is_"),
+        ("isnot", "is_not"),
+        ("allof", "all_of"),
+        ("anyof", "any_of"),
+        ("noneof", "none_of"),
+    ]:
         _install_filter_factory(operator_name, operator_function_name)
+
 
 _install_filter_factories()

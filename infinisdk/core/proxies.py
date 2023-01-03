@@ -4,7 +4,8 @@ class ValueProxy:
     """
 
     def resolve(self):
-        raise NotImplementedError() # pragma: no cover
+        raise NotImplementedError()  # pragma: no cover
+
 
 class FROM_CONFIG:
     """
@@ -16,4 +17,4 @@ class FROM_CONFIG:
         self._path = path
 
     def resolve(self):
-        raise NotImplementedError() # pragma: no cover
+        raise NotImplementedError()  # pragma: no cover

@@ -4,8 +4,7 @@ from contextlib import contextmanager
 from sentinels import NOTHING
 from urlobject import URLObject
 
-from .exceptions import (InfiniSDKRuntimeException, ObjectNotFound,
-                         TooManyObjectsFound)
+from .exceptions import InfiniSDKRuntimeException, ObjectNotFound, TooManyObjectsFound
 from .object_query import ObjectQuery, PolymorphicQuery
 
 
@@ -283,8 +282,4 @@ class SubObjectMonomorphicBinder(MonomorphicBinder):
         return f"<{system_name}:{parent_name} id={self._parent.id}.{child_name}>"
 
     def get_url_path(self):
-        return (
-            self.get_parent()
-            .get_this_url_path()
-            .add_path(self.object_type.URL_PATH)
-        )
+        return self.get_parent().get_this_url_path().add_path(self.object_type.URL_PATH)

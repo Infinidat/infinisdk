@@ -1,11 +1,14 @@
-from urlobject import URLObject as URL
 from capacity import Capacity
+from urlobject import URLObject as URL
+
 from ..core.exceptions import CapacityUnavailable
 from ..core.translators_and_types import CapacityTranslator
 
-
-CAPACITY_SUFFIX = ['space', 'capacity', 'bytes']
-_python_name_to_api = {'free_physical_capacity': 'free_physical_space', 'free_virtual_capacity': 'free_virtual_space'}
+CAPACITY_SUFFIX = ["space", "capacity", "bytes"]
+_python_name_to_api = {
+    "free_physical_capacity": "free_physical_space",
+    "free_virtual_capacity": "free_virtual_space",
+}
 
 
 class SystemCapacityTranslator(CapacityTranslator):
@@ -54,23 +57,27 @@ class InfiniBoxSystemCapacity:
         return self.capacity_translator.from_api(value)
 
     def get_id(self):
-        return self._get_field('id')
+        return self._get_field("id")
 
     def get_free_physical_capacity(self):
-        return self._get_capacity_field('free_physical_space')
+        return self._get_capacity_field("free_physical_space")
 
     def get_free_virtual_capacity(self):
-        return self._get_capacity_field('free_virtual_space')
+        return self._get_capacity_field("free_virtual_space")
 
     def get_total_physical_capacity(self):
-        return self._get_capacity_field('total_physical_capacity')
+        return self._get_capacity_field("total_physical_capacity")
 
     def get_total_virtual_capacity(self):
-        return self._get_capacity_field('total_virtual_capacity')
+        return self._get_capacity_field("total_virtual_capacity")
 
     def update_total_virtual_capacity(self, total_virtual_capacity):
         if not isinstance(total_virtual_capacity, int):
             if not isinstance(total_virtual_capacity, Capacity):
-                raise ValueError('Parameter must be of type Integer or Capacity')
-            total_virtual_capacity = self.capacity_translator.to_api(total_virtual_capacity)
-        self.system.api.put('system/capacity/total_virtual_capacity', data=total_virtual_capacity)
+                raise ValueError("Parameter must be of type Integer or Capacity")
+            total_virtual_capacity = self.capacity_translator.to_api(
+                total_virtual_capacity
+            )
+        self.system.api.put(
+            "system/capacity/total_virtual_capacity", data=total_virtual_capacity
+        )

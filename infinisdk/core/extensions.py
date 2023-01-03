@@ -10,7 +10,7 @@
 # !
 import functools
 import types
-from typing import Callable, Type, Union, Any
+from typing import Any, Callable, Type, Union
 
 from sentinels import NOTHING
 
@@ -32,6 +32,7 @@ def _extend_method(objtype, name, wrap):
         extension.activate()
         func.__extension_deactivate__ = extension.deactivate
         return func
+
     return decorator
 
 
@@ -53,6 +54,7 @@ def add_attribute(objtype, name=None):
         extension.activate()
         property_func.__extension_deactivate__ = extension.deactivate
         return property_func
+
     return decorator
 
 
@@ -63,12 +65,14 @@ def clear_all():
 
 
 class Attachment:
-
     def __init__(self, objtype, name, func, wrap=False):
         super(Attachment, self).__init__()
         if wrap and not hasattr(objtype, name):
             raise RuntimeError(
-                'You asked to wrap {1!r} in {0.__name__}, but it doesn\'t have such a method'.format(objtype, name))
+                "You asked to wrap {1!r} in {0.__name__}, but it doesn't have such a method".format(
+                    objtype, name
+                )
+            )
         self._objtype = objtype
         self._name = name
         self._func = func
@@ -104,7 +108,7 @@ class Function(Attachment):
     def __call__(self, *args, **kwargs):
         if self._wrap:
             assert self._original
-            kwargs['_wrapped'] = self._original
+            kwargs["_wrapped"] = self._original
 
         # pylint: disable=attribute-defined-outside-init
         method = _BoundMethod(self._func, *args, **kwargs)
@@ -114,12 +118,11 @@ class Function(Attachment):
 
 
 class Method(Attachment):
-
     def __get__(self, obj, objclass):
         kwargs = {}
         if self._wrap:
             assert self._original
-            kwargs['_wrapped'] = self._original
+            kwargs["_wrapped"] = self._original
 
         # pylint: disable=attribute-defined-outside-init
         method = _BoundMethod(self._func, obj, **kwargs)
@@ -131,21 +134,23 @@ class Method(Attachment):
 
 
 class _BoundMethod(functools.partial):  # pylint: disable=inherit-non-class
-
     @property
     def __doc__(self):
         return self.func.__doc__
 
     def __repr__(self):
         # pylint: disable=missing-format-attribute, invalid-format-index
-        return '<Bound method {0.im_class.__name__}.{0.__name__} of {0.args[0]!r}>'.format(self)
-
+        return (
+            "<Bound method {0.im_class.__name__}.{0.__name__} of {0.args[0]!r}>".format(
+                self
+            )
+        )
 
 
 _PROPERTY_CACHE = "__property_cache__"
 
-class Property(Attachment):
 
+class Property(Attachment):
     def __get__(self, obj, objclass):
         caching = obj.__dict__.setdefault(_PROPERTY_CACHE, {})
         cached = caching.get(self, NOTHING)
@@ -160,6 +165,7 @@ class CachedClassProperty:
     Caches a class method result.
     Works only for read-only properties.
     """
+
     def __init__(self, f: Callable) -> None:
         self.f = f
         self._name = ""

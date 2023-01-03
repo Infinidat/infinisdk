@@ -1,17 +1,16 @@
 import collections
 
-
 _operator_name_to_sign_str = {
-    "eq": '=',
-    "gt": '>',
-    "lt": '<',
-    "ge": '>=',
-    "le": '<=',
-    "ne": '!='}
+    "eq": "=",
+    "gt": ">",
+    "lt": "<",
+    "ge": ">=",
+    "le": "<=",
+    "ne": "!=",
+}
 
 
 class FieldFilter:
-
     def __init__(self, field, operator_name, value):
         super(FieldFilter, self).__init__()
         self.field = field
@@ -20,30 +19,43 @@ class FieldFilter:
 
     def _translate(self, value, system):
         if self.operator_name in ("allof", "anyof", "noneof"):
-            if (not isinstance(value, collections.abc.Iterable) or isinstance(value, (str, bytes)) or
-                    not all(isinstance(element, str) for element in value)):
-                raise ValueError("Expected an iterable of strings, but got {}".format(repr(value)))
+            if (
+                not isinstance(value, collections.abc.Iterable)
+                or isinstance(value, (str, bytes))
+                or not all(isinstance(element, str) for element in value)
+            ):
+                raise ValueError(
+                    "Expected an iterable of strings, but got {}".format(repr(value))
+                )
             return ",".join(value)
-        if isinstance(self.value, collections.abc.Iterable) and not isinstance(self.value, (str, bytes)):
-            return "({})".format(",".join(str(self._translate_single_value(val, system)) for val in self.value))
+        if isinstance(self.value, collections.abc.Iterable) and not isinstance(
+            self.value, (str, bytes)
+        ):
+            return "({})".format(
+                ",".join(
+                    str(self._translate_single_value(val, system)) for val in self.value
+                )
+            )
         return self._translate_single_value(value, system)
 
     def add_to_url(self, urlobj, system):
         value = self._translate(self.value, system)
-        return urlobj.add_query_param(self.field.api_name,
-                                      "{}:{}".format(self.operator_name, value))
+        return urlobj.add_query_param(
+            self.field.api_name, "{}:{}".format(self.operator_name, value)
+        )
 
     def __str__(self):
-        return  "{0.field.api_name}{1}{0.value}".format(
-            self, _operator_name_to_sign_str.get(self.operator_name, self.operator_name))
+        return "{0.field.api_name}{1}{0.value}".format(
+            self, _operator_name_to_sign_str.get(self.operator_name, self.operator_name)
+        )
 
     def __repr__(self):
         return "<{0.__class__.__name__}: {0}>".format(self)
 
     def _translate_single_value(self, value, system):
-        if value is None and self.operator_name.startswith('is'):
-            return 'null'
+        if value is None and self.operator_name.startswith("is"):
+            return "null"
         value = self.field.binding.get_api_value_from_value(system, None, None, value)
         if value is None:
-            value = 'null'
+            value = "null"
         return value

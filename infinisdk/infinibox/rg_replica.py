@@ -1,10 +1,11 @@
 # pylint: disable=no-member
 import gossip
-from ..core.utils import end_reraise_context
+
 from ..core import Field, MillisecondsDatetimeType
 from ..core.bindings import RelatedObjectBinding
 from ..core.system_object import SystemObject
 from ..core.translators_and_types import MillisecondsDeltaType
+from ..core.utils import end_reraise_context
 
 
 class RgReplica(SystemObject):
@@ -49,7 +50,12 @@ class RgReplica(SystemObject):
             is_filterable=True,
             is_sortable=True,
         ),
-        Field("remote_replication_group_name", is_filterable=True, is_sortable=True, cached=True),
+        Field(
+            "remote_replication_group_name",
+            is_filterable=True,
+            is_sortable=True,
+            cached=True,
+        ),
         Field(
             "remote_replica_id",
             type=int,
@@ -91,9 +97,9 @@ class RgReplica(SystemObject):
             is_filterable=True,
             is_sortable=True,
         ),
-        Field('state', type=str, cached=False, is_filterable=True),
-        Field('state_description', cached=False),
-        Field('state_reason', cached=False),
+        Field("state", type=str, cached=False, is_filterable=True),
+        Field("state_description", cached=False),
+        Field("state_reason", cached=False),
     ]
 
     @classmethod
@@ -108,8 +114,10 @@ class RgReplica(SystemObject):
         """
         Starts a sync job
         """
-        returned = self.system.api.post(self.get_this_url_path().add_path('sync'),
-                                        headers={'X-INFINIDAT-RAW-RESPONSE': 'true'})
+        returned = self.system.api.post(
+            self.get_this_url_path().add_path("sync"),
+            headers={"X-INFINIDAT-RAW-RESPONSE": "true"},
+        )
         result = returned.get_result()
         return result
 
@@ -117,26 +125,48 @@ class RgReplica(SystemObject):
         """
         Suspends this rg_replica
         """
-        gossip.trigger_with_tags('infinidat.sdk.pre_rg_replica_suspend', {'rg_replica': self}, tags=['infinibox'])
+        gossip.trigger_with_tags(
+            "infinidat.sdk.pre_rg_replica_suspend",
+            {"rg_replica": self},
+            tags=["infinibox"],
+        )
         try:
-            self.system.api.post(self.get_this_url_path().add_path('suspend'))
-        except Exception as e: # pylint: disable=broad-except
+            self.system.api.post(self.get_this_url_path().add_path("suspend"))
+        except Exception as e:  # pylint: disable=broad-except
             with end_reraise_context():
-                gossip.trigger_with_tags('infinidat.sdk.rg_replica_suspend_failure',
-                                         {'rg_replica': self, 'exception': e}, tags=['infinibox'])
-        gossip.trigger_with_tags('infinidat.sdk.post_rg_replica_suspend', {'rg_replica': self}, tags=['infinibox'])
-        self.invalidate_cache('state', 'state_reason', 'state_description')
+                gossip.trigger_with_tags(
+                    "infinidat.sdk.rg_replica_suspend_failure",
+                    {"rg_replica": self, "exception": e},
+                    tags=["infinibox"],
+                )
+        gossip.trigger_with_tags(
+            "infinidat.sdk.post_rg_replica_suspend",
+            {"rg_replica": self},
+            tags=["infinibox"],
+        )
+        self.invalidate_cache("state", "state_reason", "state_description")
 
     def resume(self):
         """
         Resumes this rg_replica
         """
-        gossip.trigger_with_tags('infinidat.sdk.pre_rg_replica_resume', {'rg_replica': self}, tags=['infinibox'])
+        gossip.trigger_with_tags(
+            "infinidat.sdk.pre_rg_replica_resume",
+            {"rg_replica": self},
+            tags=["infinibox"],
+        )
         try:
-            self.system.api.post(self.get_this_url_path().add_path('resume'))
-        except Exception as e: # pylint: disable=broad-except
+            self.system.api.post(self.get_this_url_path().add_path("resume"))
+        except Exception as e:  # pylint: disable=broad-except
             with end_reraise_context():
-                gossip.trigger_with_tags('infinidat.sdk.rg_replica_resume_failure',
-                                         {'rg_replica': self, 'exception': e}, tags=['infinibox'])
-        gossip.trigger_with_tags('infinidat.sdk.post_rg_replica_resume', {'rg_replica': self}, tags=['infinibox'])
-        self.invalidate_cache('state', 'state_reason', 'state_description')
+                gossip.trigger_with_tags(
+                    "infinidat.sdk.rg_replica_resume_failure",
+                    {"rg_replica": self, "exception": e},
+                    tags=["infinibox"],
+                )
+        gossip.trigger_with_tags(
+            "infinidat.sdk.post_rg_replica_resume",
+            {"rg_replica": self},
+            tags=["infinibox"],
+        )
+        self.invalidate_cache("state", "state_reason", "state_description")

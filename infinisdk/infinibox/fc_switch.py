@@ -4,7 +4,7 @@ from ..core.translators_and_types import WWNType
 
 
 class FcSwitch(SystemObject):
-    URL_PATH = 'fc/switches'
+    URL_PATH = "fc/switches"
 
     FIELDS = [
         Field("id", type=int, is_identity=True, cached=True),
