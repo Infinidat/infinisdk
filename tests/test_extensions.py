@@ -12,6 +12,26 @@ def test_no_extensions_by_default():
     assert len(extensions.active) == 0
 
 
+class Foo:
+    VAR = "test"
+    BAR = 0
+
+    @extensions.CachedClassProperty
+    # pylint: disable=no-self-argument
+    def method(cls):
+        cls.BAR += 1
+        return cls.VAR
+
+
+def test_cached_class_property():
+    first_call = Foo.method
+    assert Foo.BAR == 1
+    assert first_call == "test"
+    second_call = Foo.method
+    assert Foo.BAR == 1
+    assert second_call == "test"
+
+
 @pytest.mark.parametrize('different_name', [True, False])
 def test_extending(infinibox, different_name):
     with pytest.raises(AttributeError):

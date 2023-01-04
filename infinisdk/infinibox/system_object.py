@@ -1,7 +1,9 @@
 from urlobject import URLObject as URL
 from ..core.system_object import BaseSystemObject, SystemObject, DONT_CARE
 from ..core.exceptions import InfiniSDKException, CacheMiss
+from ..core.extensions import CachedClassProperty
 from ..core.type_binder import SubObjectTypeBinder, SubObjectMonomorphicBinder
+from ..core.field import Field
 from .lun import LogicalUnit, LogicalUnitContainer
 from .metadata_holder import MetadataHolder
 from ..core.utils import end_reraise_context
@@ -142,9 +144,19 @@ class InfiniBoxSubObject(InfiniBoxObject):
     def _is_caching_enabled(self):
         return self.system.is_caching_enabled()
 
+    @CachedClassProperty
+    # pylint: disable=no-self-argument
+    def parent_field(cls) -> Field:
+        parent_fields = [field for field in cls.FIELDS if field.is_parent_field]
+        if len(parent_fields) != 1:
+            raise InfiniSDKException(f"There can only be 1 parent field. Found {len(parent_fields)}")
+        return parent_fields[0]
+
+
     @classmethod
     def create(cls, system, binder, **fields):  # pylint: disable=arguments-differ
         cls._trigger_pre_create(system, fields)
+        assert cls.parent_field
         parent = binder.get_parent()
         return cls._create(
             system,
@@ -158,7 +170,7 @@ class InfiniBoxSubObject(InfiniBoxObject):
         return parent.get_this_url_path().add_path(cls.URL_PATH)
 
     def get_parent(self):
-        return getattr(self, f"get_{self.PARENT_FIELD}")(from_cache=True)
+        return getattr(self, f"get_{self.parent_field.name}")(from_cache=True)
 
     def get_this_url_path(self):
         return (
@@ -171,6 +183,18 @@ class InfiniBoxSubObject(InfiniBoxObject):
 
 
 class BaseSystemSubObject(BaseSystemObject):
+    def __init__(self, system, initial_data):
+        super().__init__(system, initial_data)
+        assert self.parent_field
+
+    @CachedClassProperty
+    # pylint: disable=no-self-argument
+    def parent_field(cls) -> Field:
+        parent_fields = [field for field in cls.FIELDS if field.is_parent_field]
+        if len(parent_fields) != 1:
+            raise InfiniSDKException(f"There can only be 1 parent field. Found {len(parent_fields)}")
+        return parent_fields[0]
+
     def _is_caching_enabled(self):
         return self.system.is_caching_enabled()
 
@@ -179,7 +203,7 @@ class BaseSystemSubObject(BaseSystemObject):
         return parent.get_this_url_path().add_path(cls.URL_PATH)
 
     def get_parent(self):
-        return getattr(self, f"get_{self.PARENT_FIELD}")(from_cache=True)
+        return getattr(self, f"get_{self.parent_field.name}")(from_cache=True)
 
     def get_this_url_path(self):
         return (

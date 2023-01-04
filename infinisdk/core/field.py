@@ -35,6 +35,7 @@ class Field(FieldBase):
         new_to_version = kwargs.pop("new_to", None)
         until_version = kwargs.pop("until", None)
         toggle_name = kwargs.pop("toggle_name", None)
+        is_parent_field = kwargs.pop("is_parent_field", False)
         super(Field, self).__init__(*args, **kwargs)
 
         if self.is_identity:  # pylint: disable=no-member
@@ -60,6 +61,8 @@ class Field(FieldBase):
         self.new_to_version = new_to_version
         #:Specifies the version this field is deprecated since
         self.until_version = until_version
+        #:Specifies if the field contains the parent object of the current object
+        self.is_parent_field = is_parent_field
         #:Specifies the name for auto-updater: enable_toggle_name & disable_toggle_name will be added to the object
         if toggle_name:
             assert self.type.type is bool  # pylint: disable=no-member

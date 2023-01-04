@@ -4,7 +4,6 @@ from .system_object import InfiniBoxSubObject
 
 
 class SharePermission(InfiniBoxSubObject):
-    PARENT_FIELD = "share"
     URL_PATH = "permissions"
 
     FIELDS = [
@@ -19,6 +18,7 @@ class SharePermission(InfiniBoxSubObject):
             creation_parameter=True,
             optional=False,
             use_in_repr=True,
+            is_parent_field=True,
         ),
         Field(
             "sid",

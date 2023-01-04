@@ -1,9 +1,15 @@
 import copy
+import gossip
+import re
 import pytest
+from unittest.mock import patch
 from infinisdk.core import Field, SystemObject
 from infinisdk.core.exceptions import (APICommandFailed,
                                        AttributeAlreadyExists, CacheMiss,
-                                       MissingFields, MethodDisabled)
+                                       MissingFields, MethodDisabled, InfiniSDKException)
+from infinisdk.infinibox.system_object import InfiniBoxSubObject, BaseSystemSubObject
+from infinisdk.core.type_binder import SubObjectTypeBinder
+from infinisdk.infinibox.share import Share
 
 
 # pylint: disable=misplaced-comparison-constant, unused-argument
@@ -13,6 +19,44 @@ class FakeSystemObject(SystemObject):
 
     def _is_caching_enabled(self):
         return False
+
+
+class FakeInfiniBoxSubObject(InfiniBoxSubObject):
+
+    def _is_caching_enabled(self):
+        return False
+
+
+class FakeBaseSystemSubObject(BaseSystemSubObject):
+
+    def _is_caching_enabled(self):
+        return False
+
+
+class BadInfiniBoxSubObject(FakeInfiniBoxSubObject):
+    URL_PATH = "bad"
+
+    FIELDS = [
+        Field("id", type=int),
+        Field(name="name"),
+        Field("parent1",
+              is_parent_field=True,
+              type="infinisdk.infinibox.share:Share",
+              ),
+        Field("parent2", is_parent_field=True),
+    ]
+
+
+class BadBaseSystemSubObject(FakeBaseSystemSubObject):
+    URL_PATH = "bad-base-object"
+
+    FIELDS = [
+        Field("id", type=int),
+        Field(name="name"),
+        Field("parent1", is_parent_field=True),
+        Field("parent2", is_parent_field=True),
+    ]
+
 
 class SampleBaseObject(FakeSystemObject):
 
@@ -62,6 +106,17 @@ class FakeSystem:
     @staticmethod
     def get_type_name():
         return 'infinibox'
+
+
+def test_cant_have_more_than_one_parent_fields_infinibox_object(system):
+    with patch("infinisdk.infinibox.system_object.InfiniBoxSubObject._trigger_pre_create") as mock_gossip:
+        mock_gossip.side_effect = gossip.get_hook("infinidat.sdk.pre_creation_data_validation").unregister_all()
+        with pytest.raises(InfiniSDKException, match=re.escape("There can only be 1 parent field. Found 2")):
+            BadInfiniBoxSubObject.create(system, binder=SubObjectTypeBinder(system, BadInfiniBoxSubObject, Share))
+
+def test_cant_have_more_than_one_parent_fields_base_system_object(system):
+    with pytest.raises(InfiniSDKException, match=re.escape("There can only be 1 parent field. Found 2")):
+        BadBaseSystemSubObject(system, {"fake_data": "data", "id": 12})
 
 
 def test_num_fields(system):

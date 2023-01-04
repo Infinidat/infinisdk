@@ -10,6 +10,7 @@
 # !
 import functools
 import types
+from typing import Callable, Type, Union, Any
 
 from sentinels import NOTHING
 
@@ -152,3 +153,22 @@ class Property(Attachment):
             cached = self._func(obj)
             caching[self] = cached
         return cached
+
+
+class CachedClassProperty:
+    """
+    Caches a class method result.
+    Works only for read-only properties.
+    """
+    def __init__(self, f: Callable) -> None:
+        self.f = f
+        self._name = ""
+
+    def __set_name__(self, objtype: Type, name: str) -> None:
+        self._name = name
+
+    # pylint: disable=unsubscriptable-object
+    def __get__(self, instance: Type = None, objtype: Type = None) -> Union[Type, Any]:
+        value = self.f(objtype)
+        setattr(objtype, self._name, value)
+        return value
