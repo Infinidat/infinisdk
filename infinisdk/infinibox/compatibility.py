@@ -248,6 +248,12 @@ class Compatibility:
             self.get_parsed_system_version() >= "7.1"
         )
 
+    def has_replicate_snapshots_suffix_lock(self):
+        feature_version = self._get_feature_version("replicate_snapshots")
+        if feature_version is not NOTHING:
+            return feature_version >= 1
+        return self.get_parsed_system_version() >= "7.2"
+
     def has_standard_counts(self):
         return self.get_parsed_system_version() >= "7.0"
 

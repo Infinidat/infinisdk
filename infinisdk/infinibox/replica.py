@@ -512,6 +512,25 @@ class Replica(SystemObject):
             optional=True,
             feature_name="replicate_snapshots",
         ),
+        Field(
+            "remote_snapshot_suffix",
+            mutable=True,
+            optional=True,
+            creation_parameter=True,
+            is_filterable=True,
+            is_sortable=True,
+            feature_name="replicate_snapshots_suffix_lock",
+        ),
+        Field(
+            "lock_remote_snapshot_retention",
+            optional=True,
+            creation_parameter=True,
+            mutable=True,
+            type=MillisecondsDeltaType,
+            is_filterable=True,
+            is_sortable=True,
+            feature_name="replicate_snapshots_suffix_lock",
+        ),
     ]
 
     @classmethod
