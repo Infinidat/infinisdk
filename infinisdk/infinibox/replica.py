@@ -503,7 +503,7 @@ class Replica(SystemObject):
         ),
         Field(
             "snapshots_retention",
-            type=int,
+            type=MillisecondsDeltaType,
             creation_parameter=True,
             is_filterable=True,
             is_sortable=True,

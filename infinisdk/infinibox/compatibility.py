@@ -244,7 +244,9 @@ class Compatibility:
         return self.get_parsed_system_version() >= "7.1"
 
     def has_replicate_snapshots(self):
-        return self.get_parsed_system_version() >= "7.1"
+        return (self._has_feature("replicate_snapshots")) or (
+            self.get_parsed_system_version() >= "7.1"
+        )
 
     def has_standard_counts(self):
         return self.get_parsed_system_version() >= "7.0"
