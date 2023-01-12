@@ -222,7 +222,15 @@ class Compatibility:
         return self.get_parsed_system_version() >= '7.1'
 
     def has_replicate_snapshots(self):
-        return self.get_parsed_system_version() >= '7.1'
+        return (self._has_feature("replicate_snapshots")) or (
+            self.get_parsed_system_version() >= "7.1"
+        )
+
+    def has_standard_counts(self):
+        return self.get_parsed_system_version() >= "7.0"
+
+    def has_vvol_counts(self):
+        return self.get_parsed_system_version() >= "7.0" and self.has_vvol()
 
     def has_standard_and_vvol_counts(self):
         return self.get_parsed_system_version() >= '7.0'
