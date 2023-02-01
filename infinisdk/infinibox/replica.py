@@ -13,7 +13,11 @@ from ..core.exceptions import (
     TooManyObjectsFound,
 )
 from ..core.system_object import SystemObject
-from ..core.translators_and_types import CapacityType, MillisecondsDeltaType
+from ..core.translators_and_types import (
+    CapacityType,
+    MillisecondsDeltaType,
+    SecondsDeltaType,
+)
 from ..core.type_binder import TypeBinder
 from ..core.utils import end_reraise_context
 
@@ -503,7 +507,7 @@ class Replica(SystemObject):
         ),
         Field(
             "snapshots_retention",
-            type=MillisecondsDeltaType,
+            type=SecondsDeltaType,
             creation_parameter=True,
             is_filterable=True,
             is_sortable=True,
@@ -526,7 +530,7 @@ class Replica(SystemObject):
             optional=True,
             creation_parameter=True,
             mutable=True,
-            type=MillisecondsDeltaType,
+            type=SecondsDeltaType,
             is_filterable=True,
             is_sortable=True,
             feature_name="replicate_snapshots_suffix_lock",

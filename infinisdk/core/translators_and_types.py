@@ -75,6 +75,23 @@ MillisecondsDatetimeType = TypeInfo(
 )
 
 
+class SecondsDatetimeTranslator(ValueTranslator):
+    def _to_api(self, value):
+        if value is None:
+            return None
+        return int(round(value.float_timestamp))
+
+    def _from_api(self, value):
+        if value is None:
+            return None
+        return arrow.get(value)
+
+
+SecondsDatetimeType = TypeInfo(
+    type=arrow.Arrow, api_type=int, translator=SecondsDatetimeTranslator()
+)
+
+
 class MillisecondsDeltaTranslator(ValueTranslator):
     def _to_api(self, value):
         if value == 0:
@@ -98,6 +115,22 @@ MillisecondsDeltaType = TypeInfo(
     type=timedelta, api_type=int, translator=MillisecondsDeltaTranslator()
 )
 
+
+class SecondsDeltaTranslator(ValueTranslator):
+    def _to_api(self, value):
+        if value == 0:
+            return 0
+        return int(value.total_seconds())
+
+    def _from_api(self, value):
+        if value is None:
+            return None
+        return timedelta(seconds=int(value))
+
+
+SecondsDeltaType = TypeInfo(
+    type=timedelta, api_type=int, translator=SecondsDeltaTranslator()
+)
 
 WWNType = TypeInfo(type=WWN, api_type=str)
 
