@@ -15,7 +15,7 @@ class SharePermission(InfiniBoxSubObject):
             api_name="share_id",
             is_filterable=True,
             is_sortable=True,
-            creation_parameter=True,
+            creation_parameter=False,
             optional=False,
             use_in_repr=True,
             is_parent_field=True,

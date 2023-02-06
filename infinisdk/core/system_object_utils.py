@@ -94,9 +94,6 @@ def get_data_for_object_creation(object_type, system, fields):
         if field.name not in fields:
             if not field.creation_parameter or field.optional:
                 continue
-        if field.is_parent_field:
-            extra_fields.pop(field.name)
-            continue
 
         field_value = extra_fields.get(field.name, NOTHING)
         extra_fields.pop(field.name, None)

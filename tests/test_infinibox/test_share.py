@@ -18,3 +18,11 @@ def test_verify_fields(infinibox, share, field):
 def test_create_share_with_filesystem_name(infinibox, filesystem):
     share = create_share(infinibox, filesystem=filesystem.get_name())
     assert share.get_filesystem() == filesystem
+
+@pytest.mark.xfail(strict=True)
+def test_create_share_permissions(infinibox, filesystem_windows):
+    smb_user = infinibox.smb_users.create(name="user1")
+    share = create_share(infinibox, filesystem=filesystem_windows.get_name())
+    # method not yet implemented
+    share_permission = share.permissions.create(sid=smb_user.get_sid(), access="READONLY")
+    assert share_permission.get_parent() == share

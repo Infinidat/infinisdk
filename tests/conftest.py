@@ -207,6 +207,10 @@ def filesystem(infinibox, pool):
     return create_filesystem(infinibox, pool_id=pool.id)
 
 @pytest.fixture
+def filesystem_windows(infinibox, pool):
+    return create_filesystem(infinibox, pool_id=pool.id, security_style="WINDOWS")
+
+@pytest.fixture
 def export(infinibox, filesystem):
     return create_export(infinibox, filesystem=filesystem)
 

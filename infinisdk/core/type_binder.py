@@ -251,7 +251,6 @@ class SubObjectTypeBinder(TypeBinder):
         self._parent = parent
 
     def create(self, *args, **kwargs):
-        kwargs[self._parent.get_type_name()] = self._parent
         return self.object_type.create(self.system, self, **kwargs)
 
     def get_parent(self):
