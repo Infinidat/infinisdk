@@ -15,6 +15,9 @@ include:
     ref: master
     file: /templates/itzik_setup.yml
 
+variables:
+  BUNDLE_NAME: new-infra
+
 stages:
   - test
   - deploy
