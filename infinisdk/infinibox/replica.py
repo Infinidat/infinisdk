@@ -507,7 +507,7 @@ class Replica(SystemObject):
         ),
         Field(
             "snapshots_retention",
-            type=SecondsDeltaType,
+            type=int,
             creation_parameter=True,
             is_filterable=True,
             is_sortable=True,

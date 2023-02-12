@@ -11,7 +11,6 @@ from ..core import CapacityType, Field, MillisecondsDatetimeType
 from ..core.api.special_values import OMIT
 from ..core.bindings import RelatedObjectBinding, RelatedObjectNamedBinding
 from ..core.exceptions import ObjectNotFound, TooManyObjectsFound
-from ..core.translators_and_types import SecondsDatetimeType, SecondsDeltaType
 from ..core.type_binder import PolymorphicBinder, TypeBinder
 from ..core.utils import (
     DONT_CARE,
@@ -226,12 +225,12 @@ class Dataset(InfiniBoxObject):
         Field("replication_types", type=list, new_to="5.5.0", is_filterable=True),
         Field(
             "snapshot_expires_at",
-            type=SecondsDatetimeType,
+            type=int,
             feature_name="replicate_snapshots",
         ),
         Field(
             "snapshot_retention",
-            type=SecondsDeltaType,
+            type=int,
             creation_parameter=True,
             optional=True,
             is_filterable=True,

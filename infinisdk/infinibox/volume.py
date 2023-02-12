@@ -6,7 +6,6 @@ from ..core.api.special_values import OMIT, Autogenerate
 from ..core.bindings import RelatedObjectBinding
 from ..core.exceptions import InfiniSDKException
 from ..core.object_query import LazyQuery
-from ..core.translators_and_types import SecondsDatetimeType, SecondsDeltaType
 from ..core.utils import end_reraise_context
 from .dataset import Dataset, DatasetTypeBinder
 from .lun import LogicalUnit, LogicalUnitContainer
@@ -112,12 +111,12 @@ class Volume(Dataset):
         Field("nguid", feature_name="nvme"),
         Field(
             "snapshot_expires_at",
-            type=SecondsDatetimeType,
+            type=int,
             feature_name="replicate_snapshots",
         ),
         Field(
             "snapshot_retention",
-            type=SecondsDeltaType,
+            type=int,
             creation_parameter=True,
             optional=True,
             is_filterable=True,
