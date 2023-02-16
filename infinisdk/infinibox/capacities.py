@@ -71,6 +71,39 @@ class InfiniBoxSystemCapacity:
     def get_total_virtual_capacity(self):
         return self._get_capacity_field("total_virtual_capacity")
 
+    def get_total_allocated_physical_capacity(self):
+        return self._get_capacity_field("total_allocated_physical_space")
+
+    def get_allocated_physical_capacity_within_pools(self):
+        return self._get_capacity_field("allocated_physical_space_within_pools")
+
+    def get_allocated_virtual_capacity_within_pools(self):
+        return self._get_capacity_field("allocated_virtual_space_within_pools")
+
+    def get_dynamic_spare_drive_cost(self):
+        return self._get_field("dynamic_spare_drive_cost")
+
+    def get_used_dynamic_spare_partitions(self):
+        return self._get_field("used_dynamic_spare_partitions")
+
+    def get_used_dynamic_spare_capacity(self):
+        return self._get_capacity_field("used_dynamic_spare_bytes")
+
+    def get_used_spare_partitions(self):
+        return self._get_field("used_spare_partitions")
+
+    def get_used_spare_capacity(self):
+        return self._get_capacity_field("used_spare_bytes")
+
+    def get_total_spare_partitions(self):
+        return self._get_field("total_spare_partitions")
+
+    def get_total_spare_capacity(self):
+        return self._get_capacity_field("total_spare_bytes")
+
+    def get_data_reduction_ratio(self):
+        return self._get_field("data_reduction_ratio")
+
     def update_total_virtual_capacity(self, total_virtual_capacity):
         if not isinstance(total_virtual_capacity, int):
             if not isinstance(total_virtual_capacity, Capacity):

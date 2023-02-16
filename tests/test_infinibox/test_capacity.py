@@ -20,8 +20,12 @@ def test_virtual_capacity(infinibox):
 
 @versioning_requiremnts(relevant_from='3.0')
 def test_get_fields(infinibox):
-    fileds = ['total_virtual_capacity', 'total_physical_capacity']
-    res = infinibox.capacities.get_fields(fileds)
-    assert len(res) == 2
-    assert all([k in fileds for k in res.keys()])
-    assert all([isinstance(v, Capacity) for v in res.values()])
+    capacity_fields = ['total_physical_capacity', 'free_physical_space', 'total_virtual_capacity', 'free_virtual_space', 'total_spare_bytes', 'used_spare_bytes', 'used_dynamic_spare_bytes', 'total_allocated_physical_space']
+    int_fields = ["total_spare_partitions", "used_spare_partitions", "used_dynamic_spare_partitions", "dynamic_spare_drive_cost"]
+    res_capacities = infinibox.capacities.get_fields(capacity_fields)
+    res_ints = infinibox.capacities.get_fields(int_fields)
+    assert len(res_capacities) == 8
+    assert len(res_ints) == 4
+    assert all([k in capacity_fields for k in res_capacities.keys()]) and all([k in int_fields for k in res_ints.keys()])
+    assert all([isinstance(v, Capacity) for v in res_capacities.values()])
+    assert all([isinstance(v, int) for v in res_ints.values()])
