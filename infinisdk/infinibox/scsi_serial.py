@@ -22,6 +22,10 @@ class SCSISerial:
                 self.reserved
             ) = self.system_id = self.volume_id = None
 
+    @property
+    def _hex_serial(self):
+        return int(self.serial, base=16)
+
     def __repr__(self):
         return self.serial
 
@@ -34,6 +38,26 @@ class SCSISerial:
         if not isinstance(other, SCSISerial):
             return self.serial != other
         return self.serial != other.serial
+
+    def __gt__(self, other):
+        if not isinstance(other, SCSISerial):
+            return self._hex_serial > other
+        return self._hex_serial > other._hex_serial
+
+    def __lt__(self, other):
+        if not isinstance(other, SCSISerial):
+            return self._hex_serial < other
+        return self._hex_serial < other._hex_serial
+
+    def __ge__(self, other):
+        if not isinstance(other, SCSISerial):
+            return self._hex_serial >= other
+        return self._hex_serial >= other._hex_serial
+
+    def __le__(self, other):
+        if not isinstance(other, SCSISerial):
+            return self._hex_serial <= other
+        return self._hex_serial <= other._hex_serial
 
     def __hash__(self):
         return hash(self.serial)
