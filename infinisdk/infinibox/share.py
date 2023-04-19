@@ -113,3 +113,8 @@ class Share(InfiniBoxObject):
     @mitba.cached_property
     def permissions(self):
         return SubObjectTypeBinder(self.system, SharePermission, self)
+
+    def update_field(self, field_name, field_value):
+        if field_name == "access_based_enumeration":
+            field_value = False
+        return super().update_field(field_name, field_value)
