@@ -1,6 +1,10 @@
 Version 215.1.4 (Released 2023-04-19)
 -------------------------------------
+* #16137: Disable access_based_enumeration
 
+Version 215.1.3 (Released 2023-02-02)
+-------------------------------------
+* #16: Fix installation with newer setuptools (Github)
 
 Version 215.1.2 (Released 2022-12-26)
 -------------------------------------
