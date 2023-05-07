@@ -1,47 +1,45 @@
-import confetti
 import os
 from configparser import ConfigParser
 
+import confetti
 
-config = confetti.Config(dict(
-
-    check_version_compatibility=True,
-
-    ini_file_path="~/.infinidat/infinisdk.ini",
-
-    api={
-        'log': {
-            'pretty_json': False,
-        }
-    },
-
-    defaults=dict(
-        system_api_port=80,
-        retry_sleep_seconds=5,
-    ),
-    infinibox=dict(
-
-        compatible_versions=[
-            "ge:2.0",
-        ],
-
+config = confetti.Config(
+    dict(
+        check_version_compatibility=True,
+        ini_file_path="~/.infinidat/infinisdk.ini",
+        api={
+            "log": {
+                "pretty_json": False,
+            }
+        },
         defaults=dict(
-            system_api=dict(
-                timeout_seconds=30,
+            system_api_port=80,
+            retry_sleep_seconds=5,
+        ),
+        infinibox=dict(
+            compatible_versions=[
+                "ge:2.0",
+            ],
+            defaults=dict(
+                system_api=dict(
+                    timeout_seconds=30,
+                ),
+                enlosure_drives=dict(
+                    total_count=dict(mock=0, simulator=480),
+                ),
             ),
-            enlosure_drives=dict(
-                total_count=dict(mock=0, simulator=480),
+            approval_required_codes=tuple(
+                (
+                    "APPROVAL_REQUIRED",
+                    "APPROVAL_REQUIRED_VOLUME_HAS_CHILDREN",
+                )
             ),
         ),
-        approval_required_codes=tuple((
-            "APPROVAL_REQUIRED",
-            "APPROVAL_REQUIRED_VOLUME_HAS_CHILDREN",
-        )),
-    ),
-
-))
+    )
+)
 
 _cached_ini_parser = None
+
 
 def get_ini_option(section, option, default=None):
     global _cached_ini_parser  # pylint: disable=global-statement

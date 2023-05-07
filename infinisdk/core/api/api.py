@@ -1,40 +1,59 @@
-import colorama
 import copy
-import flux
-import gossip
-import http.client as httplib
 import json
-import requests
 import socket
 import sys
-import urllib3.exceptions
-from ..config import config
-from ..exceptions import (APICommandFailed, APITransportFailure,
-                          CommandNotApproved, MethodDisabled,
-                          SystemNotFoundException, RelatedSystemNotFound)
-from .special_values import translate_special_values
+from base64 import b64encode
 from contextlib import contextmanager
 from functools import partial
+from http import client as httplib
+from urllib.parse import unquote as unquote_url
+
+import colorama
+import flux
+import gossip
+import requests
+import urllib3.exceptions
 from logbook import Logger
-from base64 import b64encode
 from requests.exceptions import RequestException
 from sentinels import NOTHING
-from urllib.parse import unquote as unquote_url
 from urlobject import URLObject as URL
 from vintage import warn_deprecation
 
-_RETRY_REQUESTS_EXCEPTION_TYPES = (RequestException, socket.error, urllib3.exceptions.ProtocolError,
-                                   urllib3.exceptions.TimeoutError)
-_REQUESTS_HTTP_EXCEPTION_TYPES = (requests.exceptions.HTTPError, requests.models.HTTPError)
+from ..config import config
+from ..exceptions import (
+    APICommandFailed,
+    APITransportFailure,
+    CommandNotApproved,
+    MethodDisabled,
+    RelatedSystemNotFound,
+    SystemNotFoundException,
+)
+from .special_values import translate_special_values
+
+_RETRY_REQUESTS_EXCEPTION_TYPES = (
+    RequestException,
+    socket.error,
+    urllib3.exceptions.ProtocolError,
+    urllib3.exceptions.TimeoutError,
+)
+_REQUESTS_HTTP_EXCEPTION_TYPES = (
+    requests.exceptions.HTTPError,
+    requests.models.HTTPError,
+)
 
 _logger = Logger(__name__)
+
 
 def _get_request_delegate(http_method):
     def returned(self, path, **kwargs):
         return self.request(http_method, path=path, **kwargs)
+
     returned.__name__ = http_method
-    returned.__doc__ = "Shortcut for :func:`.request({!r}) <API.request>`".format(http_method)
+    returned.__doc__ = "Shortcut for :func:`.request({!r}) <API.request>`".format(
+        http_method
+    )
     return returned
+
 
 def _join_path(url, path):
     _url = URL(url)
@@ -48,11 +67,10 @@ def _join_path(url, path):
 
 def _approval_preprocessor(approve, request):
     if request.method != "get" and not request.url.path.startswith("/api/internal/"):
-        request.url = request.url.set_query_param('approved', str(approve).lower())
+        request.url = request.url.set_query_param("approved", str(approve).lower())
 
 
 class API:
-
     def __init__(self, target, auth, use_ssl, ssl_cert):
         super(API, self).__init__()
         self._auth = None
@@ -68,17 +86,21 @@ class API:
         self._auto_retry_predicates = {}
         self._session = None
         self.reinitialize_session(auth=auth)
-        self._urls = [self._url_from_address(address, use_ssl) for address in target.get_api_addresses()]
+        self._urls = [
+            self._url_from_address(address, use_ssl)
+            for address in target.get_api_addresses()
+        ]
         self._active_url = None
         self._checked_version = False
-        self._no_response_logs = 0 # Use counter instead of bool, improves support for coroutines
+        self._no_response_logs = (
+            0  # Use counter instead of bool, improves support for coroutines
+        )
         self._use_pretty_json = config.root.api.log.pretty_json
         self._login_refresh_enabled = True
         self._disabled_http_methods = set()
 
     def save_credentials(self):
-        """Returns a copy of the current credentials, useful for loading them later
-        """
+        """Returns a copy of the current credentials, useful for loading them later"""
         return [copy.deepcopy(c) for c in self._session.cookies]
 
     def load_credentials(self, creds):
@@ -89,7 +111,6 @@ class API:
         self._session.cookies.clear()
         for c in creds:
             self._session.cookies.set_cookie(c)
-
 
     @contextmanager
     def disabled_login_refresh_context(self):
@@ -126,8 +147,7 @@ class API:
 
     @contextmanager
     def use_basic_auth_context(self):
-        """Causes API requests to send auth through Basic authorization
-        """
+        """Causes API requests to send auth through Basic authorization"""
         prev = self._use_basic_auth
         try:
             self._use_basic_auth = True
@@ -180,7 +200,6 @@ class API:
             if was_logged_in:
                 self.mark_logged_in()
 
-
     @property
     def urls(self):
         return list(self._urls)
@@ -188,7 +207,7 @@ class API:
     @property
     def url(self):
         if not self._urls:
-            raise RuntimeError('No URLs configured for {}'.format(self.system))
+            raise RuntimeError("No URLs configured for {}".format(self.system))
         return self._urls[0]
 
     @contextmanager
@@ -201,8 +220,7 @@ class API:
 
     @contextmanager
     def get_approval_context(self, value):
-        """A context manager that controls whether requests are automatically approved (confirmed)
-        """
+        """A context manager that controls whether requests are automatically approved (confirmed)"""
         with self.query_preprocessor(partial(_approval_preprocessor, value)):
             yield
 
@@ -286,7 +304,7 @@ class API:
         >>> with system.api.get_auth_context('username', 'password'):
         ...     ... # execute operations as 'username'
         """
-        _logger.debug('Changing credentials to {}', username)
+        _logger.debug("Changing credentials to {}", username)
         auth = (username, password)
         prev = self.get_auth()
         prev_cookies = self._session.cookies.copy()
@@ -295,17 +313,15 @@ class API:
             self.set_auth(*auth, login=login)
             yield
         finally:
-            _logger.debug('Changing credentials back to {}', prev[0])
+            _logger.debug("Changing credentials back to {}", prev[0])
             self.set_auth(*prev, login=False)
-            _logger.trace('Restoring cookies for user: {}', prev_cookies)
+            _logger.trace("Restoring cookies for user: {}", prev_cookies)
             self._session.cookies.clear()
             self._session.cookies.update(prev_cookies)
 
-
     def clear_cookies(self):
-        _logger.trace('Clearing cookies: {}', self._session.cookies)
+        _logger.trace("Clearing cookies: {}", self._session.cookies)
         self._session.cookies.clear()
-
 
     get = _get_request_delegate("get")
     put = _get_request_delegate("put")
@@ -320,8 +336,12 @@ class API:
         :returns: :class:`.Response`
         """
         check_version = kwargs.pop("check_version", True)
-        if check_version and self._check_version_compatibility and \
-           not self._checked_version and config.root.check_version_compatibility:
+        if (
+            check_version
+            and self._check_version_compatibility
+            and not self._checked_version
+            and config.root.check_version_compatibility
+        ):
             self._checked_version = True
             try:
                 with self.use_basic_auth_context():
@@ -334,27 +354,30 @@ class API:
         kwargs.setdefault("timeout", self._default_request_timeout)
         auth = None
 
-        if hasattr(self.system, 'compat'):
-            if path != '_features':
+        if hasattr(self.system, "compat"):
+            if path != "_features":
                 if not self.system.compat.is_initialized():
                     with self.disable_version_checking_context():
                         self.system.compat.initialize()
-            if self._use_basic_auth or not self.system.compat.is_initialized() or \
-               not self.system.compat.has_auth_sessions():
+            if (
+                self._use_basic_auth
+                or not self.system.compat.is_initialized()
+                or not self.system.compat.has_auth_sessions()
+            ):
                 auth = self._auth
 
         raw_data = kwargs.pop("raw_data", False)
         data = kwargs.pop("data", NOTHING)
         sent_json_object = None
-        headers = kwargs.pop('headers', None)
-        files = kwargs.pop('files', None)
+        headers = kwargs.pop("headers", None)
+        files = kwargs.pop("files", None)
         if headers is None:
             headers = {}
         else:
             headers = headers.copy()
 
         if data is not NOTHING:
-            headers['Content-type'] = 'application/json'
+            headers["Content-type"] = "application/json"
             if raw_data:
                 sent_json_object = data
             else:
@@ -364,7 +387,7 @@ class API:
         else:
             assert raw_data is False, "Cannot handle raw_data with no data"
 
-        url_params = kwargs.pop('params', None)
+        url_params = kwargs.pop("params", None)
         if url_params is not None:
             url_params = translate_special_values(url_params)
 
@@ -374,54 +397,85 @@ class API:
         for url in urls:
             full_url = _join_path(url, URL(path))
 
-            if http_method != "get" and not self._interactive and not path.startswith("/api/internal/"):
+            if (
+                http_method != "get"
+                and not self._interactive
+                and not path.startswith("/api/internal/")
+            ):
                 full_url = self._with_approved(full_url)
 
             hostname = full_url.hostname
-            api_request = requests.Request(http_method, full_url, data=data if data is not NOTHING else None,
-                                           params=url_params, headers=headers, auth=auth, files=files)
+            api_request = requests.Request(
+                http_method,
+                full_url,
+                data=data if data is not NOTHING else None,
+                params=url_params,
+                headers=headers,
+                auth=auth,
+                files=files,
+            )
             for preprocessor in self._preprocessors:
                 preprocessor(api_request)
 
-
-            _logger.trace("{} <-- {} {}", hostname, http_method.upper(), api_request.url)
+            _logger.trace(
+                "{} <-- {} {}", hostname, http_method.upper(), api_request.url
+            )
             if data is not NOTHING:
                 if data != api_request.data:
                     sent_json_object = json.loads(api_request.data)
                 self._log_sent_data(hostname, data, sent_json_object)
 
             prepared = self._session.prepare_request(api_request)
-            gossip.trigger('infinidat.sdk.before_api_request', request=prepared)
+            gossip.trigger("infinidat.sdk.before_api_request", request=prepared)
             start_time = flux.current_timeline.time()
             try:
                 response = self._session.send(prepared, **kwargs)
             except _RETRY_REQUESTS_EXCEPTION_TYPES as e:  # pylint: disable=catching-non-exception
                 request_kwargs = dict(url=path, method=http_method, **kwargs)
-                _logger.debug('Exception while sending API command to {}: {}', self.system, e)
+                _logger.debug(
+                    "Exception while sending API command to {}: {}", self.system, e
+                )
                 error_str = str(e).lower()
-                if any(substring in error_str for substring in ('gaierror',
-                                                                'nodename nor servname',
-                                                                'name or service not known',
-                                                                'temporary failure in name resolution')):
+                if any(
+                    substring in error_str
+                    for substring in (
+                        "gaierror",
+                        "nodename nor servname",
+                        "name or service not known",
+                        "temporary failure in name resolution",
+                    )
+                ):
                     raise SystemNotFoundException(e, api_request, start_time) from e
-                raise APITransportFailure(self.system, request_kwargs, e, api_request, start_time) from e
+                raise APITransportFailure(
+                    self.system, request_kwargs, e, api_request, start_time
+                ) from e
 
             end_time = flux.current_timeline.time()
-            gossip.trigger('infinidat.sdk.after_api_request', request=prepared, response=response)
+            gossip.trigger(
+                "infinidat.sdk.after_api_request", request=prepared, response=response
+            )
 
             elapsed = response.elapsed.total_seconds()
-            _logger.trace("{} --> {} {} (took {:.04f}s)", hostname, response.status_code, response.reason, elapsed)
+            _logger.trace(
+                "{} --> {} {} (took {:.04f}s)",
+                hostname,
+                response.status_code,
+                response.reason,
+                elapsed,
+            )
             returned = Response(response, data, start_time, end_time)
             resp_data = returned.get_json()
             if self._no_response_logs:
                 logged_response_data = "..."
             elif self._use_pretty_json and resp_data is not None:
-                logged_response_data = json.dumps(resp_data, indent=4, separators=(',', ': '))
+                logged_response_data = json.dumps(
+                    resp_data, indent=4, separators=(",", ": ")
+                )
             else:
                 logged_response_data = resp_data
             _logger.trace("{} --> {}", hostname, logged_response_data)
             if response.status_code != httplib.SERVICE_UNAVAILABLE:
-                if specified_address is None: # need to remember our next API target
+                if specified_address is None:  # need to remember our next API target
                     self._active_url = url
                 break
         return returned
@@ -429,17 +483,26 @@ class API:
     def _log_sent_data(self, hostname, data, sent_json_object):
         try:
             # Hide potential passwords included in JSON
-            if isinstance(sent_json_object, dict) and 'password' in sent_json_object:
+            if isinstance(sent_json_object, dict) and "password" in sent_json_object:
                 data = json.dumps(
-                    dict(sent_json_object, password='*' * len(sent_json_object['password']))
+                    dict(
+                        sent_json_object,
+                        password="*" * len(sent_json_object["password"]),
                     )
+                )
         except (ValueError, TypeError):
             pass
         _logger.trace("{} <-- DATA: {}", hostname, data)
 
     @contextmanager
-    def limited_interaction_context(self, disable_post=False, disable_get=False,
-                                    disable_put=False, disable_patch=False, disable_delete=False):
+    def limited_interaction_context(
+        self,
+        disable_post=False,
+        disable_get=False,
+        disable_put=False,
+        disable_patch=False,
+        disable_delete=False,
+    ):
         disabled_http_methods = set(self._disabled_http_methods)
         if disable_post:
             self._disabled_http_methods.add("post")
@@ -457,12 +520,18 @@ class API:
             self._disabled_http_methods = disabled_http_methods
 
     def read_only_context(self):
-        return self.limited_interaction_context(disable_post=True, disable_put=True,
-                                                disable_patch=True, disable_delete=True)
+        return self.limited_interaction_context(
+            disable_post=True, disable_put=True, disable_patch=True, disable_delete=True
+        )
 
     def disable_api_context(self):
-        return self.limited_interaction_context(disable_post=True, disable_get=True,
-                                                disable_put=True, disable_patch=True, disable_delete=True)
+        return self.limited_interaction_context(
+            disable_post=True,
+            disable_get=True,
+            disable_put=True,
+            disable_patch=True,
+            disable_delete=True,
+        )
 
     @contextmanager
     def get_no_response_logs_context(self):
@@ -473,10 +542,12 @@ class API:
             self._no_response_logs -= 1
 
     def add_auto_retry(self, retry_predicate, max_retries=1, sleep_seconds=None):
-        if sleep_seconds is None: # backwards compatibility
+        if sleep_seconds is None:  # backwards compatibility
             sleep_seconds = config.root.defaults.retry_sleep_seconds
         assert retry_predicate not in self._auto_retry_predicates
-        _logger.debug("Add auto-retry predicate {} for {} retries", retry_predicate, max_retries)
+        _logger.debug(
+            "Add auto-retry predicate {} for {} retries", retry_predicate, max_retries
+        )
         self._auto_retry_predicates[retry_predicate] = (max_retries, sleep_seconds)
 
     def remove_auto_retry(self, retry_predicate):
@@ -499,10 +570,13 @@ class API:
         del self._session.cookies[cookie]
 
     def request(self, http_method, path, assert_success=True, **kwargs):
-        """Sends HTTP API request to the remote system
-        """
+        """Sends HTTP API request to the remote system"""
         if http_method in self._disabled_http_methods:
-            raise MethodDisabled("Request \"{} {}\" aborted, method is disabled".format(http_method.upper(), path))
+            raise MethodDisabled(
+                'Request "{} {}" aborted, method is disabled'.format(
+                    http_method.upper(), path
+                )
+            )
         did_interactive_confirmation = False
         did_login = False
         had_cookies = bool(self._session.cookies)
@@ -511,13 +585,18 @@ class API:
             with auto_retries_context:
                 returned = self._request(http_method, path, **kwargs)
 
-                if returned.status_code == requests.codes.unauthorized and \
-                   self._login_refresh_enabled and \
-                   had_cookies and \
-                   not did_login and \
-                   'login' not in path:
+                if (
+                    returned.status_code == requests.codes.unauthorized
+                    and self._login_refresh_enabled
+                    and had_cookies
+                    and not did_login
+                    and "login" not in path
+                ):
 
-                    _logger.trace('Performing login again due to expired cookie ({})', self._session.cookies)
+                    _logger.trace(
+                        "Performing login again due to expired cookie ({})",
+                        self._session.cookies,
+                    )
                     self.mark_not_logged_in()
                     self.system.login()
                     did_login = True
@@ -528,26 +607,45 @@ class API:
                         returned.assert_success()
                     except APICommandFailed as e:
                         if self._is_approval_required(e):
-                            reason = self._get_unapproved_reason(e.response.response.json())
+                            reason = self._get_unapproved_reason(
+                                e.response.response.json()
+                            )
                             if self._interactive and not did_interactive_confirmation:
                                 did_interactive_confirmation = True
-                                if self._ask_approval_interactively(http_method, path, reason):
+                                if self._ask_approval_interactively(
+                                    http_method, path, reason
+                                ):
                                     path = self._with_approved(path)
                                     continue
                                 raise CommandNotApproved(e.response, reason) from e
-                        if (e.status_code == 403) and (e.error_code == "REMOTE_PERMISSION_REQUIRED"):
+                        if (e.status_code == 403) and (
+                            e.error_code == "REMOTE_PERMISSION_REQUIRED"
+                        ):
                             try:
-                                related_user, related_password = self._get_related_system_auth()
-                                self._session.headers["X-Remote-Authorization"] = b"Basic " + \
-                                b64encode(f"{related_user}:{related_password}".encode())
+                                (
+                                    related_user,
+                                    related_password,
+                                ) = self._get_related_system_auth()
+                                self._session.headers[
+                                    "X-Remote-Authorization"
+                                ] = b"Basic " + b64encode(
+                                    f"{related_user}:{related_password}".encode()
+                                )
                                 continue
                             except TypeError as e:
-                                raise RelatedSystemNotFound("There are no "
-                                        "related systems registered to get the auth from") from e
+                                raise RelatedSystemNotFound(
+                                    "There are no "
+                                    "related systems registered to get the auth from"
+                                ) from e
                         raise
-                deprecation_header = returned.response.headers.get('x-infinidat-deprecated-api')
+                deprecation_header = returned.response.headers.get(
+                    "x-infinidat-deprecated-api"
+                )
                 if deprecation_header:
-                    warn_deprecation('Deprecation warning: {}'.format(deprecation_header), frame_correction=2)
+                    warn_deprecation(
+                        "Deprecation warning: {}".format(deprecation_header),
+                        frame_correction=2,
+                    )
                 return returned
         assert False, "Should never get here!"  # pragma: no cover
 
@@ -557,7 +655,7 @@ class API:
                 return related_system.api.get_auth()
 
     def _with_approved(self, path):
-        return path.set_query_param('approved', 'true')
+        return path.set_query_param("approved", "true")
 
     def _ask_approval_interactively(self, method, path, reason):
         if not reason:
@@ -566,23 +664,25 @@ class API:
         if sys.stdout.isatty():
             msg = colorama.Fore.YELLOW + msg + colorama.Fore.RESET
         # note: call through module to allow stubbing
-        return input(msg).strip().lower() in ['yes', 'y']
+        return input(msg).strip().lower() in ["yes", "y"]
 
     def _is_approval_required(self, exception):
         if exception.response.get_error():
-            return exception.response.get_error().get('code') in self.system.get_approval_failure_codes()
+            return (
+                exception.response.get_error().get("code")
+                in self.system.get_approval_failure_codes()
+            )
         return False
 
     def _get_unapproved_reason(self, json):
         if json:
-            error = json.get('error')
+            error = json.get("error")
             if error:
-                reasons = error.get('reasons')
+                reasons = error.get("reasons")
                 if reasons:
                     return reasons[0]
-                return error.get('message')
+                return error.get("message")
         return None
-
 
     def _get_possible_urls(self, address=None):
 
@@ -596,13 +696,16 @@ class API:
 
     def _url_from_address(self, address, use_ssl):
         hostname, port = address
-        return URL("{}://{}:{}".format("https" if use_ssl else "http", hostname, port)).add_path("/api/rest")
+        return URL(
+            "{}://{}:{}".format("https" if use_ssl else "http", hostname, port)
+        ).add_path("/api/rest")
 
 
 class Response:
     """
     System API request response
     """
+
     def __init__(self, resp, data, start_timestamp, end_timestamp):
         super(Response, self).__init__()
         self.method = resp.request.method
@@ -673,11 +776,13 @@ class Response:
     def assert_success(self):
         try:
             self.response.raise_for_status()
-        except _REQUESTS_HTTP_EXCEPTION_TYPES: # pylint: disable=catching-non-exception
+        except _REQUESTS_HTTP_EXCEPTION_TYPES:  # pylint: disable=catching-non-exception
             if self.sent_data is not NOTHING and self.sent_data:
-                password = b'password' if isinstance(self.sent_data, bytes) else 'password'
+                password = (
+                    b"password" if isinstance(self.sent_data, bytes) else "password"
+                )
                 if password in self.sent_data:
-                    self.sent_data = '<HIDDEN>'
+                    self.sent_data = "<HIDDEN>"
             APICommandFailed.raise_from_response(self)
 
 
@@ -688,17 +793,26 @@ class _AutoRetryContext:
 
     def _should_retry_request(self, exc):
         if self._retries_dict is None:
-            self._retries_dict = dict((k, v[0]) for k, v in self._global_retries_dict.items())
+            self._retries_dict = dict(
+                (k, v[0]) for k, v in self._global_retries_dict.items()
+            )
         for retry_predicate, retries_left in self._retries_dict.items():
             if retries_left < 1:
                 return None
             if retry_predicate not in self._global_retries_dict:
                 return None
             if retry_predicate(exc):
-                max_retries, retry_sleep_seconds = self._global_retries_dict[retry_predicate]
+                max_retries, retry_sleep_seconds = self._global_retries_dict[
+                    retry_predicate
+                ]
                 retried_count = max_retries - retries_left + 1
-                _logger.debug("Auto retry API ({} of {}) by {}: {}",
-                              retried_count, max_retries, retry_predicate, exc)
+                _logger.debug(
+                    "Auto retry API ({} of {}) by {}: {}",
+                    retried_count,
+                    max_retries,
+                    retry_predicate,
+                    exc,
+                )
                 self._retries_dict[retry_predicate] -= 1
                 return retry_sleep_seconds
         return None

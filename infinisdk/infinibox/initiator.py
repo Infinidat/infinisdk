@@ -1,5 +1,9 @@
-from ..core import SystemObject, Field
-from ..core.bindings import RelatedObjectBinding, InitiatorAddressBinding, InitiatorTargetsBinding
+from ..core import Field, SystemObject
+from ..core.bindings import (
+    InitiatorAddressBinding,
+    InitiatorTargetsBinding,
+    RelatedObjectBinding,
+)
 from ..core.type_binder import TypeBinder
 
 
@@ -18,7 +22,13 @@ class Initiator(SystemObject):
         Field("address", binding=InitiatorAddressBinding()),
         Field("targets", type=list, binding=InitiatorTargetsBinding()),
         Field("type"),
-        Field("host", api_name="host_id", is_filterable=True, is_sortable=True, binding=RelatedObjectBinding('hosts')),
+        Field(
+            "host",
+            api_name="host_id",
+            is_filterable=True,
+            is_sortable=True,
+            binding=RelatedObjectBinding("hosts"),
+        ),
     ]
 
     @classmethod

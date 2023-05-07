@@ -1,9 +1,6 @@
 from ..core import Field
-from ..core.bindings import (
-    RelatedObjectBinding,
-    ListOfRelatedObjectIDsBinding
-)
 from ..core.api.special_values import Autogenerate
+from ..core.bindings import ListOfRelatedObjectIDsBinding, RelatedObjectBinding
 from .system_object import InfiniBoxObject
 
 
@@ -69,6 +66,14 @@ class SMBUser(InfiniBoxObject):
             binding=ListOfRelatedObjectIDsBinding("smb_groups"),
             is_filterable=True,
             mutable=True,
+        ),
+        Field(
+            "uid",
+            type=int,
+            is_filterable=True,
+            is_sortable=True,
+            mutable=True,
+            feature_name="native_smb_dual_protocol",
         ),
     ]
 

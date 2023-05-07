@@ -1,13 +1,18 @@
 from ..core import Field
-from ..core.api.special_values import Autogenerate
 from ..core.bindings import RelatedObjectBinding
 from .system_object import InfiniBoxObject
 
 
-class SMBGroup(InfiniBoxObject):
-    URL_PATH = "smb_groups"
+class NFSUser(InfiniBoxObject):
+    URL_PATH = "nfs_users"
     FIELDS = [
-        Field("id", type=int, is_identity=True, is_filterable=True, is_sortable=True),
+        Field(
+            "id",
+            type=int,
+            is_identity=True,
+            is_filterable=True,
+            is_sortable=True,
+        ),
         Field(
             "tenant",
             type="infinisdk.infinibox.tenant:Tenant",
@@ -17,44 +22,42 @@ class SMBGroup(InfiniBoxObject):
             is_sortable=True,
         ),
         Field(
-            "name",
+            "uid",
             creation_parameter=True,
-            default=Autogenerate("smb_group_{uuid}"),
+            type=int,
             is_filterable=True,
             is_sortable=True,
+        ),
+        Field(
+            "primary_gid",
+            creation_parameter=True,
+            type=int,
+            mutable=True,
+            is_filterable=True,
+            is_sortable=True,
+        ),
+        Field(
+            "supplementary_gids",
+            type=list,
+            mutable=True,
         ),
         Field(
             "sid",
+            mutable=True,
             is_filterable=True,
             is_sortable=True,
-        ),
-        Field(
-            "privileges",
-            type=list,
-            creation_parameter=True,
-            optional=True,
-            mutable=True,
-        ),
-        Field(
-            "domain_members",
-            type=list,
-            creation_parameter=True,
-            optional=True,
-            mutable=True,
-        ),
-        Field(
-            "uid",
-            type=int,
-            is_filterable=True,
-            is_sortable=True,
-            mutable=True,
             feature_name="native_smb_dual_protocol",
         ),
         Field(
-            "gid",
-            type=int,
+            "primary_gsid",
+            mutable=True,
             is_filterable=True,
             is_sortable=True,
+            feature_name="native_smb_dual_protocol",
+        ),
+        Field(
+            "supplementary_gsids",
+            type=list,
             mutable=True,
             feature_name="native_smb_dual_protocol",
         ),
@@ -62,8 +65,8 @@ class SMBGroup(InfiniBoxObject):
 
     @classmethod
     def get_type_name(cls):
-        return "smb_group"
+        return "nfs_user"
 
     @classmethod
     def is_supported(cls, system):
-        return system.compat.has_native_smb()
+        return system.compat.has_native_smb_dual_protocol()

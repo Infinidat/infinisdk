@@ -7,51 +7,58 @@ from mitba import cached_method
 from sentinels import NOTHING
 from urlobject import URLObject as URL
 
-from ..core.api import APITarget, OMIT
+from ..core.api import OMIT, APITarget
 from ..core.config import config, get_ini_option
 from ..core.exceptions import CacheMiss, VersionNotSupported
 from ..core.object_query import LazyQuery
-from ..core.utils.environment import get_hostname, get_logged_in_username, get_infinisdk_version
+from ..core.utils.environment import (
+    get_hostname,
+    get_infinisdk_version,
+    get_logged_in_username,
+)
+from .active_directory import ActiveDirectoryDomains
 from .capacities import InfiniBoxSystemCapacity
+from .certificates import Certificates
 from .compatibility import Compatibility
 from .components import InfiniBoxSystemComponents
 from .cons_group import ConsGroup
 from .dataset import Datasets
-from .fc_switch import FcSwitch
-from .fc_soft_target import FcSoftTarget
-from .san_client import SanClients
 from .events import Events
 from .export import Export
+from .fc_soft_target import FcSoftTarget
+from .fc_switch import FcSwitch
 from .filesystem import Filesystem
-from .treeq import TreeQ
-from .qos_policy import QosPolicy
-from .nlm_lock import NlmLock
 from .host import Host
 from .host_cluster import HostCluster
 from .initiator import Initiator
+from .kms import Kms
 from .ldap_config import LDAPConfig
 from .link import Link
+from .metadata import SystemMetadata
 from .network_interface import NetworkInterface
 from .network_space import NetworkSpace
+from .nfs_user import NFSUser
+from .nlm_lock import NlmLock
 from .notification_rule import NotificationRule
 from .notification_target import NotificationTarget
-from .pool import Pool
 from .plugin import Plugin
-from .tenant import Tenant
+from .pool import Pool
+from .qos_policy import QosPolicy
 from .replica import Replica
+from .replication_group import ReplicationGroup
+from .rg_replica import RgReplica
+from .san_client import SanClients
 from .search_utils import get_search_query_object, safe_get_object_by_id_and_type_lazy
-from .user import User
-from .volume import Volume
-from .metadata import SystemMetadata
-from .kms import Kms
-from .certificates import Certificates
-from .vvol import Vvol
-from .vm import Vm
 from .share import Share
 from .share_permission import SharePermission
-from .active_directory import ActiveDirectoryDomains
-from .smb_user import SMBUser
 from .smb_group import SMBGroup
+from .smb_user import SMBUser
+from .tenant import Tenant
+from .treeq import TreeQ
+from .user import User
+from .vm import Vm
+from .volume import Volume
+from .vvol import Vvol
 
 try:
     from infinisim.core.context import lookup_simulator_by_address
@@ -59,7 +66,7 @@ except ImportError:
     lookup_simulator_by_address = None
 
 
-_DNS_SERVERS_CONFIG_PATH = 'config/mgmt/environment.dns_servers'
+_DNS_SERVERS_CONFIG_PATH = "config/mgmt/environment.dns_servers"
 
 
 class InfiniBox(APITarget):
@@ -91,6 +98,9 @@ class InfiniBox(APITarget):
         Share,
         SMBUser,
         SMBGroup,
+        ReplicationGroup,
+        RgReplica,
+        NFSUser,
     ]
     SUB_OBJECT_TYPES = [
         TreeQ,
@@ -117,30 +127,36 @@ class InfiniBox(APITarget):
             raise VersionNotSupported(self.get_version())
 
     def is_field_supported(self, field):
-        if field.new_to_version and self.compat.get_parsed_system_version() < field.new_to_version:
+        if (
+            field.new_to_version
+            and self.compat.get_parsed_system_version() < field.new_to_version
+        ):
             return False
-        if field.until_version and self.compat.get_parsed_system_version() > field.until_version:
+        if (
+            field.until_version
+            and self.compat.get_parsed_system_version() > field.until_version
+        ):
             return False
         return self.compat.is_feature_supported(field.feature_name)
 
     def _get_api_auth(self):
-        username = self._get_auth_ini_option('username', None)
-        password = self._get_auth_ini_option('password', None)
+        username = self._get_auth_ini_option("username", None)
+        password = self._get_auth_ini_option("password", None)
         if not username and not password:
             return None
         elif not username:
-            username = 'admin'
+            username = "admin"
         elif not password:
-            password = ''
+            password = ""
 
         return username, password
 
     def _get_auth_ini_option(self, key, default):
         for address in itertools.chain([None], self._addresses):
             if address is None:
-                section = 'infinibox'
+                section = "infinibox"
             else:
-                section = 'infinibox:{}'.format(address[0])
+                section = "infinibox:{}".format(address[0])
             returned = get_ini_option(section, key, NOTHING)
             if returned is not NOTHING:
                 return returned
@@ -148,7 +164,7 @@ class InfiniBox(APITarget):
         return default
 
     def _get_api_timeout(self):
-        return config.get_path('infinibox.defaults.system_api.timeout_seconds')
+        return config.get_path("infinibox.defaults.system_api.timeout_seconds")
 
     def _is_simulator(self, address):
         return type(address).__name__ == "Infinibox"
@@ -158,13 +174,15 @@ class InfiniBox(APITarget):
         return (simulator_address, 443 if use_ssl else 80)
 
     def get_approval_failure_codes(self):
-        d = config.get_path('infinibox.approval_required_codes')
+        d = config.get_path("infinibox.approval_required_codes")
         return d
 
     def get_luns(self):
         for mapping_obj in itertools.chain(self.host_clusters, self.hosts):
             for lun in mapping_obj.get_luns():
-                if lun.is_clustered() and not isinstance(mapping_obj, self.host_clusters.object_type):
+                if lun.is_clustered() and not isinstance(
+                    mapping_obj, self.host_clusters.object_type
+                ):
                     continue
                 yield lun
 
@@ -192,8 +210,8 @@ class InfiniBox(APITarget):
         return "mock" in self.get_system_info("name")
 
     def get_system_info(self, field_name, **kwargs):
-        kwargs.setdefault('fetch_if_not_cached', True)
-        kwargs.setdefault('from_cache', True)
+        kwargs.setdefault("fetch_if_not_cached", True)
+        kwargs.setdefault("from_cache", True)
         return self.components.system_component.get_field(field_name, **kwargs)
 
     def get_name(self):
@@ -201,7 +219,9 @@ class InfiniBox(APITarget):
         Returns the name of the system
         """
         try:
-            return self.components.system_component.get_field('name', from_cache=True, fetch_if_not_cached=False)
+            return self.components.system_component.get_field(
+                "name", from_cache=True, fetch_if_not_cached=False
+            )
         except CacheMiss:
             return self._get_received_name_or_ip()
 
@@ -209,37 +229,39 @@ class InfiniBox(APITarget):
         """
         Update the name of the system
         """
-        self.api.put('/api/rest/system/name/', data=name)
-        self.components.system_component.update_field_cache({'name': name})
+        self.api.put("/api/rest/system/name/", data=name)
+        self.components.system_component.update_field_cache({"name": name})
 
     def get_serial(self, **kwargs):
         """
         Returns the serial number of the system
         """
-        return self.get_system_info('serial_number', **kwargs)
+        return self.get_system_info("serial_number", **kwargs)
 
     def get_model_name(self, long_name=False):
         """
         Retrieves the model name as reported by the system
         """
-        url = 'config/mgmt/system.model_{}_name'.format('long' if long_name else 'short')
+        url = "config/mgmt/system.model_{}_name".format(
+            "long" if long_name else "short"
+        )
         return self.api.get(url).get_result()
 
     def get_version(self):
         """
         Returns the product version of the system
         """
-        return self.get_system_info('version')
+        return self.get_system_info("version")
 
     def get_dns_servers(self):
         ip_addresses = self.api.get(_DNS_SERVERS_CONFIG_PATH).get_result()
-        return [ip_address.strip() for ip_address in ip_addresses.split(',')]
+        return [ip_address.strip() for ip_address in ip_addresses.split(",")]
 
     def update_dns_servers(self, *ip_addresses):
-        self.api.put(_DNS_SERVERS_CONFIG_PATH, data=','.join(ip_addresses))
+        self.api.put(_DNS_SERVERS_CONFIG_PATH, data=",".join(ip_addresses))
 
     def get_revision(self):
-        return self.get_system_info('release')['system']['revision']
+        return self.get_system_info("release")["system"]["revision"]
 
     def iter_related_systems(self):
         """
@@ -283,7 +305,7 @@ class InfiniBox(APITarget):
     def _after_login(self):
         self.components.system_component.refresh_cache()
 
-        gossip.trigger('infinidat.sdk.after_login', system=self)
+        gossip.trigger("infinidat.sdk.after_login", system=self)
 
     def login(self):
         """
@@ -292,15 +314,14 @@ class InfiniBox(APITarget):
         username, password = self.api.get_auth()
         login_data = {"username": username, "password": password}
         if self.compat.has_auth_sessions():
-            login_data['clientid'] = self._get_client_id()
+            login_data["clientid"] = self._get_client_id()
         res = self.api.post("users/login", data=login_data)
         self.api.mark_logged_in()
         self._after_login()
         return res
 
     def is_logged_in(self):
-        """Returns True if login() was called on this system, and logout() hasn't been called yet
-        """
+        """Returns True if login() was called on this system, and logout() hasn't been called yet"""
         return self.api.is_logged_in()
 
     def mark_logged_in(self):
@@ -313,24 +334,27 @@ class InfiniBox(APITarget):
         """
         Logs out the current user
         """
-        returned = self.api.post('users/logout', data={})
+        returned = self.api.post("users/logout", data={})
         self.api.mark_not_logged_in()
         self.api.clear_cookies()
         return returned
 
     @cached_method
     def _get_client_id(self):
-        return 'infinisdk.v{}.{}.{}.{}'.format(
+        return "infinisdk.v{}.{}.{}.{}".format(
             get_infinisdk_version(),
             get_hostname(),
             get_logged_in_username(),
-            os.getpid())
+            os.getpid(),
+        )
 
     def _get_v2_metadata_generator(self, **raw_filters):
-        for metadata_item in LazyQuery(self, URL('metadata')).extend_url(**raw_filters):
-            metadata_item['object'] = safe_get_object_by_id_and_type_lazy(type_name=metadata_item.get('object_type'),
-                                                                          object_id=metadata_item['object_id'],
-                                                                          system=self)
+        for metadata_item in LazyQuery(self, URL("metadata")).extend_url(**raw_filters):
+            metadata_item["object"] = safe_get_object_by_id_and_type_lazy(
+                type_name=metadata_item.get("object_type"),
+                object_id=metadata_item["object_id"],
+                system=self,
+            )
             yield metadata_item
 
     def get_all_metadata(self, **raw_filters):
@@ -340,17 +364,19 @@ class InfiniBox(APITarget):
         return self.components.system_component.is_active()
 
     def is_read_only(self, **kwargs):
-        return self.components.system_component.get_operational_state(**kwargs)['read_only_system']
+        return self.components.system_component.get_operational_state(**kwargs)[
+            "read_only_system"
+        ]
 
     def search(self, query=OMIT, type_name=OMIT):
         search_query = get_search_query_object(self)
         search_kwargs = {}
 
         if query is not OMIT:
-            search_kwargs['query'] = query
+            search_kwargs["query"] = query
 
         if type_name is not OMIT:
-            search_kwargs['type'] = type_name
+            search_kwargs["type"] = type_name
 
         return search_query.extend_url(**search_kwargs)
 
@@ -361,12 +387,14 @@ class InfiniBox(APITarget):
         if not isinstance(other, InfiniBox):
             return NotImplemented
         try:
-            return self.get_serial(fetch_if_not_cached=False) == other.get_serial(fetch_if_not_cached=False)
+            return self.get_serial(fetch_if_not_cached=False) == other.get_serial(
+                fetch_if_not_cached=False
+            )
         except CacheMiss:
             return self.get_api_addresses() == other.get_api_addresses()
 
     def __ne__(self, other):
-        return not (self == other) # pylint: disable=superfluous-parens
+        return not (self == other)  # pylint: disable=superfluous-parens
 
 
 class _CurrentUserProxy:
@@ -378,4 +406,4 @@ class _CurrentUserProxy:
 
     def get_roles(self):
         login_res = self.system.login()
-        return login_res.get_result()['roles']
+        return login_res.get_result()["roles"]
