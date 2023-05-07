@@ -5,7 +5,7 @@ from .bindings import InfiniSDKBinding
 from .exceptions import AttributeAlreadyExists
 from .field_filter import FieldFilter
 from .field_sorting import FieldSorting
-from .system_object_utils import make_getter, make_field_updaters
+from .system_object_utils import make_field_updaters, make_getter
 from .utils import DONT_CARE
 
 
@@ -13,16 +13,16 @@ class Field(FieldBase):
     """
     This class represents a single field exposed by a schema
     """
+
     def __repr__(self):
         # pylint: disable=no-member
         extra = []
         if self.creation_parameter:
-            extra.append('Creation param')
+            extra.append("Creation param")
         if self.mutable:
-            extra.append('Mutable')
+            extra.append("Mutable")
         return "<FIELD {}{}>".format(
-            self.name,
-            ' ({})'.format(', '.join(extra)) if extra else ''
+            self.name, " ({})".format(", ".join(extra)) if extra else ""
         )
 
     def __init__(self, *args, **kwargs):
@@ -35,6 +35,7 @@ class Field(FieldBase):
         new_to_version = kwargs.pop("new_to", None)
         until_version = kwargs.pop("until", None)
         toggle_name = kwargs.pop("toggle_name", None)
+        is_parent_field = kwargs.pop("is_parent_field", False)
         super(Field, self).__init__(*args, **kwargs)
 
         if self.is_identity:  # pylint: disable=no-member
@@ -60,6 +61,8 @@ class Field(FieldBase):
         self.new_to_version = new_to_version
         #:Specifies the version this field is deprecated since
         self.until_version = until_version
+        #:Specifies if the field contains the parent object of the current object
+        self.is_parent_field = is_parent_field
         #:Specifies the name for auto-updater: enable_toggle_name & disable_toggle_name will be added to the object
         if toggle_name:
             assert self.type.type is bool  # pylint: disable=no-member
@@ -101,6 +104,7 @@ class Field(FieldBase):
 def _install_filter_factory(operator_name, operator_function_name):
     def meth(self, other):
         return FieldFilter(self, operator_name, other)
+
     meth.__name__ = operator_function_name
     setattr(Field, operator_function_name, meth)
 
@@ -113,15 +117,18 @@ def _install_filter_factories():
         _install_filter_factory(operator_name, operator_function_name)
 
     # Installing operators that python doesn't have overloading functions for them
-    for operator_name, operator_function_name in [("in", "in_"),
-                                                  ("notin", "not_in"),
-                                                  ("between", "between"),
-                                                  ("like", "like"),
-                                                  ("is", "is_"),
-                                                  ("isnot", "is_not"),
-                                                  ("allof", "all_of"),
-                                                  ("anyof", "any_of"),
-                                                  ("noneof", "none_of")]:
+    for operator_name, operator_function_name in [
+        ("in", "in_"),
+        ("notin", "not_in"),
+        ("between", "between"),
+        ("like", "like"),
+        ("is", "is_"),
+        ("isnot", "is_not"),
+        ("allof", "all_of"),
+        ("anyof", "any_of"),
+        ("noneof", "none_of"),
+    ]:
         _install_filter_factory(operator_name, operator_function_name)
+
 
 _install_filter_factories()

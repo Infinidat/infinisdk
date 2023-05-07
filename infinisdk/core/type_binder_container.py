@@ -1,5 +1,3 @@
-
-
 class TypeBinderContainer:
     """
     Contains several type binders with a common characteristic. Used to implement system.objects and similar facilities

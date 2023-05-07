@@ -1,5 +1,7 @@
 import collections
+
 from urlobject import URLObject as URL
+
 from ..api.special_values import OMIT, Autogenerate, RawValue
 
 
@@ -14,7 +16,9 @@ def add_comma_separated_query_param(url, param_name, value):
     """
     if not isinstance(url, URL):
         url = URL(url)
-    if isinstance(value, collections.abc.Iterable) and not isinstance(value, (str, bytes)):
+    if isinstance(value, collections.abc.Iterable) and not isinstance(
+        value, (str, bytes)
+    ):
         value = ",".join(value)
     existing_sort = url.query_dict.get(param_name, "")
     if existing_sort:

@@ -1,10 +1,20 @@
 import requests
+
 from ..core.exceptions import APICommandFailed
 
 
 class LogicalUnit:
-    def __init__(self, system, id, lun, clustered, host_cluster_id, volume_id,  # pylint: disable=redefined-builtin
-                 host_id, **kwargs):
+    def __init__(
+        self,
+        system,
+        id,  # pylint: disable=redefined-builtin
+        lun,
+        clustered,
+        host_cluster_id,
+        volume_id,
+        host_id,
+        **kwargs
+    ):
         self.system = system
         self.id = id
         self.lun = int(lun) if isinstance(lun, (str, bytes)) else lun
@@ -12,7 +22,7 @@ class LogicalUnit:
         self.host_cluster_id = host_cluster_id
         self.volume_id = volume_id
         self.host_id = host_id
-        self.udid = kwargs.pop('udid', None)
+        self.udid = kwargs.pop("udid", None)
         self.additional_data = kwargs
         self.mapping_object = self.get_host() or self.get_cluster()
 
@@ -21,15 +31,13 @@ class LogicalUnit:
         return self.system.volumes.get_by_id_lazy(self.volume_id)
 
     def get_host(self):
-        """ Returns the host to which this LUN belongs
-        """
+        """Returns the host to which this LUN belongs"""
         if not self.host_id:
             return None
         return self.system.hosts.get_by_id_lazy(self.host_id)
 
     def get_cluster(self):
-        """ Returns the cluster to which this LUN belongs
-        """
+        """Returns the cluster to which this LUN belongs"""
         if not self.host_cluster_id:
             return None
         return self.system.host_clusters.get_by_id_lazy(self.host_cluster_id)
@@ -41,23 +49,21 @@ class LogicalUnit:
         return self.get_cluster() is not None
 
     def get_volume(self):
-        """ Returns the volume mapped to this LU
-        """
+        """Returns the volume mapped to this LU"""
         return self.system.volumes.get_by_id_lazy(self.volume_id)
 
     @classmethod
     def _unmap(cls, obj, lun):
-        url = obj.get_this_url_path().add_path('luns/lun/{}'.format(lun))
+        url = obj.get_this_url_path().add_path("luns/lun/{}".format(lun))
         try:
             obj.system.api.delete(url)
         except APICommandFailed as e:
             if e.status_code != requests.codes.not_found:
                 raise
-        obj.invalidate_cache('luns')
+        obj.invalidate_cache("luns")
 
     def delete(self):
-        """ Deletes (or unmaps) this LU
-        """
+        """Deletes (or unmaps) this LU"""
         if self.is_clustered():
             obj = self.get_cluster()
         else:
@@ -67,23 +73,33 @@ class LogicalUnit:
     unmap = delete
 
     def get_lun(self):
-        """ Returns the logical unit number of this LU
-        """
+        """Returns the logical unit number of this LU"""
         return self.lun
 
     def __int__(self):
-        """ Same as :meth:`.get_lun`
-        """
+        """Same as :meth:`.get_lun`"""
         return self.get_lun()
 
     def __repr__(self):
-        return "<LUN {}: {}->{}>".format(self.get_lun(), self.get_mapping_object(), self.get_volume())
+        return "<LUN {}: {}->{}>".format(
+            self.get_lun(), self.get_mapping_object(), self.get_volume()
+        )
 
     def __eq__(self, other):
-        return type(other) == type(self) and other.get_unique_key() == self.get_unique_key()  # pylint: disable=unidiomatic-typecheck
+        # pylint: disable=unidiomatic-typecheck
+        return (
+            type(other) == type(self)
+            and other.get_unique_key() == self.get_unique_key()
+        )
 
     def get_unique_key(self):
-        return (self.system, self.host_cluster_id, self.host_id, self.volume_id, self.lun)
+        return (
+            self.system,
+            self.host_cluster_id,
+            self.host_id,
+            self.volume_id,
+            self.lun,
+        )
 
     def __hash__(self):
         return hash(self.get_unique_key())
@@ -93,7 +109,6 @@ class LogicalUnitContainer:
     def __init__(self, system):
         self.luns = set()
         self._system = system
-
 
     @classmethod
     def from_logical_units(cls, system, logical_units):
@@ -138,8 +153,8 @@ class LogicalUnitContainer:
         return lus
 
     def __getitem__(self, item):
-        if hasattr(item, 'get_type_name'):
-            if item.get_type_name() == 'volume':
+        if hasattr(item, "get_type_name"):
+            if item.get_type_name() == "volume":
                 getter = self.get_lus_for_volume
             else:
                 getter = self.get_lus_for_mapping_object
@@ -150,9 +165,9 @@ class LogicalUnitContainer:
             items = self.get_lus_for_lun(item)
 
         if len(items) == 0:
-            raise KeyError('{} has no logical units'.format(item))
+            raise KeyError("{} has no logical units".format(item))
         if len(items) > 1:
-            raise ValueError('{} have too many logical units'.format(item))
+            raise ValueError("{} have too many logical units".format(item))
         return items[0]
 
     def get(self, item, default=None):

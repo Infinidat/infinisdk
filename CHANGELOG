@@ -1,3 +1,17 @@
+Version 225.1.0 (Released 2023-05-07)
+-------------------------------------
+* #16102: Change click constraint in infiniSDK to be >=8.0.4 
+* #16016: Add support for comparison to SCSISerial type instances
+* #16033: Support get_<field> for all fields of system.capacities
+* #15993: Add remote_snapshot_suffix and lock_remote_snapshot_retention
+* #15992: Use feature flag for replicate snapshots
+* #15773: Add NFSUser
+* #15756: Add separate standard and vvol fields features
+* #15744: Fix get component by id
+* #15669: Add new fields to infinisdk/infinibox/pool.py
+* #15697: Use the UID_FIELD for get_by_id and safe_get_by_id
+* #15676: Add documentation for InfiniboxSubObject and SubObjectTypeBinder in infinisdk
+
 Version 215.1.5 (Released 2023-04-19)
 -------------------------------------
 * #00: Fix CI
