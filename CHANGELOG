@@ -1,3 +1,7 @@
+Version 225.1.1 (Released 2023-05-07)
+-------------------------------------
+* #16212: Add infi.dtypes.nqn to requirements
+
 Version 225.1.0 (Released 2023-05-07)
 -------------------------------------
 * #16102: Change click constraint in infiniSDK to be >=8.0.4 
@@ -7,10 +11,6 @@ Version 225.1.0 (Released 2023-05-07)
 * #15992: Use feature flag for replicate snapshots
 * #15773: Add NFSUser
 * #15756: Add separate standard and vvol fields features
-* #15744: Fix get component by id
-* #15669: Add new fields to infinisdk/infinibox/pool.py
-* #15697: Use the UID_FIELD for get_by_id and safe_get_by_id
-* #15676: Add documentation for InfiniboxSubObject and SubObjectTypeBinder in infinisdk
 
 Version 215.1.5 (Released 2023-04-19)
 -------------------------------------
