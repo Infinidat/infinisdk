@@ -14,17 +14,15 @@ class MetadataHolder:
 
     def _get_metadata_translated_result(self, metadata_items):
         if self.system.compat.get_metadata_version() >= 2:
-            return dict((item['key'], item['value']) for item in metadata_items)
+            return dict((item["key"], item["value"]) for item in metadata_items)
         return metadata_items
 
     def set_metadata(self, key, value):
-        """Sets metadata key in the system associated with this object
-        """
+        """Sets metadata key in the system associated with this object"""
         return self.set_metadata_from_dict({key: value})
 
     def set_metadata_from_dict(self, data_dict):
-        """Sets multiple metadata keys/values in the system associated with this object
-        """
+        """Sets multiple metadata keys/values in the system associated with this object"""
         return self.system.api.put(self._get_metadata_uri(), data=data_dict)
 
     def get_metadata_value(self, key, default=NOTHING):
@@ -42,23 +40,20 @@ class MetadataHolder:
             return default
         if self.system.compat.get_metadata_version() < 2:
             return result
-        return result['value']
+        return result["value"]
 
     def get_all_metadata(self):
-        """:returns: Dictionary of all keys and values associated as metadata for this object
-        """
+        """:returns: Dictionary of all keys and values associated as metadata for this object"""
         url = self._get_metadata_uri()
         if self.system.compat.get_metadata_version() < 2:
             return self.system.api.get(url).get_result()
         query = LazyQuery(self.system, url)
-        return dict((item['key'], item['value']) for item in query)
+        return dict((item["key"], item["value"]) for item in query)
 
     def unset_metadata(self, key):
-        """Deletes a metadata key for this object
-        """
+        """Deletes a metadata key for this object"""
         return self.system.api.delete(self._get_metadata_uri().add_path(str(key)))
 
     def clear_metadata(self):
-        """Deletes all metadata keys for this object
-        """
+        """Deletes all metadata keys for this object"""
         self.system.api.delete(self._get_metadata_uri())

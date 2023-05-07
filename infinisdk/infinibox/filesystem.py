@@ -1,10 +1,9 @@
-from ..core.q import Q
 from ..core import Field
-from ..core.api.special_values import Autogenerate, OMIT
+from ..core.api.special_values import OMIT, Autogenerate
 from ..core.bindings import RelatedObjectBinding
+from ..core.q import Q
 from .dataset import Dataset, DatasetTypeBinder
 from .treeq import TreeQBinder
-
 
 
 class FilesystemBinder(DatasetTypeBinder):
@@ -27,23 +26,80 @@ class FilesystemBinder(DatasetTypeBinder):
 
 class Filesystem(Dataset):
     FIELDS = [
-        Field("parent", type='infinisdk.infinibox.filesystem:Filesystem', cached=True, api_name="parent_id",
-              binding=RelatedObjectBinding('filesystems'), is_filterable=True),
-        Field("name", creation_parameter=True, mutable=True, is_filterable=True,
-              is_sortable=True, default=Autogenerate("fs_{uuid}")),
+        Field(
+            "parent",
+            type="infinisdk.infinibox.filesystem:Filesystem",
+            cached=True,
+            api_name="parent_id",
+            binding=RelatedObjectBinding("filesystems"),
+            is_filterable=True,
+        ),
+        Field(
+            "name",
+            creation_parameter=True,
+            mutable=True,
+            is_filterable=True,
+            is_sortable=True,
+            default=Autogenerate("fs_{uuid}"),
+        ),
         Field("root_mode", creation_parameter=True, hidden=True, optional=True),
         Field("atime_mode", is_filterable=True, is_sortable=True),
-        Field("atime_granularity", type=int, mutable=True, creation_parameter=True, optional=True,
-              is_filterable=True, is_sortable=True, new_to="6.0.10"),
-        Field("established", api_name="_is_established", type=bool, is_filterable=True, is_sortable=True, new_to="4.0"),
-        Field('data_snapshot_guid', is_filterable=True, is_sortable=True, feature_name="nas_replication"),
-        Field("snapdir_name", creation_parameter=True, optional=True, is_filterable=True, is_sortable=True,
-              feature_name="dot_snapshot"),
-        Field("visible_in_snapdir", type=bool, is_filterable=True, is_sortable=True, feature_name="dot_snapshot"),
-        Field("snapdir_accessible", type=bool, feature_name="dot_snapshot", creation_parameter=True, optional=True,
-              is_filterable=True, is_sortable=True),
-        Field("security_style", creation_parameter=True, optional=True,
-              is_filterable=True, is_sortable=True, feature_name="native_smb")
+        Field(
+            "atime_granularity",
+            type=int,
+            mutable=True,
+            creation_parameter=True,
+            optional=True,
+            is_filterable=True,
+            is_sortable=True,
+            new_to="6.0.10",
+        ),
+        Field(
+            "established",
+            api_name="_is_established",
+            type=bool,
+            is_filterable=True,
+            is_sortable=True,
+            new_to="4.0",
+        ),
+        Field(
+            "data_snapshot_guid",
+            is_filterable=True,
+            is_sortable=True,
+            feature_name="nas_replication",
+        ),
+        Field(
+            "snapdir_name",
+            creation_parameter=True,
+            optional=True,
+            is_filterable=True,
+            is_sortable=True,
+            feature_name="dot_snapshot",
+        ),
+        Field(
+            "visible_in_snapdir",
+            type=bool,
+            is_filterable=True,
+            is_sortable=True,
+            feature_name="dot_snapshot",
+        ),
+        Field(
+            "snapdir_accessible",
+            type=bool,
+            feature_name="dot_snapshot",
+            creation_parameter=True,
+            optional=True,
+            is_filterable=True,
+            is_sortable=True,
+        ),
+        Field(
+            "security_style",
+            creation_parameter=True,
+            optional=True,
+            is_filterable=True,
+            is_sortable=True,
+            feature_name="native_smb",
+        ),
     ]
 
     BINDER_CLASS = FilesystemBinder
@@ -53,7 +109,9 @@ class Filesystem(Dataset):
         self.treeqs = self.system.filesystems.get_or_create_treeq_binder(self)
 
     def delete(self, force_if_snapshot_locked=OMIT):
-        super(Filesystem, self).delete(force_if_snapshot_locked=force_if_snapshot_locked)
+        super(Filesystem, self).delete(
+            force_if_snapshot_locked=force_if_snapshot_locked
+        )
         self.system.filesystems.delete_treeq_binder(self)
 
     @classmethod

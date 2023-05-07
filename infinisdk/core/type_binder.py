@@ -1,10 +1,11 @@
 import random
 from contextlib import contextmanager
+
 from sentinels import NOTHING
 from urlobject import URLObject
 
-from .object_query import PolymorphicQuery, ObjectQuery
-from .exceptions import ObjectNotFound, TooManyObjectsFound
+from .exceptions import InfiniSDKRuntimeException, ObjectNotFound, TooManyObjectsFound
+from .object_query import ObjectQuery, PolymorphicQuery
 
 
 class BaseBinder:
@@ -71,7 +72,7 @@ class BaseBinder:
         """
         Chooses a random sample out of those returned. Raises ValueError if there are not enough items
         """
-        sample_count = kw.pop('sample_count', 1)
+        sample_count = kw.pop("sample_count", 1)
         return self.find(*predicates, **kw).sample(sample_count)
 
     def choose(self, *predicates, **kw):
@@ -110,7 +111,6 @@ class BaseBinder:
 
 
 class PolymorphicBinder(BaseBinder):
-
     def __init__(self, url, object_types, factory, system, feature_name=NOTHING):
         super(PolymorphicBinder, self).__init__(system)
         self._object_types = object_types
@@ -118,9 +118,21 @@ class PolymorphicBinder(BaseBinder):
         self._query_factory = factory
         self._feature_name = feature_name
 
+    def get_by_id(self, id):  # pylint: disable=redefined-builtin
+        names_of_uid_field = {obj.UID_FIELD for obj in self._object_types}
+        if len(names_of_uid_field) == 1:
+            return self.get(**{list(names_of_uid_field)[0]: id})
+        else:
+            raise InfiniSDKRuntimeException(
+                f"Number of distinct identifying fields' names is: {len(names_of_uid_field)}"
+            )
+
     def __repr__(self):
-        return "<{}.{} ({})>".format(self.system, self.__class__.__name__,
-                                     " & ".join(type_.get_plural_name() for type_ in self._object_types))
+        return "<{}.{} ({})>".format(
+            self.system,
+            self.__class__.__name__,
+            " & ".join(type_.get_plural_name() for type_ in self._object_types),
+        )
 
     def get_url_path(self):
         return self._url
@@ -129,16 +141,35 @@ class PolymorphicBinder(BaseBinder):
         return True
 
     def find(self, *predicates, **kw):
-        query = PolymorphicQuery(self.system, self._url, self._object_types, self._query_factory)
+        query = PolymorphicQuery(
+            self.system, self._url, self._object_types, self._query_factory
+        )
         return query.extend_url(*predicates, **kw)
 
 
-class MonomorphicBinder(BaseBinder): # pylint: disable=abstract-method
-
+class MonomorphicBinder(BaseBinder):  # pylint: disable=abstract-method
     def __init__(self, object_type, system):
         super(MonomorphicBinder, self).__init__(system)
         self.object_type = object_type
         self._cache = None
+
+    def get_by_id(self, id):  # pylint: disable=redefined-builtin
+        return self.get(**{self.object_type.UID_FIELD: id})
+
+    def get_by_id_lazy(self, id):  # pylint: disable=redefined-builtin
+        """
+        Obtains an object with a specified id *without* checking if it exists or querying it on the way.
+
+        This is useful assuming the next operation is a further query/update on this object.
+        """
+        if self._cache is not None:
+            obj = self._cache.safe_get_by_id_from_cache(id)
+            if obj is not None:
+                return obj
+        return self.object_type.construct(self.system, {self.object_type.UID_FIELD: id})
+
+    def safe_get_by_id(self, id):  # pylint: disable=redefined-builtin
+        return self.safe_get(**{self.object_type.UID_FIELD: id})
 
     def get_name(self):
         return self.object_type.get_plural_name()
@@ -156,10 +187,8 @@ class MonomorphicBinder(BaseBinder): # pylint: disable=abstract-method
     def get_url_path(self):
         return self.object_type.get_url_path(self.system)
 
-
     def get_mutable_fields(self):
-        """Returns a list of all mutable fields for this object type
-        """
+        """Returns a list of all mutable fields for this object type"""
         return [f for f in self.fields if f.mutable]
 
     def find(self, *predicates, **kw):
@@ -179,7 +208,9 @@ class MonomorphicBinder(BaseBinder): # pylint: disable=abstract-method
         .. seealso:: :class:`infinisdk.core.object_query.ObjectQuery`
         """
         if self._cache is not None:
-            assert not predicates and not kw, "Custom find() is unsupported when forcing queries from cache"
+            assert (
+                not predicates and not kw
+            ), "Custom find() is unsupported when forcing queries from cache"
             return self._cache
         query = ObjectQuery(self.system, self.get_url_path(), self.object_type)
         return query.extend_url(*predicates, **kw)
@@ -195,6 +226,8 @@ class MonomorphicBinder(BaseBinder): # pylint: disable=abstract-method
             yield
         finally:
             self._cache = original_cache
+
+
 class TypeBinder(MonomorphicBinder):
     def create(self, *args, **kwargs):
         """
@@ -205,26 +238,19 @@ class TypeBinder(MonomorphicBinder):
     def is_caching_enabled(self):
         return self._cache is not None
 
-    def get_by_id_lazy(self, id):  # pylint: disable=redefined-builtin
-        """
-        Obtains an object with a specified id *without* checking if it exists or querying it on the way.
-
-        This is useful assuming the next operation is a further query/update on this object.
-        """
-        if self._cache is not None:
-            obj = self._cache.safe_get_by_id_from_cache(id)
-            if obj is not None:
-                return obj
-        return self.object_type.construct(self.system, {self.fields.id.api_name:id})
-
 
 class SubObjectTypeBinder(TypeBinder):
+    """
+    This class provides a TypeBinder for an InfiniBoxSubObject
+    binding it with general methods of handling objects like "create",
+    "find", and others.
+    """
+
     def __init__(self, system, object_type, parent):
         super().__init__(object_type, system)
         self._parent = parent
 
     def create(self, *args, **kwargs):
-        kwargs[self._parent.get_type_name()] = self._parent
         return self.object_type.create(self.system, self, **kwargs)
 
     def get_parent(self):
@@ -237,8 +263,22 @@ class SubObjectTypeBinder(TypeBinder):
         return f"<{system_name}:{parent_name} id={self._parent.id}.{child_name}>"
 
     def get_url_path(self):
-        return (
-            self.get_parent()
-            .get_this_url_path()
-            .add_path(self.object_type.URL_PATH)
-        )
+        return self.get_parent().get_this_url_path().add_path(self.object_type.URL_PATH)
+
+
+class SubObjectMonomorphicBinder(MonomorphicBinder):
+    def __init__(self, system, object_type, parent):
+        super().__init__(object_type, system)
+        self._parent = parent
+
+    def get_parent(self):
+        return self._parent
+
+    def __repr__(self):
+        system_name = self.system.get_name()
+        parent_name = self._parent.get_type_name().capitalize()
+        child_name = self.object_type.get_plural_name()
+        return f"<{system_name}:{parent_name} id={self._parent.id}.{child_name}>"
+
+    def get_url_path(self):
+        return self.get_parent().get_this_url_path().add_path(self.object_type.URL_PATH)

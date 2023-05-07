@@ -4,7 +4,6 @@ from .metadata_holder import MetadataHolder
 
 
 class SystemMetadata(MetadataHolder):
-
     def __init__(self, system):
         super(SystemMetadata, self).__init__()
         self.system = system

@@ -1,7 +1,8 @@
 import collections
-from ..core.q import Q
-from ..core import Field, SystemObject, TypeBinder, MillisecondsDatetimeType
+
+from ..core import Field, MillisecondsDatetimeType, SystemObject, TypeBinder
 from ..core.bindings import RelatedObjectBinding
+from ..core.q import Q
 
 
 class Events(TypeBinder):
@@ -37,33 +38,79 @@ class Events(TypeBinder):
         return self._types.copy()
 
     def get_codes(self):
-        return self.get_events_types()['codes']
+        return self.get_events_types()["codes"]
 
     def get_visibilities(self):
-        return self.get_events_types()['visibilities']
+        return self.get_events_types()["visibilities"]
 
     def get_reporters(self):
-        return self.get_events_types()['reporters']
+        return self.get_events_types()["reporters"]
 
 
 class Event(SystemObject):
 
     FIELDS = [
-        Field("id", type=int, cached=True, is_identity=True, is_sortable=True, is_filterable=True),
-        Field("code", type=str, cached=True, is_filterable=True, is_sortable=True, use_in_repr=True),
+        Field(
+            "id",
+            type=int,
+            cached=True,
+            is_identity=True,
+            is_sortable=True,
+            is_filterable=True,
+        ),
+        Field(
+            "code",
+            type=str,
+            cached=True,
+            is_filterable=True,
+            is_sortable=True,
+            use_in_repr=True,
+        ),
         Field("level", type=str, cached=True, is_filterable=True, is_sortable=True),
         Field("username", type=str, cached=True, is_filterable=True, is_sortable=True),
         Field("description", type=str, cached=True),
-        Field("timestamp", type=MillisecondsDatetimeType, cached=True, is_filterable=True, is_sortable=True),
+        Field(
+            "timestamp",
+            type=MillisecondsDatetimeType,
+            cached=True,
+            is_filterable=True,
+            is_sortable=True,
+        ),
         Field("reporter", type=str, cached=True, is_filterable=True, is_sortable=True),
-        Field("visibility", type=str, cached=True, is_filterable=True, is_sortable=True),
-        Field("system_version", type=str, cached=True, is_filterable=True, is_sortable=True),
-        Field("source_node_id", type=int, cached=True, is_filterable=True, is_sortable=True),
+        Field(
+            "visibility", type=str, cached=True, is_filterable=True, is_sortable=True
+        ),
+        Field(
+            "system_version",
+            type=str,
+            cached=True,
+            is_filterable=True,
+            is_sortable=True,
+        ),
+        Field(
+            "source_node_id",
+            type=int,
+            cached=True,
+            is_filterable=True,
+            is_sortable=True,
+        ),
         Field("description_template", type=str, cached=True),
-        Field("affected_entity_id", type=str, cached=True, is_filterable=True, is_sortable=True),
-        Field("tenant", api_name="tenant_id", binding=RelatedObjectBinding('tenants'),
-              type='infinisdk.infinibox.tenant:Tenant', feature_name='tenants',
-              is_filterable=True, is_sortable=True),
+        Field(
+            "affected_entity_id",
+            type=str,
+            cached=True,
+            is_filterable=True,
+            is_sortable=True,
+        ),
+        Field(
+            "tenant",
+            api_name="tenant_id",
+            binding=RelatedObjectBinding("tenants"),
+            type="infinisdk.infinibox.tenant:Tenant",
+            feature_name="tenants",
+            is_filterable=True,
+            is_sortable=True,
+        ),
     ]
 
     BINDER_CLASS = Events
@@ -87,6 +134,10 @@ class Event(SystemObject):
         return self._cache.keys()
 
     def get_event_data_dict(self):
-        return dict((value['name'], value['value']) for value in self.get_field('data', from_cache=True))
+        return dict(
+            (value["name"], value["value"])
+            for value in self.get_field("data", from_cache=True)
+        )
+
 
 collections.abc.Mapping.register(Event)  # pylint: disable=no-member

@@ -1,13 +1,16 @@
 import abc
+
 from munch import Munch
-from .api import API
+
 from ..type_binder_container import TypeBinderContainer
+from .api import API
 
 
 class APITarget(metaclass=abc.ABCMeta):
     """
     Abstract base class for anything that would like to become an API target
     """
+
     OBJECT_TYPES = []
     SYSTEM_EVENTS_TYPE = None
     SYSTEM_COMPONENTS_TYPE = None
@@ -36,10 +39,14 @@ class APITarget(metaclass=abc.ABCMeta):
     def _initialize(self):
         for object_type in self.OBJECT_TYPES:
             self.objects.install(object_type)
-            self.types[object_type.get_type_name()] = self.types[object_type.__name__] = object_type
+            self.types[object_type.get_type_name()] = self.types[
+                object_type.__name__
+            ] = object_type
 
-        self.components = self.SYSTEM_COMPONENTS_TYPE(self)  # pylint: disable=not-callable
-        self.events = self.SYSTEM_EVENTS_TYPE(self)  # pylint: disable=not-callable
+        # pylint: disable=not-callable
+        self.components = self.SYSTEM_COMPONENTS_TYPE(self)
+        # pylint: disable=not-callable
+        self.events = self.SYSTEM_EVENTS_TYPE(self)
 
     def _get_api_auth(self):
         return None
@@ -48,25 +55,22 @@ class APITarget(metaclass=abc.ABCMeta):
         return True
 
     def disable_caching(self):
-        """Disables field caching, and causes each field fetching to fetch the actual up-to-date value from the system
-        """
+        """Disables field caching, and causes each field fetching to fetch the actual up-to-date value from the system"""
         self._caching_enabled = False
 
     def enable_caching(self):
-        """Enables field caching, and causes each field fetching to use the cache by default
-        """
+        """Enables field caching, and causes each field fetching to use the cache by default"""
         self._caching_enabled = True
 
     def is_caching_enabled(self):
-        """Returns whether caching is currently enabled
-        """
+        """Returns whether caching is currently enabled"""
         return self._caching_enabled
 
     def check_version(self):
         """Called automatically by the API on the first request made to the system. Should fetch and verify the
         system version to make sure it can be operated against.
         """
-        raise NotImplementedError() # pragma: no cover
+        raise NotImplementedError()  # pragma: no cover
 
     def get_collections_names(self):
         return [obj_type.get_plural_name() for obj_type in self.OBJECT_TYPES]
@@ -107,16 +111,16 @@ class APITarget(metaclass=abc.ABCMeta):
         return self._get_received_name_or_ip()
 
     def _is_simulator(self, address):
-        raise NotImplementedError() # pragma: no cover
+        raise NotImplementedError()  # pragma: no cover
 
     def _get_simulator_address(self, address, use_ssl):
-        raise NotImplementedError() # pragma: no cover
+        raise NotImplementedError()  # pragma: no cover
 
     def _get_api_timeout(self):
         """
         :returns: number of seconds to wait for a command to return before raising a timeout
         """
-        raise NotImplementedError() # pragma: no cover
+        raise NotImplementedError()  # pragma: no cover
 
     @classmethod
     def get_type_name(cls):

@@ -1,16 +1,17 @@
 import itertools
-import flux
 from uuid import uuid4
 
+import flux
 from api_object_schema.special_value import SpecialValue
 
 
 class _OmitType(SpecialValue):
-
     def __repr__(self):
-        return '<OMIT>'
+        return "<OMIT>"
+
 
 OMIT = _OmitType()
+
 
 class Autogenerate(SpecialValue):
     """
@@ -25,13 +26,13 @@ class Autogenerate(SpecialValue):
     - prefix: a prefix added to all generated values, will be added to template unless defined in the given template
     """
 
-    _prefix = ''
+    _prefix = ""
     _ORDINALS = {}
 
     def __init__(self, template):
         super(Autogenerate, self).__init__()
-        if '{prefix}' not in template:
-            template = '{prefix}' + template
+        if "{prefix}" not in template:
+            template = "{prefix}" + template
         self.template = template
 
     def generate(self):
@@ -39,15 +40,21 @@ class Autogenerate(SpecialValue):
         if counter is None:
             counter = self._ORDINALS[self.template] = itertools.count(1)
         current_time = flux.current_timeline.time()
-        return self.template.format(time=current_time, timestamp=int(current_time * 1000), ordinal=next(counter),
-                                    uuid=_LAZY_UUID_FACTORY, short_uuid=_LAZY_SHORT_UUID_FACTORY, prefix=self._prefix)
+        return self.template.format(
+            time=current_time,
+            timestamp=int(current_time * 1000),
+            ordinal=next(counter),
+            uuid=_LAZY_UUID_FACTORY,
+            short_uuid=_LAZY_SHORT_UUID_FACTORY,
+            prefix=self._prefix,
+        )
 
     @classmethod
     def set_prefix(cls, prefix):
         if prefix:
             cls._prefix = prefix
         else:
-            prefix = ''
+            prefix = ""
 
     @classmethod
     def get_prefix(cls):
@@ -55,6 +62,7 @@ class Autogenerate(SpecialValue):
 
     def __repr__(self):
         return "<Autogenerate: {}>".format(self.template)
+
 
 class RawValue(SpecialValue):
     def __init__(self, value):
@@ -69,7 +77,6 @@ class RawValue(SpecialValue):
 
 
 class _LazyUUIDFactory:
-
     def __init__(self, short=False):
         super(_LazyUUIDFactory, self).__init__()
         self._short = short
@@ -100,5 +107,5 @@ def translate_special_values(data):
     elif isinstance(data, SpecialValue):
         if isinstance(data, Autogenerate) or isinstance(data, RawValue):
             return data.generate()
-        raise NotImplementedError() # pragma: no cover
+        raise NotImplementedError()  # pragma: no cover
     return data
