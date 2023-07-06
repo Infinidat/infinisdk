@@ -1,5 +1,7 @@
 from urlobject import URLObject as URL
 
+from infinisdk.core.translators_and_types import MunchType
+
 from ..core import Field, SystemObject
 from ..core.type_binder import TypeBinder
 from .user import User
@@ -8,6 +10,14 @@ from .user import User
 class LDAPConfigBinder(TypeBinder):
     def define(self, *args, **kwargs):
         """Alias for :func:`.create <infinisdk.core.type_binder.TypeBinder.create>`"""
+        return self.create(*args, **kwargs)
+
+    def define_active_directory(self, *args, **kwargs):
+        kwargs["repository_type"] = "ActiveDirectory"
+        return self.create(*args, **kwargs)
+
+    def define_open_ldap(self, *args, **kwargs):
+        kwargs["repository_type"] = "LDAP"
         return self.create(*args, **kwargs)
 
     def set_order(self, configs):
@@ -28,7 +38,61 @@ class LDAPConfig(SystemObject):
 
     FIELDS = [
         Field("id", type=int, is_identity=True),
-        Field("name", mutable=True),
+        Field(
+            "name",
+            mutable=True,
+        ),
+        Field(
+            "ldap_port",
+            mutable=True,
+            type=int,
+            is_filterable=True,
+            is_sortable=True,
+        ),
+        Field(
+            "use_ldaps",
+            mutable=True,
+            type=bool,
+            is_filterable=True,
+            is_sortable=True,
+        ),
+        Field(
+            "domain_name",
+            creation_parameter=True,
+            optional=True,
+            is_filterable=True,
+            is_sortable=True,
+        ),
+        Field(
+            "bind_username",
+            mutable=True,
+            is_filterable=True,
+            is_sortable=True,
+        ),
+        Field(
+            "search_order",
+            type=int,
+            is_filterable=True,
+            is_sortable=True,
+        ),
+        Field(
+            "servers",
+            type=list,
+            creation_parameter=True,
+            optional=True,
+        ),
+        Field(
+            "repository_type",
+            optional=True,
+            creation_parameter=True,
+        ),
+        Field(
+            "schema_definition",
+            type=MunchType,
+            creation_parameter=True,
+            optional=True,
+            mutable=True,
+        ),
     ]
 
     @classmethod

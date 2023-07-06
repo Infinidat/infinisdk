@@ -78,11 +78,21 @@ LDAP Integration
 Getting all current LDAP configs:
 
 
-Setting up LDAP integration is done in two main steps. First, we need to define our LDAP settings:
+Setting up LDAP integration is done in two main steps. First, we need to define our LDAP settings. This depends on your ldap provider. For open-ldap:
 
 .. code-block:: python
 
-       >>> ldap_config = system.ldap_configs.define(name='AD2K3.local', domain_name='AD2K3.local', bind_username='Administrator', bind_password='passwd')
+       >>> ldap_config = system.ldap_configs.define_open_ldap(name='AD2K3.local', bind_username='Administrator', bind_password='passwd', servers=['AD2K3.local'])
+
+
+and for active-directory:
+
+.. code-block:: python
+
+       >>> ldap_config = system.ldap_configs.define_active_directory(name='AD2K3.local', domain_name='AD2K3.local', bind_username='Administrator', bind_password='passwd')  # doctest: +SKIP
+
+
+.. note:: The usage of `system.ldap_configs.define()` is discouraged, prefer to use one of the two methods mentioned above.
 
 Once the LDAP directory is defined, we need to map the LDAP group to a local role:
 
@@ -103,6 +113,13 @@ Updating LDAP configurations can be easily done with :meth:`.LDAPConfig.modify`:
        >>> ldap_config.modify(schema_group_class='group')
 
        >>> ldap_config.update_name('some_new_name')
+
+You can also pass a dictionary with the fields' names and their updated values:
+
+.. code-block:: python
+
+        >>> d = {"name": "my-new-name", "ldap_port": 1234}
+        >>> ldap_config.modify(**d)
 
 Testing LDAP Configuration
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
