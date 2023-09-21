@@ -15,9 +15,78 @@ include:
     ref: master
     file: /templates/itzik_setup.yml
 
+variables:
+  BUNDLE_NAME: new-infra
+  BUNDLE_VERSION: master
+  RUN_ITZIK_PARAMETERS: --no-dev --src $INSTALL_DIR --bundle $BUNDLE_NAME --bundle-version $BUNDLE_VERSION --until $CI_PROJECT_NAME -p $CI_PROJECT_DIR[testing] --curr-branch $CI_COMMIT_REF_NAME
+
 stages:
   - test
+  - deploy
+  - post
   - release
+
+.install-and-lint:
+  stage: test
+  tags:
+    - infradev
+    - ubuntu
+  except:
+    - /^customer-.*$/
+    - external
+  before_script:
+    - !reference [.itzik, before_script]
+    - make check_format
+    - make lint
+
+py36:
+  extends: .install-and-lint
+  image: $PYTHON_IMAGE:3.6
+  script:
+    - pytest
+
+py37:
+  extends: .install-and-lint
+  image: $PYTHON_IMAGE:3.7
+  script:
+    - pytest
+
+py38:
+  extends: .install-and-lint
+  image: $PYTHON_IMAGE:3.8
+  script:
+    - pytest
+
+py39-codecov:
+  extends:
+    - .install-and-lint
+    - .codecov
+  image: $PYTHON_IMAGE:3.9
+
+py310:
+  extends: .install-and-lint
+  image: $PYTHON_IMAGE:3.10
+  script:
+    - pytest
+
+docs:
+  extends: .install-and-lint
+  image: $PYTHON_IMAGE:3.7
+  script:
+    - pip install -e ".[doc]"
+    - sphinx-build -a -W -E doc build/sphinx/html
+
+trigger:
+  image: $PYTHON_IMAGE:3.8
+  tags:
+    - infradev
+    - ubuntu
+  stage: post
+  only:
+    - master
+    - /^(dev|stable)-\d+(\.\d+)*$/
+  script:
+    - curl --request POST --form "token=$CI_JOB_TOKEN" --form "ref=$CI_COMMIT_REF_NAME" https://git.infinidat.com/api/v4/projects/222/trigger/pipeline
 
 sanity-tests:
   image: $PYTHON_IMAGE:3.9
