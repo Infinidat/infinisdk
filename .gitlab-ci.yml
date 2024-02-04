@@ -117,8 +117,8 @@ test-release:
     - python -m pip install --upgrade pip
     - pip install setuptools wheel twine
     - python setup.py sdist bdist_wheel
-    - twine upload -u $TEST_PYPI_USER -p $TEST_PYPI_PASSWORD --verbose --non-interactive --repository-url https://test.pypi.org/legacy/ dist/*
-    - python -m pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple infinisdk
+    - twine upload -u "__token__" -p $TEST_PYPI_API_TOKEN --verbose --non-interactive --repository-url https://test.pypi.org/legacy/ dist/*
+    - python -m pip install --pre --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple infinisdk
     - python -c "import infinisdk"
   only:
     refs:

@@ -123,6 +123,15 @@ class Volume(Dataset):
             is_sortable=True,
             feature_name="replicate_snapshots",
         ),
+        Field(
+            "source_replicated_sg",
+            api_name="source_replicated_sg_id",
+            type="infinisdk.infinibox.cons_group:ConsGroup",
+            binding=RelatedObjectBinding("cons_groups"),
+            is_filterable=True,
+            is_sortable=True,
+            feature_name="sg_replicate_snapshots",
+        ),
     ]
 
     @classmethod

@@ -261,8 +261,48 @@ class Compatibility:
         return self.get_parsed_system_version() >= "7.0" and self.has_vvol()
 
 
-    def has_standard_and_vvol_counts(self):
-        return self.get_parsed_system_version() >= '7.0'
+    def has_ethernet_interface_state(self):
+        return self.get_parsed_system_version() >= "7.3.10"
+
+    def has_sg_replicate_snapshots(self):
+        feature_version = self._get_feature_version("replicate_snapshots")
+        if feature_version is not NOTHING:
+            return feature_version >= 2
+        return self.get_parsed_system_version() >= "7.3.10"
+
+    def has_snapshot_policies(self):
+        feature_version = self._get_feature_version("snapshot_policies")
+        if feature_version is not NOTHING:
+            return feature_version >= 0
+        return self.get_parsed_system_version() >= "7.3.10"
+
+    def has_fs_replicate_snapshots(self):
+        feature_version = self._get_feature_version("replicate_snapshots")
+        if feature_version is not NOTHING:
+            return feature_version >= 3
+        return self.get_parsed_system_version() >= "7.3.10"
+
+    def has_ssa_express(self):
+        feature_version = self._get_feature_version("ssa_express")
+        if feature_version is not NOTHING:
+            return feature_version >= 1
+        return self.get_parsed_system_version() >= "7.3.10"
+
+    def has_sso(self):
+        feature_version = self._get_feature_version("sso_authentication")
+        if feature_version is not NOTHING:
+            return feature_version >= 1
+        return False
+
+    def has_smb_server_capabilities(self):
+        return self.get_parsed_system_version() >= "7.3.10"
+
+    def has_snapshot_policies_enhancements(self):
+        feature_version = self._get_feature_version("snapshot_policies")
+        if feature_version is not NOTHING:
+            return feature_version >= 1
+        return self.get_parsed_system_version() >= "7.3.10"
+
 
 _VERSION_TUPLE_LEN = 5
 

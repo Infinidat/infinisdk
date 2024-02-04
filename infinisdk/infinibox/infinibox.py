@@ -4,6 +4,7 @@ import weakref
 
 import gossip
 from mitba import cached_method
+from munch import munchify
 from sentinels import NOTHING
 from urlobject import URLObject as URL
 
@@ -48,11 +49,14 @@ from .replica import Replica
 from .replication_group import ReplicationGroup
 from .rg_replica import RgReplica
 from .san_client import SanClients
+from .schedule import Schedule
 from .search_utils import get_search_query_object, safe_get_object_by_id_and_type_lazy
 from .share import Share
 from .share_permission import SharePermission
 from .smb_group import SMBGroup
 from .smb_user import SMBUser
+from .snapshot_policy import SnapshotPolicy
+from .sso_config import SSOIdentityProvider
 from .tenant import Tenant
 from .treeq import TreeQ
 from .user import User
@@ -101,10 +105,13 @@ class InfiniBox(APITarget):
         ReplicationGroup,
         RgReplica,
         NFSUser,
+        SnapshotPolicy,
+        SSOIdentityProvider,
     ]
     SUB_OBJECT_TYPES = [
         TreeQ,
         SharePermission,
+        Schedule,
     ]
     SYSTEM_EVENTS_TYPE = Events
     SYSTEM_COMPONENTS_TYPE = InfiniBoxSystemComponents
@@ -379,6 +386,73 @@ class InfiniBox(APITarget):
             search_kwargs["type"] = type_name
 
         return search_query.extend_url(**search_kwargs)
+
+    def open_ssh_ports(self):
+        """
+        Opens ssh ports on all 3 nodes and the SA
+        """
+        return self.api.post("system/ssh/open")
+
+    def close_ssh_ports(self):
+        """
+        Closes ssh ports on all 3 nodes and the SA
+        """
+        return self.api.post("system/ssh/close")
+
+    def get_ssh_ports_status(self):
+        """
+        Returns the status of the ssh ports
+        on all 3 nodes and the SA
+        """
+        return munchify(self.api.get("system/ssh").get_result())
+
+    def get_ssa_express_info(self):
+        """
+        Returns the status of ssa-express
+        and total, free, and used capacities
+        """
+        return munchify(self.api.get("system/ssa_express_info").get_result())
+
+    def get_entity_counts(self):
+        """
+        Returns the counts of all the
+        entities in the system
+        """
+        return munchify(self.api.get("system/entity_counts").get_result())
+
+    def get_smb_server_capabilities(self):
+        """
+        Returns a munch object with
+        the smb server capabilities.
+        """
+        if not self.compat.has_smb_server_capabilities():
+            raise VersionNotSupported(self.get_version())
+        return munchify(self.api.get("smb/server_capabilities").get_result()[0])
+
+    def update_smb_server_capabilities(
+        self,
+        min_smb_protocol=OMIT,
+        max_smb_protocol=OMIT,
+        smb_signing=OMIT,
+        smb_encryption=OMIT,
+    ):
+        """
+        Updates chosen smb server capabilities
+        """
+        if not self.compat.has_smb_server_capabilities():
+            raise VersionNotSupported(self.get_version())
+        updated_data = {}
+        if min_smb_protocol is not OMIT:
+            updated_data["min_smb_protocol"] = min_smb_protocol
+        if max_smb_protocol is not OMIT:
+            updated_data["max_smb_protocol"] = max_smb_protocol
+        if smb_signing is not OMIT:
+            updated_data["smb_signing"] = smb_signing
+        if smb_encryption is not OMIT:
+            updated_data["smb_encryption"] = smb_encryption
+
+        if updated_data:
+            self.api.put("smb/server_capabilities", data=updated_data)
 
     def __hash__(self):
         return hash(self.get_name())

@@ -13,11 +13,7 @@ from ..core.exceptions import (
     TooManyObjectsFound,
 )
 from ..core.system_object import SystemObject
-from ..core.translators_and_types import (
-    CapacityType,
-    MillisecondsDeltaType,
-    SecondsDeltaType,
-)
+from ..core.translators_and_types import CapacityType, MillisecondsDeltaType
 from ..core.type_binder import TypeBinder
 from ..core.utils import end_reraise_context
 
@@ -44,6 +40,13 @@ class ReplicaBinder(TypeBinder):
         :seealso: :meth:`.replicate_entity`
         """
         return self.replicate_entity(entity=volume, remote_entity=remote_volume, **kw)
+
+    def replicate_filesystem(self, fs, remote_fs=None, **kw):
+        """Convenience wrapper around :func:`ReplicaBinder.replicate_entity`
+
+        :seealso: :meth:`.replicate_entity`
+        """
+        return self.replicate_entity(entity=fs, remote_entity=remote_fs, **kw)
 
     def replicate_cons_group(self, cg, remote_cg=None, remote_pool=OMIT, **kw):
         """Convenience wrapper around :func:`ReplicaBinder.replicate_entity`
@@ -530,7 +533,7 @@ class Replica(SystemObject):
             optional=True,
             creation_parameter=True,
             mutable=True,
-            type=SecondsDeltaType,
+            type=int,
             is_filterable=True,
             is_sortable=True,
             feature_name="replicate_snapshots_suffix_lock",
@@ -614,6 +617,7 @@ class Replica(SystemObject):
         if replica is None or not replica.is_in_system():
             return
 
+        # pylint: disable=protected-access
         gossip.trigger_with_tags(
             "infinidat.sdk.post_replication_snapshot_expose",
             {

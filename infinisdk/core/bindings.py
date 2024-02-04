@@ -1,8 +1,11 @@
+from typing import Callable
+
 from api_object_schema import ObjectAPIBinding
 from munch import Munch
 from sentinels import NOTHING
 
 from .api.special_values import RawValue, SpecialValue
+from .exceptions import InfiniSDKRuntimeException, InvalidUsageException
 from .translators_and_types import address_type_factory, host_port_from_api
 
 # pylint: disable=abstract-method
@@ -276,3 +279,74 @@ class RelatedObjectViewBinding(RelatedObjectBinding):
         if api_value == self._value_for_none or api_value is None:
             return None
         return getattr(system, self._collection_name).get_by_id_lazy(api_value["id"])
+
+
+class RelatedSubObjectBinding(RelatedObjectBinding):
+    def __init__(
+        self, collection_name=None, value_for_none=0, child_collection_resolver=None
+    ):
+        super().__init__(collection_name, value_for_none)
+        self.child_collection_resolver = child_collection_resolver
+
+    def get_value_from_api_value(self, system, objtype, obj, api_value):
+        if api_value == self._value_for_none or api_value is None:
+            return None
+        if self._collection_name is None:
+            raise InvalidUsageException("collection_name can't be None for this object")
+        assert (
+            "/" in self._collection_name
+        ), "Subobjects need to be specified as 'parents/childs'"
+        parent_collection_name, child_collection_name = self._collection_name.split(
+            "/", maxsplit=1
+        )
+        assert (
+            "/" not in parent_collection_name
+        ), f"Illegal name: {parent_collection_name}"
+        assert (
+            "/" not in child_collection_name
+        ), f"Illegal name, {child_collection_name}"
+
+        def default_child_collection_resolver():
+            """
+            The flow in this function is a default flow - try to get the child
+            collection and then the instance from the parent. However, in cases
+            where this will fail, particularly, when there is no parent nor child instances,
+            (e.g. can happen for the case of snapshot_policies/schedules.
+            A snapshot that is a member of an SG (snapshot group = snapshoted CG),
+            which in this case won't have the snapshot policy which created it because
+            snapshot policies cannot be assigned to SGs or to CG members)
+            a custom resolver with the specific colletion should be used.
+            For an example check the snapshot_policies/schedules case.
+            """
+            parent_obj = getattr(system, parent_collection_name, None)
+            if parent_obj is None:
+                raise InfiniSDKRuntimeException(
+                    f"No such collection ({parent_collection_name})"
+                )
+            parent_instance = getattr(
+                obj.get_parent(), f"get_{parent_obj.object_type.get_type_name()}"
+            )()
+            # The next line assumes that the collection name is a method on the parent class
+            child_collection = getattr(parent_instance, child_collection_name, None)
+            if child_collection is None and parent_instance is not None:
+                raise InfiniSDKRuntimeException(
+                    f"{child_collection_name} is not a sub-collection of {parent_collection_name}"
+                )
+            elif child_collection is None and parent_instance is None:
+                raise RuntimeError(
+                    "Both parent and child objects are None. You might want to use a different child_collection_resolver"
+                )
+            return child_collection
+
+        try:
+            resolved_child_collection = default_child_collection_resolver()
+            return resolved_child_collection.get_by_id(api_value)
+        except RuntimeError as e:
+            if not self.child_collection_resolver:
+                raise InvalidUsageException(
+                    "default_child_collection_resolver have failed and no other child_collection_resolver was supplied"
+                ) from e
+            assert isinstance(
+                self.child_collection_resolver, Callable
+            ), f"child_collection_resolver should be a function, got {type(self.child_collection_resolver)} instead"
+            return self.child_collection_resolver(system, api_value)

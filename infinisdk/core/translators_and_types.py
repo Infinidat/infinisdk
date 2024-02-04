@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 
-from datetime import timedelta
+from datetime import time, timedelta
+from typing import Optional
 
 import arrow
 import munch
@@ -170,3 +171,29 @@ class HostPortListTranslator(ValueTranslator):
 HostPortListType = TypeInfo(
     type=list, api_type=list, translator=HostPortListTranslator()
 )
+
+
+class TimeOfDayTranslator(ValueTranslator):
+    """
+    Converts between time of day to
+    seconds from midnight
+    """
+
+    def _to_api(self, value: Optional[time]):
+        if value is None:
+            return None
+        return int(
+            timedelta(
+                hours=value.hour, minutes=value.minute, seconds=value.second
+            ).total_seconds()
+        )
+
+    def _from_api(self, value: Optional[int]):
+        if value is None:
+            return None
+        total_minutes, seconds = divmod(value, 60)
+        hours, minutes = divmod(total_minutes, 60)
+        return time(hours, minutes, seconds)
+
+
+TimeOfDayType = TypeInfo(type=time, api_type=int, translator=TimeOfDayTranslator())

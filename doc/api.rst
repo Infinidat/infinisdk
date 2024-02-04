@@ -270,6 +270,20 @@ infinibox.smb_users
 .. autoclass:: SMBUser
    :members:
 
+infinibox.snapshot_policies
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: infinisdk.infinibox.snapshot_policy
+.. autoclass:: SnapshotPolicy
+   :members:
+
+infinibox.snapshot_policies.schedules
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: infinisdk.infinibox.schedule
+.. autoclass:: Schedule
+   :members:
+
 infinibox.active_directory_domains
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

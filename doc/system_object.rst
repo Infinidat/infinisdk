@@ -23,5 +23,13 @@ The :meth:`infinisdk.infinibox.InfiniBox.get_model_name` method retrieves the mo
 
 .. seealso:: :class:`infinisdk.infinibox.InfiniBox`
 
+Opening and Closing SSH Ports
+-----------------------------
 
+You can open/close the SSH ports of the system as well as querying its status by:
 
+.. code-block:: python
+
+        >>> system.open_ssh_ports()  # doctest: +SKIP
+        >>> system.close_ssh_ports()  # doctest: +SKIP
+        >>> system.get_ssh_ports_status()  # doctest: +SKIP

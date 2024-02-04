@@ -41,6 +41,8 @@ class LDAPConfig(SystemObject):
         Field(
             "name",
             mutable=True,
+            is_filterable=True,
+            is_sortable=True,
         ),
         Field(
             "ldap_port",
@@ -89,8 +91,6 @@ class LDAPConfig(SystemObject):
         Field(
             "schema_definition",
             type=MunchType,
-            creation_parameter=True,
-            optional=True,
             mutable=True,
         ),
     ]

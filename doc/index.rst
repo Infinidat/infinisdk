@@ -31,6 +31,7 @@ Contents:
    filesystems
    mappings
    snapshots
+   snapshot_policies
    cons_groups
    users
    system_configuration
@@ -48,6 +49,7 @@ Contents:
    api
    advanced_usage
    hooks
+   smb_server_capabilities
 
 
 Indices and tables

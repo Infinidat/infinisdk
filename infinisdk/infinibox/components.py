@@ -538,7 +538,6 @@ class LocalDrive(InfiniBoxSystemComponent):
             cached=True,
             binding=RelatedComponentBinding(),
         ),
-        Field("encryption_state", type=bool, feature_name="fips"),
     ]
 
     @classmethod

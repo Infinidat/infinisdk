@@ -9,7 +9,11 @@ from urlobject import URLObject as URL
 
 from ..core import CapacityType, Field, MillisecondsDatetimeType
 from ..core.api.special_values import OMIT
-from ..core.bindings import RelatedObjectBinding, RelatedObjectNamedBinding
+from ..core.bindings import (
+    RelatedObjectBinding,
+    RelatedObjectNamedBinding,
+    RelatedSubObjectBinding,
+)
 from ..core.exceptions import ObjectNotFound, TooManyObjectsFound
 from ..core.type_binder import PolymorphicBinder, TypeBinder
 from ..core.utils import (
@@ -18,6 +22,7 @@ from ..core.utils import (
     end_reraise_context,
     handle_possible_replication_snapshot,
 )
+from ..core.utils.resolvers import schedules_resolver
 from .system_object import InfiniBoxObject
 
 _BEGIN_FORK_HOOK = "infinidat.sdk.begin_fork"
@@ -237,6 +242,76 @@ class Dataset(InfiniBoxObject):
             is_sortable=True,
             feature_name="replicate_snapshots",
         ),
+        Field(
+            "snapshot_policy",
+            api_name="snapshot_policy_id",
+            type="infinisdk.infinibox.snapshot_policy:SnapshotPolicy",
+            binding=RelatedObjectBinding("snapshot_policies"),
+            mutable=True,
+            creation_parameter=True,
+            optional=True,
+            is_filterable=True,
+            is_sortable=True,
+            feature_name="snapshot_policies",
+        ),
+        Field(
+            "snapshot_policy_name",
+            mutable=True,
+            is_filterable=True,
+            is_sortable=True,
+            feature_name="snapshot_policies",
+        ),
+        Field(
+            "created_by_policy",
+            api_name="created_by_snapshot_policy_id",
+            type="infinisdk.infinibox.snapshot_policy:SnapshotPolicy",
+            binding=RelatedObjectBinding("snapshot_policies"),
+            is_filterable=True,
+            is_sortable=True,
+            feature_name="snapshot_policies",
+        ),
+        Field(
+            "created_by_snapshot_policy_name",
+            is_filterable=True,
+            is_sortable=True,
+            feature_name="snapshot_policies",
+        ),
+        Field(
+            "mgmt_snapshot_guid",
+            is_filterable=True,
+            is_sortable=True,
+            feature_name="fs_replicate_snapshots",
+        ),
+        Field(
+            "ssa_express_enabled",
+            type=bool,
+            mutable=True,
+            is_filterable=True,
+            is_sortable=True,
+            feature_name="ssa_express",
+        ),
+        Field(
+            "ssa_express_status",
+            feature_name="ssa_express",
+        ),
+        Field(
+            "created_by_schedule",
+            api_name="created_by_schedule_id",
+            type="infinisdk.infinibox.schedule:Schedule",
+            binding=RelatedSubObjectBinding(
+                "snapshot_policies/schedules",
+                child_collection_resolver=schedules_resolver,
+            ),
+            is_filterable=True,
+            is_sortable=True,
+            feature_name="snapshot_policies_enhancements",
+        ),
+        Field(
+            "created_by_schedule_name",
+            is_filterable=True,
+            is_sortable=True,
+            feature_name="snapshot_policies_enhancements",
+        ),
     ]
 
     PROVISIONING = namedtuple("Provisioning", ["Thick", "Thin"])("THICK", "THIN")
@@ -307,7 +382,7 @@ class Dataset(InfiniBoxObject):
         assert isinstance(delta, Capacity), "Delta must be an instance of Capacity"
         return self.update_field("size", self.get_size() + delta)
 
-    def _create_child(self, name=None, **kwargs):
+    def _create_child(self, name=None, replicate_to_async_target=OMIT, **kwargs):
         hook_tags = self.get_tags_for_object_operations(self.system)
         gossip.trigger_with_tags(
             "infinidat.sdk.pre_entity_child_creation",
@@ -325,10 +400,16 @@ class Dataset(InfiniBoxObject):
                 data[key] = self.fields.get(key).binding.get_api_value_from_value(
                     self.system, type(self), None, value
                 )
+
+        url = self.get_url_path(self.system)
+        if replicate_to_async_target is not OMIT:
+            url = url.add_query_param(
+                "replicate_to_async_target", replicate_to_async_target
+            )
         try:
             child = self._create(
                 self.system,
-                self.get_url_path(self.system),
+                url,
                 data=data,
                 tags=self.get_tags_for_object_operations(self.system),
                 parent=self,

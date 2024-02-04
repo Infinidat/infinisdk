@@ -5,9 +5,10 @@ import gossip
 
 from ..core import Field, MillisecondsDatetimeType
 from ..core.api.special_values import OMIT, Autogenerate
-from ..core.bindings import RelatedObjectBinding
+from ..core.bindings import RelatedObjectBinding, RelatedSubObjectBinding
 from ..core.object_query import PolymorphicQuery
 from ..core.utils import end_reraise_context, handle_possible_replication_snapshot
+from ..core.utils.resolvers import schedules_resolver
 from .system_object import InfiniBoxObject
 
 _CG_SUFFIX = Autogenerate("_{timestamp}")
@@ -87,6 +88,72 @@ class ConsGroup(InfiniBoxObject):
             is_sortable=True,
         ),
         Field("replication_types", type=list, new_to="5.5.0", is_filterable=True),
+        Field(
+            "snapshot_retention",
+            type=int,
+            optional=True,
+            creation_parameter=True,
+            is_filterable=True,
+            is_sortable=True,
+            feature_name="sg_replicate_snapshots",
+        ),
+        Field(
+            "snapshot_expires_at",
+            type=int,
+            feature_name="sg_replicate_snapshots",
+        ),
+        Field(
+            "snapshot_policy",
+            api_name="snapshot_policy_id",
+            type="infinisdk.infinibox.snapshot_policy:SnapshotPolicy",
+            binding=RelatedObjectBinding("snapshot_policies"),
+            mutable=True,
+            creation_parameter=True,
+            optional=True,
+            is_filterable=True,
+            is_sortable=True,
+            feature_name="snapshot_policies",
+        ),
+        Field(
+            "snapshot_policy_name",
+            mutable=True,
+            is_filterable=True,
+            is_sortable=True,
+            feature_name="snapshot_policies",
+        ),
+        Field(
+            "created_by_policy",
+            api_name="created_by_snapshot_policy_id",
+            type="infinisdk.infinibox.snapshot_policy:SnapshotPolicy",
+            binding=RelatedObjectBinding("snapshot_policies"),
+            is_filterable=True,
+            is_sortable=True,
+            feature_name="snapshot_policies",
+        ),
+        Field(
+            "created_by_snapshot_policy_name",
+            is_filterable=True,
+            is_sortable=True,
+            feature_name="snapshot_policies",
+        ),
+        Field(
+            "created_by_schedule",
+            api_name="created_by_schedule_id",
+            type="infinisdk.infinibox.schedule:Schedule",
+            binding=RelatedSubObjectBinding(
+                "snapshot_policies/schedules",
+                child_collection_resolver=schedules_resolver,
+            ),
+            is_filterable=True,
+            is_sortable=True,
+            feature_name="snapshot_policies_enhancements",
+        ),
+        Field(
+            "created_by_schedule_name",
+            is_filterable=True,
+            is_sortable=True,
+            feature_name="snapshot_policies_enhancements",
+        ),
     ]
 
     @classmethod
@@ -116,7 +183,12 @@ class ConsGroup(InfiniBoxObject):
     get_snapgroups = get_children
 
     def create_snapgroup(
-        self, name=None, prefix=None, suffix=None, lock_expires_at=None
+        self,
+        name=None,
+        prefix=None,
+        suffix=None,
+        lock_expires_at=None,
+        replicate_to_async_target=OMIT,
     ):
         """Create a snapshot group out of the consistency group."""
         hook_tags = self.get_tags_for_object_operations(self)
@@ -145,10 +217,14 @@ class ConsGroup(InfiniBoxObject):
         members = self.get_members()
         for member in members:
             member.trigger_begin_fork()
-        try:
-            child = self._create(
-                self.system, self.get_url_path(self.system), data=data, tags=None
+
+        url = self.get_url_path(self.system)
+        if replicate_to_async_target is not OMIT:
+            url = url.add_query_param(
+                "replicate_to_async_target", replicate_to_async_target
             )
+        try:
+            child = self._create(self.system, url, data=data, tags=None)
         except Exception as e:  # pylint: disable=broad-except
             with end_reraise_context():
                 gossip.trigger_with_tags(

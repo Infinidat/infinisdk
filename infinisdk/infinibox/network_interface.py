@@ -61,6 +61,12 @@ class NetworkInterface(InfiniBoxObject):
             optional=True,
         ),
         Field("vlan", type=int, creation_parameter=True, optional=True),
+        Field(
+            "operational_state",
+            is_filterable=True,
+            feature_name="ethernet_interface_state",
+        ),
+        Field("operational_state_description", feature_name="ethernet_interface_state"),
     ]
 
     @classmethod
@@ -77,6 +83,12 @@ class NetworkInterface(InfiniBoxObject):
             for network_space in self.system.network_spaces
             if self in network_space.get_interfaces()
         ]
+
+    def describe_ports(self):
+        """
+        :returns: A list of port info (dict)
+        """
+        return self.get_field("ports", raw_value=True)
 
     def add_port(self, port):
         url = self.get_this_url_path().add_path("ports")

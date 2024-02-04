@@ -1,3 +1,24 @@
+Version 240.1.1 (Released 2024-01-31)
+-------------------------------------
+* #16462: Add pagination for the new metadata of get all assigned entities
+* #16368: Add RelatedSubObjectBinding
+* #16348: Add created_by_schedule_name fields and default policy indicator
+* #16335: Add created_by_schedule_name to dataset and cons_group in InfiniSDK
+* #16318: Add support for snapshot policies enhancements, rename sso field
+* #16306: Rename auth_link_url to sign_on_url in SSO in InfiniSDK
+* #16287: Remove encryption_state field from LocalDrive in InfiniSDK [breaking change]
+* #16284: Add missing ldap config fields to InfiniSDK
+* #16280: Add tests and documentation for ldap config modify when passing an update dictionary
+* #16231: Support snapshot policy enhancements
+* #16223: Make snapshot policy suffix to contain a random part in its name
+* #16198: Support config of SMB server capabilities
+* #16155: Support SSA Express
+* #16149: Support single sign on (SSO) identity providers management
+* #16131: Support disable replication for a single snapshot
+* #16044: Support block-ssh
+* #15920: Support Snapshot Group (SG) replicate snapshots
+* #15888: Add Snapshot Policies (Snap Scheduler)
+
 Version 225.1.1 (Released 2023-05-07)
 -------------------------------------
 * #16212: Add infi.dtypes.nqn to requirements
