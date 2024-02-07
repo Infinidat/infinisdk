@@ -126,6 +126,81 @@ test-release:
     variables:
       - $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "external"
 
+test-package-py36:
+  image: $PYTHON_IMAGE:3.6
+  stage: test
+  script:
+    - python -m pip install --upgrade pip
+    - pip install -e .
+    - pip install click~=8.0.4 black~=21.8b0 isort~=5.0.9 "pylint>=2"
+    - make check_format
+    - make lint
+  only:
+    refs:
+      - merge_requests
+    variables:
+      - $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "external"
+
+test-package-py37:
+  image: $PYTHON_IMAGE:3.7
+  stage: test
+  script:
+    - python -m pip install --upgrade pip
+    - pip install -e .
+    - pip install click~=8.0.4 black~=21.8b0 isort~=5.0.9 "pylint>=2"
+    - make check_format
+    - make lint
+  only:
+    refs:
+      - merge_requests
+    variables:
+      - $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "external"
+
+test-package-py38:
+  image: $PYTHON_IMAGE:3.8
+  stage: test
+  script:
+    - python -m pip install --upgrade pip
+    - pip install -e .
+    - pip install click~=8.0.4 black~=21.8b0 isort~=5.0.9 "pylint>=2"
+    - make check_format
+    - make lint
+  only:
+    refs:
+      - merge_requests
+    variables:
+      - $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "external"
+
+test-package-py39:
+  image: $PYTHON_IMAGE:3.9
+  stage: test
+  script:
+    - python -m pip install --upgrade pip
+    - pip install -e .
+    - pip install click~=8.0.4 black~=21.8b0 isort~=5.0.9 "pylint>=2"
+    - make check_format
+    - make lint
+  only:
+    refs:
+      - merge_requests
+    variables:
+      - $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "external"
+
+test-package-py310:
+  image: $PYTHON_IMAGE:3.10
+  stage: test
+  script:
+    - python -m pip install --upgrade pip
+    - pip install -e .
+    - pip install click~=8.0.4 black~=21.8b0 isort~=5.0.9 "pylint>=2"
+    - make check_format
+    - make lint
+  only:
+    refs:
+      - merge_requests
+    variables:
+      - $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "external"
+
 push-to-github:
   # Refer to https://wiki.infinidat.com/display/ID/InfiniSDK+New+Release+Strategy#InfiniSDKNewReleaseStrategy-new_flow
   image: $PYTHON_IMAGE:3.9
