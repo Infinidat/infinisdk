@@ -37,7 +37,20 @@ As for the remote entity, it depends on the scenario being used to create the re
 * Creating a new entity on the remote side (`_create_target` or default) requires the remote pool to be provided
 * Creating over an existing, formatted target (`_existing_target`) requires the remote target to be provided via ``remote_entity`` parameter
 
+To allow for snapshot replication you would use something like the following:
 
+.. code-block:: python
+
+   from datetime import timedelta
+
+   replica = primary_system.replicas.replicate_entity(vol, link=link, remote_pool=remote_pool,
+       including_snapshots=True, snapshots_retention=3600,
+       lock_remote_snapshot_retention=timedelta(seconds=3600),
+       rpo=timedelta(seconds=4), sync_interval=timedelta(seconds=4))
+
+`lock_remote_snapshot_retention` is an optional parameter. It places a lock on the exposed snapshot
+for a duration defined by the parameter's value (number of seconds since the original snapshot was created).
+For an explanation about `rpo` and `sync_interval` parameters please see section below on RgReplica.
 
 .. seealso:: :class:`infinisdk.infinibox.replica.Replica`
 
