@@ -260,7 +260,6 @@ class Compatibility:
     def has_vvol_counts(self):
         return self.get_parsed_system_version() >= "7.0" and self.has_vvol()
 
-
     def has_ethernet_interface_state(self):
         return self.get_parsed_system_version() >= "7.3.10"
 

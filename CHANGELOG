@@ -1,3 +1,7 @@
+Version 240.1.2 (Released 2024-02-08)
+-------------------------------------
+* #16384: Add documentation for snapshot replication when creating async replica
+
 Version 240.1.1 (Released 2024-01-31)
 -------------------------------------
 * #16462: Add pagination for the new metadata of get all assigned entities
