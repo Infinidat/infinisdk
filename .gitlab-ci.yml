@@ -213,6 +213,6 @@ push-to-github:
   before_script:
     - !reference [.itzik, before_script]
   script:
-    - infradev customer-sdk push-external-to-github --email $INFINISDK_RELEASE_EMAIL --auth-token $INFINISDK_RELEASE_TOKEN --gitlab-repo $INFINISDK_GITLAB_REPO --github-repo $INFINISDK_GITHUB_REPO --github-username $INFINISDK_RELEASE_USER --version $RELEASE_VERSION
+    - infradev customer-sdk push-external-to-github --email $INFINISDK_RELEASE_EMAIL --auth-token $INFINISDK_RELEASE_TOKEN --gitlab-repo $INFINISDK_GITLAB_REPO --github-repo $INFINISDK_GITHUB_REPO --github-username $INFINISDK_RELEASE_USER --version $RELEASE_VERSION --non-version-update $NON_VERSIONED_UPDATE
   only:
     - external
