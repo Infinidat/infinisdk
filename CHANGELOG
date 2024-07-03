@@ -1,3 +1,9 @@
+Version 240.2.1 (Released 2024-06-30)
+-------------------------------------
+* #16618: Support data_reduction new fields
+* #16462: Add pagination for get all assigned entities in SnapshotPolicy
+* #16394: Move the lock_snapshots field from SnapshotPolicy to Schedule entity
+
 Version 240.1.2 (Released 2024-02-08)
 -------------------------------------
 * #16384: Add documentation for snapshot replication when creating async replica

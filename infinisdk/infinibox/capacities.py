@@ -104,6 +104,15 @@ class InfiniBoxSystemCapacity:
     def get_data_reduction_ratio(self):
         return self._get_field("data_reduction_ratio")
 
+    def get_total_disk_usage_within_pools(self):
+        return self._get_capacity_field("total_disk_usage_within_pools")
+
+    def get_total_thick_capacity_savings(self):
+        return self._get_capacity_field("total_thick_capacity_savings")
+
+    def get_total_thin_capacity_savings(self):
+        return self._get_capacity_field("total_thin_capacity_savings")
+
     def update_total_virtual_capacity(self, total_virtual_capacity):
         if not isinstance(total_virtual_capacity, int):
             if not isinstance(total_virtual_capacity, Capacity):

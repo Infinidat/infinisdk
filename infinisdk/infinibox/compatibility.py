@@ -302,6 +302,12 @@ class Compatibility:
             return feature_version >= 1
         return self.get_parsed_system_version() >= "7.3.10"
 
+    def has_data_reduction_ratio(self):
+        feature_version = self._get_feature_version("data_reduction_ratio")
+        if feature_version is not NOTHING:
+            return feature_version >= 0
+        return self.get_parsed_system_version() >= "8.0"
+
 
 _VERSION_TUPLE_LEN = 5
 

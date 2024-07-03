@@ -312,6 +312,21 @@ class Dataset(InfiniBoxObject):
             is_sortable=True,
             feature_name="snapshot_policies_enhancements",
         ),
+        Field(
+            "disk_usage",
+            type=int,
+            feature_name="data_reduction_ratio",
+        ),
+        Field(
+            "data_reduction_ratio",
+            type=int,
+            feature_name="data_reduction_ratio",
+        ),
+        Field(
+            "capacity_savings_per_entity",
+            type=CapacityType,
+            feature_name="data_reduction_ratio",
+        ),
     ]
 
     PROVISIONING = namedtuple("Provisioning", ["Thick", "Thin"])("THICK", "THIN")
