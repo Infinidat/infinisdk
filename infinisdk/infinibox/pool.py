@@ -174,6 +174,18 @@ class Pool(InfiniBoxObject):
         Field("vvol_volumes_count", type=int, feature_name="vvol_counts"),
         Field("vvol_entities_count", type=int, feature_name="vvol_counts"),
         Field("vvol_snapshots_count", type=int, feature_name="vvol_counts"),
+        Field("total_disk_usage", type=int, feature_name="data_reduction_ratio"),
+        Field(
+            "thick_capacity_savings",
+            type=CapacityType,
+            feature_name="data_reduction_ratio",
+        ),
+        Field(
+            "thin_capacity_savings",
+            type=CapacityType,
+            feature_name="data_reduction_ratio",
+        ),
+        Field("data_reduction_ratio", type=int, feature_name="data_reduction_ratio"),
     ]
 
     @classmethod
