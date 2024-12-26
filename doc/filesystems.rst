@@ -114,7 +114,7 @@ We can now access and modify various attributes of the export:
 		>>> export.get_max_read()
 		1*MiB
 		>>> export.update_max_read(2*MiB)
-		>>> export.get_max_read()
+		>>> export.get_max_read() 
 		2*MiB
 
 
@@ -125,8 +125,8 @@ Following this operation, the filesystem is not accessible by the user. The expo
 
 .. code-block:: python
 
-		>>> export.disable()
-		>>> export.is_enabled()
+		>>> export.disable() 
+		>>> export.is_enabled() 
 		False
 
 
@@ -135,8 +135,8 @@ Enabling an Export
 
 .. code-block:: python
 
-		>>> export.enable()
-		>>> export.is_enabled()
+		>>> export.enable() 
+		>>> export.is_enabled() 
 		True
 
 
@@ -147,7 +147,7 @@ Like other InfiniBox collections, InfiniSDK provides iteration and filtering abi
 
 .. code-block:: python
 
-		>>> system.exports.count()
+		>>> system.exports.count() 
 		1
 
 
@@ -162,18 +162,18 @@ Export Permissions
 .. code-block:: python
 
 		>>> from munch import Munch
-		>>> permissions = export.get_permissions()
+		>>> permissions = export.get_permissions() 
 		>>> permissions[0] ==  Munch({'access': 'RW', 'no_root_squash': True, 'client': '*'})
 		True
 		>>> export.update_permissions(permissions +
 		...   [{'access': 'RO', 'client': '1.1.1.1', 'no_root_squash': True}])
-		>>> permissions = export.get_permissions()
+		>>> permissions = export.get_permissions() 
 		>>> permissions[0] == Munch({'access': 'RW', 'no_root_squash': True, 'client': '*'})
 		True
 		>>> permissions[1] == Munch({'access': 'RO', 'no_root_squash': True, 'client': '1.1.1.1'})
 		True
 		>>> export.update_permissions([{'access': 'RW', 'client': '2.2.2.2', 'no_root_squash': True}])
-		>>> permissions = export.get_permissions()
+		>>> permissions = export.get_permissions() 
 		>>> permissions[0] == Munch({'access': 'RW', 'no_root_squash': True, 'client': '2.2.2.2'})
 		True
 
@@ -184,7 +184,8 @@ Deleting an export is done with :func:`.Export.delete <infinisdk.core.system_obj
 
 .. code-block:: python
 
-		>>> export.delete()
+		>>> export.delete() 
+
 
 Tree Quotas
 ------------

@@ -39,18 +39,6 @@ stages:
     - make check_format
     - make lint
 
-py36:
-  extends: .install-and-lint
-  image: $PYTHON_IMAGE:3.6
-  script:
-    - pytest
-
-py37:
-  extends: .install-and-lint
-  image: $PYTHON_IMAGE:3.7
-  script:
-    - pytest
-
 py38:
   extends: .install-and-lint
   image: $PYTHON_IMAGE:3.8

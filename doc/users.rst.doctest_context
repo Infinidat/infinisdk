@@ -10,6 +10,7 @@ from infinisim.infinibox import Infinibox as Simulator
 @contextmanager
 def doctest_context():
     simulator = Simulator(True)
+    simulator.config.mgmt['users.password_policy_enabled'] = False
     simulator.activate()
     system = InfiniBox(simulator, auth=('infinidat', '123456'))
     system.login()

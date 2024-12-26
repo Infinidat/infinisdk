@@ -514,3 +514,19 @@ class ConsGroup(InfiniBoxObject):
         )
 
         self.invalidate_cache("pool")
+
+    def promote_snapshot(self):
+        """
+        Converts all snapshots of the volumes inside the consistency group to standalone volumes
+        and the snapshot group to a consistency group
+        """
+        url = self.get_this_url_path().add_path("promote")
+
+        # headers need to be added here since MGMT chose
+        # to use a json content type even if no content is
+        # being sent (no data in post)
+        headers = {"Content-type": "application/json"}
+        response = self.system.api.post(url, headers=headers)
+        response_result = response.get_result()
+
+        return self.system.cons_groups.get_by_id(response_result["id"])

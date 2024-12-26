@@ -50,6 +50,7 @@ Contents:
    advanced_usage
    hooks
    smb_server_capabilities
+   nfs_server_capabilities
 
 
 Indices and tables

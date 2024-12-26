@@ -5,6 +5,7 @@ import gossip
 import logbook
 from capacity import GB, Capacity, byte
 from mitba import cached_method
+from munch import munchify
 from urlobject import URLObject as URL
 
 from ..core import CapacityType, Field, MillisecondsDatetimeType
@@ -52,6 +53,26 @@ class Datasets(PolymorphicBinder):
             dataset_type_str.lower()
         )
         return dataset_binder.object_type.construct(system, received_item)
+
+    def get_all_internals(self, internal_type=OMIT, page=None, page_size=None):
+        """
+        Returns the data of all the internal datasets
+        Can be filtered by type
+        """
+        url = self.get_url_path().add_path("internal_datasets")
+
+        if internal_type is not OMIT:
+            url = url.add_path(internal_type.lower())
+
+        if page_size is not None:
+            assert page_size > 0, "Page size must be a positive integer value"
+            url = url.add_query_param("page_size", page_size)
+
+        if page is not None:
+            assert page > 0, "Page must be a positive integer value"
+            url = url.add_query_param("page", page)
+
+        return munchify(self.system.api.get(url).get_result())
 
 
 class DatasetTypeBinder(TypeBinder):
@@ -326,6 +347,22 @@ class Dataset(InfiniBoxObject):
             "capacity_savings_per_entity",
             type=CapacityType,
             feature_name="data_reduction_ratio",
+        ),
+        Field(
+            "promote_source_id",
+            type=int,
+            feature_name="promote_snapshot",
+        ),
+        Field(
+            "has_internal_children",
+            type=bool,
+            feature_name="promote_snapshot",
+        ),
+        Field(
+            "internal",
+            api_name="is_internal",
+            type=bool,
+            feature_name="promote_snapshot",
         ),
     ]
 
