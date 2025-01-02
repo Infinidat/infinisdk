@@ -554,7 +554,11 @@ class LocalDrive(InfiniBoxSystemComponent):
         return self.get_state(**kwargs) == "OK"
 
     def is_ssd(self, **kwargs):
-        return self.get_type(**kwargs) == "SSD"
+        system_version = self._system.compat.get_parsed_system_version()
+        drive_type = self.get_type(**kwargs)
+        if system_version >= "8.1":
+            return drive_type == "Cache"
+        return drive_type == "SSD"
 
 
 @InfiniBoxSystemComponents.install_component_type

@@ -129,6 +129,23 @@ class Export(InfiniBoxObject):
             type="infinisdk.infinibox.tenant:Tenant",
             feature_name="tenants",
         ),
+        Field(
+            "nfs_version",
+            creation_parameter=True,
+            optional=True,
+            mutable=True,
+            is_filterable=True,
+            is_sortable=True,
+            feature_name="nfsv4",
+        ),
+        Field(
+            "nfsv4_auth",
+            mutable=True,
+            type=list,
+            creation_parameter=True,
+            optional=True,
+            feature_name="nfsv4",
+        ),
     ]
 
     @classmethod

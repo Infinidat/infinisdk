@@ -100,6 +100,16 @@ class Filesystem(Dataset):
             is_sortable=True,
             feature_name="native_smb",
         ),
+        Field(
+            "posix_file_ownership",
+            type=bool,
+            creation_parameter=True,
+            optional=True,
+            mutable=True,
+            is_filterable=True,
+            is_sortable=True,
+            feature_name="active_directory_user_mapping",
+        ),
     ]
 
     BINDER_CLASS = FilesystemBinder

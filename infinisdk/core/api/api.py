@@ -1,5 +1,6 @@
 import copy
 import json
+import platform
 import socket
 import sys
 from base64 import b64encode
@@ -19,6 +20,8 @@ from sentinels import NOTHING
 from urlobject import URLObject as URL
 from vintage import warn_deprecation
 
+from infinisdk.core.utils.environment import get_infinisdk_version
+
 from ..config import config
 from ..exceptions import (
     APICommandFailed,
@@ -28,7 +31,7 @@ from ..exceptions import (
     RelatedSystemNotFound,
     SystemNotFoundException,
 )
-from .special_values import translate_special_values
+from .special_values import Autogenerate, translate_special_values
 
 _RETRY_REQUESTS_EXCEPTION_TYPES = (
     RequestException,
@@ -98,6 +101,8 @@ class API:
         self._use_pretty_json = config.root.api.log.pretty_json
         self._login_refresh_enabled = True
         self._disabled_http_methods = set()
+        self.set_infinidat_header(Autogenerate("InfiniSDK-{uuid}").generate())
+        self.set_user_agent_header()
 
     def save_credentials(self):
         """Returns a copy of the current credentials, useful for loading them later"""
@@ -234,6 +239,16 @@ class API:
 
     def set_source_identifier(self, identifier):
         self._session.headers["User-Agent"] = identifier
+
+    def set_user_agent_header(self):
+        version = get_infinisdk_version()
+        platform_text = "({} {})".format(platform.system(), platform.release())
+        self._session.headers["User-Agent"] = "InfiniSDK-Client/{} {}".format(
+            version, platform_text
+        )
+
+    def set_infinidat_header(self, header):
+        self._session.headers["X-Infinidat-Source"] = header
 
     def set_interactive_approval(self):
         """Causes an interactive prompt whenever a command requires approval from the user"""
@@ -386,7 +401,6 @@ class API:
                 data = json.dumps(data)
         else:
             assert raw_data is False, "Cannot handle raw_data with no data"
-
         url_params = kwargs.pop("params", None)
         if url_params is not None:
             url_params = translate_special_values(url_params)

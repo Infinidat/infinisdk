@@ -182,6 +182,8 @@ infinibox.users
    :members:
    :inherited-members:
 
+.. autoclass:: infinisdk.infinibox.user.UserBinder
+
 infinibox.ldap_configs
 ~~~~~~~~~~~~~~~~~~~~~~
 

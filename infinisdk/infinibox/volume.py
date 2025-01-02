@@ -1,4 +1,5 @@
 import logbook
+from munch import munchify
 from storage_interfaces.scsi.abstracts import ScsiVolume
 
 from ..core import Field
@@ -60,6 +61,26 @@ class VolumesBinder(DatasetTypeBinder):
                 returned.append(snap)
 
         return returned
+
+    def get_all_internals(self, internal_type=OMIT, page=None, page_size=None):
+        """
+        Returns the data of all the internal volumes
+        Can be filtered by type
+        """
+        url = self.get_url_path().add_path("internal_volumes")
+
+        if internal_type is not OMIT:
+            url = url.add_path(internal_type.lower())
+
+        if page_size is not None:
+            assert page_size > 0, "Page size must be a positive integer value"
+            url = url.add_query_param("page_size", page_size)
+
+        if page is not None:
+            assert page > 0, "Page must be a positive integer value"
+            url = url.add_query_param("page", page)
+
+        return munchify(self.system.api.get(url).get_result())
 
 
 class Volume(Dataset):
@@ -203,6 +224,37 @@ class Volume(Dataset):
 
     def is_in_cons_group(self):
         return self.get_cons_group() is not None
+
+    def promote_snapshot(self):
+        """
+        Converts a snapshot into a standalone volume
+        """
+        url = self.get_this_url_path().add_path("promote")
+
+        # headers need to be added here since MGMT chose
+        # to use a json content type even if no content is
+        # being sent (no data in post)
+        headers = {"Content-type": "application/json"}
+        response = self.system.api.post(url, headers=headers)
+        response_result = response.get_result()
+
+        return self.system.volumes.get_by_id(response_result["id"])
+
+    def get_all_internals(self, page=None, page_size=None):
+        """
+        Returns the data of all the internal volumes that are children of the current volume
+        """
+        url = self.get_this_url_path().add_path("internal_volumes")
+
+        if page_size is not None:
+            assert page_size > 0, "Page size must be a positive integer value"
+            url = url.add_query_param("page_size", page_size)
+
+        if page is not None:
+            assert page > 0, "Page must be a positive integer value"
+            url = url.add_query_param("page", page)
+
+        return munchify(self.system.api.get(url).get_result())
 
 
 ScsiVolume.register(Volume)  # pylint: disable=no-member

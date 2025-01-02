@@ -113,6 +113,9 @@ class InfiniBoxSystemCapacity:
     def get_total_thin_capacity_savings(self):
         return self._get_capacity_field("total_thin_capacity_savings")
 
+    def get_allocated_internal_physical_capacity(self):
+        return self._get_capacity_field("allocated_internal_physical_space")
+
     def update_total_virtual_capacity(self, total_virtual_capacity):
         if not isinstance(total_virtual_capacity, int):
             if not isinstance(total_virtual_capacity, Capacity):

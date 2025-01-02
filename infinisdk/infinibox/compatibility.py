@@ -302,11 +302,65 @@ class Compatibility:
             return feature_version >= 1
         return self.get_parsed_system_version() >= "7.3.10"
 
+    def has_nfsv4(self):
+        feature_version = self._get_feature_version("nfsv4")
+        if feature_version is not NOTHING:
+            return feature_version >= 0
+        version = self.get_parsed_system_version().remove_dev()
+        return (version >= "7.4") and (version < "8.0")
+
     def has_data_reduction_ratio(self):
         feature_version = self._get_feature_version("data_reduction_ratio")
         if feature_version is not NOTHING:
             return feature_version >= 0
         return self.get_parsed_system_version() >= "8.0"
+
+    def has_promote_snapshot(self):
+        feature_version = self._get_feature_version("promote_snapshot")
+        if feature_version is not NOTHING:
+            return feature_version >= 0
+        return self.get_parsed_system_version() >= "8.1"
+
+    def has_password_policy(self):
+        feature_version = self._get_feature_version("local_users_password_policy")
+        if feature_version is not NOTHING:
+            return feature_version >= 0
+        return self.get_parsed_system_version() >= "8.1"
+
+    def has_smb_leases(self):
+        feature_version = self._get_feature_version("smb_leases")
+        if feature_version is not NOTHING:
+            return feature_version >= 0
+        return self.get_parsed_system_version() >= "8.1"
+
+    def has_active_directory_user_mapping(self):
+        feature_version = self._get_feature_version("native_smb")
+        if feature_version is not NOTHING:
+            return feature_version >= 2
+        return self.get_parsed_system_version() >= "8.1"
+
+    def has_require_encryption(self):
+        """
+        Unlike most of the has_<feature_name> methods this method does not follow
+        this convention since it was added for a different reason:
+        In the API, the `Share` field name 'require_encryption'
+        was changed to 'encryption' in versions 8.1 and above.
+        This method was added in order to not break backward compatibility.
+
+        """
+        version = self.get_parsed_system_version().remove_dev()
+        return (version >= "7.0") and (version < "8.1")
+
+    def has_per_share_security(self):
+        """
+        Unlike most of the has_<feature_name> methods this method does not follow
+        this convention since it was added for a different reason:
+        In the API, the `Share` field name 'require_encryption'
+        was changed to 'encryption' in versions 8.1 and above.
+        This method was added in order to not break backward compatibility.
+
+        """
+        return self.get_parsed_system_version() >= "8.1"
 
 
 _VERSION_TUPLE_LEN = 5
@@ -380,6 +434,10 @@ class InfiniboxVersion:
 
     def __ge__(self, other):
         return self == other or self > other
+
+    def remove_dev(self):
+        self._is_dev = False
+        return self
 
     def __repr__(self):
         extra_info = ""

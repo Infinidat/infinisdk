@@ -2,9 +2,18 @@ from urlobject import URLObject
 
 from ..core import Field, SystemObject
 from ..core.api.special_values import Autogenerate
+from ..core.type_binder import TypeBinder
+
+
+class UserBinder(TypeBinder):
+    def get_password_policy(self):
+        """Returns the system's password policy"""
+        url = self.get_url_path().add_path("password_policy")
+        return self.system.api.get(url).get_result()
 
 
 class User(SystemObject):
+    BINDER_CLASS = UserBinder
 
     FIELDS = [
         Field("id", type=int, is_identity=True, is_filterable=True, is_sortable=True),
@@ -55,6 +64,16 @@ class User(SystemObject):
             feature_name="local_users_auth",
         ),
         Field("is_digest_sufficient", type=bool, feature_name="fips"),
+        Field(
+            "enforce_user_password_policy",
+            type=bool,
+            creation_parameter=True,
+            optional=True,
+            mutable=True,
+            feature_name="password_policy",
+            is_filterable=True,
+            is_sortable=True,
+        ),
     ]
 
     @classmethod

@@ -435,6 +435,8 @@ class InfiniBox(APITarget):
         max_smb_protocol=OMIT,
         smb_signing=OMIT,
         smb_encryption=OMIT,
+        smb_leases_enable=OMIT,
+        smb_lease_break_timeout=OMIT,
     ):
         """
         Updates chosen smb server capabilities
@@ -450,9 +452,35 @@ class InfiniBox(APITarget):
             updated_data["smb_signing"] = smb_signing
         if smb_encryption is not OMIT:
             updated_data["smb_encryption"] = smb_encryption
+        if smb_leases_enable is not OMIT:
+            updated_data["smb_leases_enable"] = smb_leases_enable
+        if smb_lease_break_timeout is not OMIT:
+            updated_data["smb_lease_break_timeout"] = smb_lease_break_timeout
 
         if updated_data:
             self.api.put("smb/server_capabilities", data=updated_data)
+
+    def get_nfs_server_capabilities(self):
+        """
+        Return a munch object with
+        the nfs server capabilities
+        """
+        if not self.compat.has_nfsv4():
+            raise VersionNotSupported(self.get_version())
+        return munchify(self.api.get("nfs/server_capabilities").get_result()[0])
+
+    def update_nfs_server_capabilities(self, nfsv4_support=OMIT):
+        """
+        Updates chosen nfs server capabilities
+        """
+        if not self.compat.has_nfsv4():
+            raise VersionNotSupported(self.get_version())
+        updated_data = {}
+        if nfsv4_support is not OMIT:
+            updated_data["nfsv4_support"] = nfsv4_support
+
+        if updated_data:
+            self.api.put("nfs/server_capabilities", data=updated_data)
 
     def __hash__(self):
         return hash(self.get_name())

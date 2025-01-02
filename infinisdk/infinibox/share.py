@@ -59,6 +59,7 @@ class Share(InfiniBoxObject):
             creation_parameter=True,
             is_filterable=True,
             is_sortable=True,
+            feature_name="require_encryption",
         ),
         Field(
             "snapdir_visible",
@@ -117,6 +118,26 @@ class Share(InfiniBoxObject):
             is_filterable=True,
             is_sortable=True,
             feature_name="native_smb_dual_protocol",
+        ),
+        Field(
+            "leases_enabled",
+            type=bool,
+            mutable=True,
+            optional=True,
+            creation_parameter=True,
+            is_filterable=True,
+            is_sortable=True,
+            feature_name="smb_leases",
+        ),
+        Field(
+            "encryption",
+            type=bool,
+            mutable=True,
+            optional=True,
+            creation_parameter=True,
+            is_filterable=True,
+            is_sortable=True,
+            feature_name="per_share_security",
         ),
     ]
 

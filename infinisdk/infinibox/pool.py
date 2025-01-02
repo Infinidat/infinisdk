@@ -186,6 +186,17 @@ class Pool(InfiniBoxObject):
             feature_name="data_reduction_ratio",
         ),
         Field("data_reduction_ratio", type=int, feature_name="data_reduction_ratio"),
+        Field(
+            "allocated_internal_physical_capacity",
+            api_name="allocated_internal_physical_space",
+            type=CapacityType,
+            feature_name="promote_snapshot",
+        ),
+        Field(
+            "internal_entities_count",
+            type=int,
+            feature_name="promote_snapshot",
+        ),
     ]
 
     @classmethod
