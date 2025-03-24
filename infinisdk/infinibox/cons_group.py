@@ -397,7 +397,7 @@ class ConsGroup(InfiniBoxObject):
     def remove_member(
         self,
         member,
-        retain_staging_area=False,
+        retain_staging_area=OMIT,
         create_replica=False,
         replica_name=OMIT,
         force_if_no_remote_credentials=False,
@@ -410,8 +410,11 @@ class ConsGroup(InfiniBoxObject):
 
         path = self._get_members_url().add_path(str(member.id))
 
-        if retain_staging_area:
-            path = path.set_query_param("retain_staging_area", "true")
+        if retain_staging_area is not OMIT:
+            if retain_staging_area:
+                path = path.set_query_param("retain_staging_area", "true")
+            else:
+                path = path.set_query_param("retain_staging_area", "false")
         if create_replica:
             path = path.set_query_param("create_replica", "true")
         if force_if_no_remote_credentials:
