@@ -1,3 +1,7 @@
+## Version 258.0.1 (Released 2025-3-17)
+
+- PYSDK-138: Fixed an issue where the retain_staging_area parameter was not correctly set in the request, ensuring it is explicitly included only when provided
+
 ## Version 258.0.0 (Released 2024-12-26)
 
 - PYSDK-117: Remove support for python 3.6/3.7
