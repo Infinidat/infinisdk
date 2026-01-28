@@ -4,7 +4,7 @@ from sentinels import NOTHING
 from urlobject import URLObject
 
 from ..core import CapacityType, Field, MillisecondsDatetimeType
-from ..core.api.special_values import Autogenerate
+from ..core.api.special_values import Autogenerate, RawValue
 from ..core.bindings import (
     InfiniSDKBindingWithSpecialFlags,
     ListOfRelatedObjectBinding,
@@ -31,6 +31,13 @@ class Pool(InfiniBoxObject):
 
     BINDER_CLASS = PoolBinder
 
+    def is_type_s3_required(self):
+        value = getattr(self.get("type"), "_value", self.get("type"))
+        if isinstance(value, str) and value.lower() == "s3":
+            return False
+        else:
+            return True
+
     FIELDS = [
         Field("id", type=int, is_identity=True, is_filterable=True, is_sortable=True),
         Field(
@@ -49,6 +56,7 @@ class Pool(InfiniBoxObject):
             type=CapacityType,
             is_filterable=True,
             is_sortable=True,
+            required_if=is_type_s3_required,
         ),
         Field(
             "physical_capacity",
@@ -185,7 +193,7 @@ class Pool(InfiniBoxObject):
             type=CapacityType,
             feature_name="data_reduction_ratio",
         ),
-        Field("data_reduction_ratio", type=int, feature_name="data_reduction_ratio"),
+        Field("data_reduction_ratio", type=float, feature_name="data_reduction_ratio"),
         Field(
             "allocated_internal_physical_capacity",
             api_name="allocated_internal_physical_space",
@@ -197,6 +205,72 @@ class Pool(InfiniBoxObject):
             type=int,
             feature_name="promote_snapshot",
         ),
+        Field(
+            "zeros_capacity",
+            type=CapacityType,
+            feature_name="effective_capacity",
+        ),
+        Field(
+            "host_written_data",
+            type=CapacityType,
+            feature_name="effective_capacity",
+        ),
+        Field(
+            "reducible_host_written_data",
+            type=CapacityType,
+            feature_name="effective_capacity",
+        ),
+        Field(
+            "reducible_data_disk_usage_capacity",
+            type=CapacityType,
+            feature_name="effective_capacity",
+        ),
+        Field(
+            "reducible_data_reduction_ratio",
+            type=float,
+            feature_name="effective_capacity",
+        ),
+        Field(
+            "reducible_data_percents",
+            type=float,
+            feature_name="effective_capacity",
+        ),
+        Field(
+            "non_reducible_host_written_data",
+            type=CapacityType,
+            feature_name="effective_capacity",
+        ),
+        Field(
+            "non_reducible_data_disk_usage_capacity",
+            type=CapacityType,
+            feature_name="effective_capacity",
+        ),
+        Field(
+            "non_reducible_data_reduction_ratio",
+            type=float,
+            feature_name="effective_capacity",
+        ),
+        Field(
+            "non_reducible_data_percents",
+            type=float,
+            feature_name="effective_capacity",
+        ),
+        Field(
+            "fs_used_default_warning",
+            type=int,
+            creation_parameter=False,
+            optional=True,
+            mutable=True,
+            feature_name="filesystem_capacity_alert",
+        ),
+        Field(
+            "fs_used_default_critical",
+            type=int,
+            creation_parameter=False,
+            optional=True,
+            mutable=True,
+            feature_name="filesystem_capacity_alert",
+        ),
     ]
 
     @classmethod
@@ -205,10 +279,24 @@ class Pool(InfiniBoxObject):
         Create a new pool
         """
         capacity = fields.pop("capacity", NOTHING)
+        pool_type = fields.get("type")
+
         if capacity is not NOTHING:
-            for field_name in ["virtual_capacity", "physical_capacity"]:
-                assert field_name not in fields
-                fields[field_name] = capacity
+            if isinstance(pool_type, RawValue):
+                normalized_type = str(pool_type.generate()).lower()
+            elif isinstance(pool_type, str):
+                normalized_type = pool_type.lower()
+            else:
+                normalized_type = None
+
+            if normalized_type == "s3":
+                assert "physical_capacity" not in fields
+                fields["physical_capacity"] = capacity
+            else:
+                for field_name in ["virtual_capacity", "physical_capacity"]:
+                    assert field_name not in fields
+                    fields[field_name] = capacity
+
         return super(Pool, cls).create(system, **fields)
 
     def get_volumes(self, **kwargs):
@@ -220,6 +308,13 @@ class Pool(InfiniBoxObject):
     def get_vvols(self, **kwargs):
         assert self.system.compat.has_vvol(), "vVol is not supported in this version"
         return self.system.vvols.find(pool_id=self.id, **kwargs)
+
+    def get_s3_account(self, **kwargs):
+        accounts = self.system.s3_accounts.find(pool_id=self.id, **kwargs).to_list()
+        return accounts[0] if accounts else None
+
+    def get_s3_buckets(self, **kwargs):
+        return self.system.s3_buckets.find(pool_id=self.id, **kwargs)
 
     def _get_pool_owners_url(self, owner_id=None):
         url = self.get_this_url_path().add_path("owners")

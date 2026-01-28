@@ -636,15 +636,17 @@ class API:
                             e.error_code == "REMOTE_PERMISSION_REQUIRED"
                         ):
                             try:
-                                (
-                                    related_user,
-                                    related_password,
-                                ) = self._get_related_system_auth()
+                                related_systems = self._get_all_related_systems_auth()
+                                auth_parts = []
+                                for system_name, username, password in related_systems:
+                                    raw = f"{username}:{password}"
+                                    encoded = b64encode(raw.encode("utf-8")).decode(
+                                        "utf-8"
+                                    )
+                                    auth_parts.append(f"{system_name}={encoded}")
                                 self._session.headers[
                                     "X-Remote-Authorization"
-                                ] = b"Basic " + b64encode(
-                                    f"{related_user}:{related_password}".encode()
-                                )
+                                ] = "Basic " + ";".join(auth_parts)
                                 continue
                             except TypeError as e:
                                 raise RelatedSystemNotFound(
@@ -667,6 +669,13 @@ class API:
         for related_system in self.system.iter_related_systems():
             if related_system is not None:
                 return related_system.api.get_auth()
+
+    def _get_all_related_systems_auth(self):
+        return [
+            (related_system, *related_system.api.get_auth())
+            for related_system in self.system.iter_related_systems()
+            if related_system is not None
+        ]
 
     def _with_approved(self, path):
         return path.set_query_param("approved", "true")

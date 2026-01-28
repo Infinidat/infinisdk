@@ -6,6 +6,7 @@ import gossip
 from ..core import Field, MillisecondsDatetimeType
 from ..core.api.special_values import OMIT, Autogenerate
 from ..core.bindings import RelatedObjectBinding, RelatedSubObjectBinding
+from ..core.exceptions import InvalidUsageException
 from ..core.object_query import PolymorphicQuery
 from ..core.utils import end_reraise_context, handle_possible_replication_snapshot
 from ..core.utils.resolvers import schedules_resolver
@@ -154,6 +155,21 @@ class ConsGroup(InfiniBoxObject):
             is_sortable=True,
             feature_name="snapshot_policies_enhancements",
         ),
+        Field(
+            "remote_snapshot_retention",
+            type=int,
+            is_filterable=True,
+            is_sortable=True,
+            feature_name="snap_level_retention",
+        ),
+        Field(
+            "remote_snapshot_retention_lock",
+            type=int,
+            is_filterable=True,
+            is_sortable=True,
+            feature_name="snap_level_retention",
+        ),
+        Field("replica_ids", type=list, new_to="8.4.0"),
     ]
 
     @classmethod
@@ -189,6 +205,8 @@ class ConsGroup(InfiniBoxObject):
         suffix=None,
         lock_expires_at=None,
         replicate_to_async_target=OMIT,
+        remote_snapshot_retention=OMIT,
+        remote_snapshot_retention_lock=OMIT,
     ):
         """Create a snapshot group out of the consistency group."""
         hook_tags = self.get_tags_for_object_operations(self)
@@ -208,6 +226,8 @@ class ConsGroup(InfiniBoxObject):
             "parent_id": self.get_id(),
             "snap_suffix": suffix,
             "name": name,
+            "remote_snapshot_retention": remote_snapshot_retention,
+            "remote_snapshot_retention_lock": remote_snapshot_retention_lock,
         }
         if self.system.compat.has_snapshot_lock():
             for key, val in [("lock_expires_at", lock_expires_at)]:
@@ -297,6 +317,14 @@ class ConsGroup(InfiniBoxObject):
 
         :param delete_members: if True, deletes the member datasets as well as the group itself
         """
+
+        if delete_members not in (True, False, OMIT):
+            raise InvalidUsageException(
+                "Invalid value for delete_members: '{}'. Must be True, False, or OMIT.".format(
+                    delete_members
+                )
+            )
+
         trigger_hook = functools.partial(
             gossip.trigger_with_tags,
             kwargs={"cons_group": self, "delete_members": delete_members},
@@ -351,14 +379,27 @@ class ConsGroup(InfiniBoxObject):
         return ret
 
     def add_member(self, member, **kwargs):
-        """Adds a member data entity to this consistency group
+        """Adds a member data entity to this consistency group.
 
         :param remote_entity: Assuming this CG is currently being replicated, specifies the remote entity for
-           the member replication
+            the member replication.
+        :param replica_remote_pairs: (Optional) List of at least two [replica, remote_entity] pairs for a multi-target consistency group.
+            Each inner pair can be a list or a tuple, associating a local replica with its corresponding remote dataset entity.
+
+            Example::
+
+                replica_remote_pairs = [
+                    [replica1, remote_entity1],
+                    [replica2, remote_entity2],
+                    [replica3, remote_entity3],
+                    # Add more pairs as needed
+                ]
         """
         data = kwargs
         data["dataset_id"] = member.id
         remote_entity = kwargs.pop("remote_entity", None)
+        replica_remote_pairs = kwargs.pop("replica_remote_pairs", None)
+        replica_ids = [replica.get_id() for replica in self.get_replicas().to_list()]
         if (
             self.system.compat.has_active_active_suspend()
             and self.is_replicated()
@@ -374,6 +415,34 @@ class ConsGroup(InfiniBoxObject):
                     "base_action": "NEW",
                     "remote_entity_name": kwargs.pop("remote_entity_name", None),
                 }
+        elif len(replica_ids) > 1:
+            if remote_entity is not None:
+                raise InvalidUsageException(
+                    "The 'remote_entity' parameter is not supported for multi-target consistency groups. "
+                    "Use the 'replica_remote_pairs' parameter and provide at least two [replica, remote_entity] pairs."
+                )
+            if replica_remote_pairs:
+                data["replication_pairs_info"] = [
+                    {
+                        "local_base_action": "BASE",
+                        "remote_base_action": "BASE",
+                        "remote_entity_id": remote_entity.id,
+                        "replica_id": replica.id,
+                    }
+                    for replica, remote_entity in replica_remote_pairs
+                ]
+            else:
+                remote_entity_name = kwargs.pop("remote_entity_name", None)
+                data["replication_pairs_info"] = [
+                    {
+                        "local_base_action": "NO_BASE_DATA",
+                        "remote_base_action": "CREATE",
+                        "remote_entity_id": None,
+                        "replica_id": id,
+                        "remote_entity_name": remote_entity_name,
+                    }
+                    for id in replica_ids
+                ]
         elif remote_entity is not None:
             data["replication_pair_info"] = {
                 "remote_base_action": "NO_BASE_DATA",

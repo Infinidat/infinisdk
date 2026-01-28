@@ -41,6 +41,12 @@ Once the network interfaces are defined, creating a network space can be done vi
        ...     },
        ... )
 
+After creating a network space, you can assign IP addresses to it using the ``add_ip_address`` method:
+
+.. code-block:: python
+
+       >>> netspace = netspace.add_ip_address('192.168.1.10')
+
 Setting Network Space Properties
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

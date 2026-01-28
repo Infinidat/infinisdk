@@ -21,6 +21,15 @@ class SystemCapacityTranslator(CapacityTranslator):
 class InfiniBoxSystemCapacity:
     URL_PATH = URL("/api/rest/system/capacity")
 
+    _allow_none_fields = {
+        "total_zeros_capacity",
+        "total_host_written_data",
+        "total_reducible_host_written_data",
+        "total_reducible_data_disk_usage_capacity",
+        "total_non_reducible_host_written_data",
+        "total_non_reducible_data_disk_usage_capacity",
+    }
+
     def __init__(self, system):
         self.system = system
         self.capacity_translator = SystemCapacityTranslator()
@@ -42,7 +51,11 @@ class InfiniBoxSystemCapacity:
         translated_result = {}
         for key, value in result.items():
             if any(key.endswith(s) for s in CAPACITY_SUFFIX):
-                translated_result[key] = self.capacity_translator.from_api(value)
+                translated_result[key] = (
+                    self.capacity_translator.from_api(value)
+                    if not (key in self._allow_none_fields and value is None)
+                    else None
+                )
             else:
                 translated_result[key] = value
 
@@ -54,6 +67,8 @@ class InfiniBoxSystemCapacity:
 
     def _get_capacity_field(self, field_name):
         value = self._get_field(field_name)
+        if field_name in self._allow_none_fields and value is None:
+            return None
         return self.capacity_translator.from_api(value)
 
     def get_id(self):
@@ -115,6 +130,36 @@ class InfiniBoxSystemCapacity:
 
     def get_allocated_internal_physical_capacity(self):
         return self._get_capacity_field("allocated_internal_physical_space")
+
+    def get_total_zeros_capacity(self):
+        return self._get_capacity_field("total_zeros_capacity")
+
+    def get_total_host_written_data(self):
+        return self._get_capacity_field("total_host_written_data")
+
+    def get_total_reducible_host_written_data(self):
+        return self._get_capacity_field("total_reducible_host_written_data")
+
+    def get_total_reducible_data_disk_usage_capacity(self):
+        return self._get_capacity_field("total_reducible_data_disk_usage_capacity")
+
+    def get_total_reducible_data_reduction_ratio(self):
+        return self._get_field("total_reducible_data_reduction_ratio")
+
+    def get_total_reducible_data_percents(self):
+        return self._get_field("total_reducible_data_percents")
+
+    def get_total_non_reducible_host_written_data(self):
+        return self._get_capacity_field("total_non_reducible_host_written_data")
+
+    def get_total_non_reducible_data_disk_usage_capacity(self):
+        return self._get_capacity_field("total_non_reducible_data_disk_usage_capacity")
+
+    def get_total_non_reducible_data_reduction_ratio(self):
+        return self._get_field("total_non_reducible_data_reduction_ratio")
+
+    def get_total_non_reducible_data_percents(self):
+        return self._get_field("total_non_reducible_data_percents")
 
     def update_total_virtual_capacity(self, total_virtual_capacity):
         if not isinstance(total_virtual_capacity, int):

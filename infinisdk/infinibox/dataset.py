@@ -74,6 +74,28 @@ class Datasets(PolymorphicBinder):
 
         return munchify(self.system.api.get(url).get_result())
 
+    def bulk_update(self, entities, **kwargs):
+        """
+        Update multiple datasets in bulk.
+
+        Returns: List of datasets
+
+        :param entities: A list of dataset to be updated.
+        :type entities: list
+        :param kwargs: Arbitrary keyword arguments representing the data fields to be
+                    updated in the datasets.
+        :type kwargs: dict
+        """
+        url = self.get_url_path().add_path("bulk")
+        res = self.system.api.put(
+            url,
+            data={
+                "ids": [entity.id for entity in entities],
+                "data": {**kwargs},
+            },
+        )
+        return munchify(res.get_result())
+
 
 class DatasetTypeBinder(TypeBinder):
     def create_many(self, *args, **kwargs):
@@ -102,6 +124,28 @@ class DatasetTypeBinder(TypeBinder):
             url, data=dict(entities=[entity.id for entity in entities])
         )
         return res.get_result()["space_reclaimable"] * byte
+
+    def bulk_update(self, entities, **kwargs):
+        """
+        Update multiple datasets in bulk.
+
+        Returns: List of datasets
+
+        :param entities: A list of dataset to be updated.
+        :type entities: list
+        :param kwargs: Arbitrary keyword arguments representing the data fields to be
+                    updated in the datasets.
+        :type kwargs: dict
+        """
+        url = URL("datasets").add_path("bulk")
+        res = self.system.api.put(
+            url,
+            data={
+                "ids": [entity.id for entity in entities],
+                "data": {**kwargs},
+            },
+        )
+        return munchify(res.get_result())
 
 
 class Dataset(InfiniBoxObject):
@@ -340,7 +384,7 @@ class Dataset(InfiniBoxObject):
         ),
         Field(
             "data_reduction_ratio",
-            type=int,
+            type=float,
             feature_name="data_reduction_ratio",
         ),
         Field(
@@ -363,6 +407,70 @@ class Dataset(InfiniBoxObject):
             api_name="is_internal",
             type=bool,
             feature_name="promote_snapshot",
+        ),
+        Field(
+            "zeros_capacity",
+            type=CapacityType,
+            feature_name="effective_capacity",
+        ),
+        Field(
+            "host_written_data",
+            type=CapacityType,
+            feature_name="effective_capacity",
+        ),
+        Field(
+            "reducible_host_written_data",
+            type=CapacityType,
+            feature_name="effective_capacity",
+        ),
+        Field(
+            "reducible_data_disk_usage_capacity",
+            type=CapacityType,
+            feature_name="effective_capacity",
+        ),
+        Field(
+            "reducible_data_reduction_ratio",
+            type=float,
+            feature_name="effective_capacity",
+        ),
+        Field(
+            "reducible_data_percents",
+            type=float,
+            feature_name="effective_capacity",
+        ),
+        Field(
+            "non_reducible_host_written_data",
+            type=CapacityType,
+            feature_name="effective_capacity",
+        ),
+        Field(
+            "non_reducible_data_disk_usage_capacity",
+            type=CapacityType,
+            feature_name="effective_capacity",
+        ),
+        Field(
+            "non_reducible_data_reduction_ratio",
+            type=float,
+            feature_name="effective_capacity",
+        ),
+        Field(
+            "non_reducible_data_percents",
+            type=float,
+            feature_name="effective_capacity",
+        ),
+        Field(
+            "remote_snapshot_retention",
+            type=int,
+            is_filterable=True,
+            is_sortable=True,
+            feature_name="snap_level_retention",
+        ),
+        Field(
+            "remote_snapshot_retention_lock",
+            type=int,
+            is_filterable=True,
+            is_sortable=True,
+            feature_name="snap_level_retention",
         ),
     ]
 
@@ -429,10 +537,14 @@ class Dataset(InfiniBoxObject):
         """Returns whether or not this entity is a snapshot"""
         return self.get_type() == self._get_snapshot_type()
 
-    def resize(self, delta):
+    def resize(self, delta, force=OMIT):
         """Resize the entity by the given delta"""
         assert isinstance(delta, Capacity), "Delta must be an instance of Capacity"
-        return self.update_field("size", self.get_size() + delta)
+        return self.update_field(
+            "size",
+            self.get_size() + delta,
+            params={"force_resize": force} if force is not OMIT else None,
+        )
 
     def _create_child(self, name=None, replicate_to_async_target=OMIT, **kwargs):
         hook_tags = self.get_tags_for_object_operations(self.system)

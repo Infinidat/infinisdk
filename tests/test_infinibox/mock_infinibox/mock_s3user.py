@@ -1,0 +1,112 @@
+MOCK_USER_CREATE = {
+    "result": {
+        "id": 23,
+        "canonical_id": "dcc249b7fdda9c8572083e71a2eae9042822b1e3cec4739c618876b3c289d5a4",
+        "name": "team-1",
+        "status": "ENABLED",
+        "is_root": True,
+        "uid": None,
+        "gid": None,
+        "description": "Example",
+        "last_used": 1755415276048,
+        "created_at": 1739691204259,
+        "updated_at": 1739691204259,
+        "tenant_id": 1,
+        "account_id": 20,
+        "account_name": "my_account",
+        "num_credentials": 0,
+    },
+    "error": None,
+    "metadata": {"ready": True},
+}
+
+MOCK_USER_DISABLE_ROOT = {
+    "result": {
+        "id": 23,
+        "canonical_id": "dcc249b7fdda9c8572083e71a2eae9042822b1e3cec4739c618876b3c289d5a4",
+        "name": "team-1",
+        "status": "ENABLED",
+        "is_root": False,
+        "uid": None,
+        "gid": None,
+        "description": "Example",
+        "last_used": 1755415276048,
+        "created_at": 1739691204259,
+        "updated_at": 1739691204259,
+        "tenant_id": 1,
+        "account_id": 20,
+        "account_name": "my_account",
+        "num_credentials": 0,
+    },
+    "error": None,
+    "metadata": {"ready": True},
+}
+
+MOCK_USER_CREATE_SECOND = {
+    "result": {
+        "id": 24,
+        "canonical_id": "dcc249b7fdda9c8572083e71a2eae9042822b1e3cec4739c618876b3c289d5a4",
+        "name": "team-2",
+        "status": "ENABLED",
+        "is_root": True,
+        "uid": None,
+        "gid": None,
+        "description": "Example",
+        "last_used": 1755415276048,
+        "created_at": 1739691204259,
+        "updated_at": 1739691204259,
+        "tenant_id": 1,
+        "account_id": 20,
+        "account_name": "my_account",
+        "num_credentials": 0,
+    },
+    "error": None,
+    "metadata": {"ready": True},
+}
+
+MOCK_USERS_GET = {
+  "result": [
+   {
+        "id": 24,
+        "canonical_id": "dcc249b7fdda9c8572083e71a2eae9042822b1e3cec4739c618876b3c289d5a4",
+        "name": "team-2",
+        "status": "ENABLED",
+        "is_root": True,
+        "uid": None,
+        "gid": None,
+        "description": "Example",
+        "last_used": 1755415276048,
+        "created_at": 1739691204259,
+        "updated_at": 1739691204259,
+        "tenant_id": 1,
+        "account_id": 20,
+        "account_name": "my_account",
+        "num_credentials": 0,
+    },
+    {
+        "id": 23,
+        "canonical_id": "dcc249b7fdda9c8572083e71a2eae9042822b1e3cec4739c618876b3c289d5a4",
+        "name": "team-1",
+        "status": "ENABLED",
+        "is_root": True,
+        "uid": None,
+        "gid": None,
+        "description": "Example",
+        "last_used": 1755415276048,
+        "created_at": 1739691204259,
+        "updated_at": 1739691204259,
+        "tenant_id": 1,
+        "account_id": 20,
+        "account_name": "my_account",
+        "num_credentials": 0,
+    }
+  ],
+  "error": None,
+  "metadata": {
+    "ready": True,
+    "number_of_objects": 2,
+    "page_size": 50,
+    "pages_total": 1,
+    "page": 1
+  }
+}

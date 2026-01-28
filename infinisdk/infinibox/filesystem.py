@@ -110,6 +110,22 @@ class Filesystem(Dataset):
             is_sortable=True,
             feature_name="active_directory_user_mapping",
         ),
+        Field(
+            "used_capacity_warning",
+            type=int,
+            creation_parameter=False,
+            optional=True,
+            mutable=True,
+            feature_name="filesystem_capacity_alert",
+        ),
+        Field(
+            "used_capacity_critical",
+            type=int,
+            creation_parameter=False,
+            optional=True,
+            mutable=True,
+            feature_name="filesystem_capacity_alert",
+        ),
     ]
 
     BINDER_CLASS = FilesystemBinder

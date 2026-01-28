@@ -91,5 +91,39 @@ Example: Deleting All Volumes with Specific Name Prefix
 		...     if volume.get_name(from_cache=True).startswith('prefix'):
 		...         volume.delete()
 
+.. ::
+
+    .. code-block:: python
+
+		>>> volume1 = system.filesystems.create(pool=pool)
+		>>> volume2 = system.filesystems.create(pool=pool)
+		>>> volume3 = system.filesystems.create(pool=pool)
+		>>> v1 = system.filesystems.create(pool=pool)
+		>>> v2 = system.filesystems.create(pool=pool)
+		>>> v3 = system.filesystems.create(pool=pool)
+		>>> f1 = system.filesystems.create(pool=pool)
+		>>> f2 = system.filesystems.create(pool=pool)
+		>>> f3 = system.filesystems.create(pool=pool)
+
+Bulk Updating Volumes and Filesystems
+-------------------------------------
+
+The `bulk_update` method allows you to update the `ssa_express_enabled` field for multiple volumes or a combination of volumes and filesystems by passing a list of entities and the desired value.
+
+**Updating Volumes**
+
+>>> volumes = [volume1, volume2, volume3]  # List of volumes to update
+>>> updated_volumes = system.volumes.bulk_update(volumes, ssa_express_enabled=True)
+
+In this example, `volume1`, `volume2`, and `volume3` have their `ssa_express_enabled` field set to `True`.
+
+**Updating Volumes and Filesystems**
+
+>>> datasets = [v1, v2, v3, f1, f2, f3]
+>>> updated_datasets = system.datasets.bulk_update(datasets, ssa_express_enabled=True)
+
+In this example, both volumes (`v1`, `v2`, `v3`) and filesystems (`f1`, `f2`, `f3`) have their `ssa_express_enabled` field set to `True`.
+
+**Note:** Currently, only the `ssa_express_enabled` field is supported for updates via this method.
 
 .. seealso:: :mod:`Volume API documentation <infinisdk.infinibox.volume>`

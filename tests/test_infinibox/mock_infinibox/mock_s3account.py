@@ -1,0 +1,101 @@
+MOCK_S3_POOL_CREATION = {
+    "result": {
+        "id": 377,
+        "name": "my_pool",
+        "created_at": 1736850574969,
+        "updated_at": 1736850574969,
+        "physical_capacity": 1000000192512,
+        "virtual_capacity": 1000000192512,
+        "physical_capacity_warning": 80,
+        "physical_capacity_critical": 90,
+        "state": "NORMAL",
+        "free_physical_space": 1000000192512,
+        "reserved_capacity": 107374313472,
+        "max_extend": -1,
+        "ssd_enabled": True,
+        "compression_enabled": True,
+        "type": "S3",
+        "allocated_physical_space": 0,
+        "allocated_internal_physical_space": 0,
+        "capacity_savings": 0,
+        "thick_capacity_savings": 0,
+        "thin_capacity_savings": 0,
+        "total_disk_usage": 0,
+        "data_reduction_ratio": 1,
+        "internal_entities_count": None,
+        "volumes_count": 0,
+        "filesystems_count": 0,
+        "snapshots_count": 0,
+        "filesystem_snapshots_count": 0,
+        "standard_volumes_count": 0,
+        "standard_filesystems_count": 0,
+        "standard_snapshots_count": 0,
+        "standard_filesystem_snapshots_count": 0,
+        "standard_entities_count": 0,
+        "vvol_volumes_count": 0,
+        "vvol_snapshots_count": 0,
+        "vvol_entities_count": 0,
+        "owners": [],
+        "qos_policies": [],
+        "s3_bound": False,
+        "tenant_id": 1,
+        "entities_count": 0,
+        "free_virtual_space": 1000000192512,
+    },
+    "error": None,
+    "metadata": {"ready": True},
+}
+
+MOCK_ACCOUNT_CREATE = {
+    "result": {
+        "id": 11111,
+        "pool_id": 2341,
+        "tenant_id": 1,
+        "canonical_id": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6a7b8c9d0e1f2",
+        "name": "my_account",
+        "email": "admin@abccomp.com",
+        "pool_name": "pool-1",
+        "location": "us-east-1",
+        "enabled": True,
+        "created_at": 1604493314878,
+        "updated_at": 1604493314878,
+        "capacity_consumed": 327680,
+        "buckets_count": 1,
+        "users_count": 1,
+        "credentials_count": 1
+
+    },
+    "error": None,
+    "metadata": {"ready": True},
+}
+
+
+MOCK_ACCOUNTS_GET = {
+  "result": [
+   {
+        "id": 11111,
+        "pool_id": 2341,
+        "tenant_id": 1,
+        "canonical_id": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6a7b8c9d0e1f2",
+        "name": "my_account",
+        "email": "admin@abccomp.com",
+        "pool_name": "pool-1",
+        "location": "us-east-1",
+        "enabled": True,
+        "created_at": 1604493314878,
+        "updated_at": 1604493314878,
+        "capacity_consumed": 327680,
+        "buckets_count": 1,
+        "users_count": 1,
+        "credentials_count": 1
+    },
+  ],
+  "error": None,
+  "metadata": {
+    "ready": True,
+    "number_of_objects": 1,
+    "page_size": 50,
+    "pages_total": 1,
+    "page": 1
+  }
+}

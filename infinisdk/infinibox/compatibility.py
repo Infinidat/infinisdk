@@ -304,10 +304,13 @@ class Compatibility:
 
     def has_nfsv4(self):
         feature_version = self._get_feature_version("nfsv4")
-        if feature_version is not NOTHING:
-            return feature_version >= 0
         version = self.get_parsed_system_version().remove_dev()
-        return (version >= "7.4") and (version < "8.0")
+        # must have feature defined AND version in supported range
+        return (
+            feature_version is not NOTHING
+            and feature_version >= 0
+            and ("7.4" <= version < "8.0" or version >= "8.4")
+        )
 
     def has_data_reduction_ratio(self):
         feature_version = self._get_feature_version("data_reduction_ratio")
@@ -361,6 +364,48 @@ class Compatibility:
 
         """
         return self.get_parsed_system_version() >= "8.1"
+
+    def has_effective_capacity(self):
+        feature_version = self._get_feature_version("effective_capacity")
+        if feature_version is not NOTHING:
+            return feature_version >= 0
+        return self.get_parsed_system_version() >= "8.3"
+
+    def has_snap_level_retention(self):
+        feature_version = self._get_feature_version("replicate_snapshots")
+        if feature_version is not NOTHING:
+            return feature_version >= 4
+        return self.get_parsed_system_version() >= "8.4"
+
+    def has_host_resiliency(self):
+        feature_version = self._get_feature_version("host_resiliency")
+        if feature_version is not NOTHING:
+            return feature_version >= 0
+        return self.get_parsed_system_version() >= "8.4"
+
+    def has_native_s3(self):
+        feature_version = self._get_feature_version("native_s3")
+        if feature_version is not NOTHING:
+            return feature_version >= 0
+        return self.get_parsed_system_version() >= "8.5"
+
+    def has_smb_home_shares(self):
+        feature_version = self._get_feature_version("smb_home_shares")
+        if feature_version is not NOTHING:
+            return feature_version >= 0
+        return self.get_parsed_system_version() >= "8.4"
+
+    def has_multi_target_async_replication(self):
+        feature_version = self._get_feature_version("multi_target_async_replication")
+        if feature_version is not NOTHING:
+            return feature_version >= 0
+        return self.get_parsed_system_version() >= "8.4"
+
+    def has_filesystem_capacity_alert(self):
+        feature_version = self._get_feature_version("filesystem_capacity_alert")
+        if feature_version is not NOTHING:
+            return feature_version >= 0
+        return self.get_parsed_system_version() >= "8.4"
 
 
 _VERSION_TUPLE_LEN = 5

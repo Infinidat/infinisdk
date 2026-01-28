@@ -23,6 +23,39 @@ class HostCluster(InfiniBoxLURelatedObject):
             default=Autogenerate("cluster_{uuid}"),
         ),
         Field("luns", type=list, add_getter=False, add_updater=False),
+        Field("luns_count", type=int, is_sortable=True, feature_name="host_resiliency"),
+        Field(
+            "port_type",
+            is_sortable=True,
+            is_filterable=True,
+            feature_name="host_resiliency",
+        ),
+        Field(
+            "hosts_count",
+            type=int,
+            is_sortable=True,
+            is_filterable=True,
+            feature_name="host_resiliency",
+        ),
+        Field(
+            "ports_disconnected",
+            type=int,
+            is_sortable=True,
+            is_filterable=True,
+            feature_name="host_resiliency",
+        ),
+        Field(
+            "path_health",
+            is_sortable=True,
+            is_filterable=True,
+            feature_name="host_resiliency",
+        ),
+        Field(
+            "resiliency",
+            is_sortable=True,
+            is_filterable=True,
+            feature_name="host_resiliency",
+        ),
         Field("san_client_type", new_to="3.0"),
         Field(
             "hosts", type=list, add_updater=False, binding=ListOfRelatedObjectBinding()

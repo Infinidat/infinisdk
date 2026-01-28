@@ -49,17 +49,17 @@ py39-codecov:
   extends:
     - .install-and-lint
     - .codecov
-  image: $PYTHON_IMAGE:3.9
+  image: $PYTHON_IMAGE:3.9.23
 
 py310:
   extends: .install-and-lint
-  image: $PYTHON_IMAGE:3.10
+  image: $PYTHON_IMAGE:3.10.18
   script:
     - pytest
 
 docs:
   extends: .install-and-lint
-  image: $PYTHON_IMAGE:3.7
+  image: $PYTHON_IMAGE:3.10.18
   script:
     - pip install -e ".[doc]"
     - sphinx-build -a -W -E doc build/sphinx/html

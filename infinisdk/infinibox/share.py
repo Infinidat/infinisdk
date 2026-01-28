@@ -139,6 +139,43 @@ class Share(InfiniBoxObject):
             is_sortable=True,
             feature_name="per_share_security",
         ),
+        Field(
+            "home_share",
+            api_name="is_home_share",
+            type=bool,
+            creation_parameter=True,
+            optional=True,
+            is_filterable=True,
+            feature_name="smb_home_shares",
+        ),
+        Field(
+            "internal_base_path",
+            type=str,
+            creation_parameter=True,
+            optional=True,
+            is_filterable=True,
+            is_sortable=True,
+            feature_name="smb_home_shares",
+        ),
+        Field(
+            "user_dir_auto_create",
+            type=bool,
+            creation_parameter=True,
+            optional=True,
+            mutable=True,
+            is_filterable=True,
+            is_sortable=True,
+            feature_name="smb_home_shares",
+        ),
+        Field(
+            "user_directory",
+            type=str,
+            creation_parameter=True,
+            optional=True,
+            is_filterable=True,
+            is_sortable=True,
+            feature_name="smb_home_shares",
+        ),
     ]
 
     @classmethod
@@ -148,8 +185,3 @@ class Share(InfiniBoxObject):
     @mitba.cached_property
     def permissions(self):
         return SubObjectTypeBinder(self.system, SharePermission, self)
-
-    def update_field(self, field_name, field_value):
-        if field_name == "access_based_enumeration":
-            field_value = False
-        return super().update_field(field_name, field_value)

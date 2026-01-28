@@ -94,6 +94,29 @@ Example: Deleting All Filesystems with Specific Name Prefix
 
 .. seealso:: :mod:`Filesystem API documentation <infinisdk.infinibox.filesystem>`
 
+.. ::
+
+    .. code-block:: python
+
+		>>> f1 = system.filesystems.create(pool=pool)
+		>>> f2 = system.filesystems.create(pool=pool)
+		>>> f3 = system.filesystems.create(pool=pool)
+
+Bulk Updating Filesystems
+--------------------------
+
+The `bulk_update` method allows you to update the `ssa_express_enabled` field for multiple filesystems at once by passing a list of filesystems and the desired value.
+
+.. code-block:: python
+
+        >>> filesystems = [f1, f2, f3]  # List of filesystems to update
+        >>> updated_filesystems = system.filesystems.bulk_update(filesystems, ssa_express_enabled=True)
+
+In this example, `f1`, `f2`, and `f3` have their `ssa_express_enabled` field set to `True`.
+
+.. note::
+    Only the `ssa_express_enabled` field is supported for updates via this method at present.
+
 
 NFS Exports
 ============
@@ -292,4 +315,3 @@ Permissions can be accessed with the ``permissions`` field:
         >>> perm.delete() # doctest: +SKIP
         >>> perm in share.permissions.to_list() # doctest: +SKIP
         False
-

@@ -1,17 +1,297 @@
 # -*- mode: python -*-
+
 from contextlib import contextmanager
-from infinisim.infinibox import Infinibox as Simulator
 from infinisdk import InfiniBox
+import responses
+from tests.mocks.mock_conftest import MOCKED_FEAUTES
 
 @contextmanager
 def doctest_context():
-    simulator = Simulator()
-    simulator.activate()
-    system = InfiniBox(simulator, auth=('admin', '123456'))
-    system.login()
-    try:
-        yield {
-            "system": system,
-        }
-    finally:
-        simulator.deactivate()
+    base_url = "ibox3441"
+    system = InfiniBox(base_url, auth=("admin", "123456"))
+
+    # Start mocking API responses
+    with responses.RequestsMock() as mock:
+        mock.add(
+            responses.GET,
+            "http://ibox3441:80/api/rest/_features",
+            json=MOCKED_FEAUTES,
+            status=200,
+        )
+        mock.add(
+            responses.POST,
+            "http://ibox3441:80/api/rest/users/login",
+            json={"result": "Login successful"},
+            status=200,
+        )
+        mock.add(
+            responses.GET,
+            f"http://{base_url}:80/api/rest/system",
+            json={
+                "error": None,
+                "metadata": {"ready": True},
+                "result": {
+                    "capacity": {
+                        "allocated_internal_physical_space_within_pools": 0,
+                        "allocated_physical_space_within_pools": 120132608,
+                        "allocated_virtual_space_within_pools": 37214420992,
+                        "data_reduction_ratio": 8.13604166489085,
+                        "dynamic_spare_drive_cost": 0,
+                        "effective_capacity_guarantee_program": False,
+                        "free_physical_space": 77028035788800,
+                        "free_virtual_space": 234640121659392,
+                        "total_allocated_physical_space": 28000005390336,
+                        "total_capacity_savings": 857271296,
+                        "total_disk_usage_within_pools": 120132608,
+                        "total_host_written_data": 1904541696,
+                        "total_non_reducible_data_disk_usage_capacity": 256000,
+                        "total_non_reducible_host_written_data": 262144,
+                        "total_non_reducible_data_percents": 7,
+                        "total_non_reducible_data_reduction_ratio": 1.024,
+                        "total_physical_capacity": 105056050741248,
+                        "total_reducible_data_disk_usage_capacity": 143969280,
+                        "total_reducible_host_written_data": 2099642368,
+                        "total_reducible_data_percents": 70,
+                        "total_reducible_data_reduction_ratio": 14.583961022795974,
+                        "total_spare_bytes": 26285119635456,
+                        "total_spare_partitions": 1584,
+                        "total_thick_capacity_savings": 0,
+                        "total_thin_capacity_savings": 857271296,
+                        "total_virtual_capacity": 262640127049728,
+                        "total_zeros_capacity": 927137792,
+                        "used_dynamic_spare_bytes": 0,
+                        "used_dynamic_spare_partitions": 0,
+                        "used_spare_bytes": 0,
+                        "used_spare_partitions": 0,
+                    },
+                },
+            },
+            status=200,
+        )
+        mock.add(
+            responses.GET,
+            "http://ibox3441:80/api/rest/system/capacity?fields=total_physical_capacity",
+            json={
+                "result": {"total_physical_capacity": 105056050741248},
+                "error": None,
+                "metadata": {"ready": True},
+            },
+            status=200,
+        )
+        mock.add(
+            responses.GET,
+            "http://ibox3441:80/api/rest/system/capacity?fields=free_physical_space",
+            json={
+                "result": {"free_physical_space": 77028035788800},
+                "error": None,
+                "metadata": {"ready": True},
+            },
+            status=200,
+        )
+        mock.add(
+            responses.GET,
+            "http://ibox3441:80/api/rest/system/capacity?fields=total_virtual_capacity",
+            json={
+                "result": {"total_virtual_capacity": 262640127049728},
+                "error": None,
+                "metadata": {"ready": True},
+            },
+            status=200,
+        )
+        mock.add(
+            responses.GET,
+            "http://ibox3441:80/api/rest/system/capacity?fields=free_virtual_space",
+            json={
+                "result": {"free_virtual_space": 234640121659392},
+                "error": None,
+                "metadata": {"ready": True},
+            },
+            status=200,
+        )
+        mock.add(
+            responses.GET,
+            "http://ibox3441:80/api/rest/system/capacity?fields=total_allocated_physical_space",
+            json={
+                "result": {"total_allocated_physical_space": 28000005390336},
+                "error": None,
+                "metadata": {"ready": True},
+            },
+            status=200,
+        )
+        mock.add(
+            responses.GET,
+            "http://ibox3441:80/api/rest/system/capacity?fields=dynamic_spare_drive_cost",
+            json={
+                "result": {"dynamic_spare_drive_cost": 0},
+                "error": None,
+                "metadata": {"ready": True},
+            },
+            status=200,
+        )
+        mock.add(
+            responses.GET,
+            "http://ibox3441:80/api/rest/system/capacity?fields=used_dynamic_spare_partitions",
+            json={
+                "result": {"used_dynamic_spare_partitions": 0},
+                "error": None,
+                "metadata": {"ready": True},
+            },
+            status=200,
+        )
+        mock.add(
+            responses.GET,
+            "http://ibox3441:80/api/rest/system/capacity?fields=used_dynamic_spare_bytes",
+            json={
+                "result": {"used_dynamic_spare_bytes": 0},
+                "error": None,
+                "metadata": {"ready": True},
+            },
+            status=200,
+        )
+        mock.add(
+            responses.GET,
+            "http://ibox3441:80/api/rest/system/capacity?fields=used_spare_partitions",
+            json={
+                "result": {"used_spare_partitions": 0},
+                "error": None,
+                "metadata": {"ready": True},
+            },
+            status=200,
+        )
+        mock.add(
+            responses.GET,
+            "http://ibox3441:80/api/rest/system/capacity?fields=used_spare_bytes",
+            json={
+                "result": {"used_spare_bytes": 0},
+                "error": None,
+                "metadata": {"ready": True},
+            },
+            status=200,
+        )
+        mock.add(
+            responses.GET,
+            "http://ibox3441:80/api/rest/system/capacity?fields=total_spare_partitions",
+            json={
+                "result": {"total_spare_partitions": 0},
+                "error": None,
+                "metadata": {"ready": True},
+            },
+            status=200,
+        )
+        mock.add(
+            responses.GET,
+            "http://ibox3441:80/api/rest/system/capacity?fields=total_spare_bytes",
+            json={
+                "result": {"total_spare_bytes": 0},
+                "error": None,
+                "metadata": {"ready": True},
+            },
+            status=200,
+        )
+        mock.add(
+            responses.GET,
+            "http://ibox3441:80/api/rest/system/capacity?fields=total_zeros_capacity",
+            json={
+                "result": {"total_zeros_capacity": 927137792},
+                "error": None,
+                "metadata": {"ready": True},
+            },
+            status=200,
+        )
+        mock.add(
+            responses.GET,
+            "http://ibox3441:80/api/rest/system/capacity?fields=total_host_written_data",
+            json={
+                "result": {"total_host_written_data": 1904541696},
+                "error": None,
+                "metadata": {"ready": True},
+            },
+            status=200,
+        )
+        mock.add(
+            responses.GET,
+            "http://ibox3441:80/api/rest/system/capacity?fields=total_reducible_host_written_data",
+            json={
+                "result": {"total_reducible_host_written_data": 2099642368},
+                "error": None,
+                "metadata": {"ready": True},
+            },
+            status=200,
+        )
+        mock.add(
+            responses.GET,
+            "http://ibox3441:80/api/rest/system/capacity?fields=total_reducible_data_reduction_ratio",
+            json={
+                "result": {"total_reducible_data_reduction_ratio": 14.583961022795974},
+                "error": None,
+                "metadata": {"ready": True},
+            },
+            status=200,
+        )
+        mock.add(
+            responses.GET,
+            "http://ibox3441:80/api/rest/system/capacity?fields=total_reducible_data_percents",
+            json={
+                "result": {"total_reducible_data_percents": 70},
+                "error": None,
+                "metadata": {"ready": True},
+            },
+            status=200,
+        )
+        mock.add(
+            responses.GET,
+            "http://ibox3441:80/api/rest/system/capacity?fields=total_non_reducible_host_written_data",
+            json={
+                "result": {"total_non_reducible_host_written_data": 262144},
+                "error": None,
+                "metadata": {"ready": True},
+            },
+            status=200,
+        )
+        mock.add(
+            responses.GET,
+            "http://ibox3441:80/api/rest/system/capacity?fields=total_non_reducible_data_disk_usage_capacity",
+            json={
+                "result": {"total_non_reducible_data_disk_usage_capacity": 256000},
+                "error": None,
+                "metadata": {"ready": True},
+            },
+            status=200,
+        )
+        mock.add(
+            responses.GET,
+            "http://ibox3441:80/api/rest/system/capacity?fields=total_non_reducible_data_reduction_ratio",
+            json={
+                "result": {"total_non_reducible_data_reduction_ratio": 1.024},
+                "error": None,
+                "metadata": {"ready": True},
+            },
+            status=200,
+        )
+        mock.add(
+            responses.GET,
+            "http://ibox3441:80/api/rest/system/capacity?fields=total_non_reducible_data_percents",
+            json={
+                "result": {"total_non_reducible_data_percents": 7},
+                "error": None,
+                "metadata": {"ready": True},
+            },
+            status=200,
+        )
+        mock.add(
+            responses.GET,
+            "http://ibox3441:80/api/rest/system/capacity?fields=total_reducible_data_disk_usage_capacity",
+            json={
+                "result": {"total_reducible_data_disk_usage_capacity": 143969280},
+                "error": None,
+                "metadata": {"ready": True},
+            },
+            status=200,
+        )
+
+        
+        system.login()
+        try:
+            yield {"system": system}
+        finally:
+            pass

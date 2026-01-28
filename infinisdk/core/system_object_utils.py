@@ -91,9 +91,15 @@ def get_data_for_object_creation(object_type, system, fields):
     missing_fields = set()
     extra_fields = fields.copy()
     for field in object_type.fields:
-        if field.name not in fields:
-            if not field.creation_parameter or field.optional:
-                continue
+        # Check if required, with dynamic support
+        is_required = (
+            field.creation_parameter
+            and not field.optional
+            and (field.required_if(fields) if callable(field.required_if) else True)
+        )
+
+        if field.name not in fields and not is_required:
+            continue
 
         field_value = extra_fields.get(field.name, NOTHING)
         extra_fields.pop(field.name, None)
@@ -110,6 +116,7 @@ def get_data_for_object_creation(object_type, system, fields):
         if (
             field_value is NOTHING
             and field_api_value is NOTHING
+            and is_required
             and system.is_field_supported(field)
         ):
             missing_fields.add(field.name)

@@ -60,3 +60,8 @@ Deleting consistency groups is done through :meth:`.ConsGroup.delete`:
        
        >>> sg.delete()
        >>> cg.delete()
+
+The `delete` method also accepts the following optional boolean parameters:
+
+- ``delete_members``: If ``True``, all members (e.g., volumes) will be deleted along with the consistency group.
+- ``force_if_snapshot_locked``: If ``True``, deletion will proceed even if some snapshots are locked.
