@@ -40,7 +40,7 @@ class ActiveDirectoryDomains:
         *,
         domain,
         org_unit=OMIT,
-        preferred_ips,
+        preferred_ips=OMIT,
         username,
         password,
         tenant=None,
@@ -55,8 +55,9 @@ class ActiveDirectoryDomains:
         :type domain: str
         :param org_unit: the organization unit
         :type org_unit: str
-        :param preferred_ips: a list of ips
-        :type preferred_ips: list[str]
+        :param preferred_ips: Optional list of IP addresses and/or domain names to prefer when joining.
+                              Can be None, an empty list, a list of IPs, a list of domain names, or a mix of both.
+        :type preferred_ips: list[str] or None
         :param username: the username for the domain
         :type username: str
         :param password: the password for the domain

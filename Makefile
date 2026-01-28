@@ -3,7 +3,7 @@ all:
 	@exit 2
 
 lint:
-	pylint --rcfile .pylintrc -j $(shell nproc) infinisdk
+	pylint --rcfile .pylintrc -j $(shell nproc) infinisdk scripts tests doc/*.doctest_context
 
 check_format:
 	black --check infinisdk

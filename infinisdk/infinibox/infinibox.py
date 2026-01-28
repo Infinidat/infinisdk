@@ -8,6 +8,10 @@ from munch import munchify
 from sentinels import NOTHING
 from urlobject import URLObject as URL
 
+from infinisdk.infinibox.s3_certificates import S3Certificates
+from infinisdk.infinibox.s3_credential import S3Credential
+from infinisdk.infinibox.s3_user import S3User
+
 from ..core.api import OMIT, APITarget
 from ..core.config import config, get_ini_option
 from ..core.exceptions import CacheMiss, VersionNotSupported
@@ -48,6 +52,8 @@ from .qos_policy import QosPolicy
 from .replica import Replica
 from .replication_group import ReplicationGroup
 from .rg_replica import RgReplica
+from .s3_account import S3Account
+from .s3_bucket import S3Bucket
 from .san_client import SanClients
 from .schedule import Schedule
 from .search_utils import get_search_query_object, safe_get_object_by_id_and_type_lazy
@@ -107,12 +113,12 @@ class InfiniBox(APITarget):
         NFSUser,
         SnapshotPolicy,
         SSOIdentityProvider,
+        S3Account,
+        S3Bucket,
+        S3User,
+        S3Credential,
     ]
-    SUB_OBJECT_TYPES = [
-        TreeQ,
-        SharePermission,
-        Schedule,
-    ]
+    SUB_OBJECT_TYPES = [TreeQ, SharePermission, Schedule]
     SYSTEM_EVENTS_TYPE = Events
     SYSTEM_COMPONENTS_TYPE = InfiniBoxSystemComponents
 
@@ -128,6 +134,7 @@ class InfiniBox(APITarget):
         self.kms = Kms(self)
         self.certificates = Certificates(self)
         self.active_directory_domains = ActiveDirectoryDomains(self)
+        self.s3_certificates = S3Certificates(self)
 
     def check_version(self):
         if not self.compat.can_run_on_system():
@@ -435,7 +442,7 @@ class InfiniBox(APITarget):
         max_smb_protocol=OMIT,
         smb_signing=OMIT,
         smb_encryption=OMIT,
-        smb_leases_enable=OMIT,
+        smb_leases_enabled=OMIT,
         smb_lease_break_timeout=OMIT,
     ):
         """
@@ -452,8 +459,8 @@ class InfiniBox(APITarget):
             updated_data["smb_signing"] = smb_signing
         if smb_encryption is not OMIT:
             updated_data["smb_encryption"] = smb_encryption
-        if smb_leases_enable is not OMIT:
-            updated_data["smb_leases_enable"] = smb_leases_enable
+        if smb_leases_enabled is not OMIT:
+            updated_data["smb_leases_enabled"] = smb_leases_enabled
         if smb_lease_break_timeout is not OMIT:
             updated_data["smb_lease_break_timeout"] = smb_lease_break_timeout
 
@@ -481,6 +488,32 @@ class InfiniBox(APITarget):
 
         if updated_data:
             self.api.put("nfs/server_capabilities", data=updated_data)
+
+    def get_ssa_express_queue_datasets(self, page_size=None, page=None):
+        """
+        Returns the SSA Express queue of datasets.
+        """
+        url = URL("system/ssa_express/queue")
+        if page_size is not None:
+            assert page_size > 0, "Page size must be a positive integer value"
+            url = url.add_query_param("page_size", page_size)
+        if page is not None:
+            assert page > 0, "Page must be a positive integer value"
+            url = url.add_query_param("page", page)
+        return munchify(self.api.get(url).get_result())
+
+    def get_ssa_express_active_datasets(self, page_size=None, page=None):
+        """
+        Returns the SSA Express active datasets.
+        """
+        url = URL("system/ssa_express/active")
+        if page_size is not None:
+            assert page_size > 0, "Page size must be a positive integer value"
+            url = url.add_query_param("page_size", page_size)
+        if page is not None:
+            assert page > 0, "Page must be a positive integer value"
+            url = url.add_query_param("page", page)
+        return munchify(self.api.get(url).get_result())
 
     def __hash__(self):
         return hash(self.get_name())

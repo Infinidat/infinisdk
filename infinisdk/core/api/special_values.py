@@ -46,6 +46,7 @@ class Autogenerate(SpecialValue):
             ordinal=next(counter),
             uuid=_LAZY_UUID_FACTORY,
             short_uuid=_LAZY_SHORT_UUID_FACTORY,
+            uuid15=_LAZY_UUID_15_FACTORY,
             prefix=self._prefix,
         )
 
@@ -77,19 +78,23 @@ class RawValue(SpecialValue):
 
 
 class _LazyUUIDFactory:
-    def __init__(self, short=False):
+    def __init__(self, short=False, length=None):
         super(_LazyUUIDFactory, self).__init__()
         self._short = short
+        self._length = length
 
     def __str__(self):
         returned = str(uuid4()).lower().replace("-", "")
         if self._short:
             returned = returned[:4]
+        elif self._length:
+            returned = returned[: self._length]
         return returned
 
 
 _LAZY_UUID_FACTORY = _LazyUUIDFactory()
 _LAZY_SHORT_UUID_FACTORY = _LazyUUIDFactory(short=True)
+_LAZY_UUID_15_FACTORY = _LazyUUIDFactory(length=15)
 
 
 def translate_special_values_dict(data_dict):

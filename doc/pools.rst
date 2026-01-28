@@ -16,6 +16,18 @@ You can also specify physical and virtual capacity:
 
 		>>> pool = system.pools.create(physical_capacity=TiB, virtual_capacity=TiB)
 
+S3 Pools
+--------
+
+To create one, pass ``type='S3'``. For S3 pools only the **physical capacity** is supported; 
+``virtual_capacity`` is ignored and should not be used.
+
+Create an S3 pool with explicit physical capacity:
+
+.. code-block:: python
+
+   >>> s3_pool = system.pools.create(type='S3', physical_capacity=TiB)
+
 
 Updating Pools
 --------------

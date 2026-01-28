@@ -19,3 +19,4 @@ sentinels
 storage_interfaces
 URLObject
 vintage>=0.4.0
+responses

@@ -203,6 +203,14 @@ infinibox.notification_targets
 .. autoclass:: NotificationTarget
    :members:
 
+infinibox.notification_rules
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: infinisdk.infinibox.notification_rule
+
+.. autoclass:: NotificationRule
+   :members:
+
 infinibox.cons_groups
 ~~~~~~~~~~~~~~~~~~~~~
 
@@ -347,3 +355,49 @@ Exceptions
  
 .. autoclass:: infinisdk.core.exceptions.ObjectNotFound
 .. autoclass:: infinisdk.core.exceptions.TooManyObjectsFound
+
+
+infinibox.s3_buckets
+~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: infinisdk.infinibox.s3_bucket
+
+.. autoclass:: S3BucketsBinder
+   :members:
+
+.. autoclass:: S3Bucket
+   :members:
+   :inherited-members:
+
+infinibox.s3_accounts
+~~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: infinisdk.infinibox.s3_account
+
+.. autoclass:: S3Account
+   :members:
+   :inherited-members:
+
+infinibox.s3_users
+~~~~~~~~~~~~~~~~~~
+
+.. automodule:: infinisdk.infinibox.s3_user
+
+.. autoclass:: S3UsersBinder
+   :members:
+
+.. autoclass:: S3User
+   :members:
+   :inherited-members:
+
+infinibox.s3_credentials
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: infinisdk.infinibox.s3_credential
+
+.. autoclass:: S3CredentialsBinder
+   :members:
+
+.. autoclass:: S3Credential
+   :members:
+   :inherited-members:

@@ -29,6 +29,7 @@ Contents:
    pools
    volumes
    filesystems
+   s3_bucket
    mappings
    snapshots
    snapshot_policies
@@ -39,9 +40,13 @@ Contents:
    replication
    metadata
    events
+   notification_rules
    components
    qos
    smb_users_and_groups
+   s3_account
+   s3_user
+   s3_credential
    active_directory_domains
    extending
    cookbook
@@ -51,8 +56,7 @@ Contents:
    hooks
    smb_server_capabilities
    nfs_server_capabilities
-
-
+   
 Indices and tables
 ==================
 

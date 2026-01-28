@@ -1,0 +1,42 @@
+# -*- mode: python -*-
+from contextlib import contextmanager
+from infinisim.infinibox import Infinibox as Simulator
+from infinisdk.infinibox import InfiniBox
+
+@contextmanager
+def doctest_context():
+    simulator = Simulator()
+
+    for _ in range(2):
+        simulator.events.add_user_event(code="HOST_DOWN")
+        simulator.events.add_user_event(code="LINK_UP")
+        simulator.events.add_user_event(code="DISK_SPACE_LOW")
+
+    simulator.activate()
+    system = InfiniBox(simulator, auth=("infinidat", "123456"))
+    system.login()
+
+    snmp_target = system.notification_targets.create(
+        name="example",
+        protocol="SNMP",
+        host="snmphost.local",
+        version="SNMPv2c",
+        community="public",
+    )
+
+    syslog_target = system.notification_targets.create(
+        name="syslog_target",
+        protocol="SYSLOG",
+        host="syslog.local",
+        transport="UDP",
+        facility="local0",
+    )
+
+    try:
+        yield {
+            "system": system,
+            "snmp_target": snmp_target,
+            "syslog_target": syslog_target,
+        }
+    finally:
+        simulator.deactivate()

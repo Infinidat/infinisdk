@@ -36,6 +36,7 @@ class Field(FieldBase):
         until_version = kwargs.pop("until", None)
         toggle_name = kwargs.pop("toggle_name", None)
         is_parent_field = kwargs.pop("is_parent_field", False)
+        self.required_if = kwargs.pop("required_if", None)
         super(Field, self).__init__(*args, **kwargs)
 
         if self.is_identity:  # pylint: disable=no-member

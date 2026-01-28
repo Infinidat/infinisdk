@@ -311,17 +311,17 @@ class BaseSystemObject(metaclass=FieldsMeta):
         assert all(isinstance(key, (str, bytes)) for key in api_obj.keys())
         self._cache.update(api_obj)
 
-    def update_field(self, field_name, field_value):
+    def update_field(self, field_name, field_value, params=None):
         """
         Updates the value of a single field
         """
-        self._update_fields({field_name: field_value})
+        self._update_fields({field_name: field_value}, params=params)
 
     def update_fields(self, **update_dict):
         """Atomically updates a group of fields and respective values (given as a dictionary)"""
         self._update_fields(update_dict)
 
-    def _update_fields(self, update_dict):
+    def _update_fields(self, update_dict, params=None):
         hook_tags = self.get_tags_for_object_operations(self.system)
         gossip.trigger_with_tags(
             "infinidat.sdk.pre_fields_update",
@@ -347,7 +347,10 @@ class BaseSystemObject(metaclass=FieldsMeta):
             tags=hook_tags,
         )
         try:
-            res = self.system.api.put(self.get_this_url_path(), data=update_dict)
+            url = self.get_this_url_path()
+            if params:
+                url = add_normalized_query_params(url, **params)
+            res = self.system.api.put(url, data=update_dict)
         except Exception as e:  # pylint: disable=broad-except
             with end_reraise_context():
                 gossip.trigger_with_tags(
