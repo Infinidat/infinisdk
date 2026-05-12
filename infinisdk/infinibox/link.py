@@ -136,8 +136,13 @@ class Link(InfiniBoxObject):
         if safe:
             return None
 
+        remote_system_name = self.get_field(
+            "remote_system_name", from_cache=from_cache, raw_value=True
+        )
         raise UnknownSystem(
-            "Could not find a related machine with IP address {}".format(remote_host)
+            "Could not find a related machine for system {!r} (IP address {})".format(
+                remote_system_name, remote_host
+            )
         )
 
     def get_remote_link(self, safe=False):

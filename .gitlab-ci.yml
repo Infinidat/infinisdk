@@ -122,7 +122,7 @@ test-package-py36:
     - pip install -e .
     - pip install click~=8.0.4 black~=21.8b0 isort~=5.0.9 "pylint>=2"
     - make check_format
-    - make lint
+    - pylint --rcfile .pylintrc infinisdk
   only:
     refs:
       - merge_requests
@@ -137,7 +137,7 @@ test-package-py37:
     - pip install -e .
     - pip install click~=8.0.4 black~=21.8b0 isort~=5.0.9 "pylint>=2"
     - make check_format
-    - make lint
+    - pylint --rcfile .pylintrc infinisdk
   only:
     refs:
       - merge_requests
@@ -152,7 +152,7 @@ test-package-py38:
     - pip install -e .
     - pip install click~=8.0.4 black~=21.8b0 isort~=5.0.9 "pylint>=2"
     - make check_format
-    - make lint
+    - pylint --rcfile .pylintrc infinisdk
   only:
     refs:
       - merge_requests
@@ -167,7 +167,7 @@ test-package-py39:
     - pip install -e .
     - pip install click~=8.0.4 black~=21.8b0 isort~=5.0.9 "pylint>=2"
     - make check_format
-    - make lint
+    - pylint --rcfile .pylintrc infinisdk
   only:
     refs:
       - merge_requests
@@ -182,7 +182,7 @@ test-package-py310:
     - pip install -e .
     - pip install click~=8.0.4 black~=21.8b0 isort~=5.0.9 "pylint>=2"
     - make check_format
-    - make lint
+    - pylint --rcfile .pylintrc infinisdk
   only:
     refs:
       - merge_requests

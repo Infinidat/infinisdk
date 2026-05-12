@@ -312,7 +312,6 @@ class Dataset(InfiniBoxObject):
             api_name="snapshot_policy_id",
             type="infinisdk.infinibox.snapshot_policy:SnapshotPolicy",
             binding=RelatedObjectBinding("snapshot_policies"),
-            mutable=True,
             creation_parameter=True,
             optional=True,
             is_filterable=True,
@@ -321,7 +320,6 @@ class Dataset(InfiniBoxObject):
         ),
         Field(
             "snapshot_policy_name",
-            mutable=True,
             is_filterable=True,
             is_sortable=True,
             feature_name="snapshot_policies",

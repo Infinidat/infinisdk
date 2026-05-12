@@ -444,7 +444,9 @@ class API:
             start_time = flux.current_timeline.time()
             try:
                 response = self._session.send(prepared, **kwargs)
-            except _RETRY_REQUESTS_EXCEPTION_TYPES as e:  # pylint: disable=catching-non-exception
+            except (
+                _RETRY_REQUESTS_EXCEPTION_TYPES
+            ) as e:  # pylint: disable=catching-non-exception
                 request_kwargs = dict(url=path, method=http_method, **kwargs)
                 _logger.debug(
                     "Exception while sending API command to {}: {}", self.system, e
@@ -636,17 +638,42 @@ class API:
                             e.error_code == "REMOTE_PERMISSION_REQUIRED"
                         ):
                             try:
-                                related_systems = self._get_all_related_systems_auth()
-                                auth_parts = []
-                                for system_name, username, password in related_systems:
+                                if (
+                                    self.system.compat.has_multi_target_async_replication()
+                                ):
+                                    related_systems = (
+                                        self._get_all_related_systems_auth()
+                                    )
+                                    auth_parts = []
+                                    for (
+                                        system_name,
+                                        username,
+                                        password,
+                                    ) in related_systems:
+                                        raw = f"{username}:{password}"
+                                        encoded = b64encode(raw.encode("utf-8")).decode(
+                                            "utf-8"
+                                        )
+                                        auth_parts.append(f"{system_name}={encoded}")
+                                    new_header = "Basic " + ";".join(auth_parts)
+                                else:
+                                    auth = self._get_related_system_auth_for_path(path)
+                                    if auth is None:
+                                        auth = self._get_related_system_auth()
+                                    username, password = auth
                                     raw = f"{username}:{password}"
                                     encoded = b64encode(raw.encode("utf-8")).decode(
                                         "utf-8"
                                     )
-                                    auth_parts.append(f"{system_name}={encoded}")
+                                    new_header = "Basic " + encoded
+                                current_header = self._session.headers.get(
+                                    "X-Remote-Authorization"
+                                )
+                                if current_header == new_header:
+                                    raise
                                 self._session.headers[
                                     "X-Remote-Authorization"
-                                ] = "Basic " + ";".join(auth_parts)
+                                ] = new_header
                                 continue
                             except TypeError as e:
                                 raise RelatedSystemNotFound(
@@ -669,6 +696,27 @@ class API:
         for related_system in self.system.iter_related_systems():
             if related_system is not None:
                 return related_system.api.get_auth()
+
+    _LINK_BEARING_URL_SEGMENTS = ("links", "replicas", "rg_replicas")
+
+    def _get_related_system_auth_for_path(self, path):
+        segments = [s for s in str(path).split("?", 1)[0].split("/") if s]
+        for i, seg in enumerate(segments):
+            if seg not in self._LINK_BEARING_URL_SEGMENTS or i + 1 >= len(segments):
+                continue
+            try:
+                obj_id = int(segments[i + 1])
+            except ValueError:
+                continue
+            obj = getattr(self.system, seg).get_by_id_lazy(obj_id)
+            link = obj if seg == "links" else obj.get_link()
+            if link is None:
+                return None
+            target = link.get_linked_system(safe=True)
+            if target is not None:
+                return target.api.get_auth()
+            return None
+        return None
 
     def _get_all_related_systems_auth(self):
         return [
