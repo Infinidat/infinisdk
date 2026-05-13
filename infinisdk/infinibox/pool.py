@@ -271,6 +271,11 @@ class Pool(InfiniBoxObject):
             mutable=True,
             feature_name="filesystem_capacity_alert",
         ),
+        Field("s3_bound", type=bool),
+        Field(
+            "s3_buckets_count",
+            type=int,
+        ),
     ]
 
     @classmethod

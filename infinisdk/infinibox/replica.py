@@ -31,7 +31,6 @@ def require_sync_replication(func):
 
 
 class ReplicaBinder(TypeBinder):
-
     """Implements *system.replicas*"""
 
     def replicate_volume(self, volume, remote_volume=None, **kw):
@@ -246,9 +245,9 @@ class ReplicaBinder(TypeBinder):
                 )
             else:
                 entity_pair = {
-                    "remote_base_action": "TAKE_SNAP"
-                    if take_snapshot
-                    else "NO_BASE_DATA",
+                    "remote_base_action": (
+                        "TAKE_SNAP" if take_snapshot else "NO_BASE_DATA"
+                    ),
                     "local_entity_id": sub_entity.id,
                     "remote_entity_id": member_mappings[sub_entity].id,
                 }

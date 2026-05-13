@@ -1,3 +1,14 @@
+Version 289.1.2 (Released 2026-05-11)
+-------------------------------------
+
+* PYSDK-230: Fix credentials selection and gate multi-ibox X-Remote-Authentication header use on feature flag
+* PYSDK-220: Field "snapshot_policy_name" should not be mutable
+* PYSDK-214: Field "snapshot_policy_id" should not be mutable
+* PYSDK-207: Fix incorrect field in capacities related to promote snapshot feature
+* PYSDK-203: Missing pool fields of s3
+* PYSDK-192: New Filesystem capacity thresholds fields are missing
+* PYSDK-188: Fixed has_nfsv4 compatibility check returning wrong values
+
 Version 289.1.0 (Released 2026-01-28)
 -------------------------------------
 

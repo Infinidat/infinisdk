@@ -128,8 +128,10 @@ class InfiniBoxSystemCapacity:
     def get_total_thin_capacity_savings(self):
         return self._get_capacity_field("total_thin_capacity_savings")
 
-    def get_allocated_internal_physical_capacity(self):
-        return self._get_capacity_field("allocated_internal_physical_space")
+    def allocated_internal_physical_space_within_pools(self):
+        return self._get_capacity_field(
+            "allocated_internal_physical_space_within_pools"
+        )
 
     def get_total_zeros_capacity(self):
         return self._get_capacity_field("total_zeros_capacity")
