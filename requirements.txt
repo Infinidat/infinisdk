@@ -6,6 +6,7 @@ confetti>=2.1.0
 click>=8.0.4
 flux
 gossip>=2.3.1
+importlib_metadata>=1.4.0; python_version<'3.8'
 infi.dtypes.wwn>=0.0.2
 infi.dtypes.iqn>=0.3.0
 infi.dtypes.nqn
