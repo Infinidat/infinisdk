@@ -88,6 +88,17 @@ def test_replica_deletion_unknown_system(replica, forge):
     assert not replica.is_in_system()
 
 
+def test_get_remote_system_returns_none_when_link_id_is_null(replica):
+    replica._cache['link_id'] = None  # pylint: disable=protected-access
+    assert replica.get_remote_system(safe=True) is None
+
+
+def test_replica_delete_issued_when_link_id_is_null(replica):
+    replica._cache['link_id'] = None  # pylint: disable=protected-access
+    replica.delete()
+    assert not replica.is_in_system()
+
+
 @pytest.mark.parametrize('retain_staging_area', [True, False])
 def test_replica_deletion_remote_first(replica, retain_staging_area):
     replica.get_remote_replica().delete(force_on_target=True)

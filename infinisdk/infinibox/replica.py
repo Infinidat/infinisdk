@@ -1066,6 +1066,10 @@ class Replica(SystemObject):
         remote_replica = self.get_remote_replica(safe=True)
         if remote_replica is None:
             _logger.debug("Failed to get remote replica during delete operation")
+            if force_if_remote_error is OMIT:
+                force_if_remote_error = True
+            if force_if_no_remote_credentials is OMIT:
+                force_if_no_remote_credentials = True
         retain_staging_area = self._should_retain_staging_area(
             retain_value=retain_staging_area
         )
@@ -1184,9 +1188,10 @@ class Replica(SystemObject):
         return local, remote
 
     def get_remote_system(self, from_cache=True, safe=False):
-        return self.get_link(from_cache=from_cache).get_linked_system(
-            from_cache=from_cache, safe=safe
-        )
+        link = self.get_link(from_cache=from_cache)
+        if link is None:
+            return None
+        return link.get_linked_system(from_cache=from_cache, safe=safe)
 
     def get_remote_replica(self, from_cache=False, safe=False):
         """Get the corresponding replica object in the remote machine. For this to work, the SDK user should
