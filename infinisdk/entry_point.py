@@ -5,7 +5,7 @@ import click
 import dateutil
 import logbook
 import logbook.more
-import pkg_resources
+from importlib.metadata import entry_points
 
 from infinisdk import Q
 from infinisdk.core.config import config
@@ -175,9 +175,11 @@ def events_query(
 
 
 def main_entry_point():
-    for customize_function_cli in pkg_resources.iter_entry_points(
-        CUSTOMIZE_ENTRY_POINT
-    ):  # pylint: disable=no-member
+    try:
+        eps = entry_points(group=CUSTOMIZE_ENTRY_POINT)
+    except TypeError:
+        eps = entry_points().get(CUSTOMIZE_ENTRY_POINT, [])
+    for customize_function_cli in eps:
         func = customize_function_cli.load()
         func()
     return cli(obj={})  # pylint: disable=no-value-for-parameter,unexpected-keyword-arg

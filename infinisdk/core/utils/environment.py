@@ -1,6 +1,6 @@
 import os
+from importlib.metadata import PackageNotFoundError, version
 
-import pkg_resources
 from mitba import cached_function
 
 
@@ -28,8 +28,6 @@ def get_hostname():
 @cached_function
 def get_infinisdk_version():
     try:
-        return pkg_resources.get_distribution(
-            "infinisdk"
-        ).version  # pylint: disable=no-member
-    except pkg_resources.DistributionNotFound:
+        return version("infinisdk")
+    except PackageNotFoundError:
         return "N/A"
