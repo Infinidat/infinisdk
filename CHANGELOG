@@ -1,3 +1,10 @@
+Version 289.1.4 (Released 2026-06-16)
+-------------------------------------
+
+* PYSDK-219: pkg_resources is now removed from setuptools
+* PYSDK-234: Revert force-flag injection from Replica.delete()
+* PYSDK-232: Replica.delete() silently aborts when link_id is null/0 - get_remote_system lacks None-check on get_link()
+
 Version 289.1.2 (Released 2026-05-11)
 -------------------------------------
 

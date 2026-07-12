@@ -1184,9 +1184,10 @@ class Replica(SystemObject):
         return local, remote
 
     def get_remote_system(self, from_cache=True, safe=False):
-        return self.get_link(from_cache=from_cache).get_linked_system(
-            from_cache=from_cache, safe=safe
-        )
+        link = self.get_link(from_cache=from_cache)
+        if link is None:
+            return None
+        return link.get_linked_system(from_cache=from_cache, safe=safe)
 
     def get_remote_replica(self, from_cache=False, safe=False):
         """Get the corresponding replica object in the remote machine. For this to work, the SDK user should

@@ -5,10 +5,10 @@ import click
 import dateutil
 import logbook
 import logbook.more
-import pkg_resources
 
 from infinisdk import Q
 from infinisdk.core.config import config
+from infinisdk.core.utils.packaging_metadata import iter_entry_points
 from infinisdk.infinibox import InfiniBox
 
 _logger = logbook.Logger("sdk-cli")
@@ -175,9 +175,7 @@ def events_query(
 
 
 def main_entry_point():
-    for customize_function_cli in pkg_resources.iter_entry_points(
-        CUSTOMIZE_ENTRY_POINT
-    ):  # pylint: disable=no-member
+    for customize_function_cli in iter_entry_points(CUSTOMIZE_ENTRY_POINT):
         func = customize_function_cli.load()
         func()
     return cli(obj={})  # pylint: disable=no-value-for-parameter,unexpected-keyword-arg
